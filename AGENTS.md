@@ -32,7 +32,7 @@ Regla estructural: cada ID aparece **exactamente una vez** como texto normativo 
 
 ## Stack
 
-Java 21 (fijado con `.sdkmanrc`), **Maven** con wrapper (`mvnw`), Spring Boot con MVC y Thymeleaf, H2 en modo archivo (en memoria en las pruebas) con Flyway en SQL estándar, Spring Modulith y ArchUnit, Google Java Style con Spotless y Checkstyle. Pruebas con JUnit 5, AssertJ y Mockito (jqwik para propiedades). La versión de Spring Boot se fija en TT-01, de modo que sea compatible con la de Spring Modulith.
+Java 21 (fijado con `.sdkmanrc` y Enforcer `[21,22)`) y **Maven 3.9.16** con wrapper (`mvnw`), **Spring Boot 4.1.2** (MVC, Thymeleaf, Data JPA, Flyway) con **Spring Modulith 2.1.2**, ArchUnit 1.5.1, H2 2.4.240 en modo archivo (en memoria en las pruebas) y Flyway 12.4.0 en SQL estándar. Por el BOM de Boot 4 vienen Hibernate 7.4 y Jackson 3 (paquetes `tools.jackson`), y las pruebas usan JUnit 6, AssertJ 3.27.7 y Mockito 5.23.0 (jqwik 1.10.2 para propiedades, por verificar contra JUnit 6); el diseño de clases hablaba de Hibernate 6 y Jackson 2, y las diferencias están en `docs/proceso/cambios-de-boot-4.md`. Google Java Style con Spotless 3.10.4 (google-java-format 1.37.0) y Checkstyle 14.3.0.
 
 ## Estructura del proyecto
 
@@ -76,7 +76,7 @@ project/                          raíz del repositorio
       │  ├─ arquitectura/         ModulosTest · CapasTest · NombresTest
       │  ├─ normativa/…           espejo de los paquetes
       │  └─ soporte/              mallas sintéticas, Clock fijo
-      └─ resources/               application.yml de pruebas · json/validos/ · json/invalidos/
+      └─ resources/               application-test.yml · db/humo/ · json/validos/ · json/invalidos/
 ```
 
 **Capas y módulos**
