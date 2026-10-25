@@ -1,0 +1,6 @@
+# Entorno de desarrollo de RutaUN con SDKMAN (opcional).
+# Con `sdkman_auto_env=true`, al entrar al repositorio SDKMAN instala y
+# selecciona este JDK. La protección de la versión la hace Enforcer en el
+# build: sin SDKMAN basta un JDK 21 instalado en el sistema.
+sdkman_auto_env=true
+java=21.0.13.0+9-tem
