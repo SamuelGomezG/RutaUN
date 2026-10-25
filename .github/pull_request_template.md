@@ -29,11 +29,11 @@ Closes #
 
 <!-- Copia de docs/proceso/definicion-de-hecho.md. Si cambia una, cambia la otra. -->
 
-- [ ] Va contra `develop` y no se fusiona sin la aprobación de otra persona del equipo.
+- [ ] Está integrado en `develop` y lo revisó otra persona del equipo.
 - [ ] Si incluye código, se puede ejecutar —por quien lo escribió y por quien lo revisa— con los pasos de arriba, y el resultado muestra que hace lo que debe.
-- [ ] Tiene pruebas unitarias en verde, y las pruebas de arquitectura pasan en la integración continua (`./mvnw verify`).
-- [ ] Cumple Google Java Style (`./mvnw spotless:apply`).
-- [ ] Si es una historia, sus criterios de aceptación se demostraron funcionando.
+- [ ] Tiene pruebas unitarias en verde, y las pruebas de arquitectura pasan en la integración continua.
+- [ ] Cumple Google Java Style (el build lo verifica).
+- [ ] Si es una historia, sus criterios de aceptación se demostraron funcionando y su issue quedó cerrado en el tablero.
 
 ## Antes de pedir revisión
 
