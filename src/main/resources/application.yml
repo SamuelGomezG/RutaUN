@@ -1,0 +1,4 @@
+# Configuración común de RutaUN. El perfil dev la completa application-dev.yml.
+spring:
+  application:
+    name: rutaun
