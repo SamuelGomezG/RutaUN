@@ -2,3 +2,21 @@
 spring:
   application:
     name: rutaun
+
+  # H2 en archivo: la base persiste entre arranques en el directorio data/.
+  # Lo ignoran .gitignore y la CI usa su propio perfil de pruebas.
+  datasource:
+    url: jdbc:h2:file:./data/rutaun
+    username: sa
+    password: ""
+
+  # Flyway es el dueño del esquema: Hibernate solo valida.
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+  # TT-01 no trae migraciones de producción: TT-04 (#51) crea V1__esquema.sql
+  # y quitará esta línea. Sin migraciones, Flyway no hace nada y no falla.
+  flyway:
+    fail-on-missing-locations: false
