@@ -1,0 +1,29 @@
+
+# Plantilla de commit de RutaUN. Las líneas que empiezan con # no se guardan.
+# Escribe el mensaje arriba, antes de este bloque.
+#
+# LÍNEA 1 (máx. 72 caracteres, sin punto final):
+#     <ID>: <resumen en infinitivo>
+#   El <ID> es el del issue: UC06-HU01, TT-02, DOC-03, UC01-HU01-T2.
+#   Bien:  UC06-HU01: mostrar las reglas del programa por categoría
+#   Mal:   arreglos · wip · cambios · fix
+#
+# LÍNEA 2: vacía.
+#
+# CUERPO (opcional, líneas de máx. 72 caracteres):
+#   Qué cambia y por qué; el cómo se lee en el diff.
+#   Si toca un paso o una extensión del SRS, nómbralo: UC01 ext. 4a.
+#
+# PIE (obligatorio, tras una línea vacía):
+#     Refs #<n>
+#   El cierre (Closes #n) va en la descripción del PR, no aquí.
+#
+# ¿ES ATÓMICO?
+#   - Un solo cambio lógico: si el resumen necesita un «y», son dos commits.
+#   - Deja el proyecto válido: compila y pasa las pruebas (o, si es
+#     documentación, con los enlaces vivos).
+#   - Lleva su prueba y el documento que describe el cambio.
+#   - Un refactor no se mezcla con un cambio de comportamiento.
+#   - Se puede revertir sin deshacer nada más.
+#
+# Si no escribes nada, Git cancela el commit.
