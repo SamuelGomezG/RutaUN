@@ -43,7 +43,8 @@ project/                          raíz del repositorio
 ├─ README.md · CONTRIBUTING.md    DOC-02 · DOC-03
 ├─ AGENTS.md · CLAUDE.md          este archivo y su compañero
 ├─ .sdkmanrc · .gitignore · .gitattributes · .editorconfig
-├─ .github/                       workflows/ci.yml · ISSUE_TEMPLATE/ · pull_request_template.md
+├─ .gitmessage ▸                  plantilla de commits (git config commit.template .gitmessage)
+├─ .github/                       workflows/ci.yml · ISSUE_TEMPLATE/ ▸ · pull_request_template.md ▸ · PULL_REQUEST_TEMPLATE/ ▸
 ├─ docs/
 │  ├─ requisitos/ ▸               SRS (fuente de los requisitos)
 │  ├─ diseno/                     arquitectura.md · decisiones/

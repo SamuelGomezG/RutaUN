@@ -3,7 +3,7 @@
 Esta guía explica cómo trabajamos en RutaUN: cómo tomar un issue, nombrar las ramas, escribir los commits, abrir una solicitud de integración (PR) y revisar la de otra persona. Las reglas de código (capas, nombres, pruebas) están en [`AGENTS.md`](AGENTS.md); aquí está el flujo.
 
 > [!NOTE]
-> Tres piezas de este flujo se activan después: la integración continua y la protección de `develop` y `main` llegan con TT-01 (#48), y las plantillas de issue y de PR con DOC-03 (#64). Mientras tanto, lo que automatizarán se hace a mano y se revisa en el PR.
+> La integración continua y la protección de `develop` y `main` llegan con TT-01 (#48). Mientras tanto, lo que automatizarán se hace a mano y se revisa en el PR.
 
 ### Tópicos
 
@@ -22,7 +22,8 @@ Esta guía explica cómo trabajamos en RutaUN: cómo tomar un issue, nombrar las
 1. Lee el `README.md` y [`AGENTS.md`](AGENTS.md): trae las reglas de oro, la estructura de carpetas y las convenciones de código.
 2. Los requisitos están en `docs/requisitos/`; empieza por su `README.md`, que dice qué archivos cargar según tu tarea.
 3. Prepara el entorno: un JDK 21 (con SDKMAN, `sdk env install`) y el wrapper de Maven (`./mvnw`) cuando exista el esqueleto.
-4. Escoge un issue del tablero «RutaUN», de la iteración en curso. Asígnatelo y pásalo a *In Progress*.
+4. Activa la plantilla de commits, una vez por clon: `git config commit.template .gitmessage`.
+5. Escoge un issue del tablero «RutaUN», de la iteración en curso. Asígnatelo y pásalo a *In Progress*.
 
 ## Flujo de trabajo
 
@@ -60,13 +61,15 @@ uc01-hu01-t2-formulario-del-tope      # sub-issue
 Al cierre de cada sprint, en la demostración, el equipo decide si el sprint está completo y satisfactorio. Si lo está:
 
 1. `develop` tiene la integración continua en verde y los elementos comprometidos cumplen la [Definición de Hecho](docs/proceso/definicion-de-hecho.md).
-2. Se abre un PR de `develop` a `main`, titulado `Sprint N`, con la lista de issues terminados y lo que se mostró en la demostración. Lo aprueba otra persona.
+2. Se abre un PR de `develop` a `main`, titulado `Sprint N`, con la lista de issues terminados y lo que se mostró en la demostración. Lo aprueba otra persona. Tiene su propia plantilla, [`promocion-de-sprint.md`](.github/PULL_REQUEST_TEMPLATE/promocion-de-sprint.md), que GitHub no ofrece sola: se abre con `gh pr create --base main --head develop --title "Sprint N" --body-file .github/PULL_REQUEST_TEMPLATE/promocion-de-sprint.md`.
 3. Se fusiona con **Create a merge commit** (ni *Rebase* ni *Squash*), para que `main` tenga una marca por sprint.
 4. Se etiqueta la fusión como `sprint-N` y `develop` se alinea con `main` (`git switch develop && git merge --ff-only main`).
 
 Si el sprint no se da por satisfactorio, `main` no cambia: el trabajo sigue en `develop` y se promueve cuando lo esté. Una corrección que necesite `main` también se hace en `develop` y llega con la siguiente promoción.
 
 ## Commits
+
+Con `git commit` (sin `-m`) se abre tu editor con la plantilla [`.gitmessage`](.gitmessage): sus líneas con `#` te guían y no se guardan. Con `-m` la plantilla no aparece, así que el formato de abajo sigue valiendo.
 
 Un commit es **atómico** cuando contiene un solo cambio lógico, deja el proyecto en un estado válido (compila y pasa las pruebas, o, si es documentación, con los enlaces vivos) y se puede revertir sin deshacer nada más. En la práctica:
 
@@ -111,7 +114,7 @@ No uses mensajes como «arreglos», «wip» o «cambios», ni mezcles temas dist
 
 - **Cortas.** Si no se explica en tres líneas o pide más de 3 puntos de esfuerzo, se parte.
 - **Título:** el del issue, por ejemplo `UC06-HU01 · Elegir un programa y ver sus reglas`.
-- **Descripción:**
+- **Descripción:** GitHub la abre con la plantilla [`.github/pull_request_template.md`](.github/pull_request_template.md); llénala completa y borra solo los comentarios. Pide:
   - qué cambia y por qué;
   - `Closes #n` si el PR termina el issue, o `Refs #n` si lo deja abierto;
   - los pasos, extensiones o criterios del SRS que cubre;
@@ -141,6 +144,10 @@ Quien revisa aprueba, pide cambios o comenta. Quien escribió el cambio responde
 | Tarea técnica | `TT-nn · <Título>` | `tarea-tecnica` |
 | Spike (con tiempo máximo) | `TT-nn · <Título>` | `spike` |
 | Soporte, pruebas y documentación | `SOP-nn`, `PRU-nn`, `DOC-nn` | `sop`, `pru`, `doc` |
+| Sub-issue de una historia | `UCnn-HUmm-Tk · Verbo + objeto` | `UCnn` |
+| Defecto | `Defecto · UCnn-HUmm · Qué falla` | `defecto` |
+
+Al crear un issue, GitHub ofrece una plantilla por tipo (en [`.github/ISSUE_TEMPLATE/`](.github/ISSUE_TEMPLATE)): sub-issue, tarea (TT, SOP, PRU y DOC), spike y defecto. No hay plantilla de historia ni issue en blanco: las historias salen del SRS, así que primero se cambia `docs/requisitos/` por PR (ver [Requisitos y documentación](#requisitos-y-documentación)).
 
 Los issues del sprint llevan además `sprint-1` (comprometido) o `sprint-1-adicional`; los puntos, el carril y la iteración viven en los campos `Puntos`, `Carril` y `Sprint` del tablero.
 
