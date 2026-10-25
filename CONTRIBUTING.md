@@ -1,0 +1,165 @@
+# Guía de contribución
+
+Esta guía explica cómo trabajamos en RutaUN: cómo tomar un issue, nombrar las ramas, escribir los commits, abrir una solicitud de integración (PR) y revisar la de otra persona. Las reglas de código (capas, nombres, pruebas) están en [`AGENTS.md`](AGENTS.md); aquí está el flujo.
+
+> [!NOTE]
+> Tres piezas de este flujo se activan después: la integración continua y la protección de `develop` y `main` llegan con TT-01 (#48), y las plantillas de issue y de PR con DOC-03 (#64). Mientras tanto, lo que automatizarán se hace a mano y se revisa en el PR.
+
+### Tópicos
+
+- [Antes de empezar](#antes-de-empezar)
+- [Flujo de trabajo](#flujo-de-trabajo)
+- [Ramas](#ramas)
+- [Commits](#commits)
+- [Solicitudes de integración](#solicitudes-de-integración)
+- [Revisión](#revisión)
+- [Tipos de issue y sub-issues](#tipos-de-issue-y-sub-issues)
+- [Requisitos y documentación](#requisitos-y-documentación)
+- [Qué no subir](#qué-no-subir)
+
+## Antes de empezar
+
+1. Lee el `README.md` y [`AGENTS.md`](AGENTS.md): trae las reglas de oro, la estructura de carpetas y las convenciones de código.
+2. Los requisitos están en `docs/requisitos/`; empieza por su `README.md`, que dice qué archivos cargar según tu tarea.
+3. Prepara el entorno: un JDK 21 (con SDKMAN, `sdk env install`) y el wrapper de Maven (`./mvnw`) cuando exista el esqueleto.
+4. Escoge un issue del tablero «RutaUN», de la iteración en curso. Asígnatelo y pásalo a *In Progress*.
+
+## Flujo de trabajo
+
+Un issue, una rama, una solicitud de integración.
+
+1. Actualiza `develop` y crea tu rama desde ahí.
+2. Haz commits atómicos.
+3. Antes de abrir el PR corre `./mvnw verify` (debe quedar en verde) y ejecuta tu cambio siguiendo los pasos que vas a poner en el PR.
+4. Abre el PR contra `develop` y pasa el issue a *In Review*.
+5. Otra persona lo revisa: ejecuta el cambio, comprueba el resultado y lee el código. Respondes a sus comentarios con commits nuevos.
+6. Con la aprobación y la integración continua en verde, quien abrió el PR lo fusiona en `develop` con **Rebase and merge**, para conservar los commits atómicos; no uses *Squash*. Nadie fusiona un PR sin la aprobación de otra persona.
+7. El issue se cierra con el PR (`Closes #n`), porque `develop` es la rama predeterminada del repositorio. Pasa a *Done* cuando los criterios de aceptación se demostraron funcionando.
+
+## Ramas
+
+| Rama | Para qué | Quién escribe en ella |
+| --- | --- | --- |
+| `main` | Lo que se mostró y se dio por satisfactorio al cierre de cada sprint | Solo el PR de promoción desde `develop` |
+| `develop` | Integración: todo el trabajo del sprint en curso. Es la rama predeterminada del repositorio | Los PR de las ramas de trabajo |
+| Ramas de trabajo | Un issue cada una | Quien toma el issue |
+
+Las ramas de trabajo salen de `develop` y vuelven a `develop` por PR. Nadie hace commit directo en `develop` ni en `main`.
+
+El nombre de una rama de trabajo es el ID del issue en minúsculas, un guion y un resumen corto:
+
+```
+uc06-hu01-reglas-del-programa
+tt-02-nucleo-estructura
+doc-03-guia-de-contribucion
+uc01-hu01-t2-formulario-del-tope      # sub-issue
+```
+
+### Promoción de `develop` a `main`
+
+Al cierre de cada sprint, en la demostración, el equipo decide si el sprint está completo y satisfactorio. Si lo está:
+
+1. `develop` tiene la integración continua en verde y los elementos comprometidos cumplen la [Definición de Hecho](docs/proceso/definicion-de-hecho.md).
+2. Se abre un PR de `develop` a `main`, titulado `Sprint N`, con la lista de issues terminados y lo que se mostró en la demostración. Lo aprueba otra persona.
+3. Se fusiona con **Create a merge commit** (ni *Rebase* ni *Squash*), para que `main` tenga una marca por sprint.
+4. Se etiqueta la fusión como `sprint-N` y `develop` se alinea con `main` (`git switch develop && git merge --ff-only main`).
+
+Si el sprint no se da por satisfactorio, `main` no cambia: el trabajo sigue en `develop` y se promueve cuando lo esté. Una corrección que necesite `main` también se hace en `develop` y llega con la siguiente promoción.
+
+## Commits
+
+Un commit es **atómico** cuando contiene un solo cambio lógico, deja el proyecto en un estado válido (compila y pasa las pruebas, o, si es documentación, con los enlaces vivos) y se puede revertir sin deshacer nada más. En la práctica:
+
+- Un cambio de comportamiento lleva en el mismo commit su prueba y el documento que describe el cambio.
+- Un refactor no se mezcla con un cambio de comportamiento.
+- El formato lo aplica Spotless (`./mvnw spotless:apply`); no hace falta un commit aparte para eso.
+
+El mensaje tiene este formato:
+
+```
+<ID>: <resumen en infinitivo, hasta 72 caracteres>
+
+<Cuerpo opcional: qué cambia y por qué, no cómo.>
+
+Refs #<n>
+```
+
+- `<ID>` es el del issue: `UC06-HU01`, `TT-02`, `DOC-03`, `UC01-HU01-T2`.
+- El commit cita su issue con `Refs #n`. El cierre (`Closes #n`) va en la descripción del PR, no en los commits.
+- Si el cambio toca una extensión o un paso del SRS, nómbralo en el cuerpo (`UC01 ext. 4a`).
+
+Ejemplos:
+
+```
+UC06-HU01: mostrar las reglas del programa por categoría
+
+Agrupa las reglas vigentes y programadas y muestra su estado y la etiqueta
+«temporal» (UC06 paso 4).
+
+Refs #34
+```
+
+```
+TT-02: modelar la versión del consolidado como raíz de solo agregar
+
+Refs #49
+```
+
+No uses mensajes como «arreglos», «wip» o «cambios», ni mezcles temas distintos en un commit.
+
+## Solicitudes de integración
+
+- **Cortas.** Si no se explica en tres líneas o pide más de 3 puntos de esfuerzo, se parte.
+- **Título:** el del issue, por ejemplo `UC06-HU01 · Elegir un programa y ver sus reglas`.
+- **Descripción:**
+  - qué cambia y por qué;
+  - `Closes #n` si el PR termina el issue, o `Refs #n` si lo deja abierto;
+  - los pasos, extensiones o criterios del SRS que cubre;
+  - cómo ejecutarlo: los pasos para recrear el flujo y el resultado que se espera ver (la aplicación, una prueba de aceptación, un comando o un script);
+  - la lista de la [Definición de Hecho](docs/proceso/definicion-de-hecho.md);
+  - si cambió un comportamiento, qué documento actualizó.
+- Verifica antes de pedir revisión: `./mvnw verify` en verde y el diff sin credenciales, datos personales ni archivos locales.
+
+## Revisión
+
+La revisa una persona distinta de quien escribió el cambio. Revisa:
+
+- que el cambio **se ejecuta**: sigue los pasos del PR, recrea el flujo y comprueba que el resultado es el esperado; si no puedes reproducirlo, el PR no está listo;
+- los **criterios de aceptación** del issue, probándolos en la aplicación si es una historia;
+- que cada prueba lleve en su nombre el ID del SRS que verifica;
+- que se respeten las **reglas de oro** de [`AGENTS.md`](AGENTS.md): normas como datos, el «Aviso de lo que RutaUN no verifica», el vocabulario del glosario y la privacidad;
+- que las pruebas de arquitectura sigan en verde y el estilo esté aplicado;
+- que la documentación afectada esté actualizada.
+
+Quien revisa aprueba, pide cambios o comenta. Quien escribió el cambio responde a cada comentario antes de fusionar.
+
+## Tipos de issue y sub-issues
+
+| Tipo | Título | Etiquetas |
+| --- | --- | --- |
+| Historia | `UCnn-HUmm · <Título>` | `UCnn` |
+| Tarea técnica | `TT-nn · <Título>` | `tarea-tecnica` |
+| Spike (con tiempo máximo) | `TT-nn · <Título>` | `spike` |
+| Soporte, pruebas y documentación | `SOP-nn`, `PRU-nn`, `DOC-nn` | `sop`, `pru`, `doc` |
+
+Los issues del sprint llevan además `sprint-1` (comprometido) o `sprint-1-adicional`; los puntos, el carril y la iteración viven en los campos `Puntos`, `Carril` y `Sprint` del tablero.
+
+Una historia se **parte en sub-issues** solo cuando entra a la iteración en curso o a la siguiente. El título es `UCnn-HUmm-Tk · Verbo + objeto` (la `T` evita confundirlo con los supuestos S1–S18). Cada sub-issue:
+
+- vale como máximo 3 puntos;
+- se parte por criterio, no por capa: cada extensión del SRS suele ser uno;
+- cita los pasos, extensiones y garantías que cubre;
+- lo compartido entre dos historias se construye una sola vez y ambas dependen de ello.
+
+Las estimaciones usan la escala de Fibonacci y se acuerdan con *planning poker*. Lo que supere 8 puntos se parte.
+
+## Requisitos y documentación
+
+- **Los requisitos se cambian aquí**, por PR, en `docs/requisitos/`: ese árbol es la fuente de verdad. Cada ID aparece exactamente una vez como texto normativo (los dueños están en su `05-trazabilidad.md`).
+- Si el SRS calla, no decidas en silencio: revisa `04-supuestos.md` y `07-lagunas.md`; si tampoco está, pregunta en el issue o registra un supuesto nuevo marcado como tal.
+- La documentación va en español, con el vocabulario del glosario tal cual.
+- El PR que cambia un comportamiento actualiza el documento que lo describe.
+
+## Qué no subir
+
+Credenciales, el contenido de `data/`, datos personales (de estudiantes reales, en pruebas o en la semilla) y archivos locales del IDE.
