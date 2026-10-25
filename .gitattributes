@@ -1,0 +1,8 @@
+# Normaliza el fin de línea: todo texto en LF.
+* text=auto eol=lf
+
+# El script del wrapper siempre en LF.
+mvnw text eol=lf
+
+# Los .cmd de Windows siempre en CRLF.
+*.cmd text eol=crlf
