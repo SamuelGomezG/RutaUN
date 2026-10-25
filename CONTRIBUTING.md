@@ -31,7 +31,7 @@ Un issue, una rama, una solicitud de integración.
 
 1. Actualiza `develop` y crea tu rama desde ahí.
 2. Haz commits atómicos.
-3. Antes de abrir el PR corre `./mvnw verify` (debe quedar en verde) y ejecuta tu cambio siguiendo los pasos que vas a poner en el PR.
+3. Antes de abrir el PR, si cambiaste código, corre `./mvnw verify` (debe quedar en verde) cuando exista el esqueleto (TT-01); si el cambio es solo de documentación, comprueba que los enlaces estén vivos. En ambos casos, ejecuta tu cambio siguiendo los pasos que vas a poner en el PR.
 4. Abre el PR contra `develop` y pasa el issue a *In Review*.
 5. Otra persona lo revisa: ejecuta el cambio, comprueba el resultado y lee el código. Respondes a sus comentarios con commits nuevos.
 6. Con la aprobación y la integración continua en verde, quien abrió el PR lo fusiona en `develop` con **Rebase and merge**, para conservar los commits atómicos; no uses *Squash*. Nadie fusiona un PR sin la aprobación de otra persona.
@@ -121,7 +121,7 @@ No uses mensajes como «arreglos», «wip» o «cambios», ni mezcles temas dist
   - cómo ejecutarlo: los pasos para recrear el flujo y el resultado que se espera ver (la aplicación, una prueba de aceptación, un comando o un script);
   - la lista de la [Definición de Hecho](docs/proceso/definicion-de-hecho.md);
   - si cambió un comportamiento, qué documento actualizó.
-- Verifica antes de pedir revisión: `./mvnw verify` en verde y el diff sin credenciales, datos personales ni archivos locales.
+- Verifica antes de pedir revisión: si cambiaste código, `./mvnw verify` en verde cuando exista el esqueleto (TT-01); si es solo documentación, los enlaces vivos. En ambos casos, el diff sin credenciales, datos personales ni archivos locales.
 
 ## Revisión
 
