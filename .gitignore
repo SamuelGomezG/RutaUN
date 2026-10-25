@@ -1,0 +1,19 @@
+# Construcción
+target/
+
+# Base de datos H2 en archivo (la crea la app; no se versiona)
+data/
+*.mv.db
+*.trace.db
+
+# Entornos de desarrollo
+.idea/
+*.iml
+.vscode/
+.obsidian/
+
+# Sistema
+.DS_Store
+
+# Secretos y variables de entorno
+.env
