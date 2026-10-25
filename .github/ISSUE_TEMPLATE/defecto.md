@@ -5,8 +5,9 @@ title: "Defecto · UCnn-HUmm · Qué falla"
 labels: defecto
 ---
 
-<!-- Un defecto es un comportamiento que contradice un requisito. Si el SRS calla sobre lo que esperabas,
-     no es un defecto: coméntalo en el issue de la historia (regla de oro 3).
+<!-- Un defecto es un comportamiento que contradice el SRS o los criterios de aceptación del issue.
+     Solo si lo que esperabas no está en ninguno de los dos, coméntalo en el issue de la historia
+     (regla de oro 3).
      No pegues datos personales ni credenciales: ni de estudiantes reales ni de cuentas. -->
 
 ### Qué pasa
