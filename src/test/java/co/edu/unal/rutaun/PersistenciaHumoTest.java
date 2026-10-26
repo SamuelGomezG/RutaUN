@@ -13,8 +13,7 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 class PersistenciaHumoTest {
 
-  @Autowired
-  private JdbcClient jdbcClient;
+  @Autowired private JdbcClient jdbcClient;
 
   @Test
   @Tag("integracion")

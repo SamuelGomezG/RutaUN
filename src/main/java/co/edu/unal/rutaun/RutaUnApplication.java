@@ -4,8 +4,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * Punto de entrada de RutaUN, en la raíz del paquete para que el
- * escaneo de componentes cubra todos los módulos.
+ * Punto de entrada de RutaUN, en la raíz del paquete para que el escaneo de componentes cubra todos
+ * los módulos.
  */
 @SpringBootApplication
 public class RutaUnApplication {
