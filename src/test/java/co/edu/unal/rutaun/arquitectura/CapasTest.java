@@ -17,40 +17,59 @@ class CapasTest {
           .importPackages("co.edu.unal.rutaun");
 
   @Test
-  void tt01_elDominioNoConoceNiSpringNiPersistencia() {
+  void tt01_elDominioNoConoceNiSpringNiPersistenciaNiSuperiores() {
     ArchRule regla =
         noClasses()
             .that()
             .resideInAPackage("..dominio..")
             .should()
             .dependOnClassesThat()
-            .resideInAnyPackage("..persistencia..", "org.springframework..");
+            .resideInAnyPackage(
+                "..aplicacion..",
+                "co.edu.unal.rutaun..web..",
+                "..persistencia..",
+                "org.springframework..");
 
     regla.check(clases);
   }
 
   @Test
-  void tt01_laPersistenciaNoConoceClasesDeNegocio() {
+  void tt01_laPersistenciaNoConoceClasesDeNegocioNiLaPresentacion() {
     ArchRule regla =
         noClasses()
             .that()
             .resideInAPackage("..persistencia..")
             .should()
             .dependOnClassesThat()
-            .resideInAnyPackage("..aplicacion..", "..dominio..");
+            .resideInAnyPackage("co.edu.unal.rutaun..web..", "..aplicacion..", "..dominio..");
+
+    regla.check(clases);
+  }
+
+  @Test
+  void tt01_laAplicacionNoDependeDeLaPresentacion() {
+    ArchRule regla =
+        noClasses()
+            .that()
+            .resideInAPackage("..aplicacion..")
+            .should()
+            .dependOnClassesThat()
+            .resideInAPackage("co.edu.unal.rutaun..web..");
 
     regla.check(clases);
   }
 
   @Test
   void tt01_laPresentacionNoTocaNiPersistenciaNiLosRepositorios() {
-    // Los repositorios de Spring Data viven bajo org.springframework.data:
-    // prohibir el paquete entero cubre la regla «solo aplicacion usa los
-    // repositorios» hasta que TT-04 (#51) los cree.
+    // El selector acotado cubre también los web/ de cada módulo (por ejemplo
+    // normativa.web) sin matchear paquetes de frameworks. Los repositorios de
+    // Spring Data viven bajo org.springframework.data: prohibir el paquete
+    // entero cubre la regla «solo aplicacion usa los repositorios» hasta que
+    // TT-04 (#51) los cree.
     ArchRule sinPersistenciaNiRepositorios =
         noClasses()
             .that()
-            .resideInAPackage("co.edu.unal.rutaun.web..")
+            .resideInAPackage("co.edu.unal.rutaun..web..")
             .should()
             .dependOnClassesThat()
             .resideInAnyPackage("..persistencia..", "org.springframework.data..");

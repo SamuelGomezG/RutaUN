@@ -47,11 +47,16 @@ Las pruebas de integración corren con el perfil `test`
 
 `CapasTest` (AGENTS.md, «Capas y módulos»):
 
-- El dominio no importa persistencia ni Spring.
-- La persistencia no importa clases de negocio (`aplicacion` ni `dominio`).
-- La presentación no toca persistencia ni Spring Data (los repositorios los
-  usa solo `aplicacion`; la regla explícita «solo `aplicacion` usa los
-  repositorios» se encuesta con firmeza cuando TT-04 los cree).
+- El dominio no importa `aplicacion`, la presentación ni persistencia, y no
+  conoce Spring.
+- La persistencia no importa clases de negocio (`aplicacion` ni `dominio`) ni
+  la presentación.
+- La aplicación no depende de la presentación; la presentación no toca
+  persistencia ni Spring Data (los repositorios los usa solo `aplicacion`;
+  la regla explícita «solo `aplicacion` usa los repositorios» se encuesta con
+  firmeza cuando TT-04 los cree). Los selectores de `web` quedan acotados a
+  `co.edu.unal.rutaun..web..` para cubrir los `web/` de cada módulo sin
+  matchear paquetes de frameworks.
 
 `ModulosTest`: `ApplicationModules.of(RutaUnApplication.class).verify()`
 falla si un módulo usa las clases internas de otro.
