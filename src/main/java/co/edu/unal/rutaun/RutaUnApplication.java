@@ -10,6 +10,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class RutaUnApplication {
 
+  /** Arranca RutaUN. */
   public static void main(String[] args) {
     SpringApplication.run(RutaUnApplication.class, args);
   }
