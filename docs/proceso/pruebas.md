@@ -34,7 +34,7 @@ Las pruebas de integración corren con el perfil `test`
 | Nivel | Qué se prueba | Herramienta | Ejemplo en el código |
 | --- | --- | --- | --- |
 | Unitarias de dominio | Valores y restricciones, sin Spring | JUnit 6 y AssertJ | `utilidades/ArgumentChecksTest` |
-| Propiedades | Determinismo del cálculo, cumplimiento del tope y de restricciones | jqwik | *(se retoma cuando jqwik corra con JUnit 6; ver «Pendientes»)* |
+| Propiedades | Determinismo del cálculo, cumplimiento del tope y de restricciones | jqwik | `utilidades/ArgumentChecksPropiedadesTest` |
 | Oráculo de optimalidad | El plan mínimo y los seis criterios del cálculo, contra fuerza bruta | JUnit 6 con mallas sintéticas | *(sprint 2, con TT-05)* |
 | Orquestadores | Flujos y extensiones de cada caso con fachadas falsas | Mockito con `Clock` fijo | *(sprint 2)* |
 | Arquitectura | Reglas de capas, módulos y nombres | Modulith `verify()` y ArchUnit | `arquitectura/ModulosTest`, `CapasTest`, `NombresTest` |
@@ -62,8 +62,9 @@ ASCII. Las reglas sobre paquetes que aún no tienen clases no fallan
 
 ## Pendientes (se completan al llegar)
 
-- **jqwik (D8):** 1.10.2 compila contra JUnit Platform 1.14.4 y el BOM de
-  Boot usa la serie 6. Si el humo del PR 2 no corre, se aplaza a que el
-  stack lo soporte y se anota aquí.
+- **jqwik (decisión D8, resuelta):** el humo con JUnit 6 corrió en el PR 2:
+  jqwik 1.10.2 descubre y ejecuta propiedades junto a JUnit 6.0.3 sin
+  conflicto de motores. Las propiedades reales del cálculo llegan en el
+  sprint 2 (TT-05).
 - **Datos de prueba:** mallas sintéticas en `soporte/` y archivos JSON en
   `src/test/resources/json/`; nunca datos personales reales (regla de oro 7).
