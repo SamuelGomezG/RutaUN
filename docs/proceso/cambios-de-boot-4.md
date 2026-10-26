@@ -10,6 +10,10 @@ esqueleto queda aquí; lo marcado «por verificar» se completa en el PR 2.
   `org.springframework.boot.test.autoconfigure.web.servlet`; en Boot 4.1.2 vive en
   `org.springframework.boot.webmvc.test.autoconfigure` (junto con `@WebMvcTest`).
   Afecta a toda prueba MockMvc de los carriles 2, 3 y 4.
+- **Spring Modulith 2.1.2 cambió la firma de `verify`.** En la serie 1 era
+  `ApplicationModules.verify(ApplicationModules.of(App.class))`; en 2.1.2 es el
+  método de instancia `ApplicationModules.of(App.class).verify()`
+  (con variante `verify(VerificationOptions)` para reglas adicionales).
 - **El starter de pruebas web es `spring-boot-starter-webmvc-test`** e incluye
   `spring-boot-starter-test` (JUnit 6, AssertJ, Mockito, Hamcrest): con él basta
   para MockMvc y para las de integración.
