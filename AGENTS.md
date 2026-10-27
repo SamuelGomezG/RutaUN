@@ -2,7 +2,7 @@
 
 **RutaUN** es un planificador de carrera semestre a semestre para estudiantes de pregrado de la UNAL Sede Bogotá, calculado sobre la normativa consolidada de su programa. Proyecto del curso Ingeniería de Software I («Equipo Zeus», 2026-II). Todo va en español: código de dominio, documentación e interfaz.
 
-**Estado.** Sprint 1 (22 de octubre al 4 de noviembre de 2026). El esqueleto (TT-01, #48) ya está en `develop`: entorno que arranca, marco de pruebas, formato y estilo, pruebas de arquitectura, persistencia de humo y la integración continua (`.github/workflows/ci.yml`). Los comandos de «Construir y probar» son ejecutables. El resto de la estructura de abajo se completa durante el sprint; lo marcado «pendiente» tampoco existe todavía.
+**Estado.** Sprint 1 (22 de octubre al 4 de noviembre de 2026). El esqueleto (TT-01, #48) ya está en `develop`: entorno que arranca, marco de pruebas, formato y estilo, pruebas de arquitectura y persistencia de humo; los comandos de «Construir y probar» son ejecutables. La integración continua (`.github/workflows/ci.yml`) entra con el PR de cierre de TT-01 (#75) y queda en `develop` al fusionarse. El resto de la estructura de abajo se completa durante el sprint; lo marcado «pendiente» tampoco existe todavía.
 
 ## Dónde está cada cosa
 

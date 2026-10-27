@@ -10,7 +10,7 @@
 Planificador de carrera semestre a semestre para estudiantes de pregrado de la UNAL Sede Bogotá, calculado sobre la normativa consolidada de su programa.
 
 > [!NOTE]
-> El proyecto está en el sprint 1. El esqueleto técnico ya está en `develop` (TT-01, [#48](https://github.com/SamuelGomezG/RutaUN/issues/48)): los pasos de [Abrir y ejecutar el proyecto](#abrir-y-ejecutar-el-proyecto) funcionan; las funcionalidades de los casos de uso llegan durante el sprint.
+> El proyecto está en el sprint 1. El esqueleto técnico ya está en `develop` (TT-01, [#48](https://github.com/SamuelGomezG/RutaUN/issues/48)): los pasos de [Abrir y ejecutar el proyecto](#abrir-y-ejecutar-el-proyecto) funcionan; las funcionalidades de los casos de uso llegan durante el sprint. La integración continua (la insignia de arriba) entra con el PR de cierre de TT-01 ([#75](https://github.com/SamuelGomezG/RutaUN/pull/75)) y queda en `develop` al fusionarse.
 
 ### Tópicos
 
