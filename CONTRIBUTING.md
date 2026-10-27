@@ -3,7 +3,7 @@
 Esta guía explica cómo trabajamos en RutaUN: cómo tomar un issue, nombrar las ramas, escribir los commits, abrir una solicitud de integración (PR) y revisar la de otra persona. Las reglas de código (capas, nombres, pruebas) están en [`AGENTS.md`](AGENTS.md); aquí está el flujo.
 
 > [!NOTE]
-> La integración continua y la protección de `develop` y `main` llegan con TT-01 (#48). Mientras tanto, lo que automatizarán se hace a mano y se revisa en el PR.
+> La integración continua corre con la acción [`verify`](.github/workflows/ci.yml): compila, verifica formato y estilo y corre todas las pruebas en cada PR y en cada push a `develop` y `main`. La protección de ramas (PR obligatorio, aprobación y CI en verde) la activa quien tenga permisos de administrador, una vez vista la primera corrida en verde.
 
 ### Tópicos
 
@@ -21,7 +21,7 @@ Esta guía explica cómo trabajamos en RutaUN: cómo tomar un issue, nombrar las
 
 1. Lee el `README.md` y [`AGENTS.md`](AGENTS.md): trae las reglas de oro, la estructura de carpetas y las convenciones de código.
 2. Los requisitos están en `docs/requisitos/`; empieza por su `README.md`, que dice qué archivos cargar según tu tarea.
-3. Prepara el entorno: un JDK 21 (con SDKMAN, `sdk env install`) y el wrapper de Maven (`./mvnw`) cuando exista el esqueleto.
+3. Prepara el entorno: un JDK 21 (con SDKMAN, `sdk env install`) y el wrapper de Maven (`./mvnw`).
 4. Activa la plantilla de commits, una vez por clon: `git config commit.template .gitmessage`.
 5. Escoge un issue del tablero «RutaUN», de la iteración en curso. Asígnatelo y pásalo a *In Progress*.
 
@@ -31,7 +31,7 @@ Un issue, una rama, una solicitud de integración.
 
 1. Actualiza `develop` y crea tu rama desde ahí.
 2. Haz commits atómicos.
-3. Antes de abrir el PR, si cambiaste código, corre `./mvnw verify` (debe quedar en verde) cuando exista el esqueleto (TT-01); si el cambio es solo de documentación, comprueba que los enlaces estén vivos. En ambos casos, ejecuta tu cambio siguiendo los pasos que vas a poner en el PR.
+3. Antes de abrir el PR, si cambiaste código, corre `./mvnw verify` (debe quedar en verde); si el cambio es solo de documentación, comprueba que los enlaces estén vivos. En ambos casos, ejecuta tu cambio siguiendo los pasos que vas a poner en el PR.
 4. Abre el PR contra `develop` y pasa el issue a *In Review*.
 5. Otra persona lo revisa: ejecuta el cambio, comprueba el resultado y lee el código. Respondes a sus comentarios con commits nuevos.
 6. Con la aprobación y la integración continua en verde, quien abrió el PR lo fusiona en `develop` con **Rebase and merge**, para conservar los commits atómicos; no uses *Squash*. Nadie fusiona un PR sin la aprobación de otra persona.
@@ -121,7 +121,7 @@ No uses mensajes como «arreglos», «wip» o «cambios», ni mezcles temas dist
   - cómo ejecutarlo: los pasos para recrear el flujo y el resultado que se espera ver (la aplicación, una prueba de aceptación, un comando o un script);
   - la lista de la [Definición de Hecho](docs/proceso/definicion-de-hecho.md);
   - si cambió un comportamiento, qué documento actualizó.
-- Verifica antes de pedir revisión: si cambiaste código, `./mvnw verify` en verde cuando exista el esqueleto (TT-01); si es solo documentación, los enlaces vivos. En ambos casos, el diff sin credenciales, datos personales ni archivos locales.
+- Verifica antes de pedir revisión: si cambiaste código, `./mvnw verify` en verde; si es solo documentación, los enlaces vivos. En ambos casos, el diff sin credenciales, datos personales ni archivos locales.
 
 ## Revisión
 
