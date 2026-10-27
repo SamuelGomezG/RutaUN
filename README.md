@@ -5,13 +5,12 @@
 ![Java](https://img.shields.io/badge/Java-21-007396?style=for-the-badge)
 ![Maven](https://img.shields.io/badge/Maven-wrapper-C71A36?style=for-the-badge)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-MVC%20%2B%20Thymeleaf-6DB33F?style=for-the-badge)
-
-<!-- Insignia de la integración continua: agregarla cuando exista .github/workflows/ci.yml (TT-01, #48). -->
+[![CI](https://github.com/SamuelGomezG/RutaUN/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/SamuelGomezG/RutaUN/actions/workflows/ci.yml)
 
 Planificador de carrera semestre a semestre para estudiantes de pregrado de la UNAL Sede Bogotá, calculado sobre la normativa consolidada de su programa.
 
 > [!NOTE]
-> El proyecto está en el sprint 1. Hoy el repositorio contiene los requisitos y las guías del equipo; el esqueleto técnico llega con la tarea TT-01 ([#48](https://github.com/SamuelGomezG/RutaUN/issues/48)). Los pasos de [Abrir y ejecutar el proyecto](#abrir-y-ejecutar-el-proyecto) son los previstos y todavía no funcionan.
+> El proyecto está en el sprint 1. El esqueleto técnico ya está en `develop` (TT-01, [#48](https://github.com/SamuelGomezG/RutaUN/issues/48)): los pasos de [Abrir y ejecutar el proyecto](#abrir-y-ejecutar-el-proyecto) funcionan; las funcionalidades de los casos de uso llegan durante el sprint.
 
 ### Tópicos
 
@@ -67,16 +66,13 @@ Proyecto del curso Ingeniería de Software I («Equipo Zeus», 2026-II).
 | [H2](https://www.h2database.com) y [Flyway](https://flywaydb.org) | Base de datos en archivo y sus migraciones en SQL estándar |
 | [Spring Modulith](https://spring.io/projects/spring-modulith) y [ArchUnit](https://www.archunit.org) | Verificación automática de módulos y capas |
 | [Spotless](https://github.com/diffplug/spotless) y [Checkstyle](https://checkstyle.org) | Google Java Style; el build falla si algo no está formateado |
-| [JUnit 5](https://junit.org/junit5/), [AssertJ](https://assertj.github.io/doc/), [Mockito](https://site.mockito.org) y [jqwik](https://jqwik.net) | Pruebas |
+| [JUnit 6](https://junit.org/junit6/), [AssertJ](https://assertj.github.io/doc/), [Mockito](https://site.mockito.org) y [jqwik](https://jqwik.net) | Pruebas |
 
 ## Acceso al proyecto
 
 Puedes [acceder al código fuente](https://github.com/SamuelGomezG/RutaUN) o seguir el trabajo en el [tablero «RutaUN»](https://github.com/users/SamuelGomezG/projects/3) y en los [issues](https://github.com/SamuelGomezG/RutaUN/issues). El trabajo vive en `develop`, la rama predeterminada; `main` guarda lo que se mostró y se dio por satisfactorio al cierre de cada sprint.
 
 ## Abrir y ejecutar el proyecto
-
-> [!NOTE]
-> Estos pasos son los previstos. Funcionan cuando TT-01 ([#48](https://github.com/SamuelGomezG/RutaUN/issues/48)) entregue el esqueleto.
 
 **Requisitos previos:** [Git](https://git-scm.com/downloads) y un JDK 21. No necesitas instalar Maven: el proyecto trae su wrapper.
 
@@ -110,7 +106,7 @@ sdk env install
 
 ## Pruebas
 
-Cada prueba lleva en su nombre el ID del requisito que verifica, por ejemplo `uc01_ext4b_topeBajoElMinimoAdvierte`. Hay pruebas unitarias del dominio sin Spring, de arquitectura (módulos y capas), de integración con H2 en memoria, de la capa web con MockMvc y de contrato para el formato del JSON de normativa. Se corren todas con:
+Cada prueba lleva en su nombre el ID del requisito que verifica, por ejemplo `uc01_ext4b_topeBajoElMinimoAdvierte`. Hay pruebas unitarias del dominio sin Spring, de propiedades con jqwik, de arquitectura (módulos y capas), de integración con H2 en memoria, de la capa web con MockMvc y de contrato para el formato del JSON de normativa. Los tipos, la convención de nombres y cómo correrlas por etiqueta están en [`docs/proceso/pruebas.md`](docs/proceso/pruebas.md). Se corren todas con:
 
 ```sh
 ./mvnw verify
@@ -124,6 +120,7 @@ Cada prueba lleva en su nombre el ID del requisito que verifica, por ejemplo `uc
 | [`AGENTS.md`](AGENTS.md) | Reglas de oro, estructura, convenciones de código y pruebas |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Cómo contribuir: ramas, commits, solicitudes de integración y revisión |
 | [`docs/proceso/definicion-de-hecho.md`](docs/proceso/definicion-de-hecho.md) | Cuándo un elemento cuenta como terminado |
+| [`docs/proceso/pruebas.md`](docs/proceso/pruebas.md) | La convención de pruebas: pirámide, nombres y cómo correrlas |
 | `docs/diseno/` | Arquitectura y decisiones (pendiente) |
 | `docs/datos/formato-normativa.md` | Formato del JSON de normativa (pendiente) |
 
@@ -131,6 +128,7 @@ Cada prueba lleva en su nombre el ID del requisito que verifica, por ejemplo `uc
 
 ```
 .
+├─ .github/         plantillas de issues y PR, y la acción de CI
 ├─ docs/            requisitos, diseño, formato de datos y proceso
 ├─ src/main/        código y recursos (Java, plantillas, migraciones, semilla de normativa)
 ├─ src/test/        pruebas

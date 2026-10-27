@@ -2,7 +2,8 @@
 
 Nota de TT-01 (#48), PR 1 (25 de octubre de 2026). El diseño de clases se escribió
 pensando en Boot 3; el esqueleto usa Boot 4.1.2. Lo verificado al construir el
-esqueleto queda aquí; lo marcado «por verificar» se completa en el PR 2.
+esqueleto queda aquí; lo que solo puede verificar quien construya sobre H2
+(Jackson 3 y Hibernate 7 con columnas JSON) queda para los carriles 2 y 3.
 
 ## Verificado en el PR 1
 
@@ -24,13 +25,19 @@ esqueleto queda aquí; lo marcado «por verificar» se completa en el PR 2.
   que H2 2.4.240 es más nueva que la última versión verificada (2.3.232). No
   bloquea: el arranque y la prueba de humo pasan. Se vigila en TT-04 (#51).
 
-## Por verificar (se completa en el PR 2 y al construir sobre H2)
+## Verificado en el PR 2
+
+- **jqwik 1.10.2 corre con JUnit 6 (R3):** el humo descubre y ejecuta
+  propiedades junto a JUnit 6.0.3 sin conflicto de motores; entra al stack.
+- **ArchUnit 1.5.1 corre con JUnit 6 (R3):** `CapasTest` y `NombresTest`
+  corren en `verify`. Sin `haveSimpleNameMatching` ni
+  `areMetaAnnotatedWith` fluentes; los `check` van como
+  `rule.check(classes)`.
+
+## Pendiente de los carriles (se completa al construir sobre H2)
 
 - **Jackson 3 (R1):** el `ObjectMapper` de `JsonConfig` y el lector de
   UC07-HU03 (#41) deben importar `tools.jackson.databind.ObjectMapper`. La API
   de lectura/escritura es casi igual, pero hay cambios menores (por verificar).
 - **Hibernate 7.4 con columnas JSON (R2):** `@JdbcTypeCode(SqlTypes.JSON)` sobre
   H2 2.4 y qué librería JSON usa por dentro (`ReglaEntity` de TT-04, #51).
-- **jqwik 1.10.2 con JUnit 6 (R3):** jqwik 1.10.2 compila contra JUnit Platform
-  1.14.4; el BOM de Boot usa la serie 6. Se prueba con un humo en el PR 2.
-- **ArchUnit 1.5.1 con JUnit 6 (R3):** se prueba con `CapasTest` y `NombresTest`.
