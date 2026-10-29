@@ -15,10 +15,12 @@ correr_verify() {
     commit)
       consecuencia="no se crea el commit"
       salto="git commit --no-verify"
+      tras_formato="vuelve a preparar los archivos con git add"
       ;;
     *)
       consecuencia="no se empuja"
       salto="git push --no-verify"
+      tras_formato="confirma los archivos corregidos (un commit nuevo o git commit --amend)"
       ;;
   esac
 
@@ -29,7 +31,7 @@ correr_verify() {
     segundos=$(($(date +%s) - inicio))
     echo "$hook: verify en verde (${segundos} s)."
     if [ "$1" = commit ] && [ "$segundos" -gt 30 ]; then
-      echo "  aviso: pasó de 30 s; conviene mover las pruebas a pre-push (ENT-06, fase 2)."
+      echo "  aviso: pasó de 30 s; conviene dejar verify solo en pre-push y quitarlo de pre-commit (ENT-06)."
     fi
     rm -f "$salida"
     return 0
@@ -46,7 +48,7 @@ correr_verify() {
     tail -30 "$salida" | sed 's/^/  /' >&2
   fi
   if grep -q 'spotless:apply' "$salida"; then
-    echo "  Formato: ./mvnw spotless:apply y vuelve a preparar los archivos con git add." >&2
+    echo "  Formato: ./mvnw spotless:apply y $tras_formato." >&2
   fi
   echo "  Salida completa: $salida" >&2
   echo "  (En una emergencia, $salto salta los hooks.)" >&2

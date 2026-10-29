@@ -4,15 +4,17 @@
 #   .githooks/probar.sh
 #
 # No toca tu repositorio ni tu configuración: los casos de commit-msg usan
-# archivos temporales y los de pre-commit, repositorios temporales con un
-# mvnw falso. Termina con código 1 si falla algún caso.
+# archivos temporales; los de pre-commit y pre-push, repositorios temporales
+# (el segundo con un remoto local) y un mvnw falso. Termina con código 1 si
+# falla algún caso.
 
 hooks=$(cd "$(dirname "$0")" && pwd)
 total=0
 fallos=0
 tmp_msg=$(mktemp)
 tmp_repo=""
-trap 'rm -f "$tmp_msg"; [ -n "$tmp_repo" ] && rm -rf "$tmp_repo"' EXIT
+tmp_origen=""
+trap 'rm -f "$tmp_msg"; [ -n "$tmp_repo" ] && rm -rf "$tmp_repo"; [ -n "$tmp_origen" ] && rm -rf "$tmp_origen"' EXIT
 
 # Registra un caso: 0 si pasó, 1 si falló; el detalle solo se muestra al fallar.
 resultado() {
@@ -86,10 +88,13 @@ msg 1 "mensaje vacío" "" "«<ID>: »"
 # ---------------------------------------------------------------- pre-commit
 
 # nuevo_repo [sin_rama]: repositorio temporal en develop, con un mvnw falso que
-# anota sus llamadas en mvnw.llamadas y falla si MVNW_SALIDA=1. Por omisión
-# cambia a una rama de trabajo.
+# anota sus llamadas en mvnw.llamadas y falla si MVNW_SALIDA=1, y un remoto
+# local (origin) que ya tiene develop. Por omisión cambia a una rama de trabajo.
 nuevo_repo() {
   [ -z "$tmp_repo" ] || rm -rf "$tmp_repo"
+  [ -z "$tmp_origen" ] || rm -rf "$tmp_origen"
+  tmp_origen=$(mktemp -d)
+  git init -q --bare "$tmp_origen"
   tmp_repo=$(mktemp -d)
   git -C "$tmp_repo" init -q
   git -C "$tmp_repo" symbolic-ref HEAD refs/heads/develop
@@ -104,6 +109,8 @@ nuevo_repo() {
   printf 'inicio\n' >"$tmp_repo/LEEME.md"
   git -C "$tmp_repo" add mvnw LEEME.md src
   git -C "$tmp_repo" commit -q -m inicio
+  git -C "$tmp_repo" remote add origin "$tmp_origen"
+  git -C "$tmp_repo" push -q origin develop >/dev/null 2>&1
   git -C "$tmp_repo" config core.hooksPath "$hooks"
   [ "$1" = sin_rama ] || git -C "$tmp_repo" checkout -q -b rama-de-trabajo
 }
@@ -200,6 +207,13 @@ pc 1 1 "verify en rojo: muestra el detalle de Checkstyle y no el ruido de Maven"
 unset MVNW_SALIDA MVNW_MENSAJE
 
 nuevo_repo
+preparar src/main/java/A.java "class A { int x; }"
+export MVNW_SALIDA=1
+export MVNW_MENSAJE="[ERROR] Run 'mvn spotless:apply' to fix these violations."
+pc 1 1 "formato roto: sugiere spotless:apply y volver a preparar los archivos" "vuelve a preparar los archivos con git add"
+unset MVNW_SALIDA MVNW_MENSAJE
+
+nuevo_repo
 preparar data/rutaun.mv.db "binario"
 pc 1 0 "la base H2 local" "data/rutaun.mv.db"
 
@@ -210,6 +224,133 @@ pc 1 0 "un .env" ".env"
 nuevo_repo
 preparar claves/servidor.pem "-----BEGIN-----"
 pc 1 0 "una clave privada .pem" "servidor.pem"
+
+# ------------------------------------------------------------------ pre-push
+
+# confirmar <archivo> [contenido]: cambia el archivo y lo confirma saltando los
+# hooks, como lo haría un rebase o un commit hecho con --no-verify.
+confirmar() {
+  preparar "$1" "$2"
+  git -C "$tmp_repo" commit -q --no-verify -m "TT-02: cambio de prueba" -m "Refs #1"
+}
+
+# empujado_en_origen <rama>: cuántas veces aparece la rama en el remoto.
+empujado_en_origen() {
+  git -C "$tmp_repo" ls-remote --heads origin "$1" | wc -l | tr -d ' '
+}
+
+# empujar <0|1 esperado> <llamadas a mvnw esperadas> <descripción>
+#         <texto que debe aparecer, o -> [argumentos de git push]
+empujar() {
+  esperado=$1
+  llam=$2
+  desc=$3
+  texto=$4
+  shift 4
+  rm -f "$tmp_repo/mvnw.llamadas"
+  salida=$(cd "$tmp_repo" && git push -q "$@" 2>&1)
+  codigo=$?
+  n=$(llamadas)
+  ok=0
+  [ "$codigo" -eq "$esperado" ] || ok=1
+  [ "$n" -eq "$llam" ] || ok=1
+  if [ "$ok" -eq 0 ] && [ "$texto" != "-" ]; then
+    printf '%s' "$salida" | grep -Fq -- "$texto" || ok=1
+  fi
+  resultado "$ok" "$desc" "salió con $codigo (esperado $esperado), mvnw llamado $n vez/veces (esperado $llam); salida: $salida"
+}
+
+echo "pre-push · lo que debe pasar"
+nuevo_repo
+confirmar README.md "solo documentación"
+empujar 0 0 "rama nueva solo con documentación: no corre Maven" "se omite" -u origin rama-de-trabajo
+
+nuevo_repo
+confirmar src/main/java/A.java "class A { int x; }"
+empujar 0 1 "rama nueva con cambio en Java: corre verify y empuja" "verify en verde" -u origin rama-de-trabajo
+[ "$(empujado_en_origen rama-de-trabajo)" -eq 1 ]
+resultado $? "la rama llegó al remoto"
+
+nuevo_repo
+confirmar src/main/java/A.java "class A { int x; }"
+confirmar README.md "después, un commit de documentación"
+empujar 0 1 "el código está en un commit anterior al último: también corre verify" "verify en verde" -u origin rama-de-trabajo
+
+nuevo_repo
+confirmar README.md "primero"
+git -C "$tmp_repo" push -q --no-verify -u origin rama-de-trabajo >/dev/null 2>&1
+confirmar README.md "segundo"
+empujar 0 0 "rama existente con un commit más de documentación: no corre Maven" "se omite"
+
+nuevo_repo
+confirmar src/main/java/A.java "class A { int x; }"
+git -C "$tmp_repo" push -q --no-verify -u origin rama-de-trabajo >/dev/null 2>&1
+confirmar README.md "segundo"
+empujar 0 0 "código ya empujado y un commit de documentación más: no vuelve a verificar" "se omite"
+
+nuevo_repo
+confirmar README.md "primero"
+git -C "$tmp_repo" push -q --no-verify -u origin rama-de-trabajo >/dev/null 2>&1
+confirmar src/main/java/A.java "class A { int y; }"
+empujar 0 1 "rama existente con un commit de Java más: corre verify" "verify en verde"
+
+nuevo_repo
+confirmar src/main/java/A.java "class A { int x; }"
+git -C "$tmp_repo" push -q --no-verify -u origin rama-de-trabajo >/dev/null 2>&1
+git -C "$tmp_repo" commit -q --amend --no-verify -m "TT-02: cambio reescrito" -m "Refs #1"
+empujar 0 1 "un push forzado tras reescribir commits corre verify" "verify en verde" --force-with-lease
+
+nuevo_repo
+confirmar README.md "doc"
+git -C "$tmp_repo" push -q --no-verify -u origin rama-de-trabajo >/dev/null 2>&1
+empujar 0 0 "borrar la rama remota no corre verify" "-" --delete origin rama-de-trabajo
+[ "$(empujado_en_origen rama-de-trabajo)" -eq 0 ]
+resultado $? "la rama dejó de existir en el remoto"
+
+nuevo_repo
+confirmar src/main/java/A.java "class A { int x; }"
+git -C "$tmp_repo" tag v1
+empujar 0 0 "empujar una etiqueta no corre verify" "-" origin v1
+
+nuevo_repo
+git -C "$tmp_repo" checkout -q -b otra-rama develop
+confirmar src/main/java/B.java "class B {}"
+git -C "$tmp_repo" checkout -q rama-de-trabajo
+empujar 0 0 "empujar una rama que no es la actual: avisa y no verifica" "no es la actual" origin otra-rama
+
+nuevo_repo
+confirmar src/main/java/A.java "class A { int x; }"
+printf 'class Nueva {}\n' >"$tmp_repo/src/main/java/Nueva.java"
+empujar 0 1 "código sin confirmar: avisa pero corre" "sin confirmar" -u origin rama-de-trabajo
+
+echo "pre-push · lo que debe rechazarse"
+nuevo_repo
+confirmar src/main/java/A.java "class A { int x; }"
+export MVNW_SALIDA=1
+empujar 1 1 "verify en rojo: no se empuja y se muestra el motivo" "verify simulado" -u origin rama-de-trabajo
+unset MVNW_SALIDA
+[ "$(empujado_en_origen rama-de-trabajo)" -eq 0 ]
+resultado $? "la rama no llegó al remoto"
+
+nuevo_repo
+confirmar src/main/java/A.java "class A { int x; }"
+export MVNW_SALIDA=1
+export MVNW_MENSAJE="[WARNING] src/main/java/A.java:[5,3] (javadoc) MissingJavadocMethod: falta el Javadoc"
+empujar 1 1 "verify en rojo: muestra el detalle de Checkstyle" "MissingJavadocMethod" -u origin rama-de-trabajo
+unset MVNW_SALIDA MVNW_MENSAJE
+
+nuevo_repo
+confirmar src/main/java/A.java "class A { int x; }"
+export MVNW_SALIDA=1
+export MVNW_MENSAJE="[ERROR] Run 'mvn spotless:apply' to fix these violations."
+empujar 1 1 "formato roto: sugiere spotless:apply y confirmar los archivos corregidos" "confirma los archivos corregidos" -u origin rama-de-trabajo
+unset MVNW_SALIDA MVNW_MENSAJE
+
+nuevo_repo
+confirmar src/main/java/A.java "class A { int x; }"
+export MVNW_SALIDA=1
+empujar 0 0 "git push --no-verify salta el hook (la salida de emergencia)" "-" --no-verify -u origin rama-de-trabajo
+unset MVNW_SALIDA
 
 # ----------------------------------------------- git commit de punta a punta
 

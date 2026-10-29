@@ -113,21 +113,22 @@ No uses mensajes como «arreglos», «wip» o «cambios», ni mezcles temas dist
 
 ## Hooks de git
 
-Los hooks de [`.githooks/`](.githooks) revisan tu trabajo en tu máquina antes de que el commit exista. Se activan una vez por clon (paso 4 de [Antes de empezar](#antes-de-empezar)).
+Los hooks de [`.githooks/`](.githooks) revisan tu trabajo en tu máquina antes de que el commit exista y antes de que se empuje. Se activan una vez por clon (paso 4 de [Antes de empezar](#antes-de-empezar)).
 
 | Hook | Cuándo corre | Qué comprueba | Tarda |
 | --- | --- | --- | --- |
 | `commit-msg` | Al guardar el mensaje | El formato de arriba: `<ID>: ` y un verbo en infinitivo, asunto de hasta 72 caracteres sin punto final, línea 2 vacía, cuerpo de hasta 72 caracteres por línea, pie `Refs #n` y ningún `Closes #n`. No revisa los mensajes que genera git (merge, revert, fixup y squash) | Al instante |
 | `pre-commit` | Antes de crear el commit | Que no estés en `develop` ni en `main`; que no subas `data/`, `*.mv.db`, `.env` ni claves privadas; y, si el commit toca `src/`, `config/`, `.mvn/`, `pom.xml` o `mvnw`, que `./mvnw verify` termine en verde (formato, estilo, arquitectura y pruebas). Si solo cambias documentación, no corre Maven | Unos 11 s si hay código |
+| `pre-push` | Antes de empujar | Si lo que empujas toca esos mismos archivos de código y build, que `./mvnw verify` termine en verde. Cubre lo que `pre-commit` no ve: los commits que un rebase reaplica y los hechos con `--no-verify`. Solo mira ramas (no etiquetas ni borrados) y compara con lo que el remoto ya tiene, o con `origin/develop` si la rama es nueva. Si empujas una rama distinta de la actual, avisa y no la verifica. | Unos 11 s si hay código |
 
-- **Son una ayuda, no la barrera.** La CI y el ruleset de GitHub repiten la comprobación antes de fusionar. En una emergencia, `git commit --no-verify` salta los hooks.
+- **Son una ayuda, no la barrera.** La CI y el ruleset de GitHub repiten la comprobación antes de fusionar. En una emergencia, `git commit --no-verify` y `git push --no-verify` los saltan. Conviene no hacerlo: un push que falla la CI descarta las aprobaciones del PR, y `pre-push` existe para evitarlo.
 - **Si falla el formato**, ejecuta `./mvnw spotless:apply`, vuelve a preparar los archivos con `git add` y repite el commit. Si falla el mensaje, el propio hook te da el comando para reabrirlo sin perderlo.
-- **`verify` revisa todo tu árbol de trabajo**, no solo lo que preparaste con `git add`; el hook avisa si hay cambios de código sin preparar.
+- **`verify` revisa todo tu árbol de trabajo**, no solo lo que preparaste con `git add`; `pre-commit` avisa si hay cambios de código sin preparar y `pre-push`, si hay sin confirmar.
 - **Viven en el árbol de trabajo.** En una rama que no contenga `.githooks/` (por ejemplo, una creada antes de que se fusionaran), git no ejecuta nada y no avisa: rebásala sobre `develop`.
-- **Necesitan JDK 21** en el entorno desde el que haces el commit. Si lo haces desde un IDE con otro `JAVA_HOME`, el Enforcer de Maven lo dirá.
+- **Necesitan JDK 21** en el entorno desde el que haces el commit o el push. Si lo haces desde un IDE con otro `JAVA_HOME`, el Enforcer de Maven lo dirá.
 - **En Windows** deberían funcionar con Git Bash, que viene con Git for Windows, pero no se han probado ahí.
-- **Probarlos:** `.githooks/probar.sh` ejercita ambos con casos buenos y malos, sin tocar tu repositorio. Si cambias un hook, cambia ahí sus casos.
-- Si `verify` pasa de 30 s, las pruebas deberán pasar de `pre-commit` a `pre-push`; el hook te avisa cuando ocurra.
+- **Probarlos:** `.githooks/probar.sh` ejercita los tres con casos buenos y malos, sin tocar tu repositorio. Si cambias un hook, cambia ahí sus casos.
+- Si `verify` pasa de 30 s, conviene dejarlo solo en `pre-push` y quitarlo de `pre-commit`; el hook te avisa cuando ocurra.
 
 ## Solicitudes de integración
 
