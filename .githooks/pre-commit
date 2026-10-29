@@ -16,6 +16,9 @@
 # Es una ayuda local: git commit --no-verify la salta, pero la CI y el ruleset
 # de GitHub repiten la comprobación antes de fusionar.
 
+aqui=$(cd "$(dirname "$0")" && pwd) || exit 1
+. "$aqui/verificar.sh"
+
 raiz=$(git rev-parse --show-toplevel) || exit 1
 cd "$raiz" || exit 1
 
@@ -65,32 +68,5 @@ if [ -n "$sin_preparar" ]; then
   printf '%s\n' "$sin_preparar" | sed 's/^/    /' >&2
 fi
 
-salida=$(mktemp "${TMPDIR:-/tmp}/rutaun-verify.XXXXXX") || salida=/tmp/rutaun-verify.log
-echo "pre-commit: ./mvnw verify (formato, estilo, arquitectura y pruebas)..."
-inicio=$(date +%s)
-if sh ./mvnw -B verify >"$salida" 2>&1; then
-  segundos=$(($(date +%s) - inicio))
-  echo "pre-commit: verify en verde (${segundos} s)."
-  if [ "$segundos" -gt 30 ]; then
-    echo "  aviso: pasó de 30 s; conviene mover las pruebas a pre-push (ENT-06, fase 2)."
-  fi
-  rm -f "$salida"
-  exit 0
-fi
-
-error "verify falló; no se crea el commit. Lo esencial:"
-# Maven marca los errores con [ERROR], pero Checkstyle da el detalle de cada
-# violación en líneas [WARNING] que nombran el archivo .java.
-esencial=$(grep -E '^\[ERROR\]|^\[WARNING\] [^ ]*\.java' "$salida" \
-  | grep -Ev '^\[ERROR\] *$|^\[ERROR\] \[Help|To see the full stack trace|Re-run Maven using|For more information')
-if [ -n "$esencial" ]; then
-  printf '%s\n' "$esencial" | head -30 | sed 's/^/  /' >&2
-else
-  tail -30 "$salida" | sed 's/^/  /' >&2
-fi
-if grep -q 'spotless:apply' "$salida"; then
-  echo "  Formato: ./mvnw spotless:apply y vuelve a preparar los archivos con git add." >&2
-fi
-echo "  Salida completa: $salida" >&2
-echo "  (En una emergencia, git commit --no-verify salta los hooks.)" >&2
-exit 1
+correr_verify commit || exit 1
+exit 0
