@@ -1,0 +1,76 @@
+#!/bin/sh
+# pre-push de RutaUN (ENT-06, #80).
+#
+# Antes de empujar, si lo que se empuja toca código o el build, corre
+# ./mvnw verify (formato, estilo, arquitectura y pruebas, lo mismo que la CI).
+# Cubre lo que pre-commit no ve: los commits que git reaplica en un rebase y
+# los hechos con --no-verify. Se activa, una vez por clon, con:
+#
+#   git config core.hooksPath .githooks
+#
+# Es una ayuda local: git push --no-verify la salta, pero la CI y el ruleset
+# de GitHub repiten la comprobación antes de fusionar. Un push roto además
+# descarta las aprobaciones del PR, así que conviene detectarlo antes.
+
+aqui=$(cd "$(dirname "$0")" && pwd) || exit 1
+. "$aqui/verificar.sh"
+
+raiz=$(git rev-parse --show-toplevel) || exit 1
+cd "$raiz" || exit 1
+
+CODIGO='^(src/|config/|\.mvn/|pom\.xml$|mvnw(\.cmd)?$)'
+CEROS='^0+$'
+
+# git entrega una línea por referencia que se empuja:
+#   <ref local> <sha local> <ref remota> <sha remota>
+verificar=no
+fuera_del_arbol=no
+while read -r ref_local sha_local ref_remota sha_remota; do
+  # Solo importan las ramas: ni las etiquetas ni el borrado de una rama remota
+  # (su ref local es «(delete)») empujan commits.
+  case "$ref_local" in
+    refs/heads/*) ;;
+    *) continue ;;
+  esac
+
+  # Qué se empuja: lo que la rama local tiene y el remoto no. Una rama nueva se
+  # compara con origin/develop; una que ya existe, con lo que el remoto tiene.
+  if printf '%s' "$sha_remota" | grep -Eq "$CEROS"; then
+    base=origin/develop
+  else
+    base=$sha_remota
+  fi
+  # Si no se conoce la base (por ejemplo, no existe origin/develop), se verifica
+  # por prudencia.
+  if git cat-file -e "$base^{commit}" 2>/dev/null; then
+    cambiados=$(git -c core.quotepath=off diff --name-only "$base...$sha_local")
+    printf '%s\n' "$cambiados" | grep -Eq "$CODIGO" || continue
+  fi
+
+  # verify solo puede comprobar el árbol de trabajo actual.
+  if [ "$sha_local" != "$(git rev-parse HEAD)" ]; then
+    fuera_del_arbol=si
+    continue
+  fi
+  verificar=si
+done
+
+if [ "$fuera_del_arbol" = si ]; then
+  echo "pre-push: aviso: empujas una rama que no es la actual; verify solo comprueba el árbol de trabajo, así que no la verifico." >&2
+fi
+if [ "$verificar" = no ]; then
+  [ "$fuera_del_arbol" = si ] || echo "pre-push: sin cambios de código ni de build en lo que empujas; se omite ./mvnw verify."
+  exit 0
+fi
+
+# verify corre sobre el árbol de trabajo, no sobre lo confirmado: si hay
+# cambios de código sin confirmar, se avisa.
+sin_confirmar=$( { git -c core.quotepath=off diff --name-only HEAD; git ls-files --others --exclude-standard; } \
+  | grep -E "$CODIGO")
+if [ -n "$sin_confirmar" ]; then
+  echo "pre-push: aviso: hay cambios de código sin confirmar; verify los incluye aunque no se empujen:" >&2
+  printf '%s\n' "$sin_confirmar" | sed 's/^/    /' >&2
+fi
+
+correr_verify push || exit 1
+exit 0
