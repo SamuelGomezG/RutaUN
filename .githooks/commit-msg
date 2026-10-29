@@ -1,0 +1,85 @@
+#!/bin/sh
+# commit-msg de RutaUN (ENT-06, #80).
+#
+# Valida el mensaje del commit contra CONTRIBUTING.md, sección «Commits».
+# Git lo invoca con la ruta del archivo que guarda el mensaje. Se activa, una
+# vez por clon, con:
+#
+#   git config core.hooksPath .githooks
+#
+# Solo usa herramientas POSIX y no depende del idioma del sistema, para que
+# funcione igual en Linux, macOS y Git Bash (Windows).
+
+archivo="$1"
+if [ ! -f "$archivo" ]; then
+  echo "commit-msg: no encuentro el archivo del mensaje (${archivo:-sin ruta})." >&2
+  exit 1
+fi
+
+# Git deja en el archivo las líneas de comentario de la plantilla (#...).
+texto=$(grep -v '^#' "$archivo")
+asunto=$(printf '%s\n' "$texto" | sed -n '1p')
+
+# Los mensajes que genera git (merge, revert, fixup, squash) no se validan.
+case "$asunto" in
+  "Merge "* | "Revert "* | "fixup! "* | "squash! "*) exit 0 ;;
+esac
+
+errores=""
+falla() {
+  errores="${errores}  - $1
+"
+}
+
+# Caracteres de una línea (no bytes), sin depender de la configuración
+# regional: se descartan los bytes de continuación de UTF-8 (0x80-0xBF) y se
+# cuenta el resto.
+largo() {
+  printf '%s' "$1" | LC_ALL=C tr -d '\200-\277' | wc -c | tr -d ' '
+}
+
+ID='(UC[0-9]{2}(-HU[0-9]{2})?(-T[0-9]+)?|(TT|SOP|PRU|DOC|ENT)-[0-9]{2}(-T[0-9]+)?)'
+
+# Asunto: «<ID>: <resumen en infinitivo>», hasta 72 caracteres y sin punto final.
+if printf '%s\n' "$asunto" | grep -Eq "^${ID}: "; then
+  resumen=${asunto#*: }
+  primera=${resumen%% *}
+  if ! printf '%s\n' "$primera" | grep -Eq '^[a-z][^ ]*(ar|er|ir)(se)?$'; then
+    falla "el resumen debe empezar con un verbo en infinitivo y en minúscula (ahora empieza con «${primera}»)"
+  fi
+else
+  falla "el asunto debe empezar con «<ID>: » (UC06-HU01, UC01-HU01-T2, TT-02, SOP-05, DOC-03, ENT-06…)"
+fi
+[ "$(largo "$asunto")" -le 72 ] || falla "el asunto pasa de 72 caracteres (tiene $(largo "$asunto"))"
+case "$asunto" in
+  *.) falla "el asunto no termina en punto" ;;
+esac
+
+# La línea 2 queda vacía; el cuerpo, si lo hay, va en líneas de hasta 72
+# caracteres (las URL y los pies como Refs o Co-Authored-By no cuentan).
+segunda=$(printf '%s\n' "$texto" | sed -n '2p')
+[ -z "$segunda" ] || falla "la línea 2 debe estar vacía (separa el asunto del cuerpo)"
+largas=$(printf '%s\n' "$texto" | sed -n '3,$p' | while IFS= read -r linea; do
+  case "$linea" in
+    *http://* | *https://* | Refs\ * | Co-Authored-By:* | Co-authored-by:* | Signed-off-by:*) continue ;;
+  esac
+  [ "$(largo "$linea")" -le 72 ] || echo x
+done | wc -l | tr -d ' ')
+[ "$largas" -eq 0 ] || falla "$largas línea(s) del cuerpo pasan de 72 caracteres"
+
+# Pie: «Refs #n» en su propia línea; el cierre va en la descripción del PR.
+printf '%s\n' "$texto" | grep -Eq '^Refs #[0-9]+(, #[0-9]+)*$' \
+  || falla "falta el pie «Refs #n» (en una línea propia, después del cuerpo)"
+printf '%s\n' "$texto" | grep -Eiq '^(close[sd]?|fix(e[sd])?|resolve[sd]?)[[:space:]]+#' \
+  && falla "«Closes #n» y similares van en la descripción del PR, no en el commit"
+
+if [ -n "$errores" ]; then
+  {
+    echo "Mensaje de commit rechazado (CONTRIBUTING.md, sección «Commits»):"
+    printf '%s' "$errores"
+    echo "Corrígelo sin perderlo con:  git commit -e -F $archivo"
+    echo "(En una emergencia, git commit --no-verify salta los hooks.)"
+  } >&2
+  exit 1
+fi
+exit 0
