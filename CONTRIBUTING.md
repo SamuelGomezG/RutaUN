@@ -3,7 +3,7 @@
 Esta guía explica cómo trabajamos en RutaUN: cómo tomar un issue, nombrar las ramas, escribir los commits, abrir una solicitud de integración (PR) y revisar la de otra persona. Las reglas de código (capas, nombres, pruebas) están en [`AGENTS.md`](AGENTS.md); aquí está el flujo.
 
 > [!NOTE]
-> La integración continua corre con la acción [`verify`](.github/workflows/ci.yml): compila, verifica formato y estilo y corre todas las pruebas en cada PR y, desde que se fusione el PR de cierre de TT-01 (#75), en cada push a `develop` y `main`. La protección de ramas (PR obligatorio, aprobación y CI en verde) la activa quien tenga permisos de administrador, una vez vista la primera corrida en verde.
+> La integración continua corre con la acción [`verify`](.github/workflows/ci.yml): compila, verifica formato y estilo y corre todas las pruebas en cada PR y en cada push a `develop` y `main`. La protección de ramas (el ruleset «critical branches protection») exige, para fusionar en esas dos ramas, un PR con la aprobación de otra persona, sus conversaciones resueltas y el check `verify` en verde.
 
 ### Tópicos
 
