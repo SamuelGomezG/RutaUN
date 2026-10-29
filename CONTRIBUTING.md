@@ -11,6 +11,7 @@ Esta guía explica cómo trabajamos en RutaUN: cómo tomar un issue, nombrar las
 - [Flujo de trabajo](#flujo-de-trabajo)
 - [Ramas](#ramas)
 - [Commits](#commits)
+- [Hooks de git](#hooks-de-git)
 - [Solicitudes de integración](#solicitudes-de-integración)
 - [Revisión](#revisión)
 - [Tipos de issue y sub-issues](#tipos-de-issue-y-sub-issues)
@@ -22,7 +23,7 @@ Esta guía explica cómo trabajamos en RutaUN: cómo tomar un issue, nombrar las
 1. Lee el `README.md` y [`AGENTS.md`](AGENTS.md): trae las reglas de oro, la estructura de carpetas y las convenciones de código.
 2. Los requisitos están en `docs/requisitos/`; empieza por su `README.md`, que dice qué archivos cargar según tu tarea.
 3. Prepara el entorno: un JDK 21 (con SDKMAN, `sdk env install`) y el wrapper de Maven (`./mvnw`).
-4. Activa la plantilla de commits, una vez por clon: `git config commit.template .gitmessage`.
+4. Activa la plantilla de commits y los [hooks de git](#hooks-de-git), una vez por clon: `git config commit.template .gitmessage` y `git config core.hooksPath .githooks`.
 5. Escoge un issue del tablero «RutaUN», de la iteración en curso. Asígnatelo y pásalo a *In Progress*.
 
 ## Flujo de trabajo
@@ -109,6 +110,24 @@ Refs #49
 ```
 
 No uses mensajes como «arreglos», «wip» o «cambios», ni mezcles temas distintos en un commit.
+
+## Hooks de git
+
+Los hooks de [`.githooks/`](.githooks) revisan tu trabajo en tu máquina antes de que el commit exista. Se activan una vez por clon (paso 4 de [Antes de empezar](#antes-de-empezar)).
+
+| Hook | Cuándo corre | Qué comprueba | Tarda |
+| --- | --- | --- | --- |
+| `commit-msg` | Al guardar el mensaje | El formato de arriba: `<ID>: ` y un verbo en infinitivo, asunto de hasta 72 caracteres sin punto final, línea 2 vacía, cuerpo de hasta 72 caracteres por línea, pie `Refs #n` y ningún `Closes #n`. No revisa los mensajes que genera git (merge, revert, fixup y squash) | Al instante |
+| `pre-commit` | Antes de crear el commit | Que no estés en `develop` ni en `main`; que no subas `data/`, `*.mv.db`, `.env` ni claves privadas; y, si el commit toca `src/`, `config/`, `.mvn/`, `pom.xml` o `mvnw`, que `./mvnw verify` termine en verde (formato, estilo, arquitectura y pruebas). Si solo cambias documentación, no corre Maven | Unos 11 s si hay código |
+
+- **Son una ayuda, no la barrera.** La CI y el ruleset de GitHub repiten la comprobación antes de fusionar. En una emergencia, `git commit --no-verify` salta los hooks.
+- **Si falla el formato**, ejecuta `./mvnw spotless:apply`, vuelve a preparar los archivos con `git add` y repite el commit. Si falla el mensaje, el propio hook te da el comando para reabrirlo sin perderlo.
+- **`verify` revisa todo tu árbol de trabajo**, no solo lo que preparaste con `git add`; el hook avisa si hay cambios de código sin preparar.
+- **Viven en el árbol de trabajo.** En una rama que no contenga `.githooks/` (por ejemplo, una creada antes de que se fusionaran), git no ejecuta nada y no avisa: rebásala sobre `develop`.
+- **Necesitan JDK 21** en el entorno desde el que haces el commit. Si lo haces desde un IDE con otro `JAVA_HOME`, el Enforcer de Maven lo dirá.
+- **En Windows** deberían funcionar con Git Bash, que viene con Git for Windows, pero no se han probado ahí.
+- **Probarlos:** `.githooks/probar.sh` ejercita ambos con casos buenos y malos, sin tocar tu repositorio. Si cambias un hook, cambia ahí sus casos.
+- Si `verify` pasa de 30 s, las pruebas deberán pasar de `pre-commit` a `pre-push`; el hook te avisa cuando ocurra.
 
 ## Solicitudes de integración
 

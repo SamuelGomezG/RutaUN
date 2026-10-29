@@ -44,6 +44,7 @@ project/                          raíz del repositorio
 ├─ AGENTS.md · CLAUDE.md          este archivo y su compañero
 ├─ .sdkmanrc · .gitignore · .gitattributes · .editorconfig
 ├─ .gitmessage ▸                  plantilla de commits (git config commit.template .gitmessage)
+├─ .githooks/ ▸                   commit-msg · pre-commit · probar.sh (git config core.hooksPath .githooks)
 ├─ .github/                       workflows/ci.yml · ISSUE_TEMPLATE/ ▸ · pull_request_template.md ▸ · PULL_REQUEST_TEMPLATE/ ▸
 ├─ docs/
 │  ├─ requisitos/ ▸               SRS (fuente de los requisitos)
@@ -116,6 +117,7 @@ project/                          raíz del repositorio
 ./mvnw verify                                        # compila, verifica formato y estilo, y corre todas las pruebas
 ./mvnw spotless:apply                                # formatea el código
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev   # arranca y carga la semilla de Sistemas
+.githooks/probar.sh                                  # prueba los hooks de git (commit-msg y pre-commit) sin tocar tu repositorio
 ```
 
 ## Definición de terminado
@@ -126,6 +128,7 @@ Un elemento cuenta como terminado solo si: está integrado en `develop` y revisa
 
 - Numeración de issues: #1–#7 = UC01 · #8–#12 = UC02 · #13–#21 = UC03 · #22–#26 = UC04 · #27–#33 = UC05 · #34–#38 = UC06 · #39–#47 = UC07 · #48–#52 = TT-01…TT-05 · #53–#60 = SOP-01…SOP-08 · #61–#62 = PRU-02, PRU-04 · #63–#66 = DOC-01, DOC-03, DOC-04, DOC-06 · #67 = SOP-05-T2 · #68 = DOC-07.
 - Los commits y las solicitudes de integración citan los IDs que cubren (`#n`, `UCnn-HUmm`). El formato de los mensajes y el flujo de trabajo están en `CONTRIBUTING.md`.
+- Los hooks de `.githooks/` (se activan con `git config core.hooksPath .githooks`) validan el mensaje de cada commit y, si toca código o el build, corren `./mvnw verify`. No los saltes con `--no-verify`: si fallan, corrige la causa.
 - Ramas: `main` solo recibe `develop`, al cierre de un sprint que la demostración dio por satisfactorio. El trabajo va en una rama por issue que se fusiona a `develop`, la rama predeterminada. Nadie hace commit directo en ninguna de las dos.
 
 ## Alcance del sprint 1 (no improvises más allá)

@@ -1,0 +1,96 @@
+#!/bin/sh
+# pre-commit de RutaUN (ENT-06, #80).
+#
+# Antes de crear el commit comprueba:
+#   1. que no se esté commiteando en develop ni en main (CONTRIBUTING.md,
+#      «Ramas»);
+#   2. que no se suban archivos locales ni secretos (CONTRIBUTING.md, «Qué no
+#      subir»);
+#   3. si el commit toca código o el build, que ./mvnw verify termine en verde
+#      (formato, estilo, arquitectura y pruebas, lo mismo que corre la CI).
+#
+# Se activa, una vez por clon, con:
+#
+#   git config core.hooksPath .githooks
+#
+# Es una ayuda local: git commit --no-verify la salta, pero la CI y el ruleset
+# de GitHub repiten la comprobación antes de fusionar.
+
+raiz=$(git rev-parse --show-toplevel) || exit 1
+cd "$raiz" || exit 1
+
+error() {
+  echo "pre-commit: $1" >&2
+}
+
+# 1. Nada de commits directos en develop ni en main.
+rama=$(git symbolic-ref --short -q HEAD)
+case "$rama" in
+  develop | main)
+    error "no se hacen commits directos en «$rama» (CONTRIBUTING.md, «Ramas»)."
+    echo "  Pasa a tu rama sin perder lo preparado:  git switch -c <id-del-issue>-<resumen>" >&2
+    exit 1
+    ;;
+esac
+
+# 2. Archivos que nunca se suben: la base H2 local, variables de entorno y
+#    claves privadas (los .env.example y .env.sample sí pueden subirse).
+agregados=$(git -c core.quotepath=off diff --cached --name-only --diff-filter=ACMR)
+prohibidos=$(printf '%s\n' "$agregados" \
+  | grep -E '^data/|\.(mv|trace)\.db$|(^|/)\.env($|\.)|\.(pem|key|p12|pfx|jks)$|(^|/)id_(rsa|ed25519)$' \
+  | grep -Ev '\.(example|sample)$')
+if [ -n "$prohibidos" ]; then
+  error "estos archivos no se suben (datos locales, secretos o claves):"
+  printf '%s\n' "$prohibidos" | sed 's/^/    /' >&2
+  echo "  Quítalos del commit:  git restore --staged <archivo>" >&2
+  exit 1
+fi
+
+# 3. Solo hay que construir si el commit toca código o el build. Los cambios
+#    de documentación no pasan por Maven. Aquí cuentan también los archivos
+#    borrados.
+CODIGO='^(src/|config/|\.mvn/|pom\.xml$|mvnw(\.cmd)?$)'
+cambiados=$(git -c core.quotepath=off diff --cached --name-only)
+if ! printf '%s\n' "$cambiados" | grep -Eq "$CODIGO"; then
+  echo "pre-commit: sin cambios de código ni de build; se omite ./mvnw verify."
+  exit 0
+fi
+
+# verify corre sobre el árbol de trabajo, no sobre lo preparado: si hay
+# cambios de código sin preparar, se avisa.
+sin_preparar=$( { git -c core.quotepath=off diff --name-only; git ls-files --others --exclude-standard; } \
+  | grep -E "$CODIGO")
+if [ -n "$sin_preparar" ]; then
+  error "aviso: hay cambios de código sin preparar; verify los incluye aunque no vayan en el commit:"
+  printf '%s\n' "$sin_preparar" | sed 's/^/    /' >&2
+fi
+
+salida=$(mktemp "${TMPDIR:-/tmp}/rutaun-verify.XXXXXX") || salida=/tmp/rutaun-verify.log
+echo "pre-commit: ./mvnw verify (formato, estilo, arquitectura y pruebas)..."
+inicio=$(date +%s)
+if sh ./mvnw -B verify >"$salida" 2>&1; then
+  segundos=$(($(date +%s) - inicio))
+  echo "pre-commit: verify en verde (${segundos} s)."
+  if [ "$segundos" -gt 30 ]; then
+    echo "  aviso: pasó de 30 s; conviene mover las pruebas a pre-push (ENT-06, fase 2)."
+  fi
+  rm -f "$salida"
+  exit 0
+fi
+
+error "verify falló; no se crea el commit. Lo esencial:"
+# Maven marca los errores con [ERROR], pero Checkstyle da el detalle de cada
+# violación en líneas [WARNING] que nombran el archivo .java.
+esencial=$(grep -E '^\[ERROR\]|^\[WARNING\] [^ ]*\.java' "$salida" \
+  | grep -Ev '^\[ERROR\] *$|^\[ERROR\] \[Help|To see the full stack trace|Re-run Maven using|For more information')
+if [ -n "$esencial" ]; then
+  printf '%s\n' "$esencial" | head -30 | sed 's/^/  /' >&2
+else
+  tail -30 "$salida" | sed 's/^/  /' >&2
+fi
+if grep -q 'spotless:apply' "$salida"; then
+  echo "  Formato: ./mvnw spotless:apply y vuelve a preparar los archivos con git add." >&2
+fi
+echo "  Salida completa: $salida" >&2
+echo "  (En una emergencia, git commit --no-verify salta los hooks.)" >&2
+exit 1
