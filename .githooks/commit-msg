@@ -16,8 +16,11 @@ if [ ! -f "$archivo" ]; then
   exit 1
 fi
 
-# Git deja en el archivo las líneas de comentario de la plantilla (#...).
-texto=$(grep -v '^#' "$archivo")
+# Git deja en el archivo las líneas de comentario de la plantilla (#...) y, con
+# git commit --verbose, un diff bajo la línea de tijeras; el diff no será parte
+# del mensaje definitivo, así que borra de esa línea al final antes de validar.
+texto=$(sed '/^# ------------------------ >8 ------------------------$/,$d' "$archivo")
+texto=$(printf '%s\n' "$texto" | grep -v '^#')
 asunto=$(printf '%s\n' "$texto" | sed -n '1p')
 
 # Los mensajes que genera git (merge, revert, fixup, squash) no se validan.
