@@ -37,11 +37,12 @@ case "$rama" in
 esac
 
 # 2. Archivos que nunca se suben: la base H2 local, variables de entorno y
-#    claves privadas (los .env.example y .env.sample sí pueden subirse).
+#    claves privadas. Solo los .env.example y .env.sample se pueden subir: la
+#    exención es para los .env, no para copias de bases ni de claves.
 agregados=$(git -c core.quotepath=off diff --cached --name-only --diff-filter=ACMR)
 prohibidos=$(printf '%s\n' "$agregados" \
   | grep -E '^data/|\.(mv|trace)\.db$|(^|/)\.env($|\.)|\.(pem|key|p12|pfx|jks)$|(^|/)id_(rsa|ed25519)$' \
-  | grep -Ev '\.(example|sample)$')
+  | grep -Ev '\.env\.(example|sample)$')
 if [ -n "$prohibidos" ]; then
   error "estos archivos no se suben (datos locales, secretos o claves):"
   printf '%s\n' "$prohibidos" | sed 's/^/    /' >&2
