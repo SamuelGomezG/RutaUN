@@ -8,6 +8,7 @@ import co.edu.unal.rutaun.compartido.ProgramaId;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -59,6 +60,41 @@ class ConsolidadoVistaTest {
             () -> new ConsolidadoVista(ProgramaId.nuevo(), -1, LocalDate.of(2026, 10, 1), Map.of()))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("version no puede ser negativo");
+  }
+
+  @Test
+  void tt02_consolidadoVistaConservaElOrdenDeLasCategorias() {
+    Map<String, List<ReglaVista>> porCategoria = new LinkedHashMap<>();
+    porCategoria.put("Carga por periodo", List.of(REGLA));
+    porCategoria.put("Prerrequisito", List.of(REGLA));
+    porCategoria.put("Informativa", List.of(REGLA));
+
+    ConsolidadoVista vista =
+        new ConsolidadoVista(ProgramaId.nuevo(), 1, LocalDate.of(2026, 10, 1), porCategoria);
+
+    assertThat(vista.reglasPorCategoria().keySet())
+        .containsExactly("Carga por periodo", "Prerrequisito", "Informativa");
+  }
+
+  @Test
+  void tt02_consolidadoVistaRechazaCategoriasVaciasONulas() {
+    Map<String, List<ReglaVista>> conCategoriaVacia = new LinkedHashMap<>();
+    conCategoriaVacia.put(" ", List.of(REGLA));
+    assertThatThrownBy(
+            () ->
+                new ConsolidadoVista(
+                    ProgramaId.nuevo(), 1, LocalDate.of(2026, 10, 1), conCategoriaVacia))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("categoria no puede ser vacío");
+
+    Map<String, List<ReglaVista>> conListaNula = new LinkedHashMap<>();
+    conListaNula.put("Carga", null);
+    assertThatThrownBy(
+            () ->
+                new ConsolidadoVista(
+                    ProgramaId.nuevo(), 1, LocalDate.of(2026, 10, 1), conListaNula))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("reglas no puede ser null");
   }
 
   @Test

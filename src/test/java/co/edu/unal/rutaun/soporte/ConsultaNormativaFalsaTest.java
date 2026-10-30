@@ -36,6 +36,17 @@ class ConsultaNormativaFalsaTest {
   }
 
   @Test
+  void tt02_laFachadaFalsaPublicaLasCategoriasEnOrdenDelConsolidado() {
+    ConsolidadoVista consolidado =
+        ConsultaNormativaFalsa.conReglas()
+            .consolidadoVigente(ConsultaNormativaFalsa.SISTEMAS)
+            .orElseThrow();
+
+    assertThat(consolidado.reglasPorCategoria().keySet())
+        .containsExactly("Carga por periodo", "Prerrequisito", "Informativa");
+  }
+
+  @Test
   void tt02_laFachadaFalsaSinReglasNoTieneConsolidado() {
     ConsultaNormativaFalsa fachada = ConsultaNormativaFalsa.sinReglas();
 

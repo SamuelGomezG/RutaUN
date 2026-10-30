@@ -10,6 +10,7 @@ import co.edu.unal.rutaun.normativa.ProgramaVista;
 import co.edu.unal.rutaun.normativa.ReglaVista;
 import co.edu.unal.rutaun.normativa.TipoNorma;
 import java.time.LocalDate;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -30,38 +31,41 @@ public final class ConsultaNormativaFalsa implements ConsultaNormativaFacade {
       new ProgramaVista(
           SISTEMAS, "Ingeniería de Sistemas y Computación", "0000", "Facultad de Ingeniería");
 
-  private static final ConsolidadoVista CONSOLIDADO =
-      new ConsolidadoVista(
-          SISTEMAS,
-          1,
-          LocalDate.of(2026, 10, 1),
-          Map.of(
-              "Carga por periodo",
-              List.of(
-                  new ReglaVista(
-                      "Regla de prueba: el mínimo es de 10 créditos por periodo.",
-                      Optional.of(fuente("1", "art. 1")),
-                      EstadoRegla.VIGENTE,
-                      false)),
-              "Prerrequisito",
-              List.of(
-                  new ReglaVista(
-                      "Regla de prueba: la materia B exige haber aprobado la materia A.",
-                      Optional.of(fuente("1", "art. 2")),
-                      EstadoRegla.VIGENTE,
-                      false)),
-              "Informativa",
-              List.of(
-                  new ReglaVista(
-                      "Regla de prueba: medida temporal para el periodo 2026-2.",
-                      Optional.of(fuente("2", "art. 1")),
-                      EstadoRegla.VIGENTE,
-                      true))));
+  private static final ConsolidadoVista CONSOLIDADO = consolidado();
 
   private final boolean conReglas;
 
   private ConsultaNormativaFalsa(boolean conReglas) {
     this.conReglas = conReglas;
+  }
+
+  private static ConsolidadoVista consolidado() {
+    Map<String, List<ReglaVista>> porCategoria = new LinkedHashMap<>();
+    porCategoria.put(
+        "Carga por periodo",
+        List.of(
+            new ReglaVista(
+                "Regla de prueba: el mínimo es de 10 créditos por periodo.",
+                Optional.of(fuente("1", "art. 1")),
+                EstadoRegla.VIGENTE,
+                false)));
+    porCategoria.put(
+        "Prerrequisito",
+        List.of(
+            new ReglaVista(
+                "Regla de prueba: la materia B exige haber aprobado la materia A.",
+                Optional.of(fuente("1", "art. 2")),
+                EstadoRegla.VIGENTE,
+                false)));
+    porCategoria.put(
+        "Informativa",
+        List.of(
+            new ReglaVista(
+                "Regla de prueba: medida temporal para el periodo 2026-2.",
+                Optional.of(fuente("2", "art. 1")),
+                EstadoRegla.VIGENTE,
+                true)));
+    return new ConsolidadoVista(SISTEMAS, 1, LocalDate.of(2026, 10, 1), porCategoria);
   }
 
   private static FuenteVista fuente(String numero, String articulo) {
