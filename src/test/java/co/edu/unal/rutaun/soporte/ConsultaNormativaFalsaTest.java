@@ -61,7 +61,8 @@ class ConsultaNormativaFalsaTest {
             .orElseThrow();
 
     assertThat(consolidado.reglasPorCategoria().keySet())
-        .containsExactly("Carga por periodo", "Prerrequisito", "Informativa");
+        .containsExactly(
+            "Carga mínima o máxima por periodo", "Prerrequisitos y habilitación", "Otra");
   }
 
   @Test

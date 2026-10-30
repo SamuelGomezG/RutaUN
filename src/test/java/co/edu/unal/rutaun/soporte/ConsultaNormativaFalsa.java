@@ -46,7 +46,7 @@ public final class ConsultaNormativaFalsa implements ConsultaNormativaFacade {
   private static ConsolidadoVista consolidado() {
     Map<String, List<ReglaVista>> porCategoria = new LinkedHashMap<>();
     porCategoria.put(
-        "Carga por periodo",
+        "Carga mínima o máxima por periodo",
         List.of(
             new ReglaVista(
                 "Regla de prueba: el mínimo es de 10 créditos por periodo.",
@@ -55,7 +55,7 @@ public final class ConsultaNormativaFalsa implements ConsultaNormativaFacade {
                 false,
                 ClasificacionRegla.DEL_PLAN)));
     porCategoria.put(
-        "Prerrequisito",
+        "Prerrequisitos y habilitación",
         List.of(
             new ReglaVista(
                 "Regla de prueba: la materia B exige haber aprobado la materia A.",
@@ -64,7 +64,7 @@ public final class ConsultaNormativaFalsa implements ConsultaNormativaFacade {
                 false,
                 ClasificacionRegla.DEL_PLAN)));
     porCategoria.put(
-        "Informativa",
+        "Otra",
         List.of(
             new ReglaVista(
                 "Regla de prueba: medida temporal para el periodo 2026-2.",
