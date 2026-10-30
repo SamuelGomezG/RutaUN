@@ -15,9 +15,9 @@ class NormaVistaTest {
     assertThatThrownBy(() -> new NormaVista(TipoNorma.ACUERDO, " ", 2023, "Consejo de Facultad"))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("numero no puede ser vacío");
-    assertThatThrownBy(() -> new NormaVista(TipoNorma.ACUERDO, "11", -1, "Consejo de Facultad"))
+    assertThatThrownBy(() -> new NormaVista(TipoNorma.ACUERDO, "11", 0, "Consejo de Facultad"))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("anio no puede ser negativo");
+        .hasMessage("anio debe ser mayor que cero");
     assertThatThrownBy(() -> new NormaVista(TipoNorma.ACUERDO, "11", 2023, ""))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("organo no puede ser vacío");

@@ -42,4 +42,16 @@ class ArgumentChecksTest {
   void tt01_obligatorioNoNegativoAceptaCero() {
     assertThat(ArgumentChecks.obligatorioNoNegativo(0, "creditos")).isZero();
   }
+
+  @Test
+  void tt02_obligatorioPositivoRechazaCero() {
+    assertThatThrownBy(() -> ArgumentChecks.obligatorioPositivo(0, "version"))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("version debe ser mayor que cero");
+  }
+
+  @Test
+  void tt02_obligatorioPositivoAceptaUno() {
+    assertThat(ArgumentChecks.obligatorioPositivo(1, "version")).isEqualTo(1);
+  }
 }

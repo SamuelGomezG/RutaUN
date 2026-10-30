@@ -13,7 +13,8 @@ import java.util.Map;
  * la versión y la fecha de actualización (UC06 paso 4, GE 4).
  *
  * @param programa programa al que pertenece el consolidado
- * @param version número de la versión vigente
+ * @param version número de la versión vigente; la primera es la 1 (supuesto: el SRS no fija desde
+ *     qué número se cuentan)
  * @param fecha fecha de la versión
  * @param reglasPorCategoria reglas vigentes y programadas, por nombre de categoría (con el
  *     vocabulario del glosario, «Regla»: «Prerrequisitos y habilitación», «Otra»…) y en el orden
@@ -33,7 +34,7 @@ public record ConsolidadoVista(
    */
   public ConsolidadoVista {
     ArgumentChecks.obligatorio(programa, "programa");
-    ArgumentChecks.obligatorioNoNegativo(version, "version");
+    ArgumentChecks.obligatorioPositivo(version, "version");
     ArgumentChecks.obligatorio(fecha, "fecha");
     Map<String, List<ReglaVista>> copia = new LinkedHashMap<>();
     ArgumentChecks.obligatorio(reglasPorCategoria, "reglasPorCategoria")

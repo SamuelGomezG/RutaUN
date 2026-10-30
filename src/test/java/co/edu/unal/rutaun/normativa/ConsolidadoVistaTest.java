@@ -63,11 +63,15 @@ class ConsolidadoVistaTest {
   }
 
   @Test
-  void tt02_consolidadoVistaRechazaVersionNegativa() {
+  void tt02_consolidadoVistaRechazaVersionCeroONegativa() {
+    assertThatThrownBy(
+            () -> new ConsolidadoVista(ProgramaId.nuevo(), 0, LocalDate.of(2026, 10, 1), Map.of()))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("version debe ser mayor que cero");
     assertThatThrownBy(
             () -> new ConsolidadoVista(ProgramaId.nuevo(), -1, LocalDate.of(2026, 10, 1), Map.of()))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("version no puede ser negativo");
+        .hasMessage("version debe ser mayor que cero");
   }
 
   @Test
