@@ -63,6 +63,7 @@ msg 0 "ID de soporte, pruebas y entorno" "ENT-06: agregar los hooks de git\n\nRe
 msg 0 "varios issues en el pie" "TT-04: crear el esquema de la base\n\nRefs #51, #55"
 msg 0 "pie seguido de Co-Authored-By" "TT-01: actualizar las notas\n\nRefs #78\n\nCo-Authored-By: Persona <persona@example.com>"
 msg 0 "líneas de comentario de la plantilla" "TT-01: actualizar las notas\n\nRefs #78\n\n# Plantilla de commit\n# $(repetir x 90)"
+msg 0 "diff de git commit --verbose tras la línea de tijeras" "TT-01: actualizar las notas\n\nRefs #78\n\n# ------------------------ >8 ------------------------\n# Do not modify or remove the line above.\n# Everything below it will be removed.\ndiff --git a/LEEME.md b/LEEME.md\n+$(repetir d 90)"
 msg 0 "verbo con ñ" "TT-03: diseñar el evaluador de restricciones\n\nRefs #50"
 msg 0 "verbo reflexivo" "TT-03: asegurarse de que toda regla tenga fuente\n\nRefs #50"
 msg 0 "asunto de exactamente 72 caracteres con ñ" "TT-01: actualizar $(repetir ñ 54)\n\nRefs #78"
