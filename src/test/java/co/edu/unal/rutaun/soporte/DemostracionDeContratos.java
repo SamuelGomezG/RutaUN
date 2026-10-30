@@ -1,16 +1,18 @@
 package co.edu.unal.rutaun.soporte;
 
 import co.edu.unal.rutaun.compartido.EstadoRegla;
+import co.edu.unal.rutaun.normativa.ClasificacionRegla;
 import co.edu.unal.rutaun.normativa.ConsolidadoVista;
 import co.edu.unal.rutaun.normativa.ReglaVista;
 import java.util.Optional;
 
 /**
  * Demostración ejecutable de los contratos de TT-02-T0 (#82): imprime el consolidado de la fachada
- * falsa con el orden de las categorías, la fuente estructurada y el estado de cada regla, más el
- * caso de una regla sin fuente registrada (UC06 ext. 6e) y el de un consolidado sin reglas (UC06
- * ext. 4a). No necesita Spring ni base de datos; se ejecuta con {@code ./mvnw -q test-compile &&
- * java -cp target/classes:target/test-classes co.edu.unal.rutaun.soporte.DemostracionDeContratos}.
+ * falsa con el orden de las categorías, la fuente estructurada, el estado y la clasificación de
+ * cada regla, más el caso de una regla sin fuente registrada (UC06 ext. 6e) y el de un consolidado
+ * sin reglas (UC06 ext. 4a). No necesita Spring ni base de datos; se ejecuta con {@code ./mvnw -q
+ * test-compile && java -cp target/classes:target/test-classes
+ * co.edu.unal.rutaun.soporte.DemostracionDeContratos}.
  */
 public final class DemostracionDeContratos {
 
@@ -43,7 +45,8 @@ public final class DemostracionDeContratos {
                     "Regla de prueba sin fuente.",
                     Optional.empty(),
                     EstadoRegla.EN_REVISION,
-                    false)));
+                    false,
+                    ClasificacionRegla.DEL_PLAN)));
 
     ConsolidadoVista sinReglas =
         ConsultaNormativaFalsa.sinReglas()
@@ -77,6 +80,9 @@ public final class DemostracionDeContratos {
             .orElse("sin fuente registrada");
     return regla.estado()
         + (regla.temporal() ? " · temporal" : "")
+        + (regla.clasificacion() == ClasificacionRegla.INFORMATIVA
+            ? " · solo informativa: el plan no la aplica"
+            : "")
         + " · "
         + regla.enunciado()
         + " · ["

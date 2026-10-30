@@ -1,5 +1,7 @@
 package co.edu.unal.rutaun.normativa;
 
+import static co.edu.unal.rutaun.normativa.ClasificacionRegla.DEL_PLAN;
+import static co.edu.unal.rutaun.normativa.ClasificacionRegla.INFORMATIVA;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -25,7 +27,8 @@ class ConsolidadoVistaTest {
                   "art. 1",
                   Optional.empty())),
           EstadoRegla.VIGENTE,
-          false);
+          false,
+          DEL_PLAN);
 
   @Test
   void tt02_consolidadoVistaCopiaElMapaYSusListas() {
@@ -128,16 +131,31 @@ class ConsolidadoVistaTest {
 
   @Test
   void tt02_reglaVistaAceptaFuenteAusentePeroNoOptionalNull() {
-    assertThat(new ReglaVista("Regla", Optional.empty(), EstadoRegla.EN_REVISION, false).fuente())
+    assertThat(
+            new ReglaVista("Regla", Optional.empty(), EstadoRegla.EN_REVISION, false, DEL_PLAN)
+                .fuente())
         .isEmpty();
-    assertThatThrownBy(() -> new ReglaVista("Regla", null, EstadoRegla.VIGENTE, false))
+    assertThatThrownBy(() -> new ReglaVista("Regla", null, EstadoRegla.VIGENTE, false, DEL_PLAN))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("fuente no puede ser null");
-    assertThatThrownBy(() -> new ReglaVista(" ", Optional.empty(), EstadoRegla.VIGENTE, false))
+    assertThatThrownBy(
+            () -> new ReglaVista(" ", Optional.empty(), EstadoRegla.VIGENTE, false, DEL_PLAN))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("enunciado no puede ser vacío");
-    assertThatThrownBy(() -> new ReglaVista("Regla", Optional.empty(), null, false))
+    assertThatThrownBy(() -> new ReglaVista("Regla", Optional.empty(), null, false, DEL_PLAN))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("estado no puede ser null");
+  }
+
+  @Test
+  void tt02_uc06_ext6c_reglaVistaDiceSiElPlanLaAplicaOSoloLaInforma() {
+    assertThat(
+            new ReglaVista("Regla", Optional.empty(), EstadoRegla.VIGENTE, false, INFORMATIVA)
+                .clasificacion())
+        .isEqualTo(INFORMATIVA);
+    assertThatThrownBy(
+            () -> new ReglaVista("Regla", Optional.empty(), EstadoRegla.VIGENTE, false, null))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("clasificacion no puede ser null");
   }
 }

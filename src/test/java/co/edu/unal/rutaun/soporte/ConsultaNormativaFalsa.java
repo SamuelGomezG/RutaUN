@@ -2,6 +2,7 @@ package co.edu.unal.rutaun.soporte;
 
 import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.ProgramaId;
+import co.edu.unal.rutaun.normativa.ClasificacionRegla;
 import co.edu.unal.rutaun.normativa.ConsolidadoVista;
 import co.edu.unal.rutaun.normativa.ConsultaNormativaFacade;
 import co.edu.unal.rutaun.normativa.FuenteVista;
@@ -51,7 +52,8 @@ public final class ConsultaNormativaFalsa implements ConsultaNormativaFacade {
                 "Regla de prueba: el mínimo es de 10 créditos por periodo.",
                 Optional.of(fuente("1", "art. 1")),
                 EstadoRegla.VIGENTE,
-                false)));
+                false,
+                ClasificacionRegla.DEL_PLAN)));
     porCategoria.put(
         "Prerrequisito",
         List.of(
@@ -59,7 +61,8 @@ public final class ConsultaNormativaFalsa implements ConsultaNormativaFacade {
                 "Regla de prueba: la materia B exige haber aprobado la materia A.",
                 Optional.of(fuente("1", "art. 2")),
                 EstadoRegla.VIGENTE,
-                false)));
+                false,
+                ClasificacionRegla.DEL_PLAN)));
     porCategoria.put(
         "Informativa",
         List.of(
@@ -67,7 +70,8 @@ public final class ConsultaNormativaFalsa implements ConsultaNormativaFacade {
                 "Regla de prueba: medida temporal para el periodo 2026-2.",
                 Optional.of(fuente("2", "art. 1")),
                 EstadoRegla.VIGENTE,
-                true)));
+                true,
+                ClasificacionRegla.INFORMATIVA)));
     return new ConsolidadoVista(SISTEMAS, 1, LocalDate.of(2026, 10, 1), porCategoria);
   }
 
