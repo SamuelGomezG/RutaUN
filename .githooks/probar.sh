@@ -182,6 +182,11 @@ preparar src/main/java/B.java "class B {}"
 printf 'class A { int sin_preparar; }\n' >"$tmp_repo/src/main/java/A.java"
 pc 0 1 "cambios sin preparar: avisa pero corre" "sin preparar"
 
+nuevo_repo
+mkdir -p "$tmp_repo/docs"
+git -C "$tmp_repo" mv src/main/java/A.java docs/A.md
+pc 0 1 "renombrar un archivo de src fuera de código también corre verify" "verify en verde"
+
 echo "pre-commit · lo que debe rechazarse"
 nuevo_repo sin_rama
 preparar README.md "directo a develop"
@@ -323,6 +328,22 @@ nuevo_repo
 confirmar src/main/java/A.java "class A { int x; }"
 printf 'class Nueva {}\n' >"$tmp_repo/src/main/java/Nueva.java"
 empujar 0 1 "código sin confirmar: avisa pero corre" "sin confirmar" -u origin rama-de-trabajo
+
+nuevo_repo
+confirmar src/main/java/A.java "class A { int x; }"
+sha=$(git -C "$tmp_repo" rev-parse HEAD)
+empujar 0 1 "un push por SHA a una rama nueva también corre verify" "verify en verde" origin "$sha:refs/heads/rama-desde-sha"
+
+nuevo_repo
+confirmar src/main/java/A.java "class A { int x; }"
+empujar 0 1 "un push por HEAD a una rama nueva también corre verify" "verify en verde" origin "HEAD:refs/heads/rama-desde-HEAD"
+
+nuevo_repo
+confirmar src/main/java/B.java "class B {}"
+git -C "$tmp_repo" push -q --no-verify -u origin rama-de-trabajo >/dev/null 2>&1
+git -C "$tmp_repo" checkout -q -b reescrita origin/develop
+confirmar README.md "reescribe la rama sin el archivo de código"
+empujar 0 1 "un push forzado que deja atrás cambios del remoto: también corre verify" "verify en verde" --force origin reescrita:refs/heads/rama-de-trabajo
 
 echo "pre-push · lo que debe rechazarse"
 nuevo_repo
