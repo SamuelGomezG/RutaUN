@@ -59,12 +59,13 @@ project/                          raíz del repositorio
    ├─ main/
    │  ├─ java/co/edu/unal/rutaun/
    │  │  ├─ RutaUnApplication.java  @SpringBootApplication, en la raíz del paquete
-   │  │  ├─ compartido/ ▸           núcleo compartido: PeriodoAcademico, identificadores, Creditos…
+   │  │  ├─ compartido/ ▸           núcleo compartido: PeriodoAcademico, identificadores, Creditos, EventoDeDominio…
    │  │  ├─ utilidades/ ▸           ArgumentChecks, JsonConfig
    │  │  ├─ web/                    piezas transversales de presentación
+   │  │  ├─ puertos/ ▸              puertos transversales y sus adaptadores: DomainEventPublisher…
    │  │  ├─ normativa/ ▸            raíz = API del módulo (fachadas, vistas, interfaces de rol)
    │  │  │  └─ web/ · aplicacion/ · dominio/ · persistencia/
-   │  │  ├─ incidentes/ ▸           SOP-05: aplicacion/ · persistencia/
+   │  │  ├─ incidentes/ ▸           raíz = IncidenteDetectado · SOP-05: aplicacion/ · persistencia/
    │  │  └─ avance/ · plandecarrera/ · periodoencurso/ · identidad/   (después del sprint 1)
    │  └─ resources/
    │     ├─ application.yml · application-dev.yml · messages.properties
@@ -84,7 +85,9 @@ project/                          raíz del repositorio
 - Cuatro capas con dependencias **solo hacia abajo**: presentación (`web`) → negocio (`aplicacion` y `dominio`) → persistencia; todas usan utilidades.
 - Dentro de un módulo: `web` usa `aplicacion`; `aplicacion` usa `dominio` y `persistencia`, que no se conocen entre sí. El dominio no conoce persistencia ni Spring. Persistencia no importa ninguna clase de negocio. Solo `aplicacion` usa los repositorios de Spring Data.
 - Cada contexto es un módulo de Spring Modulith (un paquete de primer nivel). Lo que otros módulos pueden usar va en la raíz del paquete del módulo; los subpaquetes son internos. Ningún módulo usa clases internas de otro.
-- `compartido`, `utilidades` y `web` también son paquetes de primer nivel, así que se declaran módulos abiertos (`@ApplicationModule(type = OPEN)` en su `package-info.java`).
+- `compartido`, `utilidades`, `web` y `puertos` también son paquetes de primer nivel, así que se declaran módulos abiertos (`@ApplicationModule(type = OPEN)` en su `package-info.java`).
+- Los puertos transversales (los que reciben contextos distintos, como `DomainEventPublisher`) viven en `puertos`, junto con sus adaptadores, que sí pueden usar Spring. El dominio no importa `puertos` (lo verifica `CapasTest`); el marcador `EventoDeDominio`, que sí usan los agregados, vive en `compartido`.
+- Los contextos no se llaman entre sí: las reacciones viajan como eventos. `IncidenteDetectado` lo define Incidentes en la raíz de su módulo; los contextos de negocio lo importan y lo publican con `DomainEventPublisher` (el orquestador del caso de uso, si no hay un agregado que guardar; el servicio que guarda el agregado, si el incidente nace al guardar), y Incidentes no importa ninguno de ellos. `IncidentesFacade` es para reportar un enlace roto, consultar incidentes y marcarlos como atendidos, y queda fuera del sprint 1.
 - En el sprint 1 solo existen `normativa` e `incidentes` (este último de «estilo simple»: la entidad vive en `persistencia` y su lógica en el servicio de `aplicacion`). No crees módulos vacíos.
 - `IncorporacionJsonReader` vive en `normativa/aplicacion`, no en presentación: lo invocan el arranque en desarrollo y, más adelante, el controlador del formulario de carga.
 
