@@ -15,7 +15,8 @@ import java.util.Map;
  * @param programa programa al que pertenece el consolidado
  * @param version número de la versión vigente
  * @param fecha fecha de la versión
- * @param reglasPorCategoria reglas vigentes y programadas, por nombre de categoría y en el orden
+ * @param reglasPorCategoria reglas vigentes y programadas, por nombre de categoría (con el
+ *     vocabulario del glosario, «Regla»: «Prerrequisitos y habilitación», «Otra»…) y en el orden
  *     del consolidado: el mismo dato produce siempre la misma vista. Vacío si la versión no tiene
  *     reglas cargadas (UC06 ext. 4a); una categoría presente tiene al menos una regla
  */

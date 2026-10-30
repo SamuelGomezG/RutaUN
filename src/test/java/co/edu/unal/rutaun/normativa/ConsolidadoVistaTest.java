@@ -34,26 +34,31 @@ class ConsolidadoVistaTest {
   void tt02_consolidadoVistaCopiaElMapaYSusListas() {
     List<ReglaVista> reglas = new ArrayList<>(List.of(REGLA));
     Map<String, List<ReglaVista>> porCategoria = new HashMap<>();
-    porCategoria.put("Carga por periodo", reglas);
+    porCategoria.put("Carga mínima o máxima por periodo", reglas);
 
     ConsolidadoVista vista =
         new ConsolidadoVista(ProgramaId.nuevo(), 1, LocalDate.of(2026, 10, 1), porCategoria);
     reglas.clear();
     porCategoria.clear();
 
-    assertThat(vista.reglasPorCategoria()).containsOnlyKeys("Carga por periodo");
-    assertThat(vista.reglasPorCategoria().get("Carga por periodo")).containsExactly(REGLA);
+    assertThat(vista.reglasPorCategoria()).containsOnlyKeys("Carga mínima o máxima por periodo");
+    assertThat(vista.reglasPorCategoria().get("Carga mínima o máxima por periodo"))
+        .containsExactly(REGLA);
   }
 
   @Test
   void tt02_consolidadoVistaNoSePuedeModificarPorFuera() {
     ConsolidadoVista vista =
         new ConsolidadoVista(
-            ProgramaId.nuevo(), 1, LocalDate.of(2026, 10, 1), Map.of("Carga", List.of(REGLA)));
+            ProgramaId.nuevo(),
+            1,
+            LocalDate.of(2026, 10, 1),
+            Map.of("Carga mínima o máxima por periodo", List.of(REGLA)));
 
     assertThatThrownBy(() -> vista.reglasPorCategoria().put("Otra", List.of()))
         .isInstanceOf(UnsupportedOperationException.class);
-    assertThatThrownBy(() -> vista.reglasPorCategoria().get("Carga").add(REGLA))
+    assertThatThrownBy(
+            () -> vista.reglasPorCategoria().get("Carga mínima o máxima por periodo").add(REGLA))
         .isInstanceOf(UnsupportedOperationException.class);
   }
 
@@ -68,15 +73,16 @@ class ConsolidadoVistaTest {
   @Test
   void tt02_consolidadoVistaConservaElOrdenDeLasCategorias() {
     Map<String, List<ReglaVista>> porCategoria = new LinkedHashMap<>();
-    porCategoria.put("Carga por periodo", List.of(REGLA));
-    porCategoria.put("Prerrequisito", List.of(REGLA));
-    porCategoria.put("Informativa", List.of(REGLA));
+    porCategoria.put("Carga mínima o máxima por periodo", List.of(REGLA));
+    porCategoria.put("Prerrequisitos y habilitación", List.of(REGLA));
+    porCategoria.put("Otra", List.of(REGLA));
 
     ConsolidadoVista vista =
         new ConsolidadoVista(ProgramaId.nuevo(), 1, LocalDate.of(2026, 10, 1), porCategoria);
 
     assertThat(vista.reglasPorCategoria().keySet())
-        .containsExactly("Carga por periodo", "Prerrequisito", "Informativa");
+        .containsExactly(
+            "Carga mínima o máxima por periodo", "Prerrequisitos y habilitación", "Otra");
   }
 
   @Test
@@ -91,7 +97,7 @@ class ConsolidadoVistaTest {
         .hasMessage("categoria no puede ser vacío");
 
     Map<String, List<ReglaVista>> conListaNula = new LinkedHashMap<>();
-    conListaNula.put("Carga", null);
+    conListaNula.put("Carga mínima o máxima por periodo", null);
     assertThatThrownBy(
             () ->
                 new ConsolidadoVista(
@@ -114,7 +120,10 @@ class ConsolidadoVistaTest {
   void tt02_consolidadoVistaConReglasNoEstaSinReglas() {
     ConsolidadoVista vista =
         new ConsolidadoVista(
-            ProgramaId.nuevo(), 1, LocalDate.of(2026, 10, 1), Map.of("Carga", List.of(REGLA)));
+            ProgramaId.nuevo(),
+            1,
+            LocalDate.of(2026, 10, 1),
+            Map.of("Carga mínima o máxima por periodo", List.of(REGLA)));
 
     assertThat(vista.sinReglas()).isFalse();
   }
@@ -124,7 +133,10 @@ class ConsolidadoVistaTest {
     assertThatThrownBy(
             () ->
                 new ConsolidadoVista(
-                    ProgramaId.nuevo(), 1, LocalDate.of(2026, 10, 1), Map.of("Carga", List.of())))
+                    ProgramaId.nuevo(),
+                    1,
+                    LocalDate.of(2026, 10, 1),
+                    Map.of("Carga mínima o máxima por periodo", List.of())))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("reglas no puede ser vacío");
   }
