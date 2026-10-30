@@ -60,6 +60,22 @@ class CapasTest {
   }
 
   @Test
+  void tt02_elDominioNoImportaLosPuertosTransversales() {
+    // Los puertos transversales y sus adaptadores (que sí usan Spring) viven en
+    // co.edu.unal.rutaun.puertos; el dominio no los importa, para que Spring siga fuera del
+    // dominio.
+    ArchRule regla =
+        noClasses()
+            .that()
+            .resideInAPackage("..dominio..")
+            .should()
+            .dependOnClassesThat()
+            .resideInAPackage("co.edu.unal.rutaun.puertos..");
+
+    regla.check(clases);
+  }
+
+  @Test
   void tt01_laPresentacionNoTocaNiPersistenciaNiLosRepositorios() {
     // El selector acotado cubre también los web/ de cada módulo (por ejemplo
     // normativa.web) sin matchear paquetes de frameworks. Los repositorios de
