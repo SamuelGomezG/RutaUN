@@ -8,9 +8,9 @@ import java.util.Optional;
 /**
  * Demostración ejecutable de los contratos de TT-02-T0 (#82): imprime el consolidado de la fachada
  * falsa con el orden de las categorías, la fuente estructurada y el estado de cada regla, más el
- * caso de una regla sin fuente registrada (UC06 ext. 6e). No necesita Spring ni base de datos; se
- * ejecuta con {@code ./mvnw -q test-compile && java -cp target/classes:target/test-classes
- * co.edu.unal.rutaun.soporte.DemostracionDeContratos}.
+ * caso de una regla sin fuente registrada (UC06 ext. 6e) y el de un consolidado sin reglas (UC06
+ * ext. 4a). No necesita Spring ni base de datos; se ejecuta con {@code ./mvnw -q test-compile &&
+ * java -cp target/classes:target/test-classes co.edu.unal.rutaun.soporte.DemostracionDeContratos}.
  */
 public final class DemostracionDeContratos {
 
@@ -44,6 +44,18 @@ public final class DemostracionDeContratos {
                     Optional.empty(),
                     EstadoRegla.EN_REVISION,
                     false)));
+
+    ConsolidadoVista sinReglas =
+        ConsultaNormativaFalsa.sinReglas()
+            .consolidadoVigente(ConsultaNormativaFalsa.SISTEMAS)
+            .orElseThrow();
+    System.out.println();
+    System.out.println("[Caso UC06 ext. 4a: consolidado sin reglas]");
+    System.out.println(
+        "  sin reglas: "
+            + sinReglas.sinReglas()
+            + " · versión para el incidente: v"
+            + sinReglas.version());
   }
 
   private static String describir(ReglaVista regla) {

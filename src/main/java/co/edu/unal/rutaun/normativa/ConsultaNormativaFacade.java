@@ -17,8 +17,10 @@ public interface ConsultaNormativaFacade {
   Optional<ProgramaVista> programa(ProgramaId id);
 
   /**
-   * El consolidado vigente del programa; vacío si el programa no tiene reglas cargadas (UC06 ext.
-   * 4a).
+   * El consolidado vigente del programa, con su versión y su fecha. Si la versión vigente no tiene
+   * reglas cargadas (UC06 ext. 4a), devuelve el consolidado con {@link
+   * ConsolidadoVista#reglasPorCategoria()} vacío, para que el incidente cite esa versión. Vacío
+   * solo si el programa no está cargado o no tiene una versión vigente del consolidado.
    */
   Optional<ConsolidadoVista> consolidadoVigente(ProgramaId id);
 }
