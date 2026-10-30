@@ -3,6 +3,7 @@ package co.edu.unal.rutaun.soporte;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import co.edu.unal.rutaun.compartido.ProgramaId;
+import co.edu.unal.rutaun.normativa.ClasificacionRegla;
 import co.edu.unal.rutaun.normativa.ConsolidadoVista;
 import co.edu.unal.rutaun.normativa.ReglaVista;
 import java.util.List;
@@ -33,6 +34,23 @@ class ConsultaNormativaFalsaTest {
                 .flatMap(List::stream)
                 .allMatch(regla -> regla.fuente().isPresent()))
         .isTrue();
+  }
+
+  @Test
+  void tt02_laFachadaFalsaTieneDosReglasDelPlanYUnaInformativa() {
+    ConsolidadoVista consolidado =
+        ConsultaNormativaFalsa.conReglas()
+            .consolidadoVigente(ConsultaNormativaFalsa.SISTEMAS)
+            .orElseThrow();
+
+    assertThat(
+            consolidado.reglasPorCategoria().values().stream()
+                .flatMap(List::stream)
+                .map(ReglaVista::clasificacion))
+        .containsExactly(
+            ClasificacionRegla.DEL_PLAN,
+            ClasificacionRegla.DEL_PLAN,
+            ClasificacionRegla.INFORMATIVA);
   }
 
   @Test

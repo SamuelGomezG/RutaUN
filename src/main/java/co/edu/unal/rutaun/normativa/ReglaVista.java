@@ -12,14 +12,20 @@ import java.util.Optional;
  *     (UC06 ext. 6e)
  * @param estado estado de la regla
  * @param temporal si la regla es temporal por su norma o por una vigencia propia
+ * @param clasificacion si el plan la aplica o solo la informa (UC06 paso 6, ext. 6c)
  */
 public record ReglaVista(
-    String enunciado, Optional<FuenteVista> fuente, EstadoRegla estado, boolean temporal) {
+    String enunciado,
+    Optional<FuenteVista> fuente,
+    EstadoRegla estado,
+    boolean temporal,
+    ClasificacionRegla clasificacion) {
 
-  /** Exige enunciado y estado; la fuente puede faltar, pero no ser null. */
+  /** Exige enunciado, estado y clasificación; la fuente puede faltar, pero no ser null. */
   public ReglaVista {
     ArgumentChecks.obligatorioNoVacio(enunciado, "enunciado");
     ArgumentChecks.obligatorio(fuente, "fuente");
     ArgumentChecks.obligatorio(estado, "estado");
+    ArgumentChecks.obligatorio(clasificacion, "clasificacion");
   }
 }
