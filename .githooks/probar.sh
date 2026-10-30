@@ -162,6 +162,14 @@ preparar .env.example "CLAVE="
 pc 0 0 "un .env.example sí puede subirse"
 
 nuevo_repo
+preparar .env.sample "CLAVE="
+pc 0 0 "un .env.sample sí puede subirse"
+
+nuevo_repo
+preparar data/rutaun.mv.db.example "binario"
+pc 1 0 "una copia .example de la base H2 dentro de data/" "rutaun.mv.db.example"
+
+nuevo_repo
 preparar src/main/java/A.java "class A { int x; }"
 pc 0 1 "cambio en Java: corre verify una vez" "verify en verde"
 [ "$(cat "$tmp_repo/mvnw.llamadas")" = "-B verify" ]
