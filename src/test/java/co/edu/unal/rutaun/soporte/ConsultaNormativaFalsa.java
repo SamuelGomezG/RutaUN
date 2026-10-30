@@ -18,8 +18,8 @@ import java.util.UUID;
 
 /**
  * Fachada de consulta falsa, con datos fijos y sintéticos, para probar la vista sin persistencia.
- * Se crea con Ingeniería de Sistemas y Computación y tres reglas, o con ese programa sin reglas
- * (UC06 ext. 4a).
+ * Se crea con Ingeniería de Sistemas y Computación y tres reglas, o con ese programa y un
+ * consolidado vigente sin reglas (UC06 ext. 4a).
  */
 public final class ConsultaNormativaFalsa implements ConsultaNormativaFacade {
 
@@ -32,6 +32,9 @@ public final class ConsultaNormativaFalsa implements ConsultaNormativaFacade {
           SISTEMAS, "Ingeniería de Sistemas y Computación", "0000", "Facultad de Ingeniería");
 
   private static final ConsolidadoVista CONSOLIDADO = consolidado();
+
+  private static final ConsolidadoVista CONSOLIDADO_SIN_REGLAS =
+      new ConsolidadoVista(SISTEMAS, 1, LocalDate.of(2026, 10, 1), Map.of());
 
   private final boolean conReglas;
 
@@ -81,7 +84,10 @@ public final class ConsultaNormativaFalsa implements ConsultaNormativaFacade {
     return new ConsultaNormativaFalsa(true);
   }
 
-  /** La fachada con el programa de prueba y sin reglas cargadas (UC06 ext. 4a). */
+  /**
+   * La fachada con el programa de prueba y una versión vigente del consolidado sin reglas cargadas
+   * (UC06 ext. 4a).
+   */
   public static ConsultaNormativaFalsa sinReglas() {
     return new ConsultaNormativaFalsa(false);
   }
@@ -98,6 +104,9 @@ public final class ConsultaNormativaFalsa implements ConsultaNormativaFacade {
 
   @Override
   public Optional<ConsolidadoVista> consolidadoVigente(ProgramaId id) {
-    return conReglas && SISTEMAS.equals(id) ? Optional.of(CONSOLIDADO) : Optional.empty();
+    if (!SISTEMAS.equals(id)) {
+      return Optional.empty();
+    }
+    return Optional.of(conReglas ? CONSOLIDADO : CONSOLIDADO_SIN_REGLAS);
   }
 }

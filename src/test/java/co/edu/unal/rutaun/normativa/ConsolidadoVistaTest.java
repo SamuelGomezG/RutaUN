@@ -98,6 +98,35 @@ class ConsolidadoVistaTest {
   }
 
   @Test
+  void tt02_uc06_ext4a_consolidadoVistaSinReglasConservaVersionYFecha() {
+    ConsolidadoVista vista =
+        new ConsolidadoVista(ProgramaId.nuevo(), 4, LocalDate.of(2026, 10, 1), Map.of());
+
+    assertThat(vista.sinReglas()).isTrue();
+    assertThat(vista.version()).isEqualTo(4);
+    assertThat(vista.fecha()).isEqualTo(LocalDate.of(2026, 10, 1));
+  }
+
+  @Test
+  void tt02_consolidadoVistaConReglasNoEstaSinReglas() {
+    ConsolidadoVista vista =
+        new ConsolidadoVista(
+            ProgramaId.nuevo(), 1, LocalDate.of(2026, 10, 1), Map.of("Carga", List.of(REGLA)));
+
+    assertThat(vista.sinReglas()).isFalse();
+  }
+
+  @Test
+  void tt02_consolidadoVistaRechazaUnaCategoriaSinReglas() {
+    assertThatThrownBy(
+            () ->
+                new ConsolidadoVista(
+                    ProgramaId.nuevo(), 1, LocalDate.of(2026, 10, 1), Map.of("Carga", List.of())))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("reglas no puede ser vacío");
+  }
+
+  @Test
   void tt02_reglaVistaAceptaFuenteAusentePeroNoOptionalNull() {
     assertThat(new ReglaVista("Regla", Optional.empty(), EstadoRegla.EN_REVISION, false).fuente())
         .isEmpty();

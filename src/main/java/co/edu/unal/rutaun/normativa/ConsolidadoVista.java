@@ -16,7 +16,8 @@ import java.util.Map;
  * @param version número de la versión vigente
  * @param fecha fecha de la versión
  * @param reglasPorCategoria reglas vigentes y programadas, por nombre de categoría y en el orden
- *     del consolidado: el mismo dato produce siempre la misma vista
+ *     del consolidado: el mismo dato produce siempre la misma vista. Vacío si la versión no tiene
+ *     reglas cargadas (UC06 ext. 4a); una categoría presente tiene al menos una regla
  */
 public record ConsolidadoVista(
     ProgramaId programa,
@@ -26,7 +27,8 @@ public record ConsolidadoVista(
 
   /**
    * Exige todos los datos y copia el mapa y sus listas, conservando el orden de las categorías,
-   * para que nadie pueda modificarlos.
+   * para que nadie pueda modificarlos. Rechaza una categoría sin reglas, para que «sin reglas»
+   * (UC06 ext. 4a) se lea siempre como un mapa vacío.
    */
   public ConsolidadoVista {
     ArgumentChecks.obligatorio(programa, "programa");
@@ -38,7 +40,19 @@ public record ConsolidadoVista(
             (categoria, reglas) ->
                 copia.put(
                     ArgumentChecks.obligatorioNoVacio(categoria, "categoria"),
-                    List.copyOf(ArgumentChecks.obligatorio(reglas, "reglas"))));
+                    reglasDeUnaCategoria(reglas)));
     reglasPorCategoria = Collections.unmodifiableMap(copia);
+  }
+
+  /** Si la versión no tiene reglas cargadas (UC06 ext. 4a). */
+  public boolean sinReglas() {
+    return reglasPorCategoria.isEmpty();
+  }
+
+  private static List<ReglaVista> reglasDeUnaCategoria(List<ReglaVista> reglas) {
+    if (ArgumentChecks.obligatorio(reglas, "reglas").isEmpty()) {
+      throw new IllegalArgumentException("reglas no puede ser vacío");
+    }
+    return List.copyOf(reglas);
   }
 }

@@ -47,11 +47,14 @@ class ConsultaNormativaFalsaTest {
   }
 
   @Test
-  void tt02_laFachadaFalsaSinReglasNoTieneConsolidado() {
+  void tt02_uc06_ext4a_laFachadaFalsaSinReglasConservaLaVersionDelConsolidado() {
     ConsultaNormativaFalsa fachada = ConsultaNormativaFalsa.sinReglas();
 
     assertThat(fachada.programa(ConsultaNormativaFalsa.SISTEMAS)).isPresent();
-    assertThat(fachada.consolidadoVigente(ConsultaNormativaFalsa.SISTEMAS)).isEmpty();
+    ConsolidadoVista consolidado =
+        fachada.consolidadoVigente(ConsultaNormativaFalsa.SISTEMAS).orElseThrow();
+    assertThat(consolidado.sinReglas()).isTrue();
+    assertThat(consolidado.version()).isEqualTo(1);
   }
 
   @Test
