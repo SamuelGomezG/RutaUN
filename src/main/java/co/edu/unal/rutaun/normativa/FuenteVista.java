@@ -13,10 +13,11 @@ import java.util.Optional;
  */
 public record FuenteVista(NormaVista norma, String articulo, Optional<String> enlace) {
 
-  /** Exige norma y artículo; el enlace puede faltar, pero no ser null. */
+  /** Exige norma y artículo; el enlace puede faltar, pero si está no puede ser vacío. */
   public FuenteVista {
     ArgumentChecks.obligatorio(norma, "norma");
     ArgumentChecks.obligatorioNoVacio(articulo, "articulo");
-    ArgumentChecks.obligatorio(enlace, "enlace");
+    ArgumentChecks.obligatorio(enlace, "enlace")
+        .ifPresent(valor -> ArgumentChecks.obligatorioNoVacio(valor, "enlace"));
   }
 }

@@ -3,9 +3,10 @@ package co.edu.unal.rutaun.normativa;
 import co.edu.unal.rutaun.compartido.ProgramaId;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
 import java.time.LocalDate;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Vista inmutable del consolidado vigente de un programa: sus reglas agrupadas por categoría, con
@@ -14,7 +15,8 @@ import java.util.stream.Collectors;
  * @param programa programa al que pertenece el consolidado
  * @param version número de la versión vigente
  * @param fecha fecha de la versión
- * @param reglasPorCategoria reglas vigentes y programadas, por nombre de categoría
+ * @param reglasPorCategoria reglas vigentes y programadas, por nombre de categoría y en el orden
+ *     del consolidado: el mismo dato produce siempre la misma vista
  */
 public record ConsolidadoVista(
     ProgramaId programa,
@@ -22,14 +24,21 @@ public record ConsolidadoVista(
     LocalDate fecha,
     Map<String, List<ReglaVista>> reglasPorCategoria) {
 
-  /** Exige todos los datos y copia el mapa y sus listas para que nadie pueda modificarlos. */
+  /**
+   * Exige todos los datos y copia el mapa y sus listas, conservando el orden de las categorías,
+   * para que nadie pueda modificarlos.
+   */
   public ConsolidadoVista {
     ArgumentChecks.obligatorio(programa, "programa");
     ArgumentChecks.obligatorioNoNegativo(version, "version");
     ArgumentChecks.obligatorio(fecha, "fecha");
-    reglasPorCategoria =
-        ArgumentChecks.obligatorio(reglasPorCategoria, "reglasPorCategoria").entrySet().stream()
-            .collect(
-                Collectors.toUnmodifiableMap(Map.Entry::getKey, e -> List.copyOf(e.getValue())));
+    Map<String, List<ReglaVista>> copia = new LinkedHashMap<>();
+    ArgumentChecks.obligatorio(reglasPorCategoria, "reglasPorCategoria")
+        .forEach(
+            (categoria, reglas) ->
+                copia.put(
+                    ArgumentChecks.obligatorioNoVacio(categoria, "categoria"),
+                    List.copyOf(ArgumentChecks.obligatorio(reglas, "reglas"))));
+    reglasPorCategoria = Collections.unmodifiableMap(copia);
   }
 }

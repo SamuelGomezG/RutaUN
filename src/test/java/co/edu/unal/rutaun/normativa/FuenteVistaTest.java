@@ -25,6 +25,13 @@ class FuenteVistaTest {
   }
 
   @Test
+  void tt02_fuenteVistaRechazaUnEnlaceVacio() {
+    assertThatThrownBy(() -> new FuenteVista(NORMA, "art. 1", Optional.of(" ")))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("enlace no puede ser vacío");
+  }
+
+  @Test
   void tt02_fuenteVistaAceptaUnEnlaceAusente() {
     FuenteVista fuente = new FuenteVista(NORMA, "art. 2 (transitorio)", Optional.empty());
 
