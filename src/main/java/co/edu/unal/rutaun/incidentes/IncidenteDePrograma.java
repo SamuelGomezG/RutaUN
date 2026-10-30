@@ -12,8 +12,8 @@ import java.util.List;
  * @param casoDeUso caso de uso en que ocurrió
  * @param paso paso o extensión en que ocurrió
  * @param programa programa involucrado
- * @param versionDelConsolidado versión del consolidado; toda forma de incidente con programa cita
- *     también su versión
+ * @param versionDelConsolidado versión del consolidado, desde la 1; toda forma de incidente con
+ *     programa cita también su versión
  * @param causa qué ocurrió
  * @param elementos materias, agrupaciones, reglas o enlaces involucrados; puede estar vacía
  */
@@ -31,7 +31,7 @@ public record IncidenteDePrograma(
     ArgumentChecks.obligatorioNoVacio(casoDeUso, "casoDeUso");
     ArgumentChecks.obligatorioNoVacio(paso, "paso");
     ArgumentChecks.obligatorio(programa, "programa");
-    ArgumentChecks.obligatorioNoNegativo(versionDelConsolidado, "versionDelConsolidado");
+    ArgumentChecks.obligatorioPositivo(versionDelConsolidado, "versionDelConsolidado");
     ArgumentChecks.obligatorioNoVacio(causa, "causa");
     elementos = List.copyOf(ArgumentChecks.obligatorio(elementos, "elementos"));
   }

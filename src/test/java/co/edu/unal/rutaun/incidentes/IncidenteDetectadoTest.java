@@ -68,6 +68,16 @@ class IncidenteDetectadoTest {
   }
 
   @Test
+  void tt02_elIncidenteDeProgramaRechazaUnaVersionCero() {
+    assertThatThrownBy(
+            () ->
+                new IncidenteDePrograma(
+                    "UC06", "ext. 4a", ProgramaId.nuevo(), 0, "consolidado sin reglas", List.of()))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("versionDelConsolidado debe ser mayor que cero");
+  }
+
+  @Test
   void tt02_losIncidentesCopianLosElementos() {
     List<String> elementos = new ArrayList<>(List.of("R-1"));
     IncidenteDetectado incidente =

@@ -2,7 +2,7 @@ package co.edu.unal.rutaun.utilidades;
 
 /**
  * Comprobaciones genéricas de argumentos para los constructores de valores y entidades: no nulo, no
- * vacío y no negativo. Falla con {@link IllegalArgumentException}.
+ * vacío, no negativo y positivo. Falla con {@link IllegalArgumentException}.
  */
 public final class ArgumentChecks {
 
@@ -29,6 +29,14 @@ public final class ArgumentChecks {
   public static int obligatorioNoNegativo(int valor, String nombre) {
     if (valor < 0) {
       throw new IllegalArgumentException(nombre + " no puede ser negativo");
+    }
+    return valor;
+  }
+
+  /** Devuelve el número si es mayor que cero; si no, falla. */
+  public static int obligatorioPositivo(int valor, String nombre) {
+    if (valor <= 0) {
+      throw new IllegalArgumentException(nombre + " debe ser mayor que cero");
     }
     return valor;
   }

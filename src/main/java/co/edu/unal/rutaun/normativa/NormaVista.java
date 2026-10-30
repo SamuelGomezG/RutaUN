@@ -17,7 +17,7 @@ public record NormaVista(TipoNorma tipo, String numero, int anio, String organo)
   public NormaVista {
     ArgumentChecks.obligatorio(tipo, "tipo");
     ArgumentChecks.obligatorioNoVacio(numero, "numero");
-    ArgumentChecks.obligatorioNoNegativo(anio, "anio");
+    ArgumentChecks.obligatorioPositivo(anio, "anio");
     ArgumentChecks.obligatorioNoVacio(organo, "organo");
   }
 }
