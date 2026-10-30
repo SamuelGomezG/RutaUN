@@ -26,7 +26,7 @@
 #   - Un refactor no se mezcla con un cambio de comportamiento.
 #   - Se puede revertir sin deshacer nada más.
 #
-# EL HOOK commit-msg (.githooks/) revisa todo lo anterior al guardar el
-# mensaje; si lo rechaza, el commit no se crea (CONTRIBUTING.md, «Hooks de git»).
+# EL HOOK commit-msg (.githooks/) valida el formato del mensaje antes de crear
+# el commit; si lo rechaza, el commit no se crea (CONTRIBUTING.md, «Hooks de git»).
 #
 # Si no escribes nada, Git cancela el commit.
