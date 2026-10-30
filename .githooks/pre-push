@@ -23,15 +23,22 @@ CEROS='^0+$'
 
 # git entrega una línea por referencia que se empuja:
 #   <ref local> <sha local> <ref remota> <sha remota>
+# La ref remota decide si es una rama: el origen puede ser un SHA o cualquier
+# ref (git push <sha>:refs/heads/rama). El borrado de una rama remota no empuja
+# commits: su ref local es «(delete)» y su sha local es ceros.
 verificar=no
 fuera_del_arbol=no
 while read -r ref_local sha_local ref_remota sha_remota; do
-  # Solo importan las ramas: ni las etiquetas ni el borrado de una rama remota
-  # (su ref local es «(delete)») empujan commits.
-  case "$ref_local" in
+  case "$ref_remota" in
     refs/heads/*) ;;
     *) continue ;;
   esac
+  case "$ref_local" in
+    "(delete)") continue ;;
+  esac
+  if printf '%s' "$sha_local" | grep -Eq "$CEROS"; then
+    continue
+  fi
 
   # Qué se empuja: lo que la rama local tiene y el remoto no. Una rama nueva se
   # compara con origin/develop; una que ya existe, con lo que el remoto tiene.
@@ -43,8 +50,20 @@ while read -r ref_local sha_local ref_remota sha_remota; do
   # Si no se conoce la base (por ejemplo, no existe origin/develop), se verifica
   # por prudencia.
   if git cat-file -e "$base^{commit}" 2>/dev/null; then
-    cambiados=$(git -c core.quotepath=off diff --name-only "$base...$sha_local")
-    printf '%s\n' "$cambiados" | grep -Eq "$CODIGO" || continue
+    cambio=no
+    # Se miran los commits empujados desde su punto común con la base y, por si
+    # un push forzado deja atrás cambios del remoto, también el efecto neto
+    # entre los dos árboles. Si una comparación falla, se verifica por
+    # prudencia.
+    for extremos in "$base...$sha_local" "$base $sha_local"; do
+      if ! cambiados=$(git -c core.quotepath=off diff --name-only --no-renames $extremos); then
+        echo "pre-push: no pude comparar $ref_remota con $base; se verifica por prudencia." >&2
+        cambio=sí
+        break
+      fi
+      printf '%s\n' "$cambiados" | grep -Eq "$CODIGO" && { cambio=sí; break; }
+    done
+    [ "$cambio" = sí ] || continue
   fi
 
   # verify solo puede comprobar el árbol de trabajo actual.

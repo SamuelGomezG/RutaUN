@@ -53,7 +53,9 @@ fi
 #    de documentación no pasan por Maven. Aquí cuentan también los archivos
 #    borrados.
 CODIGO='^(src/|config/|\.mvn/|pom\.xml$|mvnw(\.cmd)?$)'
-cambiados=$(git -c core.quotepath=off diff --cached --name-only)
+# --no-renames: si un archivo de código se renombra fuera de código, el diff
+# normal solo listaría el nombre nuevo y el cambio se perdería.
+cambiados=$(git -c core.quotepath=off diff --cached --name-only --no-renames)
 if ! printf '%s\n' "$cambiados" | grep -Eq "$CODIGO"; then
   echo "pre-commit: sin cambios de código ni de build; se omite ./mvnw verify."
   exit 0
