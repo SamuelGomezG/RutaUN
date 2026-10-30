@@ -128,7 +128,7 @@ Un elemento cuenta como terminado solo si: está integrado en `develop` y revisa
 
 - Numeración de issues: #1–#7 = UC01 · #8–#12 = UC02 · #13–#21 = UC03 · #22–#26 = UC04 · #27–#33 = UC05 · #34–#38 = UC06 · #39–#47 = UC07 · #48–#52 = TT-01…TT-05 · #53–#60 = SOP-01…SOP-08 · #61–#62 = PRU-02, PRU-04 · #63–#66 = DOC-01, DOC-03, DOC-04, DOC-06 · #67 = SOP-05-T2 · #68 = DOC-07.
 - Los commits y las solicitudes de integración citan los IDs que cubren (`#n`, `UCnn-HUmm`). El formato de los mensajes y el flujo de trabajo están en `CONTRIBUTING.md`.
-- Los hooks de `.githooks/` (se activan con `git config core.hooksPath .githooks`) validan el mensaje de cada commit y, si el commit o el push tocan código o el build, corren `./mvnw verify`. No los saltes con `--no-verify`: si fallan, corrige la causa.
+- Los hooks de `.githooks/` (se activan con `git config core.hooksPath .githooks`) corren según los casos que documenta «Hooks de git» en `CONTRIBUTING.md`: `commit-msg` valida el formato del mensaje, y `pre-commit` y `pre-push` corren `./mvnw verify` solo si lo que va a integrarse o empujarse toca código o el build. No los saltes con `--no-verify`: si fallan, corrige la causa.
 - Ramas: `main` solo recibe `develop`, al cierre de un sprint que la demostración dio por satisfactorio. El trabajo va en una rama por issue que se fusiona a `develop`, la rama predeterminada. Nadie hace commit directo en ninguna de las dos.
 
 ## Alcance del sprint 1 (no improvises más allá)
