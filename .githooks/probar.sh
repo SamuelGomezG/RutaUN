@@ -101,6 +101,8 @@ nuevo_repo() {
   git -C "$tmp_repo" symbolic-ref HEAD refs/heads/develop
   git -C "$tmp_repo" config user.name pruebas
   git -C "$tmp_repo" config user.email pruebas@example.invalid
+  git -C "$tmp_repo" config commit.gpgSign false
+  git -C "$tmp_repo" config tag.gpgSign false
   printf '%s\n' '#!/bin/sh' \
     'echo "$*" >> "$(dirname "$0")/mvnw.llamadas"' \
     '[ -z "$MVNW_MENSAJE" ] || printf "%s\n" "$MVNW_MENSAJE"' \
