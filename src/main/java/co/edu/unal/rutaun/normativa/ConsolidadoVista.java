@@ -52,9 +52,10 @@ public record ConsolidadoVista(
   }
 
   private static List<ReglaVista> reglasDeUnaCategoria(List<ReglaVista> reglas) {
-    if (ArgumentChecks.obligatorio(reglas, "reglas").isEmpty()) {
+    List<ReglaVista> copia = ArgumentChecks.copiaSinNulos(reglas, "reglas");
+    if (copia.isEmpty()) {
       throw new IllegalArgumentException("reglas no puede ser vacío");
     }
-    return List.copyOf(reglas);
+    return copia;
   }
 }

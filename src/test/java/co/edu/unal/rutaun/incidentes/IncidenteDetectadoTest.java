@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import co.edu.unal.rutaun.compartido.EventoDeDominio;
 import co.edu.unal.rutaun.compartido.ProgramaId;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -75,6 +76,20 @@ class IncidenteDetectadoTest {
                     "UC06", "ext. 4a", ProgramaId.nuevo(), 0, "consolidado sin reglas", List.of()))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("versionDelConsolidado debe ser mayor que cero");
+  }
+
+  @Test
+  void tt02_losIncidentesRechazanElementosNull() {
+    List<String> conNull = Arrays.asList("R-1", null);
+
+    assertThatThrownBy(() -> new IncidenteInterno("UC01", "paso 2", "causa", conNull))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("elementos no puede tener elementos null");
+    assertThatThrownBy(
+            () ->
+                new IncidenteDePrograma("UC06", "ext. 6e", ProgramaId.nuevo(), 1, "causa", conNull))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("elementos no puede tener elementos null");
   }
 
   @Test
