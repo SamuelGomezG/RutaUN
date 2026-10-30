@@ -33,6 +33,6 @@ public record IncidenteDePrograma(
     ArgumentChecks.obligatorio(programa, "programa");
     ArgumentChecks.obligatorioPositivo(versionDelConsolidado, "versionDelConsolidado");
     ArgumentChecks.obligatorioNoVacio(causa, "causa");
-    elementos = List.copyOf(ArgumentChecks.obligatorio(elementos, "elementos"));
+    elementos = ArgumentChecks.copiaSinNulos(elementos, "elementos");
   }
 }

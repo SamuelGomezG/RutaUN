@@ -20,6 +20,6 @@ public record IncidenteInterno(String casoDeUso, String paso, String causa, List
     ArgumentChecks.obligatorioNoVacio(casoDeUso, "casoDeUso");
     ArgumentChecks.obligatorioNoVacio(paso, "paso");
     ArgumentChecks.obligatorioNoVacio(causa, "causa");
-    elementos = List.copyOf(ArgumentChecks.obligatorio(elementos, "elementos"));
+    elementos = ArgumentChecks.copiaSinNulos(elementos, "elementos");
   }
 }

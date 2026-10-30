@@ -1,5 +1,7 @@
 package co.edu.unal.rutaun.utilidades;
 
+import java.util.List;
+
 /**
  * Comprobaciones genéricas de argumentos para los constructores de valores y entidades: no nulo, no
  * vacío, no negativo y positivo. Falla con {@link IllegalArgumentException}.
@@ -31,6 +33,21 @@ public final class ArgumentChecks {
       throw new IllegalArgumentException(nombre + " no puede ser negativo");
     }
     return valor;
+  }
+
+  /**
+   * Devuelve una copia inmutable de la lista si ni ella ni sus elementos son null; si no, falla con
+   * {@link IllegalArgumentException} en vez de la {@link NullPointerException} de {@link
+   * List#copyOf}.
+   */
+  public static <T> List<T> copiaSinNulos(List<T> lista, String nombre) {
+    obligatorio(lista, nombre);
+    for (T elemento : lista) {
+      if (elemento == null) {
+        throw new IllegalArgumentException(nombre + " no puede tener elementos null");
+      }
+    }
+    return List.copyOf(lista);
   }
 
   /** Devuelve el número si es mayor que cero; si no, falla. */

@@ -9,6 +9,7 @@ import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.ProgramaId;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -108,6 +109,15 @@ class ConsolidadoVistaTest {
                     ProgramaId.nuevo(), 1, LocalDate.of(2026, 10, 1), conListaNula))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("reglas no puede ser null");
+
+    Map<String, List<ReglaVista>> conReglaNula = new LinkedHashMap<>();
+    conReglaNula.put("Otra", Arrays.asList(REGLA, null));
+    assertThatThrownBy(
+            () ->
+                new ConsolidadoVista(
+                    ProgramaId.nuevo(), 1, LocalDate.of(2026, 10, 1), conReglaNula))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("reglas no puede tener elementos null");
   }
 
   @Test

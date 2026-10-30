@@ -3,6 +3,9 @@ package co.edu.unal.rutaun.utilidades;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class ArgumentChecksTest {
@@ -41,6 +44,31 @@ class ArgumentChecksTest {
   @Test
   void tt01_obligatorioNoNegativoAceptaCero() {
     assertThat(ArgumentChecks.obligatorioNoNegativo(0, "creditos")).isZero();
+  }
+
+  @Test
+  void tt02_copiaSinNulosRechazaUnElementoNull() {
+    assertThatThrownBy(() -> ArgumentChecks.copiaSinNulos(Arrays.asList("a", null), "elementos"))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("elementos no puede tener elementos null");
+  }
+
+  @Test
+  void tt02_copiaSinNulosRechazaLaListaNull() {
+    assertThatThrownBy(() -> ArgumentChecks.copiaSinNulos(null, "elementos"))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("elementos no puede ser null");
+  }
+
+  @Test
+  void tt02_copiaSinNulosDevuelveUnaCopiaInmutable() {
+    List<String> original = new ArrayList<>(List.of("a"));
+
+    List<String> copia = ArgumentChecks.copiaSinNulos(original, "elementos");
+    original.add("b");
+
+    assertThat(copia).containsExactly("a");
+    assertThatThrownBy(() -> copia.add("c")).isInstanceOf(UnsupportedOperationException.class);
   }
 
   @Test
