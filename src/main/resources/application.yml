@@ -16,7 +16,4 @@ spring:
       ddl-auto: validate
     open-in-view: false
 
-  # TT-01 no trae migraciones de producción: TT-04 (#51) crea V1__esquema.sql
-  # y quitará esta línea. Sin migraciones, Flyway no hace nada y no falla.
-  flyway:
-    fail-on-missing-locations: false
+

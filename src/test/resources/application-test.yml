@@ -12,4 +12,4 @@ spring:
     open-in-view: false
 
   flyway:
-    locations: classpath:db/humo
+    locations: classpath:db/migration,classpath:db/humo
