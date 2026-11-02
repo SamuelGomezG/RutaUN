@@ -27,8 +27,8 @@ public record PeriodoAcademico(int anio, ParteDelAnio parte)
   /** Devuelve el periodo que sigue a este: después de 2026-2 viene 2027-1. */
   public PeriodoAcademico siguiente() {
     return switch (parte) {
-      case PRIMERA -> new PeriodoAcademico(anio, ParteDelAnio.SEGUNDA);
-      case SEGUNDA -> new PeriodoAcademico(anio + 1, ParteDelAnio.PRIMERA);
+      case PRIMERO -> new PeriodoAcademico(anio, ParteDelAnio.SEGUNDO);
+      case SEGUNDO -> new PeriodoAcademico(anio + 1, ParteDelAnio.PRIMERO);
     };
   }
 

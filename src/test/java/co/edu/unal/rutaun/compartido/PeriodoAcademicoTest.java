@@ -10,10 +10,10 @@ class PeriodoAcademicoTest {
 
   @Test
   void tt02_periodoAcademicoGuardaAnioYParte() {
-    PeriodoAcademico periodo = new PeriodoAcademico(2026, ParteDelAnio.SEGUNDA);
+    PeriodoAcademico periodo = new PeriodoAcademico(2026, ParteDelAnio.SEGUNDO);
 
     assertThat(periodo.anio()).isEqualTo(2026);
-    assertThat(periodo.parte()).isEqualTo(ParteDelAnio.SEGUNDA);
+    assertThat(periodo.parte()).isEqualTo(ParteDelAnio.SEGUNDO);
   }
 
   @Test
@@ -25,38 +25,38 @@ class PeriodoAcademicoTest {
 
   @Test
   void tt02_periodoAcademicoRechazaUnAnioSinCuatroCifras() {
-    assertThatThrownBy(() -> new PeriodoAcademico(999, ParteDelAnio.PRIMERA))
+    assertThatThrownBy(() -> new PeriodoAcademico(999, ParteDelAnio.PRIMERO))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("anio debe tener cuatro cifras");
-    assertThatThrownBy(() -> new PeriodoAcademico(10000, ParteDelAnio.PRIMERA))
+    assertThatThrownBy(() -> new PeriodoAcademico(10000, ParteDelAnio.PRIMERO))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("anio debe tener cuatro cifras");
   }
 
   @Test
   void tt02_periodoAcademicoSiguienteDeLaPrimeraEsLaSegundaDelMismoAnio() {
-    assertThat(new PeriodoAcademico(2027, ParteDelAnio.PRIMERA).siguiente())
-        .isEqualTo(new PeriodoAcademico(2027, ParteDelAnio.SEGUNDA));
+    assertThat(new PeriodoAcademico(2027, ParteDelAnio.PRIMERO).siguiente())
+        .isEqualTo(new PeriodoAcademico(2027, ParteDelAnio.SEGUNDO));
   }
 
   @Test
   void tt02_periodoAcademicoSiguienteDeLaSegundaEsLaPrimeraDelAnioSiguiente() {
-    assertThat(new PeriodoAcademico(2026, ParteDelAnio.SEGUNDA).siguiente())
-        .isEqualTo(new PeriodoAcademico(2027, ParteDelAnio.PRIMERA));
+    assertThat(new PeriodoAcademico(2026, ParteDelAnio.SEGUNDO).siguiente())
+        .isEqualTo(new PeriodoAcademico(2027, ParteDelAnio.PRIMERO));
   }
 
   @Test
   void tt02_periodoAcademicoNoTieneSiguienteMasAllaDelUltimoAnio() {
-    PeriodoAcademico ultimo = new PeriodoAcademico(9999, ParteDelAnio.SEGUNDA);
+    PeriodoAcademico ultimo = new PeriodoAcademico(9999, ParteDelAnio.SEGUNDO);
 
     assertThatThrownBy(ultimo::siguiente).isInstanceOf(IllegalArgumentException.class);
   }
 
   @Test
   void tt02_periodoAcademicoSeOrdenaPorAnioYLuegoPorParte() {
-    PeriodoAcademico p20261 = new PeriodoAcademico(2026, ParteDelAnio.PRIMERA);
-    PeriodoAcademico p20262 = new PeriodoAcademico(2026, ParteDelAnio.SEGUNDA);
-    PeriodoAcademico p20271 = new PeriodoAcademico(2027, ParteDelAnio.PRIMERA);
+    PeriodoAcademico p20261 = new PeriodoAcademico(2026, ParteDelAnio.PRIMERO);
+    PeriodoAcademico p20262 = new PeriodoAcademico(2026, ParteDelAnio.SEGUNDO);
+    PeriodoAcademico p20271 = new PeriodoAcademico(2027, ParteDelAnio.PRIMERO);
 
     assertThat(List.of(p20271, p20261, p20262).stream().sorted())
         .containsExactly(p20261, p20262, p20271);
@@ -64,14 +64,14 @@ class PeriodoAcademicoTest {
 
   @Test
   void tt02_periodoAcademicoIgualCompararDaCero() {
-    PeriodoAcademico periodo = new PeriodoAcademico(2026, ParteDelAnio.SEGUNDA);
+    PeriodoAcademico periodo = new PeriodoAcademico(2026, ParteDelAnio.SEGUNDO);
 
-    assertThat(periodo.compareTo(new PeriodoAcademico(2026, ParteDelAnio.SEGUNDA))).isZero();
+    assertThat(periodo.compareTo(new PeriodoAcademico(2026, ParteDelAnio.SEGUNDO))).isZero();
   }
 
   @Test
   void tt02_periodoAcademicoRechazaCompararConNull() {
-    PeriodoAcademico periodo = new PeriodoAcademico(2026, ParteDelAnio.SEGUNDA);
+    PeriodoAcademico periodo = new PeriodoAcademico(2026, ParteDelAnio.SEGUNDO);
 
     assertThatThrownBy(() -> periodo.compareTo(null))
         .isInstanceOf(IllegalArgumentException.class)
