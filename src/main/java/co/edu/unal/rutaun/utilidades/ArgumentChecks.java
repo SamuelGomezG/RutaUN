@@ -1,6 +1,7 @@
 package co.edu.unal.rutaun.utilidades;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Comprobaciones genéricas de argumentos para los constructores de valores y entidades: no nulo, no
@@ -48,6 +49,21 @@ public final class ArgumentChecks {
       }
     }
     return List.copyOf(lista);
+  }
+
+  /**
+   * Devuelve una copia inmutable del conjunto si ni él ni sus elementos son null; si no, falla con
+   * {@link IllegalArgumentException} en vez de la {@link NullPointerException} de {@link
+   * Set#copyOf}.
+   */
+  public static <T> Set<T> copiaSinNulosDeConjunto(Set<T> conjunto, String nombre) {
+    obligatorio(conjunto, nombre);
+    for (T elemento : conjunto) {
+      if (elemento == null) {
+        throw new IllegalArgumentException(nombre + " no puede tener elementos null");
+      }
+    }
+    return Set.copyOf(conjunto);
   }
 
   /** Devuelve el número si es mayor que cero; si no, falla. */
