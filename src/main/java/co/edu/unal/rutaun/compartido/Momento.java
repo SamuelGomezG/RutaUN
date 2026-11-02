@@ -16,10 +16,10 @@ public sealed interface Momento {
    *
    * @param periodo el periodo
    */
-  record DePeriodo(PeriodoAcademico periodo) implements Momento {
+  record EnPeriodo(PeriodoAcademico periodo) implements Momento {
 
     /** Exige el periodo. */
-    public DePeriodo {
+    public EnPeriodo {
       ArgumentChecks.obligatorio(periodo, "periodo");
     }
   }
@@ -29,10 +29,10 @@ public sealed interface Momento {
    *
    * @param fecha la fecha
    */
-  record DeFecha(LocalDate fecha) implements Momento {
+  record EnFecha(LocalDate fecha) implements Momento {
 
     /** Exige la fecha. */
-    public DeFecha {
+    public EnFecha {
       ArgumentChecks.obligatorio(fecha, "fecha");
     }
   }

@@ -6,9 +6,9 @@ package co.edu.unal.rutaun.compartido;
  */
 public enum ParteDelAnio {
   /** Primer periodo del año («AAAA-1»). */
-  PRIMERA(1),
+  PRIMERO(1),
   /** Segundo periodo del año («AAAA-2»). */
-  SEGUNDA(2);
+  SEGUNDO(2);
 
   private final int numero;
 

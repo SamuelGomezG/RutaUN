@@ -9,50 +9,50 @@ import org.junit.jupiter.api.Test;
 class MomentoTest {
 
   @Test
-  void tt02_momentoDePeriodoRechazaPeriodoNull() {
-    assertThatThrownBy(() -> new Momento.DePeriodo(null))
+  void tt02_momentoEnPeriodoRechazaPeriodoNull() {
+    assertThatThrownBy(() -> new Momento.EnPeriodo(null))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("periodo no puede ser null");
   }
 
   @Test
-  void tt02_momentoDeFechaRechazaFechaNull() {
-    assertThatThrownBy(() -> new Momento.DeFecha(null))
+  void tt02_momentoEnFechaRechazaFechaNull() {
+    assertThatThrownBy(() -> new Momento.EnFecha(null))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("fecha no puede ser null");
   }
 
   @Test
   void tt02_momentoGuardaElPeriodoOLaFecha() {
-    PeriodoAcademico periodo = new PeriodoAcademico(2027, ParteDelAnio.PRIMERA);
+    PeriodoAcademico periodo = new PeriodoAcademico(2027, ParteDelAnio.PRIMERO);
     LocalDate fecha = LocalDate.of(2027, 3, 15);
 
-    assertThat(new Momento.DePeriodo(periodo).periodo()).isEqualTo(periodo);
-    assertThat(new Momento.DeFecha(fecha).fecha()).isEqualTo(fecha);
+    assertThat(new Momento.EnPeriodo(periodo).periodo()).isEqualTo(periodo);
+    assertThat(new Momento.EnFecha(fecha).fecha()).isEqualTo(fecha);
   }
 
   @Test
   void tt02_momentoConLosMismosDatosEsIgual() {
-    PeriodoAcademico periodo = new PeriodoAcademico(2027, ParteDelAnio.PRIMERA);
+    PeriodoAcademico periodo = new PeriodoAcademico(2027, ParteDelAnio.PRIMERO);
 
-    assertThat(new Momento.DePeriodo(periodo)).isEqualTo(new Momento.DePeriodo(periodo));
-    assertThat(new Momento.DeFecha(LocalDate.of(2027, 3, 15)))
-        .isEqualTo(new Momento.DeFecha(LocalDate.of(2027, 3, 15)));
+    assertThat(new Momento.EnPeriodo(periodo)).isEqualTo(new Momento.EnPeriodo(periodo));
+    assertThat(new Momento.EnFecha(LocalDate.of(2027, 3, 15)))
+        .isEqualTo(new Momento.EnFecha(LocalDate.of(2027, 3, 15)));
   }
 
   @Test
   void tt02_momentoSeAnalizaConUnSwitchExhaustivo() {
-    Momento deFecha = new Momento.DeFecha(LocalDate.of(2027, 3, 15));
-    Momento dePeriodo = new Momento.DePeriodo(new PeriodoAcademico(2027, ParteDelAnio.SEGUNDA));
+    Momento deFecha = new Momento.EnFecha(LocalDate.of(2027, 3, 15));
+    Momento dePeriodo = new Momento.EnPeriodo(new PeriodoAcademico(2027, ParteDelAnio.SEGUNDO));
 
     assertThat(describir(deFecha)).isEqualTo("fecha 2027-03-15");
-    assertThat(describir(dePeriodo)).isEqualTo("periodo 2027-SEGUNDA");
+    assertThat(describir(dePeriodo)).isEqualTo("periodo 2027-SEGUNDO");
   }
 
   private static String describir(Momento momento) {
     return switch (momento) {
-      case Momento.DePeriodo p -> "periodo " + p.periodo().anio() + "-" + p.periodo().parte();
-      case Momento.DeFecha f -> "fecha " + f.fecha();
+      case Momento.EnPeriodo p -> "periodo " + p.periodo().anio() + "-" + p.periodo().parte();
+      case Momento.EnFecha f -> "fecha " + f.fecha();
     };
   }
 }
