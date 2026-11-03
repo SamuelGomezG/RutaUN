@@ -72,7 +72,8 @@ public final class PlanOptimizador {
         if (cancelacion.cancelado()) {
           return null;
         }
-        if (libreInicial >= 3 && b > 0 && b < 3) {
+        int creditosPorMateria = modelo.creditosPorMateriaLibre();
+        if (libreInicial >= creditosPorMateria && b > 0 && b < creditosPorMateria) {
           continue;
         }
         if (libreInicial < 3 && b > 0 && b != libreInicial) {
@@ -86,8 +87,8 @@ public final class PlanOptimizador {
             continue;
           }
           int mover = Math.min(delta, disponible);
-          if (disponible - mover > 0 && disponible - mover < 3) {
-            mover = disponible - 3;
+          if (disponible - mover > 0 && disponible - mover < modelo.creditosPorMateriaLibre()) {
+            mover = disponible - modelo.creditosPorMateriaLibre();
           }
           if (mover <= 0) {
             continue;

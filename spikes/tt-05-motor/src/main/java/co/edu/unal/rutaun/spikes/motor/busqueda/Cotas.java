@@ -59,7 +59,9 @@ public final class Cotas {
         if (actual < habilitacion.umbral()) {
           int extra = habilitacion.umbral() - actual;
           int semestres =
-              tope.tieneLimiteCreditos() ? 1 + (int) ceilDiv(extra, tope.limiteCreditos()) : 1;
+              tope.tieneLimiteCreditos()
+                  ? 1 + (int) Math.ceilDiv((long) extra, (long) tope.limiteCreditos())
+                  : 1;
           habilitaciones = Math.max(habilitaciones, semestres);
         }
       }
@@ -80,18 +82,18 @@ public final class Cotas {
     }
 
     long totalCreditos = creditosPendientes + creditosOptativos + L;
-    long totalMaterias = materiasPendientes + materiasOptativas + ceilDiv(L, 3);
+    long totalMaterias =
+        materiasPendientes
+            + materiasOptativas
+            + Math.ceilDiv((long) L, (long) modelo.creditosPorMateriaLibre());
     int cotaCreditos =
-        tope.tieneLimiteCreditos() ? (int) ceilDiv(totalCreditos, tope.limiteCreditos()) : 0;
+        tope.tieneLimiteCreditos()
+            ? (int) Math.ceilDiv(totalCreditos, (long) tope.limiteCreditos())
+            : 0;
     int cotaMaterias =
-        tope.tieneLimiteMaterias() ? (int) ceilDiv(totalMaterias, tope.limiteMaterias()) : 0;
+        tope.tieneLimiteMaterias()
+            ? (int) Math.ceilDiv(totalMaterias, (long) tope.limiteMaterias())
+            : 0;
     return Math.max(Math.max(cadena, habilitaciones), Math.max(cotaCreditos, cotaMaterias));
-  }
-
-  private static long ceilDiv(long numerador, long denominador) {
-    if (numerador <= 0) {
-      return 0;
-    }
-    return (numerador + denominador - 1) / denominador;
   }
 }

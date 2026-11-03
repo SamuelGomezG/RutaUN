@@ -48,7 +48,7 @@ public final class VerificadorDePlan {
     for (int s = 1; s <= k; s++) {
       libreAntes[s] = libreAntes[s - 1] + (s >= 2 ? bloque[s - 1] : 0);
       int creditos = bloque[s];
-      int materias = ceilDiv(bloque[s], 3);
+      int materias = Math.ceilDiv(bloque[s], modelo.creditosPorMateriaLibre());
       int materiasDelSemestre = 0;
       for (int i = 0; i < n; i++) {
         if (semestre[i] == s) {
@@ -66,7 +66,9 @@ public final class VerificadorDePlan {
       if (materias > tope.limiteMaterias()) {
         errores.add("Semestre " + s + " excede el tope de materias: " + materias);
       }
-      if (libreInicial >= 3 && bloque[s] > 0 && bloque[s] < 3) {
+      if (libreInicial >= modelo.creditosPorMateriaLibre()
+          && bloque[s] > 0
+          && bloque[s] < modelo.creditosPorMateriaLibre()) {
         errores.add("Bloque de menos de 3 créditos en el semestre " + s);
       }
       sumaBloques += bloque[s];
@@ -74,7 +76,7 @@ public final class VerificadorDePlan {
     if (sumaBloques != libreInicial) {
       errores.add("Los bloques suman " + sumaBloques + " y se esperaban " + libreInicial);
     }
-    if (libreInicial < 3) {
+    if (libreInicial < modelo.creditosPorMateriaLibre()) {
       int bloquesNoVacios = 0;
       for (int s = 1; s <= k; s++) {
         if (bloque[s] > 0) {
@@ -192,9 +194,5 @@ public final class VerificadorDePlan {
       }
     }
     return false;
-  }
-
-  private static int ceilDiv(int numerador, int denominador) {
-    return (numerador + denominador - 1) / denominador;
   }
 }

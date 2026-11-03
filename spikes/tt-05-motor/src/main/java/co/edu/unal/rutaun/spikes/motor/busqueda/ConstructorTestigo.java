@@ -43,7 +43,8 @@ public final class ConstructorTestigo {
     int maximoSemestres =
         Math.min(
             restricciones.maxSemestres,
-            Math.min(200, modelo.cantidadMaterias() + libreInicial + 1));
+            Math.min(
+                ModeloDeCalculo.LIMITE_DE_SEMESTRES, modelo.cantidadMaterias() + libreInicial + 1));
     if (maximoSemestres < 1) {
       return null;
     }
@@ -72,7 +73,7 @@ public final class ConstructorTestigo {
         }
       }
 
-      long[] utiles = clausulasUtiles(modelo, D, restricciones);
+      long[] utiles = Seleccion.clausulasUtiles(modelo, D, restricciones);
       List<Integer> requeridos = new ArrayList<>();
       List<Integer> optativas = new ArrayList<>();
       for (int i = 0; i < n; i++) {
@@ -94,7 +95,7 @@ public final class ConstructorTestigo {
         if (!modelo.habilitacionesCumplidas(i, D, libreInicial - L, asignacion)) {
           continue;
         }
-        if (esRequerida(i, modelo, restricciones)) {
+        if (Seleccion.esRequerida(i, modelo, restricciones)) {
           requeridos.add(i);
         } else {
           if (restricciones.soloIncluidas && !restricciones.incluidas.contiene(i)) {
@@ -130,7 +131,8 @@ public final class ConstructorTestigo {
           seleccion.add(materia);
           creditos += modelo.creditos(materia);
           materias++;
-          asignarGrupo(modelo, materia, seleccionadas, asignacionSeleccion, restricciones);
+          Seleccion.elegirAgrupacion(
+              modelo, materia, seleccionadas, asignacionSeleccion, restricciones);
           seleccionadas.agregar(materia);
         }
       }
@@ -147,7 +149,8 @@ public final class ConstructorTestigo {
         seleccion.add(materia);
         creditos += modelo.creditos(materia);
         materias++;
-        asignarGrupo(modelo, materia, seleccionadas, asignacionSeleccion, restricciones);
+        Seleccion.elegirAgrupacion(
+            modelo, materia, seleccionadas, asignacionSeleccion, restricciones);
         seleccionadas.agregar(materia);
       }
 
@@ -180,7 +183,8 @@ public final class ConstructorTestigo {
             seleccion.add(par);
             creditos += modelo.creditos(par);
             materias++;
-            asignarGrupo(modelo, par, seleccionadas, asignacionSeleccion, restricciones);
+            Seleccion.elegirAgrupacion(
+                modelo, par, seleccionadas, asignacionSeleccion, restricciones);
             seleccionadas.agregar(par);
           } else {
             seleccion.remove(indice);
@@ -212,7 +216,7 @@ public final class ConstructorTestigo {
         }
       }
 
-      int b = bloquePermitido(restricciones, s, L, creditos, materias, tope, libreInicial);
+      int b = bloquePermitido(modelo, restricciones, s, L, creditos, materias, tope, libreInicial);
       if (b < 0) {
         return null;
       }
@@ -258,6 +262,7 @@ public final class ConstructorTestigo {
   }
 
   private static int bloquePermitido(
+      ModeloDeCalculo modelo,
       Restricciones restricciones,
       int s,
       int L,
@@ -269,47 +274,27 @@ public final class ConstructorTestigo {
       int fijo = restricciones.bloqueFijo[s];
       if (fijo > L
           || creditos + fijo > tope.limiteCreditos()
-          || materias + ceilDiv(fijo, 3) > tope.limiteMaterias()) {
+          || materias + Math.ceilDiv(fijo, modelo.creditosPorMateriaLibre())
+              > tope.limiteMaterias()) {
         return -1;
       }
       return fijo;
     }
     int maximo = Math.min(L, tope.limiteCreditos() - creditos);
     for (int b = maximo; b >= 0; b--) {
-      if (libreInicial >= 3) {
-        if (b > 0 && b < 3) {
+      int creditosPorMateria = modelo.creditosPorMateriaLibre();
+      if (libreInicial >= creditosPorMateria) {
+        if (b > 0 && b < creditosPorMateria) {
           continue;
         }
       } else if (b > 0 && b != libreInicial) {
         continue;
       }
-      if (materias + ceilDiv(b, 3) <= tope.limiteMaterias()) {
+      if (materias + Math.ceilDiv(b, modelo.creditosPorMateriaLibre()) <= tope.limiteMaterias()) {
         return b;
       }
     }
     return -1;
-  }
-
-  private static long[] clausulasUtiles(
-      ModeloDeCalculo modelo, ConjuntoDeMaterias D, Restricciones restricciones) {
-    long[] utiles = new long[ConjuntoDeMaterias.palabrasNecesarias(modelo.cantidadMaterias())];
-    long[] requeridas = modelo.requeridas().palabras();
-    for (int i = 0; i < modelo.cantidadMaterias(); i++) {
-      boolean esRequerida =
-          (requeridas[i >>> 6] & (1L << (i & 63))) != 0
-              || restricciones.obligatoriasExtra.contiene(i);
-      if (!esRequerida || D.contiene(i)) {
-        continue;
-      }
-      for (long[] clausula : modelo.prerrequisitos(i)) {
-        if (!D.contieneAlguna(clausula)) {
-          for (int j = 0; j < utiles.length; j++) {
-            utiles[j] |= clausula[j];
-          }
-        }
-      }
-    }
-    return utiles;
   }
 
   private static boolean todasRequeridas(
@@ -324,34 +309,6 @@ public final class ConstructorTestigo {
       }
     }
     return true;
-  }
-
-  private static boolean esRequerida(
-      int materia, ModeloDeCalculo modelo, Restricciones restricciones) {
-    return modelo.requeridas().contiene(materia)
-        || restricciones.obligatoriasExtra.contiene(materia);
-  }
-
-  private static void asignarGrupo(
-      ModeloDeCalculo modelo,
-      int materia,
-      ConjuntoDeMaterias seleccionadas,
-      int[] asignacion,
-      Restricciones restricciones) {
-    int[] gruposMateria = modelo.gruposDeMateria(materia);
-    if (asignacion[materia] >= 0 || gruposMateria.length == 0) {
-      return;
-    }
-    int mejor = gruposMateria[0];
-    int mejorFaltan = -1;
-    for (int grupo : gruposMateria) {
-      int faltan = modelo.faltan(grupo, seleccionadas, asignacion, restricciones.obligatoriasExtra);
-      if (faltan > mejorFaltan) {
-        mejorFaltan = faltan;
-        mejor = grupo;
-      }
-    }
-    asignacion[materia] = mejor;
   }
 
   private static int buscarCorrequisito(
@@ -387,7 +344,7 @@ public final class ConstructorTestigo {
         if (restricciones.semestreMaximo[i] < semestre) {
           continue;
         }
-        if (!esRequerida(i, modelo, restricciones)
+        if (!Seleccion.esRequerida(i, modelo, restricciones)
             && restricciones.soloIncluidas
             && !restricciones.incluidas.contiene(i)) {
           continue;
@@ -470,17 +427,18 @@ public final class ConstructorTestigo {
           continue;
         }
         int movimiento = faltan;
-        if (bloque[receptor] == 0 && movimiento < 3) {
+        if (bloque[receptor] == 0 && movimiento < modelo.creditosPorMateriaLibre()) {
           movimiento = 3;
         }
-        if (bloque[donante] - movimiento < 3) {
+        if (bloque[donante] - movimiento < modelo.creditosPorMateriaLibre()) {
           movimiento = bloque[donante] - 3;
         }
         if (movimiento <= 0) {
           continue;
         }
         int materiasReceptor =
-            materiasDelSemestre(semestre, receptor) + ceilDiv(bloque[receptor] + movimiento, 3);
+            materiasDelSemestre(semestre, receptor)
+                + Math.ceilDiv(bloque[receptor] + movimiento, modelo.creditosPorMateriaLibre());
         if (materiasReceptor > tope.limiteMaterias()
             || creditosPorSemestre[receptor] + movimiento > tope.limiteCreditos()) {
           continue;
@@ -510,14 +468,14 @@ public final class ConstructorTestigo {
           || (restricciones.bloqueFijo != null && restricciones.bloqueFijo[donante] != null)) {
         continue;
       }
-      if (bloque[donante] < 3) {
+      if (bloque[donante] < modelo.creditosPorMateriaLibre()) {
         continue;
       }
       int movimiento = faltan;
-      if (bloque[receptor] == 0 && movimiento < 3) {
+      if (bloque[receptor] == 0 && movimiento < modelo.creditosPorMateriaLibre()) {
         movimiento = 3;
       }
-      if (bloque[donante] - movimiento < 3) {
+      if (bloque[donante] - movimiento < modelo.creditosPorMateriaLibre()) {
         movimiento = bloque[donante] - 3;
       }
       if (movimiento <= 0) {
@@ -527,7 +485,8 @@ public final class ConstructorTestigo {
         continue;
       }
       int materiasReceptor =
-          materiasDelSemestre(semestre, receptor) + ceilDiv(bloque[receptor] + movimiento, 3);
+          materiasDelSemestre(semestre, receptor)
+              + Math.ceilDiv(bloque[receptor] + movimiento, modelo.creditosPorMateriaLibre());
       if (materiasReceptor > tope.limiteMaterias()
           || creditosPorSemestre[receptor] + movimiento > tope.limiteCreditos()) {
         continue;
@@ -545,9 +504,5 @@ public final class ConstructorTestigo {
       }
     }
     return total;
-  }
-
-  private static int ceilDiv(int numerador, int denominador) {
-    return (numerador + denominador - 1) / denominador;
   }
 }

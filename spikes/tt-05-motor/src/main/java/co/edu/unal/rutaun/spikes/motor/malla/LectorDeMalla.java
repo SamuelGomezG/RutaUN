@@ -152,7 +152,10 @@ public final class LectorDeMalla {
         sugeridos.put(campo, nodoSugeridos.get(campo).asInt());
       }
     }
-    return new ModelosJson.LibreEleccionJson(n.get("creditos").asInt(), sugeridos);
+    return new ModelosJson.LibreEleccionJson(
+        n.get("creditos").asInt(),
+        n.has("creditosPorMateria") ? n.get("creditosPorMateria").asInt() : 3,
+        sugeridos);
   }
 
   private static List<ModelosJson.PrerrequisitoJson> prerrequisitos(JsonNode nodo) {

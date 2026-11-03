@@ -16,6 +16,7 @@ public final class ModeloDeCalculo {
 
   public static final int PROGRAMA = -1;
   public static final int INFINITO = 1_000_000;
+  public static final int LIMITE_DE_SEMESTRES = 200;
 
   /** Configuración específica de un escenario o variante. */
   public record Configuracion(
@@ -145,6 +146,7 @@ public final class ModeloDeCalculo {
   private final List<Grupo> grupos;
   private final Map<String, Integer> porCodigo;
   private final int libreEleccion;
+  private final int creditosPorMateriaLibre;
   private final int minimoPorPeriodo;
   private final int creditosDelPrograma;
   private final int componenteDisciplinar;
@@ -155,6 +157,7 @@ public final class ModeloDeCalculo {
   public ModeloDeCalculo(ModelosJson.MallaJson malla, Configuracion configuracion) {
     this.malla = malla;
     this.libreEleccion = malla.libreEleccion().creditos();
+    this.creditosPorMateriaLibre = malla.libreEleccion().creditosPorMateria();
     this.minimoPorPeriodo = malla.minimoPorPeriodo();
     this.creditosDelPrograma = malla.creditosDelPrograma();
 
@@ -590,6 +593,10 @@ public final class ModeloDeCalculo {
 
   public int libreEleccion() {
     return libreEleccion;
+  }
+
+  public int creditosPorMateriaLibre() {
+    return creditosPorMateriaLibre;
   }
 
   public int minimoPorPeriodo() {

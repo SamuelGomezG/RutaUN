@@ -223,12 +223,17 @@ public final class CalculoDelPlan {
     for (ModeloDeCalculo.Grupo grupo : modelo.grupos()) {
       int minimo = modelo.minimoMateriasOptativas(grupo.indice(), a0, asignacionInicial);
       if (minimo >= ModeloDeCalculo.INFINITO) {
-        return Math.max(1, pendientes + ceilDiv(libreInicial, 3));
+        return Math.max(
+            1, pendientes + Math.ceilDiv(libreInicial, modelo.creditosPorMateriaLibre()));
       }
       materiasOptativas += minimo;
     }
-    int calculado = pendientes + materiasOptativas + ceilDiv(libreInicial, 3);
-    return Math.max(1, Math.min(200, Math.max(calculado, pendientes + 1)));
+    int calculado =
+        pendientes
+            + materiasOptativas
+            + Math.ceilDiv(libreInicial, modelo.creditosPorMateriaLibre());
+    return Math.max(
+        1, Math.min(ModeloDeCalculo.LIMITE_DE_SEMESTRES, Math.max(calculado, pendientes + 1)));
   }
 
   private ResultadoBusqueda buscar(int k, Restricciones restricciones, boolean capturar) {
@@ -251,10 +256,6 @@ public final class CalculoDelPlan {
     long ms = (System.nanoTime() - inicio) / 1_000_000L;
     metricas.cancelada = true;
     return new ResultadoCalculo.TiempoAgotado(metricas.copia(), ms);
-  }
-
-  private static int ceilDiv(int numerador, int denominador) {
-    return (numerador + denominador - 1) / denominador;
   }
 
   private record ResultadoBusqueda(boolean encontrado, Plan plan, boolean cancelada) {}
