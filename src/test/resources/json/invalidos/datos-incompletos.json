@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "1.0",
+  "programa": {
+    "codigoSia": "2541",
+    "nombre": "Ingeniería de Sistemas y Computación",
+    "facultad": "Facultad de Ingeniería"
+  },
+  "norma": {
+    "tipo": "ACUERDO",
+    "numero": "003-A",
+    "anio": 2022,
+    "organo": "Consejo Académico",
+    "tipoDeEfecto": "BASE",
+    "fechaExpedicion": "2022-05-25",
+    "vigencia": {
+      "aplicaDesde": { "tipo": "PERIODO", "periodo": "2022-2" },
+      "vigenteHasta": null
+    },
+    "enlaceRegimenLegal": null,
+    "alcance": {
+      "tipo": "PROGRAMAS",
+      "facultades": [],
+      "programas": ["2541"],
+      "exclusiones": [],
+      "texto": "El presente acuerdo aplica al programa de Ingeniería de Sistemas y Computación."
+    }
+  },
+  "reglas": [
+    {
+      "categoria": "MATERIA",
+      "objeto": "2024042 Cálculo diferencial",
+      "enunciado": "Cálculo diferencial pertenece a la agrupación Matemáticas.",
+      "articulo": "art. 2",
+      "vigenciaPropia": null,
+      "clasificacion": "DEL_PLAN",
+      "afectacion": null,
+      "datos": {
+        "tipo": "MATERIA",
+        "materia": {
+          "codigo": "2024042",
+          "nombre": "Cálculo diferencial",
+          "obligatoriedad": "OBLIGATORIA",
+          "semestreSugerido": 1
+        },
+        "contenedor": {
+          "componente": "Componente de Fundamentación",
+          "agrupacion": "Matemáticas"
+        }
+      }
+    }
+  ]
+}

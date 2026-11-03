@@ -1,0 +1,215 @@
+{
+  "schemaVersion": "1.0",
+  "programa": {
+    "codigoSia": "2541",
+    "nombre": "Ingeniería de Sistemas y Computación",
+    "facultad": "Facultad de Ingeniería"
+  },
+  "norma": {
+    "tipo": "ACUERDO",
+    "numero": "003-A",
+    "anio": 2022,
+    "organo": "Consejo Académico",
+    "tipoDeEfecto": "BASE",
+    "fechaExpedicion": "2022-05-25",
+    "vigencia": {
+      "aplicaDesde": { "tipo": "PERIODO", "periodo": "2022-2" },
+      "vigenteHasta": null
+    },
+    "enlaceRegimenLegal": null,
+    "alcance": {
+      "tipo": "PROGRAMAS",
+      "facultades": [],
+      "programas": ["2541"],
+      "exclusiones": [],
+      "texto": "El presente acuerdo aplica al programa de Ingeniería de Sistemas y Computación."
+    }
+  },
+  "reglas": [
+    {
+      "categoria": "MATERIA",
+      "objeto": "2024042 Cálculo diferencial",
+      "enunciado": "Cálculo diferencial pertenece a la agrupación Matemáticas.",
+      "articulo": "art. 2",
+      "vigenciaPropia": null,
+      "clasificacion": "DEL_PLAN",
+      "afectacion": null,
+      "datos": {
+        "tipo": "MATERIA",
+        "materia": {
+          "codigo": "2024042",
+          "nombre": "Cálculo diferencial",
+          "creditos": 4,
+          "obligatoriedad": "OBLIGATORIA",
+          "semestreSugerido": 1
+        },
+        "contenedor": {
+          "componente": "Componente de Fundamentación",
+          "agrupacion": "Matemáticas"
+        }
+      }
+    },
+    {
+      "categoria": "PRERREQUISITO",
+      "objeto": "2024043 Cálculo integral",
+      "enunciado": "Cálculo integral exige Cálculo diferencial y Matemáticas Básicas.",
+      "articulo": "art. 2",
+      "vigenciaPropia": null,
+      "clasificacion": "DEL_PLAN",
+      "afectacion": null,
+      "datos": {
+        "tipo": "PRERREQUISITO",
+        "materia": "2024043",
+        "expresion": {
+          "tipo": "Y",
+          "izquierda": { "tipo": "MATERIA_DEL_PROGRAMA", "codigo": "2024042" },
+          "derecha": {
+            "tipo": "MATERIA_EXTERNA",
+            "nombre": "Matemáticas Básicas",
+            "codigo": null,
+            "origen": "NIVELACION"
+          }
+        }
+      }
+    },
+    {
+      "categoria": "CORREQUISITO",
+      "objeto": "2024044 Física Mecánica",
+      "enunciado": "Física Mecánica debe cursarse con Cálculo diferencial o antes.",
+      "articulo": "art. 2",
+      "vigenciaPropia": null,
+      "clasificacion": "DEL_PLAN",
+      "afectacion": null,
+      "datos": {
+        "tipo": "CORREQUISITO",
+        "materia": "2024044",
+        "expresion": { "tipo": "MATERIA_DEL_PROGRAMA", "codigo": "2024042" }
+      }
+    },
+    {
+      "categoria": "HABILITACION",
+      "objeto": "2024045 Ingeniería de Software I",
+      "enunciado": "Ingeniería de Software I exige 40 créditos del componente de fundamentación.",
+      "articulo": "art. 2",
+      "vigenciaPropia": null,
+      "clasificacion": "DEL_PLAN",
+      "afectacion": null,
+      "datos": {
+        "tipo": "HABILITACION",
+        "materia": "2024045",
+        "medida": {
+          "tipo": "COMPONENTE",
+          "componente": "Componente de Fundamentación"
+        },
+        "umbral": 40
+      }
+    },
+    {
+      "categoria": "AGRUPACION",
+      "objeto": "Agrupación Matemáticas",
+      "enunciado": "La agrupación Matemáticas exige 16 créditos.",
+      "articulo": "art. 5",
+      "vigenciaPropia": null,
+      "clasificacion": "DEL_PLAN",
+      "afectacion": null,
+      "datos": {
+        "tipo": "AGRUPACION",
+        "agrupacion": {
+          "nombre": "Matemáticas",
+          "creditosExigidos": 16,
+          "desglose": { "obligatorios": 8, "optativos": 8 }
+        },
+        "contenedor": {
+          "componente": "Componente de Fundamentación",
+          "agrupacion": null
+        }
+      }
+    },
+    {
+      "categoria": "COMPONENTE",
+      "objeto": "Componente de Fundamentación",
+      "enunciado": "El componente de fundamentación exige 51 créditos.",
+      "articulo": "art. 4",
+      "vigenciaPropia": null,
+      "clasificacion": "DEL_PLAN",
+      "afectacion": null,
+      "datos": {
+        "tipo": "COMPONENTE",
+        "componente": {
+          "nombre": "Componente de Fundamentación",
+          "tipo": "FUNDAMENTACION",
+          "creditosExigidos": 51,
+          "desglose": { "obligatorios": 15, "optativos": 36 }
+        }
+      }
+    },
+    {
+      "categoria": "PROGRAMA",
+      "objeto": "Plan de estudios",
+      "enunciado": "El plan de estudios exige 160 créditos.",
+      "articulo": "art. 4",
+      "vigenciaPropia": null,
+      "clasificacion": "DEL_PLAN",
+      "afectacion": null,
+      "datos": {
+        "tipo": "PROGRAMA",
+        "creditosExigidos": 160
+      }
+    },
+    {
+      "categoria": "EQUIVALENCIA",
+      "objeto": "Equivalencia de Cálculo diferencial",
+      "enunciado": "Cálculo diferencial se reconoce como Cálculo diferencial en una variable.",
+      "articulo": "art. 12",
+      "vigenciaPropia": null,
+      "clasificacion": "DEL_PLAN",
+      "afectacion": null,
+      "datos": {
+        "tipo": "EQUIVALENCIA",
+        "origen": ["2024042"],
+        "destino": "2024046"
+      }
+    },
+    {
+      "categoria": "CARGA_POR_PERIODO",
+      "objeto": "Mínimo por periodo",
+      "enunciado": "El mínimo por periodo es de 10 créditos.",
+      "articulo": "art. 10",
+      "vigenciaPropia": null,
+      "clasificacion": "DEL_PLAN",
+      "afectacion": null,
+      "datos": {
+        "tipo": "CARGA_POR_PERIODO",
+        "creditos": 10,
+        "tipoCarga": "MINIMA"
+      }
+    },
+    {
+      "categoria": "REQUISITO_DE_GRADO",
+      "objeto": "Requisitos de grado",
+      "enunciado": "Para graduarse se deben cumplir los requisitos de grado.",
+      "articulo": "art. 8",
+      "vigenciaPropia": null,
+      "clasificacion": "INFORMATIVA",
+      "afectacion": null,
+      "datos": {
+        "tipo": "REQUISITO_DE_GRADO"
+      }
+    },
+    {
+      "categoria": "OTRA",
+      "objeto": "Medida temporal de prueba",
+      "enunciado": "Medida informativa temporal para probar el formato.",
+      "articulo": "art. 9",
+      "vigenciaPropia": {
+        "aplicaDesde": { "tipo": "PERIODO", "periodo": "2026-2" },
+        "vigenteHasta": { "tipo": "PERIODO", "periodo": "2026-2" }
+      },
+      "clasificacion": "INFORMATIVA",
+      "afectacion": null,
+      "datos": {
+        "tipo": "OTRA"
+      }
+    }
+  ]
+}
