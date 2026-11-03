@@ -27,8 +27,20 @@
               "nombre": "Cálculo diferencial",
               "creditos": 4,
               "materias": [
-                { "codigo": "1000004", "nombre": "Cálculo diferencial", "creditos": 4, "obligatoria": false, "semestre": 1 },
-                { "codigo": "2016377", "nombre": "Cálculo diferencial en una variable", "creditos": 4, "obligatoria": false, "semestre": null }
+                {
+                  "codigo": "1000004",
+                  "nombre": "Cálculo diferencial",
+                  "creditos": 4,
+                  "obligatoria": false,
+                  "semestre": 1
+                },
+                {
+                  "codigo": "2016377",
+                  "nombre": "Cálculo diferencial en una variable",
+                  "creditos": 4,
+                  "obligatoria": false,
+                  "semestre": null
+                }
               ],
               "subagrupaciones": []
             },
@@ -37,8 +49,20 @@
               "nombre": "Cálculo integral",
               "creditos": 4,
               "materias": [
-                { "codigo": "1000005", "nombre": "Cálculo integral", "creditos": 4, "obligatoria": false, "semestre": 2 },
-                { "codigo": "2015556", "nombre": "Cálculo integral en una variable", "creditos": 4, "obligatoria": false, "semestre": null }
+                {
+                  "codigo": "1000005",
+                  "nombre": "Cálculo integral",
+                  "creditos": 4,
+                  "obligatoria": false,
+                  "semestre": 2
+                },
+                {
+                  "codigo": "2015556",
+                  "nombre": "Cálculo integral en una variable",
+                  "creditos": 4,
+                  "obligatoria": false,
+                  "semestre": null
+                }
               ],
               "subagrupaciones": []
             },
@@ -47,8 +71,20 @@
               "nombre": "Cálculo en varias variables",
               "creditos": 4,
               "materias": [
-                { "codigo": "1000006", "nombre": "Cálculo en varias variables", "creditos": 4, "obligatoria": false, "semestre": 3 },
-                { "codigo": "2015162", "nombre": "Cálculo vectorial", "creditos": 4, "obligatoria": false, "semestre": null }
+                {
+                  "codigo": "1000006",
+                  "nombre": "Cálculo en varias variables",
+                  "creditos": 4,
+                  "obligatoria": false,
+                  "semestre": 3
+                },
+                {
+                  "codigo": "2015162",
+                  "nombre": "Cálculo vectorial",
+                  "creditos": 4,
+                  "obligatoria": false,
+                  "semestre": null
+                }
               ],
               "subagrupaciones": []
             },
@@ -57,8 +93,20 @@
               "nombre": "Álgebra lineal",
               "creditos": 4,
               "materias": [
-                { "codigo": "1000003", "nombre": "Álgebra lineal", "creditos": 4, "obligatoria": false, "semestre": 2 },
-                { "codigo": "2015555", "nombre": "Álgebra lineal básica", "creditos": 4, "obligatoria": false, "semestre": null }
+                {
+                  "codigo": "1000003",
+                  "nombre": "Álgebra lineal",
+                  "creditos": 4,
+                  "obligatoria": false,
+                  "semestre": 2
+                },
+                {
+                  "codigo": "2015555",
+                  "nombre": "Álgebra lineal básica",
+                  "creditos": 4,
+                  "obligatoria": false,
+                  "semestre": null
+                }
               ],
               "subagrupaciones": []
             }
@@ -69,9 +117,27 @@
           "nombre": "Probabilidad y estadística",
           "creditos": 3,
           "materias": [
-            { "codigo": "1000013", "nombre": "Probabilidad y estadística fundamental", "creditos": 3, "obligatoria": false, "semestre": 4 },
-            { "codigo": "2027877", "nombre": "Probabilidad fundamental", "creditos": 4, "obligatoria": false, "semestre": null },
-            { "codigo": "2015178", "nombre": "Probabilidad", "creditos": 4, "obligatoria": false, "semestre": null }
+            {
+              "codigo": "1000013",
+              "nombre": "Probabilidad y estadística fundamental",
+              "creditos": 3,
+              "obligatoria": false,
+              "semestre": 4
+            },
+            {
+              "codigo": "2027877",
+              "nombre": "Probabilidad fundamental",
+              "creditos": 4,
+              "obligatoria": false,
+              "semestre": null
+            },
+            {
+              "codigo": "2015178",
+              "nombre": "Probabilidad",
+              "creditos": 4,
+              "obligatoria": false,
+              "semestre": null
+            }
           ],
           "subagrupaciones": []
         },
@@ -80,8 +146,20 @@
           "nombre": "Física",
           "creditos": 8,
           "materias": [
-            { "codigo": "1000019", "nombre": "Fundamentos de mecánica", "creditos": 4, "obligatoria": true, "semestre": 2 },
-            { "codigo": "1000017", "nombre": "Fundamentos de electricidad y magnetismo", "creditos": 4, "obligatoria": true, "semestre": 3 }
+            {
+              "codigo": "1000019",
+              "nombre": "Fundamentos de mecánica",
+              "creditos": 4,
+              "obligatoria": true,
+              "semestre": 2
+            },
+            {
+              "codigo": "1000017",
+              "nombre": "Fundamentos de electricidad y magnetismo",
+              "creditos": 4,
+              "obligatoria": true,
+              "semestre": 3
+            }
           ],
           "subagrupaciones": []
         },
@@ -90,8 +168,20 @@
           "nombre": "Ciencias de la computación",
           "creditos": 18,
           "materias": [
-            { "codigo": "2015174", "nombre": "Introducción a la teoría de la computación", "creditos": 4, "obligatoria": true, "semestre": 5 },
-            { "codigo": "2016696", "nombre": "Algoritmos", "creditos": 3, "obligatoria": true, "semestre": 6 }
+            {
+              "codigo": "2015174",
+              "nombre": "Introducción a la teoría de la computación",
+              "creditos": 4,
+              "obligatoria": true,
+              "semestre": 5
+            },
+            {
+              "codigo": "2016696",
+              "nombre": "Algoritmos",
+              "creditos": 3,
+              "obligatoria": true,
+              "semestre": 6
+            }
           ],
           "subagrupaciones": [
             {
@@ -99,8 +189,20 @@
               "nombre": "Matemáticas discretas I",
               "creditos": 4,
               "materias": [
-                { "codigo": "2025963", "nombre": "Matemáticas discretas I", "creditos": 4, "obligatoria": false, "semestre": 3 },
-                { "codigo": "2015168", "nombre": "Fundamentos de matemáticas", "creditos": 4, "obligatoria": false, "semestre": null }
+                {
+                  "codigo": "2025963",
+                  "nombre": "Matemáticas discretas I",
+                  "creditos": 4,
+                  "obligatoria": false,
+                  "semestre": 3
+                },
+                {
+                  "codigo": "2015168",
+                  "nombre": "Fundamentos de matemáticas",
+                  "creditos": 4,
+                  "obligatoria": false,
+                  "semestre": null
+                }
               ],
               "subagrupaciones": []
             },
@@ -109,8 +211,20 @@
               "nombre": "Matemáticas discretas II",
               "creditos": 4,
               "materias": [
-                { "codigo": "2025964", "nombre": "Matemáticas discretas II", "creditos": 4, "obligatoria": false, "semestre": 4 },
-                { "codigo": "2015181", "nombre": "Sistemas numéricos", "creditos": 4, "obligatoria": false, "semestre": null }
+                {
+                  "codigo": "2025964",
+                  "nombre": "Matemáticas discretas II",
+                  "creditos": 4,
+                  "obligatoria": false,
+                  "semestre": 4
+                },
+                {
+                  "codigo": "2015181",
+                  "nombre": "Sistemas numéricos",
+                  "creditos": 4,
+                  "obligatoria": false,
+                  "semestre": null
+                }
               ],
               "subagrupaciones": []
             },
@@ -119,8 +233,20 @@
               "nombre": "Métodos numéricos",
               "creditos": 3,
               "materias": [
-                { "codigo": "2015970", "nombre": "Métodos numéricos", "creditos": 3, "obligatoria": false, "semestre": 6 },
-                { "codigo": "2019072", "nombre": "Análisis numérico I", "creditos": 4, "obligatoria": false, "semestre": null }
+                {
+                  "codigo": "2015970",
+                  "nombre": "Métodos numéricos",
+                  "creditos": 3,
+                  "obligatoria": false,
+                  "semestre": 6
+                },
+                {
+                  "codigo": "2019072",
+                  "nombre": "Análisis numérico I",
+                  "creditos": 4,
+                  "obligatoria": false,
+                  "semestre": null
+                }
               ],
               "subagrupaciones": []
             }
@@ -137,9 +263,27 @@
               "nombre": "Ingeniería económica",
               "creditos": 3,
               "materias": [
-                { "codigo": "2025986", "nombre": "Ingeniería económica y análisis de riesgo", "creditos": 3, "obligatoria": false, "semestre": null },
-                { "codigo": "2015703", "nombre": "Ingeniería económica", "creditos": 3, "obligatoria": false, "semestre": 4 },
-                { "codigo": "2016047", "nombre": "Modelos económicos computacionales", "creditos": 3, "obligatoria": false, "semestre": null }
+                {
+                  "codigo": "2025986",
+                  "nombre": "Ingeniería económica y análisis de riesgo",
+                  "creditos": 3,
+                  "obligatoria": false,
+                  "semestre": null
+                },
+                {
+                  "codigo": "2015703",
+                  "nombre": "Ingeniería económica",
+                  "creditos": 3,
+                  "obligatoria": false,
+                  "semestre": 4
+                },
+                {
+                  "codigo": "2016047",
+                  "nombre": "Modelos económicos computacionales",
+                  "creditos": 3,
+                  "obligatoria": false,
+                  "semestre": null
+                }
               ],
               "subagrupaciones": []
             },
@@ -148,8 +292,20 @@
               "nombre": "Gerencia y gestión de proyectos",
               "creditos": 3,
               "materias": [
-                { "codigo": "2015702", "nombre": "Gerencia y gestión de proyectos", "creditos": 3, "obligatoria": false, "semestre": 5 },
-                { "codigo": "2016028", "nombre": "Diseño, gestión y evaluación de proyectos", "creditos": 4, "obligatoria": false, "semestre": null }
+                {
+                  "codigo": "2015702",
+                  "nombre": "Gerencia y gestión de proyectos",
+                  "creditos": 3,
+                  "obligatoria": false,
+                  "semestre": 5
+                },
+                {
+                  "codigo": "2016028",
+                  "nombre": "Diseño, gestión y evaluación de proyectos",
+                  "creditos": 4,
+                  "obligatoria": false,
+                  "semestre": null
+                }
               ],
               "subagrupaciones": []
             }
@@ -169,11 +325,41 @@
           "nombre": "Métodos y tecnologías de software",
           "creditos": 21,
           "materias": [
-            { "codigo": "2016375", "nombre": "Programación orientada a objetos", "creditos": 3, "obligatoria": true, "semestre": 2 },
-            { "codigo": "2016699", "nombre": "Estructuras de datos", "creditos": 3, "obligatoria": true, "semestre": 4 },
-            { "codigo": "2016701", "nombre": "Ingeniería de software I", "creditos": 3, "obligatoria": true, "semestre": 5 },
-            { "codigo": "2016702", "nombre": "Ingeniería de software II", "creditos": 3, "obligatoria": true, "semestre": 6 },
-            { "codigo": "2016716", "nombre": "Arquitectura de software", "creditos": 3, "obligatoria": true, "semestre": 7 }
+            {
+              "codigo": "2016375",
+              "nombre": "Programación orientada a objetos",
+              "creditos": 3,
+              "obligatoria": true,
+              "semestre": 2
+            },
+            {
+              "codigo": "2016699",
+              "nombre": "Estructuras de datos",
+              "creditos": 3,
+              "obligatoria": true,
+              "semestre": 4
+            },
+            {
+              "codigo": "2016701",
+              "nombre": "Ingeniería de software I",
+              "creditos": 3,
+              "obligatoria": true,
+              "semestre": 5
+            },
+            {
+              "codigo": "2016702",
+              "nombre": "Ingeniería de software II",
+              "creditos": 3,
+              "obligatoria": true,
+              "semestre": 6
+            },
+            {
+              "codigo": "2016716",
+              "nombre": "Arquitectura de software",
+              "creditos": 3,
+              "obligatoria": true,
+              "semestre": 7
+            }
           ],
           "subagrupaciones": [
             {
@@ -181,8 +367,20 @@
               "nombre": "Programación de computadores",
               "creditos": 3,
               "materias": [
-                { "codigo": "2015734", "nombre": "Programación de computadores", "creditos": 3, "obligatoria": false, "semestre": 1 },
-                { "codigo": "2026573", "nombre": "Introducción a las ciencias de la computación y a la programación", "creditos": 3, "obligatoria": false, "semestre": null }
+                {
+                  "codigo": "2015734",
+                  "nombre": "Programación de computadores",
+                  "creditos": 3,
+                  "obligatoria": false,
+                  "semestre": 1
+                },
+                {
+                  "codigo": "2026573",
+                  "nombre": "Introducción a las ciencias de la computación y a la programación",
+                  "creditos": 3,
+                  "obligatoria": false,
+                  "semestre": null
+                }
               ],
               "subagrupaciones": []
             },
@@ -191,9 +389,27 @@
               "nombre": "Lenguajes",
               "creditos": 3,
               "materias": [
-                { "codigo": "2025966", "nombre": "Lenguajes de programación", "creditos": 3, "obligatoria": false, "semestre": 7 },
-                { "codigo": "2027642", "nombre": "Compiladores", "creditos": 3, "obligatoria": false, "semestre": null },
-                { "codigo": "2027628", "nombre": "Teoría de lenguajes formales", "creditos": 3, "obligatoria": false, "semestre": null }
+                {
+                  "codigo": "2025966",
+                  "nombre": "Lenguajes de programación",
+                  "creditos": 3,
+                  "obligatoria": false,
+                  "semestre": 7
+                },
+                {
+                  "codigo": "2027642",
+                  "nombre": "Compiladores",
+                  "creditos": 3,
+                  "obligatoria": false,
+                  "semestre": null
+                },
+                {
+                  "codigo": "2027628",
+                  "nombre": "Teoría de lenguajes formales",
+                  "creditos": 3,
+                  "obligatoria": false,
+                  "semestre": null
+                }
               ],
               "subagrupaciones": []
             }
@@ -204,11 +420,41 @@
           "nombre": "Infraestructura computacional, de comunicaciones y de información",
           "creditos": 30,
           "materias": [
-            { "codigo": "2016697", "nombre": "Arquitectura de computadores", "creditos": 3, "obligatoria": true, "semestre": 4 },
-            { "codigo": "2025967", "nombre": "Redes de computadores", "creditos": 3, "obligatoria": true, "semestre": 5 },
-            { "codigo": "2016707", "nombre": "Sistemas operativos", "creditos": 3, "obligatoria": true, "semestre": 6 },
-            { "codigo": "2025983", "nombre": "Arquitectura de infraestructura y gobierno de TICs", "creditos": 3, "obligatoria": true, "semestre": 7 },
-            { "codigo": "2016722", "nombre": "Computación paralela y distribuida", "creditos": 3, "obligatoria": true, "semestre": 8 }
+            {
+              "codigo": "2016697",
+              "nombre": "Arquitectura de computadores",
+              "creditos": 3,
+              "obligatoria": true,
+              "semestre": 4
+            },
+            {
+              "codigo": "2025967",
+              "nombre": "Redes de computadores",
+              "creditos": 3,
+              "obligatoria": true,
+              "semestre": 5
+            },
+            {
+              "codigo": "2016707",
+              "nombre": "Sistemas operativos",
+              "creditos": 3,
+              "obligatoria": true,
+              "semestre": 6
+            },
+            {
+              "codigo": "2025983",
+              "nombre": "Arquitectura de infraestructura y gobierno de TICs",
+              "creditos": 3,
+              "obligatoria": true,
+              "semestre": 7
+            },
+            {
+              "codigo": "2016722",
+              "nombre": "Computación paralela y distribuida",
+              "creditos": 3,
+              "obligatoria": true,
+              "semestre": 8
+            }
           ],
           "subagrupaciones": [
             {
@@ -216,8 +462,20 @@
               "nombre": "Elementos de computadores",
               "creditos": 3,
               "materias": [
-                { "codigo": "2016698", "nombre": "Elementos de computadores", "creditos": 3, "obligatoria": false, "semestre": 3 },
-                { "codigo": "2016498", "nombre": "Electrónica digital I", "creditos": 4, "obligatoria": false, "semestre": null }
+                {
+                  "codigo": "2016698",
+                  "nombre": "Elementos de computadores",
+                  "creditos": 3,
+                  "obligatoria": false,
+                  "semestre": 3
+                },
+                {
+                  "codigo": "2016498",
+                  "nombre": "Electrónica digital I",
+                  "creditos": 4,
+                  "obligatoria": false,
+                  "semestre": null
+                }
               ],
               "subagrupaciones": []
             },
@@ -226,8 +484,20 @@
               "nombre": "Bases de datos",
               "creditos": 3,
               "materias": [
-                { "codigo": "2016353", "nombre": "Bases de datos", "creditos": 3, "obligatoria": false, "semestre": 3 },
-                { "codigo": "2027641", "nombre": "Análisis de bases de datos", "creditos": 3, "obligatoria": false, "semestre": null }
+                {
+                  "codigo": "2016353",
+                  "nombre": "Bases de datos",
+                  "creditos": 3,
+                  "obligatoria": false,
+                  "semestre": 3
+                },
+                {
+                  "codigo": "2027641",
+                  "nombre": "Análisis de bases de datos",
+                  "creditos": 3,
+                  "obligatoria": false,
+                  "semestre": null
+                }
               ],
               "subagrupaciones": []
             },
@@ -236,8 +506,20 @@
               "nombre": "Información y comunicaciones",
               "creditos": 3,
               "materias": [
-                { "codigo": "2025994", "nombre": "Teoría de la información y sistemas de comunicaciones", "creditos": 3, "obligatoria": false, "semestre": 7 },
-                { "codigo": "2016492", "nombre": "Comunicaciones", "creditos": 3, "obligatoria": false, "semestre": null }
+                {
+                  "codigo": "2025994",
+                  "nombre": "Teoría de la información y sistemas de comunicaciones",
+                  "creditos": 3,
+                  "obligatoria": false,
+                  "semestre": 7
+                },
+                {
+                  "codigo": "2016492",
+                  "nombre": "Comunicaciones",
+                  "creditos": 3,
+                  "obligatoria": false,
+                  "semestre": null
+                }
               ],
               "subagrupaciones": []
             },
@@ -246,8 +528,20 @@
               "nombre": "Sistemas de información",
               "creditos": 3,
               "materias": [
-                { "codigo": "2025982", "nombre": "Sistemas de información", "creditos": 3, "obligatoria": false, "semestre": 6 },
-                { "codigo": "2016053", "nombre": "Sistemas de información gerencial", "creditos": 4, "obligatoria": false, "semestre": null }
+                {
+                  "codigo": "2025982",
+                  "nombre": "Sistemas de información",
+                  "creditos": 3,
+                  "obligatoria": false,
+                  "semestre": 6
+                },
+                {
+                  "codigo": "2016053",
+                  "nombre": "Sistemas de información gerencial",
+                  "creditos": 4,
+                  "obligatoria": false,
+                  "semestre": null
+                }
               ],
               "subagrupaciones": []
             },
@@ -256,10 +550,34 @@
               "nombre": "Criptografía y seguridad de la información",
               "creditos": 3,
               "materias": [
-                { "codigo": "2025972", "nombre": "Introducción a la criptografía y a la seguridad de la información", "creditos": 3, "obligatoria": false, "semestre": 8 },
-                { "codigo": "2027311", "nombre": "Introducción a la criptografía y a la teoría de información", "creditos": 4, "obligatoria": false, "semestre": null },
-                { "codigo": "2027313", "nombre": "Teoría de la codificación", "creditos": 4, "obligatoria": false, "semestre": null },
-                { "codigo": "2027310", "nombre": "Criptografía", "creditos": 3, "obligatoria": false, "semestre": null }
+                {
+                  "codigo": "2025972",
+                  "nombre": "Introducción a la criptografía y a la seguridad de la información",
+                  "creditos": 3,
+                  "obligatoria": false,
+                  "semestre": 8
+                },
+                {
+                  "codigo": "2027311",
+                  "nombre": "Introducción a la criptografía y a la teoría de información",
+                  "creditos": 4,
+                  "obligatoria": false,
+                  "semestre": null
+                },
+                {
+                  "codigo": "2027313",
+                  "nombre": "Teoría de la codificación",
+                  "creditos": 4,
+                  "obligatoria": false,
+                  "semestre": null
+                },
+                {
+                  "codigo": "2027310",
+                  "nombre": "Criptografía",
+                  "creditos": 3,
+                  "obligatoria": false,
+                  "semestre": null
+                }
               ],
               "subagrupaciones": []
             }
@@ -270,16 +588,76 @@
           "nombre": "Computación aplicada",
           "creditos": 3,
           "materias": [
-            { "codigo": "2016788", "nombre": "Tecnología digital", "creditos": 3, "obligatoria": false, "semestre": null },
-            { "codigo": "2016753", "nombre": "Microcontroladores", "creditos": 3, "obligatoria": false, "semestre": null },
-            { "codigo": "2025960", "nombre": "Computación visual", "creditos": 3, "obligatoria": false, "semestre": 8 },
-            { "codigo": "2016080", "nombre": "Aplicaciones gráficas tridimensionales", "creditos": 3, "obligatoria": false, "semestre": null },
-            { "codigo": "2016770", "nombre": "Robótica", "creditos": 3, "obligatoria": false, "semestre": null },
-            { "codigo": "2025196", "nombre": "Introducción a la biología computacional", "creditos": 4, "obligatoria": false, "semestre": null },
-            { "codigo": "2026548", "nombre": "Introducción al análisis combinatorio", "creditos": 4, "obligatoria": false, "semestre": null },
-            { "codigo": "2028837", "nombre": "Matemáticas del aprendizaje de máquinas", "creditos": 4, "obligatoria": false, "semestre": null },
-            { "codigo": "2027309", "nombre": "Análisis forense digital", "creditos": 4, "obligatoria": false, "semestre": null },
-            { "codigo": "2029297", "nombre": "Introducción a la computación de alto rendimiento", "creditos": 4, "obligatoria": false, "semestre": null }
+            {
+              "codigo": "2016788",
+              "nombre": "Tecnología digital",
+              "creditos": 3,
+              "obligatoria": false,
+              "semestre": null
+            },
+            {
+              "codigo": "2016753",
+              "nombre": "Microcontroladores",
+              "creditos": 3,
+              "obligatoria": false,
+              "semestre": null
+            },
+            {
+              "codigo": "2025960",
+              "nombre": "Computación visual",
+              "creditos": 3,
+              "obligatoria": false,
+              "semestre": 8
+            },
+            {
+              "codigo": "2016080",
+              "nombre": "Aplicaciones gráficas tridimensionales",
+              "creditos": 3,
+              "obligatoria": false,
+              "semestre": null
+            },
+            {
+              "codigo": "2016770",
+              "nombre": "Robótica",
+              "creditos": 3,
+              "obligatoria": false,
+              "semestre": null
+            },
+            {
+              "codigo": "2025196",
+              "nombre": "Introducción a la biología computacional",
+              "creditos": 4,
+              "obligatoria": false,
+              "semestre": null
+            },
+            {
+              "codigo": "2026548",
+              "nombre": "Introducción al análisis combinatorio",
+              "creditos": 4,
+              "obligatoria": false,
+              "semestre": null
+            },
+            {
+              "codigo": "2028837",
+              "nombre": "Matemáticas del aprendizaje de máquinas",
+              "creditos": 4,
+              "obligatoria": false,
+              "semestre": null
+            },
+            {
+              "codigo": "2027309",
+              "nombre": "Análisis forense digital",
+              "creditos": 4,
+              "obligatoria": false,
+              "semestre": null
+            },
+            {
+              "codigo": "2029297",
+              "nombre": "Introducción a la computación de alto rendimiento",
+              "creditos": 4,
+              "obligatoria": false,
+              "semestre": null
+            }
           ],
           "subagrupaciones": []
         },
@@ -288,12 +666,48 @@
           "nombre": "Sistemas inteligentes",
           "creditos": 3,
           "materias": [
-            { "codigo": "2025995", "nombre": "Introducción a los sistemas inteligentes", "creditos": 3, "obligatoria": false, "semestre": 7 },
-            { "codigo": "2016748", "nombre": "Inteligencia artificial", "creditos": 3, "obligatoria": false, "semestre": null },
-            { "codigo": "2023251", "nombre": "Inteligencia artificial y minirobots", "creditos": 3, "obligatoria": false, "semestre": null },
-            { "codigo": "2027631", "nombre": "Introducción a la inteligencia artificial", "creditos": 3, "obligatoria": false, "semestre": null },
-            { "codigo": "2017290", "nombre": "Técnicas de inteligencia artificial", "creditos": 3, "obligatoria": false, "semestre": null },
-            { "codigo": "2028837", "nombre": "Matemáticas del aprendizaje de máquinas", "creditos": 4, "obligatoria": false, "semestre": null }
+            {
+              "codigo": "2025995",
+              "nombre": "Introducción a los sistemas inteligentes",
+              "creditos": 3,
+              "obligatoria": false,
+              "semestre": 7
+            },
+            {
+              "codigo": "2016748",
+              "nombre": "Inteligencia artificial",
+              "creditos": 3,
+              "obligatoria": false,
+              "semestre": null
+            },
+            {
+              "codigo": "2023251",
+              "nombre": "Inteligencia artificial y minirobots",
+              "creditos": 3,
+              "obligatoria": false,
+              "semestre": null
+            },
+            {
+              "codigo": "2027631",
+              "nombre": "Introducción a la inteligencia artificial",
+              "creditos": 3,
+              "obligatoria": false,
+              "semestre": null
+            },
+            {
+              "codigo": "2017290",
+              "nombre": "Técnicas de inteligencia artificial",
+              "creditos": 3,
+              "obligatoria": false,
+              "semestre": null
+            },
+            {
+              "codigo": "2028837",
+              "nombre": "Matemáticas del aprendizaje de máquinas",
+              "creditos": 4,
+              "obligatoria": false,
+              "semestre": null
+            }
           ],
           "subagrupaciones": []
         },
@@ -302,8 +716,20 @@
           "nombre": "Modelos, sistemas, optimización y simulación",
           "creditos": 12,
           "materias": [
-            { "codigo": "2016703", "nombre": "Pensamiento sistémico", "creditos": 3, "obligatoria": true, "semestre": 1 },
-            { "codigo": "2025969", "nombre": "Modelos estocásticos y simulación en computación y comunicaciones", "creditos": 3, "obligatoria": true, "semestre": 7 }
+            {
+              "codigo": "2016703",
+              "nombre": "Pensamiento sistémico",
+              "creditos": 3,
+              "obligatoria": true,
+              "semestre": 1
+            },
+            {
+              "codigo": "2025969",
+              "nombre": "Modelos estocásticos y simulación en computación y comunicaciones",
+              "creditos": 3,
+              "obligatoria": true,
+              "semestre": 7
+            }
           ],
           "subagrupaciones": [
             {
@@ -311,9 +737,27 @@
               "nombre": "Modelos y sistemas",
               "creditos": 3,
               "materias": [
-                { "codigo": "2025970", "nombre": "Modelos y simulación", "creditos": 3, "obligatoria": false, "semestre": 5 },
-                { "codigo": "2019082", "nombre": "Modelos matemáticos I", "creditos": 4, "obligatoria": false, "semestre": null },
-                { "codigo": "2017293", "nombre": "Modelación matemática", "creditos": 3, "obligatoria": false, "semestre": null }
+                {
+                  "codigo": "2025970",
+                  "nombre": "Modelos y simulación",
+                  "creditos": 3,
+                  "obligatoria": false,
+                  "semestre": 5
+                },
+                {
+                  "codigo": "2019082",
+                  "nombre": "Modelos matemáticos I",
+                  "creditos": 4,
+                  "obligatoria": false,
+                  "semestre": null
+                },
+                {
+                  "codigo": "2017293",
+                  "nombre": "Modelación matemática",
+                  "creditos": 3,
+                  "obligatoria": false,
+                  "semestre": null
+                }
               ],
               "subagrupaciones": []
             },
@@ -322,8 +766,20 @@
               "nombre": "Optimización",
               "creditos": 3,
               "materias": [
-                { "codigo": "2025971", "nombre": "Optimización", "creditos": 3, "obligatoria": false, "semestre": 6 },
-                { "codigo": "2015173", "nombre": "Introducción a la optimización", "creditos": 4, "obligatoria": false, "semestre": null }
+                {
+                  "codigo": "2025971",
+                  "nombre": "Optimización",
+                  "creditos": 3,
+                  "obligatoria": false,
+                  "semestre": 6
+                },
+                {
+                  "codigo": "2015173",
+                  "nombre": "Introducción a la optimización",
+                  "creditos": 4,
+                  "obligatoria": false,
+                  "semestre": null
+                }
               ],
               "subagrupaciones": []
             }
@@ -334,7 +790,13 @@
           "nombre": "Contexto profesional e interdisciplinario",
           "creditos": 6,
           "materias": [
-            { "codigo": "2025975", "nombre": "Introducción a la ingeniería de sistemas y computación", "creditos": 3, "obligatoria": true, "semestre": 1 }
+            {
+              "codigo": "2025975",
+              "nombre": "Introducción a la ingeniería de sistemas y computación",
+              "creditos": 3,
+              "obligatoria": true,
+              "semestre": 1
+            }
           ],
           "subagrupaciones": [
             {
@@ -342,17 +804,83 @@
               "nombre": "Taller interdisciplinario de proyectos de creación y gestión",
               "creditos": 3,
               "materias": [
-                { "codigo": "2024045", "nombre": "Taller de proyectos interdisciplinarios", "creditos": 3, "obligatoria": false, "semestre": 8 },
-                { "codigo": "2016615", "nombre": "Taller de invención y creatividad", "creditos": 3, "obligatoria": false, "semestre": null },
-                { "codigo": "2016093", "nombre": "Taller de énfasis en animación y narrativas audiovisuales I", "creditos": 3, "obligatoria": false, "semestre": null },
-                { "codigo": "2016091", "nombre": "Taller de énfasis en multimedia e imagen digital I", "creditos": 3, "obligatoria": false, "semestre": null },
-                { "codigo": "2026551", "nombre": "Creación y gestión de empresas", "creditos": 3, "obligatoria": false, "semestre": null },
-                { "codigo": "2016600", "nombre": "Gestión tecnológica", "creditos": 3, "obligatoria": false, "semestre": null },
-                { "codigo": "2016599", "nombre": "Gestión de la ciencia, la tecnología y la innovación", "creditos": 3, "obligatoria": false, "semestre": null },
-                { "codigo": "2016741", "nombre": "Finanzas", "creditos": 3, "obligatoria": false, "semestre": null },
-                { "codigo": "2017275", "nombre": "Proyecto aplicado de ingeniería", "creditos": 4, "obligatoria": false, "semestre": null },
-                { "codigo": "2016007", "nombre": "Fundamentos de administración", "creditos": 4, "obligatoria": false, "semestre": null },
-                { "codigo": "2016037", "nombre": "Finanzas avanzadas", "creditos": 4, "obligatoria": false, "semestre": null }
+                {
+                  "codigo": "2024045",
+                  "nombre": "Taller de proyectos interdisciplinarios",
+                  "creditos": 3,
+                  "obligatoria": false,
+                  "semestre": 8
+                },
+                {
+                  "codigo": "2016615",
+                  "nombre": "Taller de invención y creatividad",
+                  "creditos": 3,
+                  "obligatoria": false,
+                  "semestre": null
+                },
+                {
+                  "codigo": "2016093",
+                  "nombre": "Taller de énfasis en animación y narrativas audiovisuales I",
+                  "creditos": 3,
+                  "obligatoria": false,
+                  "semestre": null
+                },
+                {
+                  "codigo": "2016091",
+                  "nombre": "Taller de énfasis en multimedia e imagen digital I",
+                  "creditos": 3,
+                  "obligatoria": false,
+                  "semestre": null
+                },
+                {
+                  "codigo": "2026551",
+                  "nombre": "Creación y gestión de empresas",
+                  "creditos": 3,
+                  "obligatoria": false,
+                  "semestre": null
+                },
+                {
+                  "codigo": "2016600",
+                  "nombre": "Gestión tecnológica",
+                  "creditos": 3,
+                  "obligatoria": false,
+                  "semestre": null
+                },
+                {
+                  "codigo": "2016599",
+                  "nombre": "Gestión de la ciencia, la tecnología y la innovación",
+                  "creditos": 3,
+                  "obligatoria": false,
+                  "semestre": null
+                },
+                {
+                  "codigo": "2016741",
+                  "nombre": "Finanzas",
+                  "creditos": 3,
+                  "obligatoria": false,
+                  "semestre": null
+                },
+                {
+                  "codigo": "2017275",
+                  "nombre": "Proyecto aplicado de ingeniería",
+                  "creditos": 4,
+                  "obligatoria": false,
+                  "semestre": null
+                },
+                {
+                  "codigo": "2016007",
+                  "nombre": "Fundamentos de administración",
+                  "creditos": 4,
+                  "obligatoria": false,
+                  "semestre": null
+                },
+                {
+                  "codigo": "2016037",
+                  "nombre": "Finanzas avanzadas",
+                  "creditos": 4,
+                  "obligatoria": false,
+                  "semestre": null
+                }
               ],
               "subagrupaciones": []
             }
@@ -363,9 +891,27 @@
           "nombre": "Trabajo de grado",
           "creditos": 6,
           "materias": [
-            { "codigo": "2025974", "nombre": "Trabajo de grado - Trabajo investigativo", "creditos": 6, "obligatoria": false, "semestre": null },
-            { "codigo": "2025973", "nombre": "Trabajo de grado - Práctica de extensión", "creditos": 6, "obligatoria": false, "semestre": null },
-            { "codigo": "2016843", "nombre": "Trabajo de grado - Asignaturas de posgrado", "creditos": 6, "obligatoria": false, "semestre": null }
+            {
+              "codigo": "2025974",
+              "nombre": "Trabajo de grado - Trabajo investigativo",
+              "creditos": 6,
+              "obligatoria": false,
+              "semestre": null
+            },
+            {
+              "codigo": "2025973",
+              "nombre": "Trabajo de grado - Práctica de extensión",
+              "creditos": 6,
+              "obligatoria": false,
+              "semestre": null
+            },
+            {
+              "codigo": "2016843",
+              "nombre": "Trabajo de grado - Asignaturas de posgrado",
+              "creditos": 6,
+              "obligatoria": false,
+              "semestre": null
+            }
           ],
           "subagrupaciones": []
         }
@@ -374,113 +920,848 @@
   ],
   "libreEleccion": {
     "creditos": 33,
-    "sugeridosPorSemestre": { "1": 2, "8": 3, "9": 16, "10": 12 }
+    "sugeridosPorSemestre": {
+      "1": 2,
+      "8": 3,
+      "9": 16,
+      "10": 12
+    },
+    "creditosPorMateria": 3,
+    "supuesto": "D9 del spike TT-05"
   },
   "prerrequisitos": [
-    { "materia": "1000004", "expresion": { "externa": "Matemáticas Básicas" } },
-    { "materia": "1000003", "expresion": { "alguna": ["1000004", "2016377"] } },
-    { "materia": "1000005", "expresion": { "alguna": ["1000004", "2016377"] } },
-    { "materia": "1000019", "expresion": { "alguna": ["1000004", "2016377"] } },
-    { "materia": "2016375", "expresion": { "alguna": ["2015734", "2026573"] } },
-    { "materia": "2016377", "expresion": { "externa": "Matemáticas Básicas" } },
-    { "materia": "2015555", "expresion": { "alguna": ["1000004", "2016377"] } },
-    { "materia": "2015556", "expresion": { "alguna": ["1000004", "2016377"] } },
-    { "materia": "1000006", "expresion": { "alguna": ["1000005", "2015556"] } },
-    { "materia": "1000017", "expresion": { "todas": ["1000019", { "alguna": ["1000005", "2015556"] }] } },
-    { "materia": "2016353", "expresion": "2016375" },
-    { "materia": "2016698", "expresion": "2025975" },
-    { "materia": "2025963", "expresion": { "alguna": ["1000003", "2015555"] } },
-    { "materia": "2015162", "expresion": { "alguna": ["1000005", "2015556"] } },
-    { "materia": "2015168", "expresion": { "alguna": ["1000003", "2015555"] } },
-    { "materia": "2016498", "expresion": { "externa": "Electrónica Análoga I" } },
-    { "materia": "2027641", "expresion": "2016375" },
-    { "materia": "1000013", "expresion": { "alguna": ["1000005", "2015556"] } },
-    { "materia": "2015703", "expresion": { "alguna": ["1000005", "2015556"] } },
-    { "materia": "2016697", "expresion": { "alguna": ["2016698", "2016498"] } },
-    { "materia": "2016699", "expresion": "2016375" },
-    { "materia": "2025964", "expresion": { "alguna": ["2025963", "2015168"] } },
-    { "materia": "2015178", "expresion": { "alguna": ["1000005", "2015556"] } },
-    { "materia": "2015181", "expresion": { "alguna": ["2025963", "2015168"] } },
-    { "materia": "2016047", "expresion": { "alguna": ["1000005", "2015556"] } },
-    { "materia": "2025986", "expresion": { "todas": [{ "alguna": ["1000005", "2015556"] }, { "alguna": ["1000013", "2027877", "2015178"] }] } },
-    { "materia": "2027877", "expresion": { "alguna": ["1000005", "2015556"] } },
-    { "materia": "2015174", "expresion": { "alguna": ["2025963", "2015168"] } },
-    { "materia": "2015702", "expresion": { "alguna": ["2015703", "2025986", "2016047"] } },
-    { "materia": "2016701", "expresion": { "todas": ["2016703", "2016699", { "alguna": ["2016353", "2027641"] }] } },
-    { "materia": "2025967", "expresion": { "todas": ["1000017", "2016699", "2016697"] } },
-    { "materia": "2025970", "expresion": { "todas": ["2016375", { "alguna": ["1000006", "2015162"] }, { "alguna": ["2025964", "2015181"] }, { "alguna": ["1000013", "2027877", "2015178"] }] } },
-    { "materia": "2016028", "expresion": { "alguna": ["2015703", "2025986", "2016047"] } },
-    { "materia": "2017293", "expresion": { "todas": ["2016375", { "alguna": ["1000006", "2015162"] }, { "alguna": ["2025964", "2015181"] }, { "alguna": ["1000013", "2027877", "2015178"] }] } },
-    { "materia": "2019082", "expresion": { "todas": ["2016375", { "alguna": ["1000006", "2015162"] }, { "alguna": ["2025964", "2015181"] }, { "alguna": ["1000013", "2027877", "2015178"] }] } },
-    { "materia": "2015970", "expresion": { "alguna": ["1000006", "2015162"] } },
-    { "materia": "2016696", "expresion": { "todas": ["2016699", { "alguna": ["2025964", "2015181"] }, { "alguna": ["1000013", "2027877", "2015178"] }] } },
-    { "materia": "2016702", "expresion": { "todas": ["2016701", "2025967"] } },
-    { "materia": "2016707", "expresion": "2016697" },
-    { "materia": "2025971", "expresion": { "alguna": ["2025970", "2019082", "2017293"] } },
-    { "materia": "2025982", "expresion": { "todas": ["2016703", { "alguna": ["2016353", "2027641"] }, { "alguna": ["2015702", "2016028"] }] } },
-    { "materia": "2015173", "expresion": { "alguna": ["2025970", "2019082", "2017293"] } },
-    { "materia": "2016053", "expresion": { "todas": ["2016703", { "alguna": ["2016353", "2027641"] }, { "alguna": ["2015702", "2016028"] }] } },
-    { "materia": "2019072", "expresion": { "alguna": ["1000006", "2015162"] } },
-    { "materia": "2016716", "expresion": "2016702" },
-    { "materia": "2025966", "expresion": { "todas": ["2016699", "2015174"] } },
-    { "materia": "2025969", "expresion": { "alguna": ["2025971", "2015173"] } },
-    { "materia": "2025983", "expresion": { "todas": ["2016702", "2025982"] } },
-    { "materia": "2025994", "expresion": { "todas": ["2025967", { "alguna": ["1000013", "2027877", "2015178"] }] } },
-    { "materia": "2025995", "expresion": "2016696" },
-    { "materia": "2016492", "expresion": { "externa": "Líneas y Antenas" } },
-    { "materia": "2016748", "expresion": "2016696" },
-    { "materia": "2017290", "expresion": "2016696" },
-    { "materia": "2023251", "expresion": "2016696" },
-    { "materia": "2027628", "expresion": { "todas": ["2016699", "2015174"] } },
-    { "materia": "2027631", "expresion": "2016696" },
-    { "materia": "2027642", "expresion": { "todas": ["2016699", "2015174"] } },
-    { "materia": "2028837", "expresion": "2016696" },
-    { "materia": "2016722", "expresion": "2016696" },
-    { "materia": "2024045", "expresion": { "alguna": ["2015702", "2016028"] } },
-    { "materia": "2025960", "expresion": "2016696" },
-    { "materia": "2025972", "expresion": "2016696" },
-    { "materia": "2016007", "expresion": { "alguna": ["2015702", "2016028"] } },
-    { "materia": "2016037", "expresion": { "alguna": ["2015702", "2016028"] } },
-    { "materia": "2016080", "expresion": "2016696" },
-    { "materia": "2016091", "expresion": { "alguna": ["2015702", "2016028"] } },
-    { "materia": "2016093", "expresion": { "alguna": ["2015702", "2016028"] } },
-    { "materia": "2016599", "expresion": { "alguna": ["2015702", "2016028"] } },
-    { "materia": "2016600", "expresion": { "alguna": ["2015702", "2016028"] } },
-    { "materia": "2016615", "expresion": { "alguna": ["2015702", "2016028"] } },
-    { "materia": "2016741", "expresion": { "alguna": ["2015702", "2016028"] } },
-    { "materia": "2016753", "expresion": "2016697" },
-    { "materia": "2016770", "expresion": { "todas": ["1000017", "2016697", "2016696"] } },
-    { "materia": "2016788", "expresion": "2016697" },
-    { "materia": "2017275", "expresion": { "alguna": ["2015702", "2016028"] } },
-    { "materia": "2025196", "expresion": "2016696" },
-    { "materia": "2026548", "expresion": "2016696" },
-    { "materia": "2026551", "expresion": { "alguna": ["2015702", "2016028"] } },
-    { "materia": "2027309", "expresion": "2016696" },
-    { "materia": "2027310", "expresion": "2016696" },
-    { "materia": "2027311", "expresion": "2016696" },
-    { "materia": "2027313", "expresion": "2016696" },
-    { "materia": "2029297", "expresion": "2016696" }
+    {
+      "materia": "1000004",
+      "expresion": {
+        "externa": "Matemáticas Básicas"
+      }
+    },
+    {
+      "materia": "1000003",
+      "expresion": {
+        "alguna": [
+          "1000004",
+          "2016377"
+        ]
+      }
+    },
+    {
+      "materia": "1000005",
+      "expresion": {
+        "alguna": [
+          "1000004",
+          "2016377"
+        ]
+      }
+    },
+    {
+      "materia": "1000019",
+      "expresion": {
+        "alguna": [
+          "1000004",
+          "2016377"
+        ]
+      }
+    },
+    {
+      "materia": "2016375",
+      "expresion": {
+        "alguna": [
+          "2015734",
+          "2026573"
+        ]
+      }
+    },
+    {
+      "materia": "2016377",
+      "expresion": {
+        "externa": "Matemáticas Básicas"
+      }
+    },
+    {
+      "materia": "2015555",
+      "expresion": {
+        "alguna": [
+          "1000004",
+          "2016377"
+        ]
+      }
+    },
+    {
+      "materia": "2015556",
+      "expresion": {
+        "alguna": [
+          "1000004",
+          "2016377"
+        ]
+      }
+    },
+    {
+      "materia": "1000006",
+      "expresion": {
+        "alguna": [
+          "1000005",
+          "2015556"
+        ]
+      }
+    },
+    {
+      "materia": "1000017",
+      "expresion": {
+        "todas": [
+          "1000019",
+          {
+            "alguna": [
+              "1000005",
+              "2015556"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "materia": "2016353",
+      "expresion": "2016375"
+    },
+    {
+      "materia": "2016698",
+      "expresion": "2025975"
+    },
+    {
+      "materia": "2025963",
+      "expresion": {
+        "alguna": [
+          "1000003",
+          "2015555"
+        ]
+      }
+    },
+    {
+      "materia": "2015162",
+      "expresion": {
+        "alguna": [
+          "1000005",
+          "2015556"
+        ]
+      }
+    },
+    {
+      "materia": "2015168",
+      "expresion": {
+        "alguna": [
+          "1000003",
+          "2015555"
+        ]
+      }
+    },
+    {
+      "materia": "2016498",
+      "expresion": {
+        "externa": "Electrónica Análoga I"
+      }
+    },
+    {
+      "materia": "2027641",
+      "expresion": "2016375"
+    },
+    {
+      "materia": "1000013",
+      "expresion": {
+        "alguna": [
+          "1000005",
+          "2015556"
+        ]
+      }
+    },
+    {
+      "materia": "2015703",
+      "expresion": {
+        "alguna": [
+          "1000005",
+          "2015556"
+        ]
+      }
+    },
+    {
+      "materia": "2016697",
+      "expresion": {
+        "alguna": [
+          "2016698",
+          "2016498"
+        ]
+      }
+    },
+    {
+      "materia": "2016699",
+      "expresion": "2016375"
+    },
+    {
+      "materia": "2025964",
+      "expresion": {
+        "alguna": [
+          "2025963",
+          "2015168"
+        ]
+      }
+    },
+    {
+      "materia": "2015178",
+      "expresion": {
+        "alguna": [
+          "1000005",
+          "2015556"
+        ]
+      }
+    },
+    {
+      "materia": "2015181",
+      "expresion": {
+        "alguna": [
+          "2025963",
+          "2015168"
+        ]
+      }
+    },
+    {
+      "materia": "2016047",
+      "expresion": {
+        "alguna": [
+          "1000005",
+          "2015556"
+        ]
+      }
+    },
+    {
+      "materia": "2025986",
+      "expresion": {
+        "todas": [
+          {
+            "alguna": [
+              "1000005",
+              "2015556"
+            ]
+          },
+          {
+            "alguna": [
+              "1000013",
+              "2027877",
+              "2015178"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "materia": "2027877",
+      "expresion": {
+        "alguna": [
+          "1000005",
+          "2015556"
+        ]
+      }
+    },
+    {
+      "materia": "2015174",
+      "expresion": {
+        "alguna": [
+          "2025963",
+          "2015168"
+        ]
+      }
+    },
+    {
+      "materia": "2015702",
+      "expresion": {
+        "alguna": [
+          "2015703",
+          "2025986",
+          "2016047"
+        ]
+      }
+    },
+    {
+      "materia": "2016701",
+      "expresion": {
+        "todas": [
+          "2016703",
+          "2016699",
+          {
+            "alguna": [
+              "2016353",
+              "2027641"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "materia": "2025967",
+      "expresion": {
+        "todas": [
+          "1000017",
+          "2016699",
+          "2016697"
+        ]
+      }
+    },
+    {
+      "materia": "2025970",
+      "expresion": {
+        "todas": [
+          "2016375",
+          {
+            "alguna": [
+              "1000006",
+              "2015162"
+            ]
+          },
+          {
+            "alguna": [
+              "2025964",
+              "2015181"
+            ]
+          },
+          {
+            "alguna": [
+              "1000013",
+              "2027877",
+              "2015178"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "materia": "2016028",
+      "expresion": {
+        "alguna": [
+          "2015703",
+          "2025986",
+          "2016047"
+        ]
+      }
+    },
+    {
+      "materia": "2017293",
+      "expresion": {
+        "todas": [
+          "2016375",
+          {
+            "alguna": [
+              "1000006",
+              "2015162"
+            ]
+          },
+          {
+            "alguna": [
+              "2025964",
+              "2015181"
+            ]
+          },
+          {
+            "alguna": [
+              "1000013",
+              "2027877",
+              "2015178"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "materia": "2019082",
+      "expresion": {
+        "todas": [
+          "2016375",
+          {
+            "alguna": [
+              "1000006",
+              "2015162"
+            ]
+          },
+          {
+            "alguna": [
+              "2025964",
+              "2015181"
+            ]
+          },
+          {
+            "alguna": [
+              "1000013",
+              "2027877",
+              "2015178"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "materia": "2015970",
+      "expresion": {
+        "alguna": [
+          "1000006",
+          "2015162"
+        ]
+      }
+    },
+    {
+      "materia": "2016696",
+      "expresion": {
+        "todas": [
+          "2016699",
+          {
+            "alguna": [
+              "2025964",
+              "2015181"
+            ]
+          },
+          {
+            "alguna": [
+              "1000013",
+              "2027877",
+              "2015178"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "materia": "2016702",
+      "expresion": {
+        "todas": [
+          "2016701",
+          "2025967"
+        ]
+      }
+    },
+    {
+      "materia": "2016707",
+      "expresion": "2016697"
+    },
+    {
+      "materia": "2025971",
+      "expresion": {
+        "alguna": [
+          "2025970",
+          "2019082",
+          "2017293"
+        ]
+      }
+    },
+    {
+      "materia": "2025982",
+      "expresion": {
+        "todas": [
+          "2016703",
+          {
+            "alguna": [
+              "2016353",
+              "2027641"
+            ]
+          },
+          {
+            "alguna": [
+              "2015702",
+              "2016028"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "materia": "2015173",
+      "expresion": {
+        "alguna": [
+          "2025970",
+          "2019082",
+          "2017293"
+        ]
+      }
+    },
+    {
+      "materia": "2016053",
+      "expresion": {
+        "todas": [
+          "2016703",
+          {
+            "alguna": [
+              "2016353",
+              "2027641"
+            ]
+          },
+          {
+            "alguna": [
+              "2015702",
+              "2016028"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "materia": "2019072",
+      "expresion": {
+        "alguna": [
+          "1000006",
+          "2015162"
+        ]
+      }
+    },
+    {
+      "materia": "2016716",
+      "expresion": "2016702"
+    },
+    {
+      "materia": "2025966",
+      "expresion": {
+        "todas": [
+          "2016699",
+          "2015174"
+        ]
+      }
+    },
+    {
+      "materia": "2025969",
+      "expresion": {
+        "alguna": [
+          "2025971",
+          "2015173"
+        ]
+      }
+    },
+    {
+      "materia": "2025983",
+      "expresion": {
+        "todas": [
+          "2016702",
+          "2025982"
+        ]
+      }
+    },
+    {
+      "materia": "2025994",
+      "expresion": {
+        "todas": [
+          "2025967",
+          {
+            "alguna": [
+              "1000013",
+              "2027877",
+              "2015178"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "materia": "2025995",
+      "expresion": "2016696"
+    },
+    {
+      "materia": "2016492",
+      "expresion": {
+        "externa": "Líneas y Antenas"
+      }
+    },
+    {
+      "materia": "2016748",
+      "expresion": "2016696"
+    },
+    {
+      "materia": "2017290",
+      "expresion": "2016696"
+    },
+    {
+      "materia": "2023251",
+      "expresion": "2016696"
+    },
+    {
+      "materia": "2027628",
+      "expresion": {
+        "todas": [
+          "2016699",
+          "2015174"
+        ]
+      }
+    },
+    {
+      "materia": "2027631",
+      "expresion": "2016696"
+    },
+    {
+      "materia": "2027642",
+      "expresion": {
+        "todas": [
+          "2016699",
+          "2015174"
+        ]
+      }
+    },
+    {
+      "materia": "2028837",
+      "expresion": "2016696"
+    },
+    {
+      "materia": "2016722",
+      "expresion": "2016696"
+    },
+    {
+      "materia": "2024045",
+      "expresion": {
+        "alguna": [
+          "2015702",
+          "2016028"
+        ]
+      }
+    },
+    {
+      "materia": "2025960",
+      "expresion": "2016696"
+    },
+    {
+      "materia": "2025972",
+      "expresion": "2016696"
+    },
+    {
+      "materia": "2016007",
+      "expresion": {
+        "alguna": [
+          "2015702",
+          "2016028"
+        ]
+      }
+    },
+    {
+      "materia": "2016037",
+      "expresion": {
+        "alguna": [
+          "2015702",
+          "2016028"
+        ]
+      }
+    },
+    {
+      "materia": "2016080",
+      "expresion": "2016696"
+    },
+    {
+      "materia": "2016091",
+      "expresion": {
+        "alguna": [
+          "2015702",
+          "2016028"
+        ]
+      }
+    },
+    {
+      "materia": "2016093",
+      "expresion": {
+        "alguna": [
+          "2015702",
+          "2016028"
+        ]
+      }
+    },
+    {
+      "materia": "2016599",
+      "expresion": {
+        "alguna": [
+          "2015702",
+          "2016028"
+        ]
+      }
+    },
+    {
+      "materia": "2016600",
+      "expresion": {
+        "alguna": [
+          "2015702",
+          "2016028"
+        ]
+      }
+    },
+    {
+      "materia": "2016615",
+      "expresion": {
+        "alguna": [
+          "2015702",
+          "2016028"
+        ]
+      }
+    },
+    {
+      "materia": "2016741",
+      "expresion": {
+        "alguna": [
+          "2015702",
+          "2016028"
+        ]
+      }
+    },
+    {
+      "materia": "2016753",
+      "expresion": "2016697"
+    },
+    {
+      "materia": "2016770",
+      "expresion": {
+        "todas": [
+          "1000017",
+          "2016697",
+          "2016696"
+        ]
+      }
+    },
+    {
+      "materia": "2016788",
+      "expresion": "2016697"
+    },
+    {
+      "materia": "2017275",
+      "expresion": {
+        "alguna": [
+          "2015702",
+          "2016028"
+        ]
+      }
+    },
+    {
+      "materia": "2025196",
+      "expresion": "2016696"
+    },
+    {
+      "materia": "2026548",
+      "expresion": "2016696"
+    },
+    {
+      "materia": "2026551",
+      "expresion": {
+        "alguna": [
+          "2015702",
+          "2016028"
+        ]
+      }
+    },
+    {
+      "materia": "2027309",
+      "expresion": "2016696"
+    },
+    {
+      "materia": "2027310",
+      "expresion": "2016696"
+    },
+    {
+      "materia": "2027311",
+      "expresion": "2016696"
+    },
+    {
+      "materia": "2027313",
+      "expresion": "2016696"
+    },
+    {
+      "materia": "2029297",
+      "expresion": "2016696"
+    }
   ],
   "correquisitos": [],
   "habilitaciones": [
-    { "materia": "2024045", "medida": "COMPONENTE", "componente": "DISCIPLINAR", "creditos": 40 },
-    { "materia": "2016615", "medida": "COMPONENTE", "componente": "DISCIPLINAR", "creditos": 40 },
-    { "materia": "2016093", "medida": "COMPONENTE", "componente": "DISCIPLINAR", "creditos": 40 },
-    { "materia": "2016091", "medida": "COMPONENTE", "componente": "DISCIPLINAR", "creditos": 40 },
-    { "materia": "2026551", "medida": "COMPONENTE", "componente": "DISCIPLINAR", "creditos": 40 },
-    { "materia": "2016600", "medida": "COMPONENTE", "componente": "DISCIPLINAR", "creditos": 40 },
-    { "materia": "2016599", "medida": "COMPONENTE", "componente": "DISCIPLINAR", "creditos": 40 },
-    { "materia": "2016741", "medida": "COMPONENTE", "componente": "DISCIPLINAR", "creditos": 40 },
-    { "materia": "2017275", "medida": "COMPONENTE", "componente": "DISCIPLINAR", "creditos": 40 },
-    { "materia": "2016007", "medida": "COMPONENTE", "componente": "DISCIPLINAR", "creditos": 40 },
-    { "materia": "2016037", "medida": "COMPONENTE", "componente": "DISCIPLINAR", "creditos": 40 },
-    { "materia": "2025974", "medida": "COMPONENTE", "componente": "DISCIPLINAR", "creditos": 60 },
-    { "materia": "2025973", "medida": "COMPONENTE", "componente": "DISCIPLINAR", "creditos": 60 },
-    { "materia": "2016843", "medida": "COMPONENTE", "componente": "DISCIPLINAR", "creditos": 60 }
+    {
+      "materia": "2024045",
+      "medida": "COMPONENTE",
+      "componente": "DISCIPLINAR",
+      "creditos": 40
+    },
+    {
+      "materia": "2016615",
+      "medida": "COMPONENTE",
+      "componente": "DISCIPLINAR",
+      "creditos": 40
+    },
+    {
+      "materia": "2016093",
+      "medida": "COMPONENTE",
+      "componente": "DISCIPLINAR",
+      "creditos": 40
+    },
+    {
+      "materia": "2016091",
+      "medida": "COMPONENTE",
+      "componente": "DISCIPLINAR",
+      "creditos": 40
+    },
+    {
+      "materia": "2026551",
+      "medida": "COMPONENTE",
+      "componente": "DISCIPLINAR",
+      "creditos": 40
+    },
+    {
+      "materia": "2016600",
+      "medida": "COMPONENTE",
+      "componente": "DISCIPLINAR",
+      "creditos": 40
+    },
+    {
+      "materia": "2016599",
+      "medida": "COMPONENTE",
+      "componente": "DISCIPLINAR",
+      "creditos": 40
+    },
+    {
+      "materia": "2016741",
+      "medida": "COMPONENTE",
+      "componente": "DISCIPLINAR",
+      "creditos": 40
+    },
+    {
+      "materia": "2017275",
+      "medida": "COMPONENTE",
+      "componente": "DISCIPLINAR",
+      "creditos": 40
+    },
+    {
+      "materia": "2016007",
+      "medida": "COMPONENTE",
+      "componente": "DISCIPLINAR",
+      "creditos": 40
+    },
+    {
+      "materia": "2016037",
+      "medida": "COMPONENTE",
+      "componente": "DISCIPLINAR",
+      "creditos": 40
+    },
+    {
+      "materia": "2025974",
+      "medida": "COMPONENTE",
+      "componente": "DISCIPLINAR",
+      "creditos": 60
+    },
+    {
+      "materia": "2025973",
+      "medida": "COMPONENTE",
+      "componente": "DISCIPLINAR",
+      "creditos": 60
+    },
+    {
+      "materia": "2016843",
+      "medida": "COMPONENTE",
+      "componente": "DISCIPLINAR",
+      "creditos": 60
+    }
   ],
   "externas": [
-    { "nombre": "Matemáticas Básicas", "tipo": "NIVELACION" },
-    { "nombre": "Electrónica Análoga I", "tipo": "OTRO_PROGRAMA" },
-    { "nombre": "Líneas y Antenas", "tipo": "OTRO_PROGRAMA" }
+    {
+      "nombre": "Matemáticas Básicas",
+      "tipo": "NIVELACION"
+    },
+    {
+      "nombre": "Electrónica Análoga I",
+      "tipo": "OTRO_PROGRAMA"
+    },
+    {
+      "nombre": "Líneas y Antenas",
+      "tipo": "OTRO_PROGRAMA"
+    }
   ]
 }

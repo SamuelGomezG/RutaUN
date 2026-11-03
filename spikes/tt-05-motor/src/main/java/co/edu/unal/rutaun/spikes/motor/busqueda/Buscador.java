@@ -154,20 +154,7 @@ public final class Buscador {
       return false;
     }
 
-    long[] utiles = new long[ConjuntoDeMaterias.palabrasNecesarias(n)];
-    long[] palabrasRequeridas = modelo.requeridas().palabras();
-    for (int i = 0; i < n; i++) {
-      if ((palabrasRequeridas[i >>> 6] & (1L << (i & 63))) == 0 || D.contiene(i)) {
-        continue;
-      }
-      for (long[] clausula : modelo.prerrequisitos(i)) {
-        if (!D.contieneAlguna(clausula)) {
-          for (int j = 0; j < utiles.length; j++) {
-            utiles[j] |= clausula[j];
-          }
-        }
-      }
-    }
+    long[] utiles = Seleccion.clausulasUtiles(modelo, D, restricciones);
 
     List<Integer> candidatos = new ArrayList<>();
     for (int i = 0; i < n; i++) {
@@ -177,7 +164,7 @@ public final class Buscador {
       if (restricciones.excluidas.contiene(i)) {
         continue;
       }
-      boolean requerida = esRequerida(i);
+      boolean requerida = Seleccion.esRequerida(i, modelo, restricciones);
       if (!requerida) {
         boolean porAgrupacion = false;
         for (int grupo : modelo.gruposDeMateria(i)) {
@@ -225,19 +212,17 @@ public final class Buscador {
       clase.sort(Integer::compareTo);
     }
     clases.sort(
-        Comparator.comparingInt((List<Integer> clase) -> esRequerida(clase.get(0)) ? 0 : 1)
+        Comparator.comparingInt(
+                (List<Integer> clase) ->
+                    Seleccion.esRequerida(clase.get(0), modelo, restricciones) ? 0 : 1)
             .thenComparingInt(clase -> clase.stream().mapToInt(modelo::creditos).min().orElse(0))
             .thenComparingInt(clase -> clase.get(0)));
     return clases;
   }
 
-  private boolean esRequerida(int materia) {
-    return modelo.requeridas().contiene(materia)
-        || restricciones.obligatoriasExtra.contiene(materia);
-  }
-
   private String claveClase(int materia) {
-    if (esRequerida(materia) || modelo.gruposDeMateria(materia).length != 1) {
+    if (Seleccion.esRequerida(materia, modelo, restricciones)
+        || modelo.gruposDeMateria(materia).length != 1) {
       return "U" + materia;
     }
     int grupo = modelo.gruposDeMateria(materia)[0];
@@ -289,7 +274,7 @@ public final class Buscador {
     }
     List<Integer> clase = clases.get(indice);
     int maximo = clase.size();
-    if (!esRequerida(clase.get(0))) {
+    if (!Seleccion.esRequerida(clase.get(0), modelo, restricciones)) {
       maximo = Math.min(maximo, maximoUtil(clase));
     }
     while (maximo > 0
@@ -358,20 +343,7 @@ public final class Buscador {
     for (int i = 0; i < seleccion.size(); i++) {
       int materia = seleccion.get(i);
       asignacionesPrevias[i] = asignacion[materia];
-      if (asignacion[materia] < 0) {
-        int mejorGrupo = -1;
-        int mejorFaltan = -1;
-        for (int grupo : modelo.gruposDeMateria(materia)) {
-          int faltan = modelo.faltan(grupo, DX, asignacion, extraRequeridas);
-          if (faltan > mejorFaltan) {
-            mejorFaltan = faltan;
-            mejorGrupo = grupo;
-          }
-        }
-        if (mejorGrupo >= 0) {
-          asignacion[materia] = mejorGrupo;
-        }
-      }
+      Seleccion.elegirAgrupacion(modelo, materia, DX, asignacion, restricciones);
     }
 
     int maximoBloque = Math.min(libre, tope.limiteCreditos() - creditosX);
@@ -380,14 +352,15 @@ public final class Buscador {
         metricas.cancelada = true;
         return false;
       }
-      if (libreInicial >= 3) {
-        if (b > 0 && b < 3) {
+      int creditosPorMateria = modelo.creditosPorMateriaLibre();
+      if (libreInicial >= creditosPorMateria) {
+        if (b > 0 && b < creditosPorMateria) {
           continue;
         }
       } else if (b > 0 && b != libreInicial) {
         continue;
       }
-      if (materiasX + ceilDiv(b, 3) > tope.limiteMaterias()) {
+      if (materiasX + Math.ceilDiv(b, modelo.creditosPorMateriaLibre()) > tope.limiteMaterias()) {
         continue;
       }
       if (creditosX + b == 0) {
@@ -539,10 +512,6 @@ public final class Buscador {
       }
     }
     return false;
-  }
-
-  private static int ceilDiv(int numerador, int denominador) {
-    return (numerador + denominador - 1) / denominador;
   }
 
   private static final class Estado {

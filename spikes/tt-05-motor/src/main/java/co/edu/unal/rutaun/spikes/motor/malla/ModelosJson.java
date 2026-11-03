@@ -47,7 +47,8 @@ public final class ModelosJson {
       String codigo, String nombre, int creditos, boolean obligatoria, Integer semestre) {}
 
   /** Créditos de libre elección. */
-  public record LibreEleccionJson(int creditos, Map<String, Integer> sugeridosPorSemestre) {}
+  public record LibreEleccionJson(
+      int creditos, int creditosPorMateria, Map<String, Integer> sugeridosPorSemestre) {}
 
   /** Prerrequisito de una materia. */
   public record PrerrequisitoJson(String materia, ExpresionJson expresion) {}
