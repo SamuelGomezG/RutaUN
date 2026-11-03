@@ -15,7 +15,7 @@ public final class CalculoDelPlan {
   private final int libreInicial;
   private final Tope tope;
   private final Cancelacion cancelacion;
-  private final int n;
+  private final int cantidadMaterias;
   private final Metricas metricas = new Metricas();
 
   public CalculoDelPlan(
@@ -26,8 +26,8 @@ public final class CalculoDelPlan {
     this.modelo = modelo;
     this.tope = tope;
     this.cancelacion = cancelacion;
-    this.n = modelo.cantidadMaterias();
-    this.a0 = new ConjuntoDeMaterias(n);
+    this.cantidadMaterias = modelo.cantidadMaterias();
+    this.a0 = new ConjuntoDeMaterias(cantidadMaterias);
     for (String codigo : escenario.aprobadas()) {
       this.a0.agregar(indice(codigo));
     }
@@ -55,7 +55,9 @@ public final class CalculoDelPlan {
       return tiempoAgotado(inicio);
     }
     int[] asignacionInicial = modelo.asignacionInicial();
-    Cotas cotas = new Cotas(modelo, tope, libreInicial, new ConjuntoDeMaterias(n), cancelacion);
+    Cotas cotas =
+        new Cotas(
+            modelo, tope, libreInicial, new ConjuntoDeMaterias(cantidadMaterias), cancelacion);
     int cota = cotas.cotaInferior(a0, libreInicial, asignacionInicial);
     if (cota >= ModeloDeCalculo.INFINITO) {
       if (cancelacion.cancelado()) {
@@ -63,13 +65,13 @@ public final class CalculoDelPlan {
       }
       return new ResultadoCalculo.SinPlanPosible("La cota inferior no es finita");
     }
-    int kMax = Math.max(cota, kMaximo(asignacionInicial));
+    int maximoSemestres = Math.max(cota, kMaximo(asignacionInicial));
     int k = -1;
-    for (int candidato = Math.max(1, cota); candidato <= kMax; candidato++) {
+    for (int candidato = Math.max(1, cota); candidato <= maximoSemestres; candidato++) {
       if (cancelacion.cancelado()) {
         return tiempoAgotado(inicio);
       }
-      Restricciones base = new Restricciones(n);
+      Restricciones base = new Restricciones(cantidadMaterias);
       ResultadoBusqueda resultado = buscar(candidato, base, false);
       if (resultado.cancelada()) {
         return tiempoAgotado(inicio);
@@ -80,12 +82,12 @@ public final class CalculoDelPlan {
       }
     }
     if (k < 0) {
-      return new ResultadoCalculo.SinPlanPosible("No existe plan dentro de kMax");
+      return new ResultadoCalculo.SinPlanPosible("No existe plan dentro de maximoSemestres");
     }
-    long msExistencia = (System.nanoTime() - inicio) / 1_000_000L;
-    long inicioOptimos = System.nanoTime();
+    final long msExistencia = (System.nanoTime() - inicio) / 1_000_000L;
+    final long inicioOptimos = System.nanoTime();
 
-    Restricciones base = new Restricciones(n);
+    Restricciones base = new Restricciones(cantidadMaterias);
     base.maxSemestres = k;
 
     // c2: menos semestres con marca de autorización.
@@ -132,10 +134,10 @@ public final class CalculoDelPlan {
 
     // c4: lista de optativas elegidas, en orden del consolidado, lexicográficamente menor.
     base.soloIncluidas = false;
-    base.incluidas = new ConjuntoDeMaterias(n);
-    base.obligatoriasExtra = new ConjuntoDeMaterias(n);
-    base.excluidas = new ConjuntoDeMaterias(n);
-    for (int materia = 0; materia < n; materia++) {
+    base.incluidas = new ConjuntoDeMaterias(cantidadMaterias);
+    base.obligatoriasExtra = new ConjuntoDeMaterias(cantidadMaterias);
+    base.excluidas = new ConjuntoDeMaterias(cantidadMaterias);
+    for (int materia = 0; materia < cantidadMaterias; materia++) {
       if (cancelacion.cancelado()) {
         return tiempoAgotado(inicio);
       }
@@ -214,7 +216,7 @@ public final class CalculoDelPlan {
   private int kMaximo(int[] asignacionInicial) {
     int pendientes = 0;
     long[] palabras = modelo.requeridas().palabras();
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < cantidadMaterias; i++) {
       if ((palabras[i >>> 6] & (1L << (i & 63))) != 0 && !a0.contiene(i)) {
         pendientes++;
       }

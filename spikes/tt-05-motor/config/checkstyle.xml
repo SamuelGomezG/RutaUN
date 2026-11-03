@@ -55,6 +55,12 @@
     <property name="message" value="Trailing whitespace is not allowed"/>
   </module>
 
+  <module name="LineLength">
+    <property name="fileExtensions" value="java"/>
+    <property name="max" value="100"/>
+    <property name="ignorePattern"
+             value="^package.*|^import.*|href\s*=\s*&quot;[^&quot;]*&quot;|http://|https://|ftp://"/>
+  </module>
   <!--  Suppression to prevent LineLength Check from flagging lines in Text-blocks -->
   <module name="SuppressWithPlainTextCommentFilter">
     <property name="checkFormat" value="LineLength"/>
@@ -179,9 +185,7 @@
       <property name="treatTryResourcesAsStatement" value="true"/>
     </module>
     <module name="MultipleVariableDeclarations"/>
-    <module name="JavadocLeadingAsteriskAlign"/>
-    <module name="JavadocMissingLeadingAsterisk"/>
-    <module name="JavadocContentLocation"/>
+    <module name="ArrayTypeStyle"/>
     <module name="MissingSwitchDefault"/>
     <module name="FallThrough"/>
     <module name="UpperEll"/>
@@ -239,6 +243,12 @@
       <message key="name.invalidPattern"
              value="Type name ''{0}'' must match pattern ''{1}''."/>
     </module>
+    <module name="GoogleNonConstantFieldName"/>
+    <module name="ParameterName">
+      <property name="format" value="^[a-z]([a-z0-9][a-zA-Z0-9]*)?$"/>
+      <message key="name.invalidPattern"
+             value="Parameter name ''{0}'' must match pattern ''{1}''."/>
+    </module>
     <module name="LambdaParameterName">
       <property name="format" value="^(_|[a-z]([a-z0-9][a-zA-Z0-9]*)?)$"/>
       <message key="name.invalidPattern"
@@ -253,6 +263,12 @@
       <property name="format" value="^[a-z]([a-z0-9][a-zA-Z0-9]*)?$"/>
       <message key="name.invalidPattern"
                value="Record component name ''{0}'' must match pattern ''{1}''."/>
+    </module>
+    <module name="LocalVariableName">
+      <property name="format"
+                value="^(_|[a-z](?=[a-z0-9]|$)(?:[a-zA-Z]|[0-9]+(?:_[0-9]+)*)*)$"/>
+      <message key="name.invalidPattern"
+             value="Local variable name ''{0}'' must match pattern ''{1}''."/>
     </module>
     <module name="LocalFinalVariableName">
       <property name="format"
@@ -306,9 +322,20 @@
       <property name="arrayInitIndent" value="2"/>
     </module>
 
+    <module name="AbbreviationAsWordInName">
+      <!-- RutaUN: los nombres de pruebas llevan IDs del SRS con siglas
+           (H2, JSON, UCnn); se permiten hasta 4 letras seguidas. -->
+      <property name="ignoreFinal" value="false"/>
+      <property name="allowedAbbreviationLength" value="3"/>
+      <property name="tokens"
+               value="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, ANNOTATION_DEF, ANNOTATION_FIELD_DEF,
+                    PARAMETER_DEF, VARIABLE_DEF, METHOD_DEF, PATTERN_VARIABLE_DEF, RECORD_DEF,
+                    RECORD_COMPONENT_DEF"/>
+    </module>
     <module name="NoWhitespaceBeforeCaseDefaultColon"/>
     <module name="OverloadMethodsDeclarationOrder"/>
     <module name="ConstructorsDeclarationGrouping"/>
+    <module name="VariableDeclarationUsageDistance"/>
     <module name="CustomImportOrder">
       <property name="sortImportsInGroupAlphabetically" value="true"/>
       <property name="separateLineBetweenGroups" value="true"/>
@@ -371,9 +398,6 @@
     </module>
     <module name="MissingOverrideOnRecordAccessor"/>
     <module name="NonEmptyAtclauseDescription"/>
-    <module name="InvalidJavadocPosition"/>
-    <module name="JavadocTagContinuationIndentation"/>
-    <module name="RequireEmptyLineBeforeBlockTagGroup"/>
     <module name="SuppressionXpathSingleFilter">
       <property name="checks" value="MissingJavadocMethod"/>
       <property name="query" value="//*[self::METHOD_DEF or self::CTOR_DEF
@@ -395,7 +419,6 @@
                                    ]/IDENT"/>
       <property name="message" value="'[a-z][a-z0-9][a-zA-Z0-9]*(?:_[a-z][a-z0-9][a-zA-Z0-9]*)*'"/>
     </module>
-    <module name="SingleLineJavadoc"/>
     <module name="TodoComment">
       <property name="id" value="TodoFormat"/>
       <property name="format" value="^[ \t]*(?!TODO:)(?i:TODO)\b:?"/>

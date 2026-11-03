@@ -5,7 +5,7 @@ import java.util.Arrays;
 /** Plan encontrado: semestre de cada materia, bloque de libre elección y métricas de desempate. */
 public final class Plan {
 
-  private final int k;
+  private final int semestres;
   private final int[] semestrePorMateria;
   private final int[] asignacion;
   private final int[] bloquePorSemestre;
@@ -14,14 +14,14 @@ public final class Plan {
   private final int[] creditosPorSemestre;
 
   public Plan(
-      int k,
+      int semestres,
       int[] semestrePorMateria,
       int[] asignacion,
       int[] bloquePorSemestre,
       int marcados,
       int creditosOptativas,
       int[] creditosPorSemestre) {
-    this.k = k;
+    this.semestres = semestres;
     this.semestrePorMateria = semestrePorMateria.clone();
     this.asignacion = asignacion.clone();
     this.bloquePorSemestre = bloquePorSemestre.clone();
@@ -31,7 +31,7 @@ public final class Plan {
   }
 
   public int k() {
-    return k;
+    return semestres;
   }
 
   public int[] semestrePorMateria() {
@@ -60,7 +60,7 @@ public final class Plan {
 
   /** Huella estable del plan para las pruebas de determinismo. */
   public int huella() {
-    int resultado = 31 * k + Arrays.hashCode(semestrePorMateria);
+    int resultado = 31 * semestres + Arrays.hashCode(semestrePorMateria);
     resultado = 31 * resultado + Arrays.hashCode(bloquePorSemestre);
     resultado = 31 * resultado + Arrays.hashCode(asignacion);
     resultado = 31 * resultado + marcados;

@@ -1,8 +1,7 @@
-package co.edu.unal.rutaun.spikes.motor;
+package co.edu.unal.rutaun.spikes.motor.modelo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import co.edu.unal.rutaun.spikes.motor.modelo.ConjuntoDeMaterias;
 import org.junit.jupiter.api.Test;
 
 class ConjuntoDeMateriasTest {

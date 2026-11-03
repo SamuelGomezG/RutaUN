@@ -29,7 +29,7 @@ public final class Cotas {
     this.cancelacion = cancelacion;
   }
 
-  public int cotaInferior(ConjuntoDeMaterias D, int L, int[] asignacion) {
+  public int cotaInferior(ConjuntoDeMaterias cursadas, int libreRestante, int[] asignacion) {
     if (cancelacion.cancelado()) {
       return ModeloDeCalculo.INFINITO;
     }
@@ -44,18 +44,20 @@ public final class Cotas {
       if (cancelacion.cancelado()) {
         return ModeloDeCalculo.INFINITO;
       }
-      if ((palabras[i >>> 6] & (1L << (i & 63))) == 0 || D.contiene(i)) {
+      if ((palabras[i >>> 6] & (1L << (i & 63))) == 0 || cursadas.contiene(i)) {
         continue;
       }
       creditosPendientes += modelo.creditos(i);
       materiasPendientes++;
-      int profundidad = modelo.profundidad(i, D, memo);
+      int profundidad = modelo.profundidad(i, cursadas, memo);
       if (profundidad >= ModeloDeCalculo.INFINITO) {
         return ModeloDeCalculo.INFINITO;
       }
       cadena = Math.max(cadena, profundidad);
       for (Habilitacion habilitacion : modelo.habilitaciones(i)) {
-        int actual = modelo.creditosMedida(habilitacion.medida(), D, libreInicial - L, asignacion);
+        int actual =
+            modelo.creditosMedida(
+                habilitacion.medida(), cursadas, libreInicial - libreRestante, asignacion);
         if (actual < habilitacion.umbral()) {
           int extra = habilitacion.umbral() - actual;
           int semestres =
@@ -71,9 +73,9 @@ public final class Cotas {
     long materiasOptativas = 0;
     for (ModeloDeCalculo.Grupo grupo : modelo.grupos()) {
       int minCreditos =
-          modelo.minimoCreditosOptativos(grupo.indice(), D, asignacion, extraRequeridas);
+          modelo.minimoCreditosOptativos(grupo.indice(), cursadas, asignacion, extraRequeridas);
       int minMaterias =
-          modelo.minimoMateriasOptativas(grupo.indice(), D, asignacion, extraRequeridas);
+          modelo.minimoMateriasOptativas(grupo.indice(), cursadas, asignacion, extraRequeridas);
       if (minCreditos >= ModeloDeCalculo.INFINITO || minMaterias >= ModeloDeCalculo.INFINITO) {
         return ModeloDeCalculo.INFINITO;
       }
@@ -81,11 +83,11 @@ public final class Cotas {
       materiasOptativas += minMaterias;
     }
 
-    long totalCreditos = creditosPendientes + creditosOptativos + L;
+    long totalCreditos = creditosPendientes + creditosOptativos + libreRestante;
     long totalMaterias =
         materiasPendientes
             + materiasOptativas
-            + Math.ceilDiv((long) L, (long) modelo.creditosPorMateriaLibre());
+            + Math.ceilDiv((long) libreRestante, (long) modelo.creditosPorMateriaLibre());
     int cotaCreditos =
         tope.tieneLimiteCreditos()
             ? (int) Math.ceilDiv(totalCreditos, (long) tope.limiteCreditos())

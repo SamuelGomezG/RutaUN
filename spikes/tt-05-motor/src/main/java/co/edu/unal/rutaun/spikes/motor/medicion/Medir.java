@@ -205,7 +205,7 @@ public final class Medir {
     fila.msTotal = msTotal;
     if (resultado instanceof ResultadoCalculo.Calculado calculado) {
       fila.resultado = "calculado";
-      fila.k = calculado.plan().k();
+      fila.semestres = calculado.plan().k();
       fila.c2 = calculado.plan().marcados();
       fila.c3 = calculado.plan().creditosOptativas();
       int optativas = 0;
@@ -247,13 +247,14 @@ public final class Medir {
 
   private static void imprimir(Fila fila) {
     System.out.printf(
-        "%-16s %-4s %-2s #%d: %-12s k=%s c2=%s c3=%s opt=%s bloques=%s ms=%d (exist=%s opt=%s) nodos=%s memo=%s llamadas=%s huella=%s ver=%s%n",
+        "%-16s %-4s %-2s #%d: %-12s k=%s c2=%s c3=%s opt=%s bloques=%s "
+            + "ms=%d (exist=%s opt=%s) nodos=%s memo=%s llamadas=%s huella=%s ver=%s%n",
         fila.fase,
         fila.escenario,
         fila.tope,
         fila.corrida,
         fila.resultado,
-        fila.k,
+        fila.semestres,
         fila.c2,
         fila.c3,
         fila.optativas,
@@ -271,7 +272,8 @@ public final class Medir {
   private static void escribirCsv() {
     StringBuilder csv = new StringBuilder();
     csv.append(
-        "fase,escenario,tope,corrida,resultado,k,c2,c3,optativas,bloques,ms_existencia,ms_optimos,ms_total,nodos,memo,llamadas,huella,verificador\n");
+        "fase,escenario,tope,corrida,resultado,k,c2,c3,optativas,bloques,"
+            + "ms_existencia,ms_optimos,ms_total,nodos,memo,llamadas,huella,verificador\n");
     for (Fila fila : filas) {
       csv.append(fila.fase)
           .append(',')
@@ -283,7 +285,7 @@ public final class Medir {
           .append(',')
           .append(fila.resultado)
           .append(',')
-          .append(valor(fila.k))
+          .append(valor(fila.semestres))
           .append(',')
           .append(valor(fila.c2))
           .append(',')
@@ -445,7 +447,7 @@ public final class Medir {
     private String tope;
     private int corrida;
     private String resultado;
-    private Integer k;
+    private Integer semestres;
     private Integer c2;
     private Integer c3;
     private Integer optativas;

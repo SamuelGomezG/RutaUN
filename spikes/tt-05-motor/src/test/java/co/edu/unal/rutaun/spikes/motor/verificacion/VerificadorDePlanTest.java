@@ -1,21 +1,20 @@
-package co.edu.unal.rutaun.spikes.motor;
+package co.edu.unal.rutaun.spikes.motor.verificacion;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import co.edu.unal.rutaun.spikes.motor.Rutas;
 import co.edu.unal.rutaun.spikes.motor.busqueda.Plan;
 import co.edu.unal.rutaun.spikes.motor.busqueda.Tope;
 import co.edu.unal.rutaun.spikes.motor.malla.LectorDeMalla;
 import co.edu.unal.rutaun.spikes.motor.malla.ModelosJson;
 import co.edu.unal.rutaun.spikes.motor.modelo.ConjuntoDeMaterias;
 import co.edu.unal.rutaun.spikes.motor.modelo.ModeloDeCalculo;
-import co.edu.unal.rutaun.spikes.motor.verificacion.PlanEstandar;
-import co.edu.unal.rutaun.spikes.motor.verificacion.VerificadorDePlan;
 import java.nio.file.Path;
 import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-class VerificadorMallaEstandarTest {
+class VerificadorDePlanTest {
 
   private static ModeloDeCalculo modelo;
   private static Tope t2;
