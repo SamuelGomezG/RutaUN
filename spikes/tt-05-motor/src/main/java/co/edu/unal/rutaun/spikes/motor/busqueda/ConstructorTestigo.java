@@ -248,9 +248,6 @@ public final class ConstructorTestigo {
     Plan plan =
         PlanEstandar.reconstruir(modelo, semestre, Arrays.copyOf(bloque, k + 1), asignacion);
     List<String> errores = new VerificadorDePlan(modelo).verificar(plan, a0, libreInicial, tope);
-    if (!errores.isEmpty()) {}
-    if (!errores.isEmpty()) {}
-    if (!errores.isEmpty()) {}
     return errores.isEmpty() ? plan : null;
   }
 

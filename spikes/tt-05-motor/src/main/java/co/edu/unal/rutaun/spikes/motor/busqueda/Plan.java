@@ -1,8 +1,6 @@
 package co.edu.unal.rutaun.spikes.motor.busqueda;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 /** Plan encontrado: semestre de cada materia, bloque de libre elección y métricas de desempate. */
 public final class Plan {
@@ -56,32 +54,8 @@ public final class Plan {
     return creditosOptativas;
   }
 
-  public int[] creditosPorSemestre() {
-    return creditosPorSemestre;
-  }
-
   public int semestre(int materia) {
     return semestrePorMateria[materia];
-  }
-
-  public List<Integer> materiasEnSemestre(int semestre) {
-    List<Integer> materias = new ArrayList<>();
-    for (int i = 0; i < semestrePorMateria.length; i++) {
-      if (semestrePorMateria[i] == semestre) {
-        materias.add(i);
-      }
-    }
-    return materias;
-  }
-
-  public List<Integer> optativasElegidas(boolean[] obligatoria, boolean[] fijas) {
-    List<Integer> optativas = new ArrayList<>();
-    for (int i = 0; i < semestrePorMateria.length; i++) {
-      if (semestrePorMateria[i] > 0 && !obligatoria[i] && !fijas[i]) {
-        optativas.add(i);
-      }
-    }
-    return optativas;
   }
 
   /** Huella estable del plan para las pruebas de determinismo. */

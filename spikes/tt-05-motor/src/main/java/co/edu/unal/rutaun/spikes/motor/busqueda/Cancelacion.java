@@ -10,15 +10,6 @@ public final class Cancelacion {
     this.plazoNanos = System.nanoTime() + duracionMilisegundos * 1_000_000L;
   }
 
-  private Cancelacion(long plazoNanos, boolean cancelado) {
-    this.plazoNanos = plazoNanos;
-    this.cancelado = cancelado;
-  }
-
-  public static Cancelacion sinLimite() {
-    return new Cancelacion(Long.MAX_VALUE, false);
-  }
-
   public boolean cancelado() {
     if (!cancelado && System.nanoTime() - plazoNanos >= 0) {
       cancelado = true;
@@ -28,10 +19,5 @@ public final class Cancelacion {
 
   public void cancelar() {
     cancelado = true;
-  }
-
-  public long restanteMilisegundos() {
-    long restante = (plazoNanos - System.nanoTime()) / 1_000_000L;
-    return Math.max(0, restante);
   }
 }

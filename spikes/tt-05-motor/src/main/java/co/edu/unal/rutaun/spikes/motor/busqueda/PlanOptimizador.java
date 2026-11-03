@@ -4,7 +4,6 @@ import co.edu.unal.rutaun.spikes.motor.modelo.ConjuntoDeMaterias;
 import co.edu.unal.rutaun.spikes.motor.modelo.ModeloDeCalculo;
 import co.edu.unal.rutaun.spikes.motor.verificacion.PlanEstandar;
 import co.edu.unal.rutaun.spikes.motor.verificacion.VerificadorDePlan;
-import java.util.Arrays;
 import java.util.List;
 
 /** Mejora local de un plan válido para acercarse a los criterios 5 y 6. */
@@ -117,9 +116,5 @@ public final class PlanOptimizador {
       ModeloDeCalculo modelo, Plan plan, ConjuntoDeMaterias a0, int libreInicial, Tope tope) {
     List<String> errores = new VerificadorDePlan(modelo).verificar(plan, a0, libreInicial, tope);
     return errores.isEmpty();
-  }
-
-  public static int[] copiar(int[] vector) {
-    return Arrays.copyOf(vector, vector.length);
   }
 }

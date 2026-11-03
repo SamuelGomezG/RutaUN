@@ -1,7 +1,6 @@
 package co.edu.unal.rutaun.spikes.motor.busqueda;
 
 import co.edu.unal.rutaun.spikes.motor.modelo.ConjuntoDeMaterias;
-import co.edu.unal.rutaun.spikes.motor.modelo.ModeloDeCalculo;
 
 /** Restricciones adicionales para la fijación sucesiva de criterios. */
 public final class Restricciones {
@@ -40,14 +39,5 @@ public final class Restricciones {
     copia.semestreMaximo = semestreMaximo.clone();
     copia.bloqueFijo = bloqueFijo == null ? null : bloqueFijo.clone();
     return copia;
-  }
-
-  public void fijarSemilla(ModeloDeCalculo modelo, java.util.List<String> codigos) {
-    for (String codigo : codigos) {
-      Integer indice = modelo.indiceDe(codigo);
-      if (indice != null) {
-        incluidas.agregar(indice);
-      }
-    }
   }
 }
