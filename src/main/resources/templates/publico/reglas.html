@@ -30,7 +30,7 @@
               <span th:case="'RESOLUCION'">Resolución</span>
               <span th:case="'CIRCULAR'">Circular</span>
             </span>
-            <span th:text="${norma.numero()} + ' de ' + ${norma.anio()} + ' del ' + ${norma.organo()} + ', ' + ${regla.fuente().get().articulo()}">1 de 2026 del Consejo, art. 1</span>
+            <span th:text="${norma.numero()} + ' de ' + ${norma.anio()} + ', ' + ${norma.organo()} + ', ' + ${regla.fuente().get().articulo()}">1 de 2026, Consejo, art. 1</span>
           </small>
           <small th:unless="${regla.fuente().isPresent()}">sin fuente registrada</small>
         </li>

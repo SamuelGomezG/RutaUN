@@ -88,18 +88,18 @@ class ReglasDelProgramaControllerTest {
 
   @Test
   void uc06_gm2_cadaReglaCitaSuFuenteConNumeroAnioOrganoYArticulo() throws Exception {
-    String organo = "del Consejo de Facultad de Ingeniería (de prueba)";
+    String organo = "Consejo de Facultad de Ingeniería (de prueba)";
     List<String> enOrden =
         List.of(
             "el mínimo es de 10 créditos por periodo",
             "Acuerdo",
-            "1 de 2026 " + organo + ", art. 1",
+            "1 de 2026, " + organo + ", art. 1",
             "la materia B exige haber aprobado la materia A",
             "Acuerdo",
-            "1 de 2026 " + organo + ", art. 2",
+            "1 de 2026, " + organo + ", art. 2",
             "medida temporal para el periodo 2026-2",
             "Acuerdo",
-            "2 de 2026 " + organo + ", art. 1");
+            "2 de 2026, " + organo + ", art. 1");
 
     mockMvc
         .perform(get(RUTA_DE_SISTEMAS))
