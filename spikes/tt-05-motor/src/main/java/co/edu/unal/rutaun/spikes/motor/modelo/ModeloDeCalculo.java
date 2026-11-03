@@ -132,6 +132,7 @@ public final class ModeloDeCalculo {
 
   private final ModelosJson.MallaJson malla;
   private final int cantidadMaterias;
+  private final int palabrasPorMascara;
   private final String[] codigos;
   private final String[] nombres;
   private final int[] creditos;
@@ -231,6 +232,7 @@ public final class ModeloDeCalculo {
             .thenComparing(m -> m.codigo));
 
     cantidadMaterias = materiasTemporales.size();
+    palabrasPorMascara = ConjuntoDeMaterias.palabrasNecesarias(cantidadMaterias);
     codigos = new String[cantidadMaterias];
     nombres = new String[cantidadMaterias];
     creditos = new int[cantidadMaterias];
@@ -311,16 +313,17 @@ public final class ModeloDeCalculo {
 
     // Máscaras de grupos.
     for (Grupo grupo : grupos) {
-      grupo.mascaraDirecta = new long[palabras()];
-      grupo.mascaraRequeridasDirectas = new long[palabras()];
-      grupo.mascaraOptativasDirectas = new long[palabras()];
+      grupo.mascaraDirecta = new long[palabrasPorMascara];
+      grupo.mascaraRequeridasDirectas = new long[palabrasPorMascara];
+      grupo.mascaraOptativasDirectas = new long[palabrasPorMascara];
       for (int materia : grupo.materiasDirectas) {
         grupo.mascaraDirecta[materia >>> 6] |= 1L << (materia & 63);
       }
     }
-    // Las fijas cuentan como requeridas de la agrupación asignada.
+    // Las fijas cuentan como requeridas de la agrupación asignada. Una fija que además es
+    // obligatoria ya cuenta en el bucle siguiente: sumarla aquí duplicaría sus créditos.
     for (int i = 0; i < cantidadMaterias; i++) {
-      if (!fijas.contiene(i) || asignacionInicial[i] < 0) {
+      if (!fijas.contiene(i) || obligatoria[i] || asignacionInicial[i] < 0) {
         continue;
       }
       Grupo grupo = grupos.get(asignacionInicial[i]);
@@ -349,7 +352,7 @@ public final class ModeloDeCalculo {
       grupo.mascaraSubarbol = grupo.mascaraDirecta.clone();
       for (int hija : grupo.hijos) {
         long[] mascaraHija = grupos.get(hija).mascaraSubarbol;
-        for (int j = 0; j < palabras(); j++) {
+        for (int j = 0; j < palabrasPorMascara; j++) {
           grupo.mascaraSubarbol[j] |= mascaraHija[j];
         }
       }
@@ -471,10 +474,6 @@ public final class ModeloDeCalculo {
     motivoSinPlan = motivo;
   }
 
-  public static int palabras() {
-    return 2;
-  }
-
   private static void agregarMateria(
       List<MateriaDatos> materias,
       Map<String, MateriaDatos> porCodigo,
@@ -527,7 +526,7 @@ public final class ModeloDeCalculo {
   private List<long[]> aMascaras(Cnf cnf, int materia) {
     List<long[]> resultado = new ArrayList<>();
     for (List<String> clausula : cnf.clausulas) {
-      long[] mascara = new long[palabras()];
+      long[] mascara = new long[palabrasPorMascara];
       for (String codigo : clausula) {
         Integer indice = porCodigo.get(codigo);
         if (indice == null) {
