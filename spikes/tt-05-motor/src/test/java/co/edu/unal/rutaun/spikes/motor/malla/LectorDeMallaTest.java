@@ -33,6 +33,14 @@ class LectorDeMallaTest {
   }
 
   @Test
+  void tt05_creditosPorMateriaEnCeroLaCargaFalla() throws IOException {
+    Path malla = mallaCon("\"creditosPorMateria\": 0,");
+    assertThatThrownBy(() -> LectorDeMalla.leer(malla))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("libreEleccion.creditosPorMateria");
+  }
+
+  @Test
   void tt05_creditosPorMateriaLibreSeLeenDeLaMalla() throws IOException {
     // Constructor, optimizador y verificador deben leer el mismo dato, no un 3 escrito en código.
     Path malla = mallaCon("\"creditosPorMateria\": 4,");

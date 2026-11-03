@@ -298,7 +298,7 @@ public final class Medir {
           .append(',')
           .append(fila.corrida)
           .append(',')
-          .append(fila.resultado)
+          .append(campoCsv(fila.resultado))
           .append(',')
           .append(valor(fila.semestres))
           .append(',')
@@ -467,6 +467,11 @@ public final class Medir {
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException("Tope desconocido: " + id));
     return new Tope(tope.id(), tope.creditos(), tope.materias());
+  }
+
+  /** Un campo de texto libre del CSV no puede traer comas ni saltos de línea. */
+  static String campoCsv(String texto) {
+    return texto == null ? "" : texto.replace(',', ';').replace('\r', ' ').replace('\n', ' ');
   }
 
   private static String valor(Object valor) {
