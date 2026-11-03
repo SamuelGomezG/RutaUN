@@ -18,10 +18,15 @@ Desde la raíz del repositorio:
 ./mvnw -f spikes/tt-05-motor/pom.xml exec:java -Dexec.args="E0 T2"
 ```
 
+Por omisión, las mediciones se escriben en `target/mediciones/` con la fecha y
+la hora en el nombre. Para publicar una corrida en `resultados/` (la evidencia
+que cita el informe), agrega `-Dtt05.publicar=true`.
+
 El informe de la decisión está en
 [`docs/diseno/decisiones/0001-motor-del-calculo-del-plan.md`](../../docs/diseno/decisiones/0001-motor-del-calculo-del-plan.md).
-La corrida `curado` escribe `resultados/mediciones-<fecha>.csv` y resume las
-medianas; `todos` recorre además los casos extremos.
+La corrida `curado` hace 3 calentamientos y 20 medidas por caso y resume
+mediana, p95 y máximo; `todos` recorre además los casos extremos. Cada fila
+lleva la fase y la huella del plan para comprobar el determinismo.
 
 El proyecto usa una copia local de `config/checkstyle/checkstyle.xml` que
 relaja Javadoc y nombres internos del prototipo; las demás reglas del proyecto

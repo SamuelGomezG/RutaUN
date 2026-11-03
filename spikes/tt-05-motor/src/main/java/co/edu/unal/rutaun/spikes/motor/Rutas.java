@@ -3,10 +3,15 @@ package co.edu.unal.rutaun.spikes.motor;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-/** Resuelve datos y resultados tanto desde la raíz del repositorio como desde el spike. */
+/** Resuelve datos y salidas tanto desde la raíz del repositorio como desde el spike. */
 public final class Rutas {
+
+  private static final DateTimeFormatter MARCA =
+      DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH-mm-ss");
 
   private Rutas() {}
 
@@ -23,19 +28,17 @@ public final class Rutas {
         "No encuentro el directorio datos/; ejecuta desde la raíz o desde spikes/tt-05-motor");
   }
 
-  public static Path resultados() {
-    for (Path candidato :
-        List.of(Path.of("resultados"), Path.of("spikes", "tt-05-motor", "resultados"))) {
-      if (Files.isDirectory(candidato)) {
-        return candidato;
-      }
+  public static Path mediciones(boolean publicar) {
+    Path raiz = datos().toAbsolutePath();
+    if ("datos".equals(raiz.getFileName().toString())) {
+      raiz = raiz.getParent();
     }
+    Path base = raiz.resolve(publicar ? "resultados" : "target/mediciones");
     try {
-      Path nuevo = Path.of("resultados");
-      Files.createDirectories(nuevo);
-      return nuevo;
+      Files.createDirectories(base);
     } catch (IOException e) {
-      throw new IllegalStateException("No puedo crear resultados/", e);
+      throw new IllegalStateException("No puedo crear " + base, e);
     }
+    return base.resolve("mediciones-" + MARCA.format(LocalDateTime.now()) + ".csv");
   }
 }
