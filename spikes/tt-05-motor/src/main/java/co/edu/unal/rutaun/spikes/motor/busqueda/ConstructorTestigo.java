@@ -156,6 +156,9 @@ public final class ConstructorTestigo {
         seleccionadas.agregar(materia);
       }
 
+      // Cada materia entra como pareja a lo sumo una vez por semestre y, al quitarla, queda
+      // descartada y no vuelve a proponerse; el bucle da como mucho 2·n vueltas.
+      boolean[] descartadas = new boolean[n];
       boolean cambio = true;
       while (cambio) {
         if (cancelacion.cancelado()) {
@@ -180,6 +183,7 @@ public final class ConstructorTestigo {
                   materias,
                   libreInicial - libreRestante,
                   s,
+                  descartadas,
                   cancelacion);
           if (par >= 0) {
             seleccion.add(par);
@@ -190,6 +194,7 @@ public final class ConstructorTestigo {
             seleccionadas.agregar(par);
           } else {
             seleccion.remove(indice);
+            descartadas[materia] = true;
             creditos -= modelo.creditos(materia);
             materias--;
             seleccionadas.quitar(materia);
@@ -327,6 +332,7 @@ public final class ConstructorTestigo {
       int materias,
       int libreColocado,
       int semestre,
+      boolean[] descartadas,
       Cancelacion cancelacion) {
     for (long[] clausula : modelo.correquisitos(materia)) {
       if (seleccionadas.contieneAlguna(clausula)) {
@@ -338,6 +344,7 @@ public final class ConstructorTestigo {
         }
         if ((clausula[i >>> 6] & (1L << (i & 63))) == 0
             || seleccionadas.contiene(i)
+            || descartadas[i]
             || !modelo.cursable(i)
             || restricciones.excluidas.contiene(i)) {
           continue;

@@ -223,6 +223,23 @@
           "expresion": "2016698"
         }
       ]
+    },
+    {
+      "id": "CC",
+      "nombre": "Cadena de correquisitos",
+      "sintetica": true,
+      "escenario": "E1",
+      "tope": "T2",
+      "correquisitos": [
+        {
+          "materia": "1000017",
+          "expresion": "2016699"
+        },
+        {
+          "materia": "2016699",
+          "expresion": "2016697"
+        }
+      ]
     }
   ]
 }
