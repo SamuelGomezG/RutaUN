@@ -83,9 +83,8 @@ public final class Buscador {
     this.creditosOptativas = 0;
     this.fallidos = new HashSet<>();
     this.contadorSubconjuntos = 0;
-    this.metricas.nodos = 0;
-    this.metricas.llamadasExistencia++;
-    this.metricas.cancelada = false;
+    this.metricas.reiniciar();
+    this.metricas.registrarLlamada();
     for (int i = 0; i < cantidadMaterias; i++) {
       if ((cursadas.contiene(i) || extraRequeridas.contiene(i)) && asignacion[i] < 0) {
         int[] grupos = modelo.gruposDeMateria(i);
@@ -102,22 +101,22 @@ public final class Buscador {
     if (testigo != null && testigo.k() <= semestres) {
       this.plan = testigo;
       this.encontrado = true;
-      this.metricas.tamanoMemoizacion = 0;
+      this.metricas.registrarMemoizacion(0);
       return true;
     }
     if (cancelacion.cancelado()) {
-      this.metricas.cancelada = true;
+      this.metricas.marcarCancelada();
       return false;
     }
     boolean resultado = dfs(1);
-    this.metricas.tamanoMemoizacion = Math.max(metricas.tamanoMemoizacion, fallidos.size());
+    this.metricas.registrarMemoizacion(fallidos.size());
     return resultado && encontrado;
   }
 
   private boolean dfs(int s) {
-    metricas.nodos++;
+    metricas.registrarNodo();
     if (cancelacion.cancelado()) {
-      metricas.cancelada = true;
+      metricas.marcarCancelada();
       return false;
     }
     if (s > semestres) {
@@ -263,7 +262,7 @@ public final class Buscador {
       List<Integer> seleccion,
       int s) {
     if ((++contadorSubconjuntos & 1023) == 0 && cancelacion.cancelado()) {
-      metricas.cancelada = true;
+      metricas.marcarCancelada();
       return false;
     }
     if (creditos > tope.limiteCreditos() || materias > tope.limiteMaterias()) {
@@ -349,7 +348,7 @@ public final class Buscador {
     int maximoBloque = Math.min(libre, tope.limiteCreditos() - creditosX);
     for (int b = maximoBloque; b >= 0; b--) {
       if ((++contadorSubconjuntos & 1023) == 0 && cancelacion.cancelado()) {
-        metricas.cancelada = true;
+        metricas.marcarCancelada();
         return false;
       }
       int creditosPorMateria = modelo.creditosPorMateriaLibre();

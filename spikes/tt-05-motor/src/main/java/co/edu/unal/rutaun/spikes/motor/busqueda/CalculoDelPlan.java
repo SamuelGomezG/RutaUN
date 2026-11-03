@@ -243,7 +243,7 @@ public final class CalculoDelPlan {
     boolean encontrado = buscador.buscar(k, capturar);
     Metricas parciales = buscador.metricas();
     metricas.sumar(parciales);
-    return new ResultadoBusqueda(encontrado, buscador.plan(), parciales.cancelada);
+    return new ResultadoBusqueda(encontrado, buscador.plan(), parciales.instantanea().cancelada());
   }
 
   private int indice(String codigo) {
@@ -256,7 +256,7 @@ public final class CalculoDelPlan {
 
   private ResultadoCalculo tiempoAgotado(long inicio) {
     long ms = (System.nanoTime() - inicio) / 1_000_000L;
-    metricas.cancelada = true;
+    metricas.marcarCancelada();
     return new ResultadoCalculo.TiempoAgotado(metricas.copia(), ms);
   }
 

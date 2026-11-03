@@ -220,15 +220,17 @@ public final class Medir {
       fila.bloques = contarBloques(calculado.plan());
       fila.msExistencia = calculado.msExistencia();
       fila.msOptimos = calculado.msOptimos();
-      fila.nodos = calculado.metricas().nodos;
-      fila.memo = calculado.metricas().tamanoMemoizacion;
-      fila.llamadas = calculado.metricas().llamadasExistencia;
+      Metricas.Instantanea metricas = calculado.metricas().instantanea();
+      fila.nodos = metricas.nodos();
+      fila.memo = metricas.tamanoMemoizacion();
+      fila.llamadas = metricas.llamadasExistencia();
       fila.huella = calculado.plan().huella();
     } else if (resultado instanceof ResultadoCalculo.TiempoAgotado agotado) {
       fila.resultado = "tiempo agotado";
-      fila.nodos = agotado.metricas().nodos;
-      fila.memo = agotado.metricas().tamanoMemoizacion;
-      fila.llamadas = agotado.metricas().llamadasExistencia;
+      Metricas.Instantanea metricas = agotado.metricas().instantanea();
+      fila.nodos = metricas.nodos();
+      fila.memo = metricas.tamanoMemoizacion();
+      fila.llamadas = metricas.llamadasExistencia();
     } else if (resultado instanceof ResultadoCalculo.SinPlanPosible sinPlan) {
       fila.resultado = "sin plan: " + sinPlan.motivo();
     }
