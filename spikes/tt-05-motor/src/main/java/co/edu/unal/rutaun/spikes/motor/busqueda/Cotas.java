@@ -29,6 +29,23 @@ public final class Cotas {
     this.cancelacion = cancelacion;
   }
 
+  /**
+   * Primera materia requerida, en el orden del consolidado, que no se puede alcanzar desde {@code
+   * cursadas} (prerrequisito circular o materia no cursable), o -1 si todas se alcanzan.
+   */
+  public int primeraRequeridaInalcanzable(ConjuntoDeMaterias cursadas) {
+    int[] memo = new int[modelo.cantidadMaterias()];
+    Arrays.fill(memo, -1);
+    for (int i = 0; i < modelo.cantidadMaterias(); i++) {
+      if (requeridas.contiene(i)
+          && !cursadas.contiene(i)
+          && modelo.profundidad(i, cursadas, memo) >= ModeloDeCalculo.INFINITO) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
   public int cotaInferior(ConjuntoDeMaterias cursadas, int libreRestante, int[] asignacion) {
     if (cancelacion.cancelado()) {
       return ModeloDeCalculo.INFINITO;

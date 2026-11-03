@@ -240,6 +240,37 @@
           "expresion": "2016697"
         }
       ]
+    },
+    {
+      "id": "IMP",
+      "nombre": "Ciclo de prerrequisitos",
+      "sintetica": true,
+      "escenario": "E1",
+      "tope": "T2",
+      "prerrequisitos": [
+        {
+          "materia": "2016699",
+          "expresion": "2025967"
+        }
+      ]
+    },
+    {
+      "id": "ESC",
+      "nombre": "Ciclo con salida por «o»",
+      "sintetica": true,
+      "escenario": "E1",
+      "tope": "T2",
+      "prerrequisitos": [
+        {
+          "materia": "2016699",
+          "expresion": {
+            "alguna": [
+              "2025967",
+              "2016353"
+            ]
+          }
+        }
+      ]
     }
   ]
 }
