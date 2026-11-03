@@ -105,7 +105,7 @@ class VersionDelConsolidadoTest {
   }
 
   @Test
-  void tt02_laVersionDelPlanSubeSiUnaReglaDeEstructuraCambiaDeEstado() {
+  void tt02_laVersionDelPlanNoSubeSiUnaReglaDeEstructuraSoloCambiaDeEstado() {
     ReglaId id = ReglaId.nuevo();
     VersionDelConsolidado primera =
         VersionDelConsolidado.primera(
@@ -114,7 +114,28 @@ class VersionDelConsolidadoTest {
     VersionDelConsolidado segunda =
         primera.siguiente(validado(estructural(id, EstadoRegla.VIGENTE)), MOTIVO, FECHA);
 
-    assertThat(segunda.versionDelPlan()).isEqualTo(2);
+    assertThat(segunda.numero()).isEqualTo(2);
+    assertThat(segunda.versionDelPlan()).isEqualTo(1);
+  }
+
+  @Test
+  void tt02_unaReformaProgramadaYSuVersionAutomaticaSubenElPlanUnaSolaVez() {
+    Regla base = estructural(ReglaId.nuevo(), EstadoRegla.VIGENTE);
+    ReglaId reforma = ReglaId.nuevo();
+    VersionDelConsolidado v1 = VersionDelConsolidado.primera(validado(base), MOTIVO, FECHA);
+
+    VersionDelConsolidado v2 =
+        v1.siguiente(validado(base, estructural(reforma, EstadoRegla.PROGRAMADA)), MOTIVO, FECHA);
+    VersionDelConsolidado v3 =
+        v2.siguiente(
+            validado(base, estructural(reforma, EstadoRegla.VIGENTE)),
+            new MotivoDeVersion.AutomaticoPorFecha(FECHA),
+            FECHA);
+
+    assertThat(v1.versionDelPlan()).isEqualTo(1);
+    assertThat(v2.versionDelPlan()).isEqualTo(2);
+    assertThat(v3.versionDelPlan()).isEqualTo(2);
+    assertThat(v3.numero()).isEqualTo(3);
   }
 
   @Test
