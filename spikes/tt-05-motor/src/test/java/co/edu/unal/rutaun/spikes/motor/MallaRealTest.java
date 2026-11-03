@@ -117,6 +117,27 @@ class MallaRealTest {
   }
 
   @Test
+  void tt05_correquisitoPendienteVaEnElMismoSemestre() {
+    ModelosJson.VarianteJson variante = variante("C2");
+    ModeloDeCalculo modelo =
+        new ModeloDeCalculo(
+            malla,
+            new ModeloDeCalculo.Configuracion(
+                variante.fijadas(), variante.prerrequisitos(), variante.correquisitos()));
+    Tope t2 = tope("T2");
+    CalculoDelPlan calculo =
+        new CalculoDelPlan(modelo, escenario("E1"), t2, new Cancelacion(30_000));
+    ResultadoCalculo resultado = calculo.calcular();
+    assertThat(resultado).isInstanceOf(ResultadoCalculo.Calculado.class);
+    Plan plan = ((ResultadoCalculo.Calculado) resultado).plan();
+    assertThat(plan.semestre(modelo.indiceDe("2016353")))
+        .isEqualTo(plan.semestre(modelo.indiceDe("2016698")));
+    assertThat(
+            new VerificadorDePlan(modelo).verificar(plan, calculo.a0(), calculo.libreInicial(), t2))
+        .isEmpty();
+  }
+
+  @Test
   void tt05_determinismoRepiteElMismoPlan() {
     ModelosJson.EscenarioJson e1 = escenario("E1");
     Tope t2 = tope("T2");
@@ -142,6 +163,10 @@ class MallaRealTest {
         .filter(e -> e.id().equals(id))
         .findFirst()
         .orElseThrow();
+  }
+
+  private static ModelosJson.VarianteJson variante(String id) {
+    return escenarios.variantes().stream().filter(v -> v.id().equals(id)).findFirst().orElseThrow();
   }
 
   private static Tope tope(String id) {
