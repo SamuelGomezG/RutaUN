@@ -64,19 +64,21 @@ class MallaRealTest {
 
   @Test
   void tt05_determinismoRepiteElMismoPlan() {
-    ModeloDeCalculo modelo = new ModeloDeCalculo(malla, ModeloDeCalculo.Configuracion.vacia());
     ModelosJson.EscenarioJson e1 = escenario("E1");
     Tope t2 = tope("T2");
-    int huella = -1;
+    Plan primero = null;
     for (int i = 0; i < 20; i++) {
+      ModeloDeCalculo modelo = new ModeloDeCalculo(malla, ModeloDeCalculo.Configuracion.vacia());
       CalculoDelPlan calculo = new CalculoDelPlan(modelo, e1, t2, new Cancelacion(30_000));
       ResultadoCalculo resultado = calculo.calcular();
       assertThat(resultado).isInstanceOf(ResultadoCalculo.Calculado.class);
-      int actual = ((ResultadoCalculo.Calculado) resultado).plan().huella();
-      if (huella < 0) {
-        huella = actual;
+      Plan actual = ((ResultadoCalculo.Calculado) resultado).plan();
+      if (primero == null) {
+        primero = actual;
       } else {
-        assertThat(actual).isEqualTo(huella);
+        assertThat(actual.semestrePorMateria()).containsExactly(primero.semestrePorMateria());
+        assertThat(actual.bloquePorSemestre()).containsExactly(primero.bloquePorSemestre());
+        assertThat(actual.asignacion()).containsExactly(primero.asignacion());
       }
     }
   }
