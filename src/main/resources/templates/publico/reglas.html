@@ -10,7 +10,10 @@
     <p th:text="${programa.facultad()}">Facultad</p>
     <p th:text="'Versión del consolidado: ' + ${consolidado.version()}">Versión del consolidado: 1</p>
     <p th:text="'Fecha de actualización: ' + ${consolidado.fecha()}">Fecha de actualización: 2026-01-01</p>
-    <p th:if="${consolidado.sinReglas()}">No hay reglas para mostrar.</p>
+    <div th:if="${consolidado.sinReglas()}">
+      <p>No hay reglas para mostrar.</p>
+      <p>El consolidado normativo del programa tiene un problema que ya se informó al administrador de normativa.</p>
+    </div>
     <section th:each="categoria : ${consolidado.reglasPorCategoria()}">
       <h2 th:text="${categoria.key}">Categoría</h2>
       <ul>

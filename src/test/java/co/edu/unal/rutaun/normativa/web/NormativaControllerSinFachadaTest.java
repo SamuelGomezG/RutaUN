@@ -20,7 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-class ProgramasControllerSinFachadaTest {
+class NormativaControllerSinFachadaTest {
 
   @Autowired private MockMvc mockMvc;
 
