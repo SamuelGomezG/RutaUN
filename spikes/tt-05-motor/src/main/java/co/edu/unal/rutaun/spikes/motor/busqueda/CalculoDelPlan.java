@@ -5,8 +5,11 @@ import co.edu.unal.rutaun.spikes.motor.modelo.ConjuntoDeMaterias;
 import co.edu.unal.rutaun.spikes.motor.modelo.ModeloDeCalculo;
 
 /**
- * Cálculo exacto por fijación sucesiva: primero el mínimo k y después, criterio a criterio, el
- * valor óptimo con el oráculo de existencia.
+ * Cálculo por fijación sucesiva. El mínimo de semestres k y los criterios 2 y 3 salen del oráculo
+ * de existencia (el constructor testigo y, si falla, la búsqueda en profundidad), así que son
+ * exactos mientras la búsqueda termine. Los criterios 4 a 6 no están probados óptimos: el 4 decide
+ * cada optativa con el constructor testigo (o, en la vía de rescate, con una búsqueda acotada) y
+ * los criterios 5 y 6 se mejoran con una búsqueda local verificada.
  */
 public final class CalculoDelPlan {
 
@@ -81,7 +84,7 @@ public final class CalculoDelPlan {
       }
       return new ResultadoCalculo.SinPlanPosible("La cota inferior no es finita");
     }
-    int maximoSemestres = Math.max(cota, kMaximo(asignacionInicial));
+    int maximoSemestres = Math.max(cota, kMaximo());
     int k = -1;
     for (int candidato = Math.max(1, cota); candidato <= maximoSemestres; candidato++) {
       if (cancelacion.cancelado()) {
@@ -157,7 +160,9 @@ public final class CalculoDelPlan {
 
     // c4: lista de optativas elegidas, en orden del consolidado. Vía rápida: el constructor decide
     // cada inclusión. Si no logra reconstruir el plan, vía de rescate: la búsqueda en profundidad,
-    // con un tope de nodos por inclusión, decide en su lugar.
+    // con un tope de nodos por inclusión, decide en su lugar. Ninguna de las dos vías garantiza la
+    // lista lexicográficamente menor: una exclusión puede significar que el constructor o el tope
+    // de nodos no hallaron plan, no que no exista.
     ResultadoC4 listaRapida = fijarListaDeOptativas(k, base, false);
     if (listaRapida.cancelada()) {
       return tiempoAgotado(inicio);
@@ -274,29 +279,20 @@ public final class CalculoDelPlan {
     return lo;
   }
 
-  private int kMaximo(int[] asignacionInicial) {
+  /**
+   * Cota superior de semestres. En un plan válido ningún semestre está vacío, así que k no supera
+   * las materias cursables que todavía no están en el avance (requeridas, optativas y los
+   * prerrequisitos opcionales que no suman a ninguna agrupación) más los bloques de libre elección.
+   */
+  private int kMaximo() {
     int pendientes = 0;
-    long[] palabras = modelo.requeridas().palabras();
     for (int i = 0; i < cantidadMaterias; i++) {
-      if ((palabras[i >>> 6] & (1L << (i & 63))) != 0 && !a0.contiene(i)) {
+      if (!a0.contiene(i) && modelo.cursable(i)) {
         pendientes++;
       }
     }
-    int materiasOptativas = 0;
-    for (ModeloDeCalculo.Grupo grupo : modelo.grupos()) {
-      int minimo = modelo.minimoMateriasOptativas(grupo.indice(), a0, asignacionInicial);
-      if (minimo >= ModeloDeCalculo.INFINITO) {
-        return Math.max(
-            1, pendientes + Math.ceilDiv(libreInicial, modelo.creditosPorMateriaLibre()));
-      }
-      materiasOptativas += minimo;
-    }
-    int calculado =
-        pendientes
-            + materiasOptativas
-            + Math.ceilDiv(libreInicial, modelo.creditosPorMateriaLibre());
-    return Math.max(
-        1, Math.min(ModeloDeCalculo.LIMITE_DE_SEMESTRES, Math.max(calculado, pendientes + 1)));
+    int bloquesLibres = Math.ceilDiv(libreInicial, modelo.creditosPorMateriaLibre());
+    return Math.max(1, Math.min(ModeloDeCalculo.LIMITE_DE_SEMESTRES, pendientes + bloquesLibres));
   }
 
   private ResultadoBusqueda buscar(int k, Restricciones restricciones, boolean capturar) {
