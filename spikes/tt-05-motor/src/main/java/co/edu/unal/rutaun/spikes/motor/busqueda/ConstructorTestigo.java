@@ -492,6 +492,10 @@ public final class ConstructorTestigo {
       if (movimiento <= 0) {
         continue;
       }
+      // Tras el ajuste por el donante, un receptor vacío podría recibir menos de un bloque válido.
+      if (bloque[receptor] + movimiento < modelo.creditosPorMateriaLibre()) {
+        continue;
+      }
       if (creditosPorSemestre[donante] - movimiento < modelo.minimoPorPeriodo()) {
         continue;
       }
