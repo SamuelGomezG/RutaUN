@@ -132,6 +132,38 @@ class CalculoDelPlanTest {
   }
 
   @Test
+  void tt05_correquisitosEncadenadosNoCiclan() {
+    ModeloDeCalculo modelo = modeloDe(variante("CC"));
+    CalculoDelPlan calculo =
+        new CalculoDelPlan(modelo, escenario("E1"), tope("T2"), new Cancelacion(10_000));
+    long inicio = System.nanoTime();
+    ResultadoCalculo resultado = calculo.calcular();
+    long ms = (System.nanoTime() - inicio) / 1_000_000L;
+    assertThat(resultado).isNotInstanceOf(ResultadoCalculo.TiempoAgotado.class);
+    assertThat(ms).isLessThan(1_000L);
+  }
+
+  @Test
+  void tt05_correquisitosEncadenadosRespetanElOrden() {
+    ModeloDeCalculo modelo = modeloDe(variante("CC"));
+    Tope t2 = tope("T2");
+    CalculoDelPlan calculo =
+        new CalculoDelPlan(modelo, escenario("E1"), t2, new Cancelacion(10_000));
+    ResultadoCalculo resultado = calculo.calcular();
+    assertThat(resultado).isInstanceOf(ResultadoCalculo.Calculado.class);
+    Plan plan = ((ResultadoCalculo.Calculado) resultado).plan();
+    assertThat(
+            new VerificadorDePlan(modelo).verificar(plan, calculo.a0(), calculo.libreInicial(), t2))
+        .isEmpty();
+    // 1000017 exige 2016699 y 2016699 exige 2016697: cada una va con su correquisito o después.
+    int cabeza = plan.semestre(modelo.indiceDe("1000017"));
+    int medio = plan.semestre(modelo.indiceDe("2016699"));
+    int cola = plan.semestre(modelo.indiceDe("2016697"));
+    assertThat(cola).isPositive().isLessThanOrEqualTo(medio);
+    assertThat(medio).isLessThanOrEqualTo(cabeza);
+  }
+
+  @Test
   void tt05_determinismoRepiteElMismoPlan() {
     ModelosJson.EscenarioJson e1 = escenario("E1");
     Tope t2 = tope("T2");
@@ -157,6 +189,13 @@ class CalculoDelPlanTest {
         .filter(e -> e.id().equals(id))
         .findFirst()
         .orElseThrow();
+  }
+
+  private static ModeloDeCalculo modeloDe(ModelosJson.VarianteJson variante) {
+    return new ModeloDeCalculo(
+        malla,
+        new ModeloDeCalculo.Configuracion(
+            variante.fijadas(), variante.prerrequisitos(), variante.correquisitos()));
   }
 
   private static ModelosJson.VarianteJson variante(String id) {
