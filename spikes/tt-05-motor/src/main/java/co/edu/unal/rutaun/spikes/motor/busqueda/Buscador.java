@@ -39,7 +39,6 @@ public final class Buscador {
   private Plan plan;
   private Set<Estado> fallidos;
   private final Metricas metricas = new Metricas();
-  private long contadorSubconjuntos;
 
   public Buscador(
       ModeloDeCalculo modelo,
@@ -82,7 +81,6 @@ public final class Buscador {
     this.marcados = 0;
     this.creditosOptativas = 0;
     this.fallidos = new HashSet<>();
-    this.contadorSubconjuntos = 0;
     this.metricas.reiniciar();
     this.metricas.registrarLlamada();
     for (int i = 0; i < cantidadMaterias; i++) {
@@ -261,7 +259,7 @@ public final class Buscador {
       int materias,
       List<Integer> seleccion,
       int s) {
-    if ((++contadorSubconjuntos & 1023) == 0 && cancelacion.cancelado()) {
+    if (cancelacion.cancelado()) {
       metricas.marcarCancelada();
       return false;
     }
@@ -347,7 +345,7 @@ public final class Buscador {
 
     int maximoBloque = Math.min(libre, tope.limiteCreditos() - creditosX);
     for (int b = maximoBloque; b >= 0; b--) {
-      if ((++contadorSubconjuntos & 1023) == 0 && cancelacion.cancelado()) {
+      if (cancelacion.cancelado()) {
         metricas.marcarCancelada();
         return false;
       }
