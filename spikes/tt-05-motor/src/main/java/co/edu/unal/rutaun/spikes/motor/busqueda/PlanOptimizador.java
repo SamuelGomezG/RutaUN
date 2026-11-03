@@ -76,7 +76,7 @@ public final class PlanOptimizador {
         if (libreInicial >= creditosPorMateria && b > 0 && b < creditosPorMateria) {
           continue;
         }
-        if (libreInicial < 3 && b > 0 && b != libreInicial) {
+        if (libreInicial < creditosPorMateria && b > 0 && b != libreInicial) {
           continue;
         }
         int[] nuevo = bloqueActual.clone();

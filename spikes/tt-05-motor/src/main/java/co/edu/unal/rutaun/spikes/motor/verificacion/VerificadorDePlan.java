@@ -69,7 +69,11 @@ public final class VerificadorDePlan {
       if (libreInicial >= modelo.creditosPorMateriaLibre()
           && bloque[s] > 0
           && bloque[s] < modelo.creditosPorMateriaLibre()) {
-        errores.add("Bloque de menos de 3 créditos en el semestre " + s);
+        errores.add(
+            "Bloque de menos de "
+                + modelo.creditosPorMateriaLibre()
+                + " créditos en el semestre "
+                + s);
       }
       sumaBloques += bloque[s];
     }
@@ -82,12 +86,18 @@ public final class VerificadorDePlan {
         if (bloque[s] > 0) {
           bloquesNoVacios++;
           if (bloque[s] != libreInicial) {
-            errores.add("Bloque distinto del total con menos de 3 créditos en el semestre " + s);
+            errores.add(
+                "Bloque distinto del total con menos de "
+                    + modelo.creditosPorMateriaLibre()
+                    + " créditos en el semestre "
+                    + s);
           }
         }
       }
       if (bloquesNoVacios > 1) {
-        errores.add("Hay más de un bloque cuando la libre elección es menor que 3");
+        errores.add(
+            "Hay más de un bloque cuando la libre elección es menor que "
+                + modelo.creditosPorMateriaLibre());
       }
     }
 

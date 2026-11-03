@@ -152,10 +152,15 @@ public final class LectorDeMalla {
         sugeridos.put(campo, nodoSugeridos.get(campo).asInt());
       }
     }
+    if (!n.has("creditosPorMateria")) {
+      // Un dato que falta no se inventa: los créditos de una materia de libre elección son un
+      // dato de la norma del programa.
+      throw new IllegalArgumentException(
+          "Falta libreEleccion.creditosPorMateria en la malla: los créditos de una materia de "
+              + "libre elección son un dato de la normativa y no tienen valor por omisión");
+    }
     return new ModelosJson.LibreEleccionJson(
-        n.get("creditos").asInt(),
-        n.has("creditosPorMateria") ? n.get("creditosPorMateria").asInt() : 3,
-        sugeridos);
+        n.get("creditos").asInt(), n.get("creditosPorMateria").asInt(), sugeridos);
   }
 
   private static List<ModelosJson.PrerrequisitoJson> prerrequisitos(JsonNode nodo) {

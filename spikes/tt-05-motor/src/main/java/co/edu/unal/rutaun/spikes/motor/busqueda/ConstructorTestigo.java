@@ -439,10 +439,10 @@ public final class ConstructorTestigo {
         }
         int movimiento = faltan;
         if (bloque[receptor] == 0 && movimiento < modelo.creditosPorMateriaLibre()) {
-          movimiento = 3;
+          movimiento = modelo.creditosPorMateriaLibre();
         }
         if (bloque[donante] - movimiento < modelo.creditosPorMateriaLibre()) {
-          movimiento = bloque[donante] - 3;
+          movimiento = bloque[donante] - modelo.creditosPorMateriaLibre();
         }
         if (movimiento <= 0) {
           continue;
@@ -484,10 +484,10 @@ public final class ConstructorTestigo {
       }
       int movimiento = faltan;
       if (bloque[receptor] == 0 && movimiento < modelo.creditosPorMateriaLibre()) {
-        movimiento = 3;
+        movimiento = modelo.creditosPorMateriaLibre();
       }
       if (bloque[donante] - movimiento < modelo.creditosPorMateriaLibre()) {
-        movimiento = bloque[donante] - 3;
+        movimiento = bloque[donante] - modelo.creditosPorMateriaLibre();
       }
       if (movimiento <= 0) {
         continue;
