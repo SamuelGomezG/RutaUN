@@ -23,6 +23,16 @@
             <em th:case="'EN_REVISION'">en revisión</em>
           </span>
           <strong th:if="${regla.temporal()}">temporal</strong>
+          <small th:if="${regla.fuente().isPresent()}"
+                 th:with="norma=${regla.fuente().get().norma()}">
+            <span th:switch="${norma.tipo().name()}">
+              <span th:case="'ACUERDO'">Acuerdo</span>
+              <span th:case="'RESOLUCION'">Resolución</span>
+              <span th:case="'CIRCULAR'">Circular</span>
+            </span>
+            <span th:text="${norma.numero()} + ' de ' + ${norma.anio()} + ' del ' + ${norma.organo()} + ', ' + ${regla.fuente().get().articulo()}">1 de 2026 del Consejo, art. 1</span>
+          </small>
+          <small th:unless="${regla.fuente().isPresent()}">sin fuente registrada</small>
         </li>
       </ul>
     </section>

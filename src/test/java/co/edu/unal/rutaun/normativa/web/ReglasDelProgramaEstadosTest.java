@@ -1,5 +1,6 @@
 package co.edu.unal.rutaun.normativa.web;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -11,8 +12,11 @@ import co.edu.unal.rutaun.compartido.ProgramaId;
 import co.edu.unal.rutaun.normativa.ClasificacionRegla;
 import co.edu.unal.rutaun.normativa.ConsolidadoVista;
 import co.edu.unal.rutaun.normativa.ConsultaNormativaFacade;
+import co.edu.unal.rutaun.normativa.FuenteVista;
+import co.edu.unal.rutaun.normativa.NormaVista;
 import co.edu.unal.rutaun.normativa.ProgramaVista;
 import co.edu.unal.rutaun.normativa.ReglaVista;
+import co.edu.unal.rutaun.normativa.TipoNorma;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +54,17 @@ class ReglasDelProgramaEstadosTest {
         enunciado, Optional.empty(), estado, temporal, ClasificacionRegla.DEL_PLAN);
   }
 
+  private static ReglaVista regla(
+      String enunciado, EstadoRegla estado, boolean temporal, FuenteVista fuente) {
+    return new ReglaVista(
+        enunciado, Optional.of(fuente), estado, temporal, ClasificacionRegla.DEL_PLAN);
+  }
+
+  private static FuenteVista fuente(TipoNorma tipo, String numero, String articulo) {
+    return new FuenteVista(
+        new NormaVista(tipo, numero, 2026, "Consejo de prueba"), articulo, Optional.empty());
+  }
+
   private static String ruta(ProgramaId id) {
     return "/programas/" + id.valor() + "/reglas";
   }
@@ -82,9 +97,17 @@ class ReglasDelProgramaEstadosTest {
                     Map.of(
                         "Otra",
                         List.of(
-                            regla("Regla uno", EstadoRegla.VIGENTE, false),
+                            regla(
+                                "Regla uno",
+                                EstadoRegla.VIGENTE,
+                                false,
+                                fuente(TipoNorma.RESOLUCION, "5", "art. 3")),
                             regla("Regla dos", EstadoRegla.PROGRAMADA, false),
-                            regla("Regla tres", EstadoRegla.YA_NO_RIGE, false),
+                            regla(
+                                "Regla tres",
+                                EstadoRegla.YA_NO_RIGE,
+                                false,
+                                fuente(TipoNorma.CIRCULAR, "11", "num. 2")),
                             regla("Regla cuatro", EstadoRegla.EN_REVISION, true)))));
           }
           if (SIN_REGLAS.equals(id)) {
@@ -126,6 +149,35 @@ class ReglasDelProgramaEstadosTest {
         .perform(get(ruta(CON_ESTADOS)))
         .andExpect(status().isOk())
         .andExpect(content().string(stringContainsInOrder(enOrden)));
+  }
+
+  @Test
+  void uc06_gm2_laReglaConFuenteLaCitaYLaQueNoTieneDiceSinFuenteRegistrada() throws Exception {
+    String pagina =
+        mockMvc
+            .perform(get(ruta(CON_ESTADOS)))
+            .andExpect(status().isOk())
+            .andExpect(
+                content()
+                    .string(
+                        stringContainsInOrder(
+                            List.of(
+                                "Regla uno",
+                                "Resolución",
+                                "5 de 2026 del Consejo de prueba, art. 3",
+                                "Regla dos",
+                                "sin fuente registrada",
+                                "Regla tres",
+                                "Circular",
+                                "11 de 2026 del Consejo de prueba, num. 2",
+                                "Regla cuatro",
+                                "sin fuente registrada"))))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+    String laPrimera = pagina.substring(pagina.indexOf("Regla uno"), pagina.indexOf("Regla dos"));
+    assertThat(laPrimera).doesNotContain("sin fuente registrada");
   }
 
   @Test

@@ -2,6 +2,7 @@ package co.edu.unal.rutaun.normativa.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -83,6 +84,28 @@ class ReglasDelProgramaControllerTest {
             .getContentAsString();
 
     assertThat(pagina).containsOnlyOnce("<strong>temporal</strong>");
+  }
+
+  @Test
+  void uc06_gm2_cadaReglaCitaSuFuenteConNumeroAnioOrganoYArticulo() throws Exception {
+    String organo = "del Consejo de Facultad de Ingeniería (de prueba)";
+    List<String> enOrden =
+        List.of(
+            "el mínimo es de 10 créditos por periodo",
+            "Acuerdo",
+            "1 de 2026 " + organo + ", art. 1",
+            "la materia B exige haber aprobado la materia A",
+            "Acuerdo",
+            "1 de 2026 " + organo + ", art. 2",
+            "medida temporal para el periodo 2026-2",
+            "Acuerdo",
+            "2 de 2026 " + organo + ", art. 1");
+
+    mockMvc
+        .perform(get(RUTA_DE_SISTEMAS))
+        .andExpect(status().isOk())
+        .andExpect(content().string(stringContainsInOrder(enOrden)))
+        .andExpect(content().string(not(containsString("sin fuente registrada"))));
   }
 
   @Test
