@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8"/>
+    <title>Reglas del programa · RutaUN</title>
+  </head>
+  <body>
+    <p><a th:href="@{/programas}">Volver a los programas</a></p>
+    <h1 th:text="${programa.nombre()}">Programa</h1>
+    <p th:text="${programa.facultad()}">Facultad</p>
+    <p>Aquí se mostrarán las reglas del programa.</p>
+  </body>
+</html>
