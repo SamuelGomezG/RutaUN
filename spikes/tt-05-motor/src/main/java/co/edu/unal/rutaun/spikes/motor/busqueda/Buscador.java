@@ -1,0 +1,585 @@
+package co.edu.unal.rutaun.spikes.motor.busqueda;
+
+import co.edu.unal.rutaun.spikes.motor.modelo.ConjuntoDeMaterias;
+import co.edu.unal.rutaun.spikes.motor.modelo.ModeloDeCalculo;
+import co.edu.unal.rutaun.spikes.motor.modelo.ModeloDeCalculo.Habilitacion;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+/** Búsqueda en profundidad, semestre a semestre, con cotas, simetrías y memoización. */
+public final class Buscador {
+
+  private final ModeloDeCalculo modelo;
+  private final ConjuntoDeMaterias a0;
+  private final int libreInicial;
+  private final Tope tope;
+  private final Cancelacion cancelacion;
+  private final Restricciones restricciones;
+  private final Cotas cotas;
+  private final ConjuntoDeMaterias extraRequeridas;
+  private final int n;
+
+  private ConjuntoDeMaterias D;
+  private int libre;
+  private int[] asignacion;
+  private int[] semestre;
+  private int[] bloque;
+  private int[] creditosPorSemestre;
+  private int marcados;
+  private int creditosOptativas;
+  private int k;
+  private boolean capturar;
+  private boolean encontrado;
+  private Plan plan;
+  private Set<Estado> fallidos;
+  private final Metricas metricas = new Metricas();
+  private long contadorSubconjuntos;
+
+  public Buscador(
+      ModeloDeCalculo modelo,
+      ConjuntoDeMaterias a0,
+      int libreInicial,
+      Tope tope,
+      Cancelacion cancelacion,
+      Restricciones restricciones) {
+    this.modelo = modelo;
+    this.a0 = a0;
+    this.libreInicial = libreInicial;
+    this.tope = tope;
+    this.cancelacion = cancelacion;
+    this.restricciones = restricciones;
+    this.extraRequeridas = restricciones.obligatoriasExtra;
+    this.cotas = new Cotas(modelo, tope, libreInicial, extraRequeridas);
+    this.n = modelo.cantidadMaterias();
+  }
+
+  public Metricas metricas() {
+    return metricas;
+  }
+
+  public Plan plan() {
+    return plan;
+  }
+
+  public boolean buscar(int k, boolean capturar) {
+    this.k = k;
+    this.capturar = capturar;
+    this.encontrado = false;
+    this.plan = null;
+    this.D = a0.copia();
+    this.libre = libreInicial;
+    this.asignacion = modelo.asignacionInicial();
+    this.semestre = new int[n];
+    Arrays.fill(this.semestre, -1);
+    this.bloque = new int[k + 1];
+    this.creditosPorSemestre = new int[k + 1];
+    this.marcados = 0;
+    this.creditosOptativas = 0;
+    this.fallidos = new HashSet<>();
+    this.contadorSubconjuntos = 0;
+    this.metricas.nodos = 0;
+    this.metricas.llamadasExistencia++;
+    this.metricas.cancelada = false;
+    for (int i = 0; i < n; i++) {
+      if ((D.contiene(i) || extraRequeridas.contiene(i)) && asignacion[i] < 0) {
+        int[] grupos = modelo.gruposDeMateria(i);
+        if (grupos.length > 0) {
+          asignacion[i] = grupos[0];
+        }
+      }
+    }
+    if (modelo.motivoSinPlan() != null) {
+      return false;
+    }
+    Plan testigo = ConstructorTestigo.construir(modelo, a0, libreInicial, tope, restricciones);
+    if (testigo != null && testigo.k() <= k) {
+      this.plan = testigo;
+      this.encontrado = true;
+      this.metricas.tamanoMemoizacion = 0;
+      return true;
+    }
+    boolean resultado = dfs(1);
+    this.metricas.tamanoMemoizacion = Math.max(metricas.tamanoMemoizacion, fallidos.size());
+    return resultado && encontrado;
+  }
+
+  public boolean existe(int k) {
+    return buscar(k, false);
+  }
+
+  private boolean dfs(int s) {
+    metricas.nodos++;
+    if ((metricas.nodos & 1023) == 0 && cancelacion.cancelado()) {
+      metricas.cancelada = true;
+      return false;
+    }
+    if (s > k) {
+      return cerrarPlan();
+    }
+    if (s - 1 + cotas.cotaInferior(D, libre, asignacion) > k) {
+      return false;
+    }
+    if (marcados > restricciones.maxSemestresMarcados
+        || creditosOptativas > restricciones.maxCreditosOptativas) {
+      return false;
+    }
+    for (int i = 0; i < n; i++) {
+      if (restricciones.semestreFijo[i] >= 0
+          && restricciones.semestreFijo[i] < s
+          && !D.contiene(i)) {
+        return false;
+      }
+      if (restricciones.semestreFijo[i] >= 0
+          && D.contiene(i)
+          && semestre[i] != restricciones.semestreFijo[i]) {
+        return false;
+      }
+      if (restricciones.semestreMaximo[i] < s && !D.contiene(i)) {
+        return false;
+      }
+      if (D.contiene(i) && semestre[i] > restricciones.semestreMaximo[i]) {
+        return false;
+      }
+    }
+
+    Estado estado = new Estado(s, libre, marcados, D.copiaPalabras(), asignacion.clone());
+    if (fallidos.contains(estado)) {
+      return false;
+    }
+
+    long[] utiles = new long[ConjuntoDeMaterias.palabrasNecesarias(n)];
+    long[] palabrasRequeridas = modelo.requeridas().palabras();
+    for (int i = 0; i < n; i++) {
+      if ((palabrasRequeridas[i >>> 6] & (1L << (i & 63))) == 0 || D.contiene(i)) {
+        continue;
+      }
+      for (long[] clausula : modelo.prerrequisitos(i)) {
+        if (!D.contieneAlguna(clausula)) {
+          for (int j = 0; j < utiles.length; j++) {
+            utiles[j] |= clausula[j];
+          }
+        }
+      }
+    }
+
+    List<Integer> candidatos = new ArrayList<>();
+    for (int i = 0; i < n; i++) {
+      if (D.contiene(i) || !modelo.cursable(i)) {
+        continue;
+      }
+      if (restricciones.excluidas.contiene(i)) {
+        continue;
+      }
+      boolean requerida = esRequerida(i);
+      if (!requerida) {
+        boolean porAgrupacion = false;
+        for (int grupo : modelo.gruposDeMateria(i)) {
+          if (modelo.faltan(grupo, D, asignacion, extraRequeridas) > 0) {
+            porAgrupacion = true;
+            break;
+          }
+        }
+        boolean util = (utiles[i >>> 6] & (1L << (i & 63))) != 0;
+        if (!porAgrupacion && !util) {
+          continue;
+        }
+      }
+      if (!modelo.clausulasCumplidas(modelo.prerrequisitos(i), D)) {
+        continue;
+      }
+      if (!modelo.habilitacionesCumplidas(i, D, libreInicial - libre, asignacion)) {
+        continue;
+      }
+      if (restricciones.semestreFijo[i] >= 0 && restricciones.semestreFijo[i] != s) {
+        continue;
+      }
+      if (restricciones.semestreMaximo[i] < s) {
+        continue;
+      }
+      candidatos.add(i);
+    }
+
+    List<List<Integer>> clases = construirClases(candidatos);
+    List<Integer> seleccion = new ArrayList<>();
+    boolean resultado = recorrerClases(clases, 0, 0, 0, seleccion, s);
+    if (!resultado) {
+      fallidos.add(estado);
+    }
+    return resultado;
+  }
+
+  private List<List<Integer>> construirClases(List<Integer> candidatos) {
+    Map<String, List<Integer>> porClave = new LinkedHashMap<>();
+    for (int i : candidatos) {
+      porClave.computeIfAbsent(claveClase(i), clave -> new ArrayList<>()).add(i);
+    }
+    List<List<Integer>> clases = new ArrayList<>(porClave.values());
+    for (List<Integer> clase : clases) {
+      clase.sort(Integer::compareTo);
+    }
+    clases.sort(
+        Comparator.comparingInt((List<Integer> clase) -> esRequerida(clase.get(0)) ? 0 : 1)
+            .thenComparingInt(clase -> clase.stream().mapToInt(modelo::creditos).min().orElse(0))
+            .thenComparingInt(clase -> clase.get(0)));
+    return clases;
+  }
+
+  private boolean esRequerida(int materia) {
+    return modelo.requeridas().contiene(materia)
+        || restricciones.obligatoriasExtra.contiene(materia);
+  }
+
+  private String claveClase(int materia) {
+    if (esRequerida(materia) || modelo.gruposDeMateria(materia).length != 1) {
+      return "U" + materia;
+    }
+    int grupo = modelo.gruposDeMateria(materia)[0];
+    StringBuilder clave = new StringBuilder();
+    clave.append("C").append(grupo).append('|').append(modelo.creditos(materia)).append('|');
+    for (long[] clausula : modelo.prerrequisitos(materia)) {
+      clave.append(Arrays.toString(clausula)).append(';');
+    }
+    clave.append('|');
+    for (Habilitacion habilitacion : modelo.habilitaciones(materia)) {
+      clave.append(habilitacion.medida()).append(':').append(habilitacion.umbral()).append(';');
+    }
+    clave.append('|');
+    for (int i = 0; i < n; i++) {
+      int indiceClausula = 0;
+      for (long[] clausula : modelo.prerrequisitos(i)) {
+        if ((clausula[materia >>> 6] & (1L << (materia & 63))) != 0) {
+          clave.append(i).append(':').append(indiceClausula).append(';');
+        }
+        indiceClausula++;
+      }
+      indiceClausula = 0;
+      for (long[] clausula : modelo.correquisitos(i)) {
+        if ((clausula[materia >>> 6] & (1L << (materia & 63))) != 0) {
+          clave.append('c').append(i).append(':').append(indiceClausula).append(';');
+        }
+        indiceClausula++;
+      }
+    }
+    return clave.toString();
+  }
+
+  private boolean recorrerClases(
+      List<List<Integer>> clases,
+      int indice,
+      int creditos,
+      int materias,
+      List<Integer> seleccion,
+      int s) {
+    if ((++contadorSubconjuntos & 1023) == 0 && cancelacion.cancelado()) {
+      metricas.cancelada = true;
+      return false;
+    }
+    if (creditos > tope.limiteCreditos() || materias > tope.limiteMaterias()) {
+      return false;
+    }
+    if (indice == clases.size()) {
+      return probarSubconjunto(seleccion, creditos, materias, s);
+    }
+    List<Integer> clase = clases.get(indice);
+    int maximo = clase.size();
+    if (!esRequerida(clase.get(0))) {
+      maximo = Math.min(maximo, maximoUtil(clase));
+    }
+    while (maximo > 0
+        && (creditos + creditosDe(clase, maximo) > tope.limiteCreditos()
+            || materias + maximo > tope.limiteMaterias())) {
+      maximo--;
+    }
+    for (int tomar = maximo; tomar >= 0; tomar--) {
+      int agregados = 0;
+      for (int i = 0; i < tomar; i++) {
+        int materia = clase.get(i);
+        if (!seleccion.contains(materia)) {
+          seleccion.add(materia);
+          agregados++;
+        }
+      }
+      int creditosTomados = creditosDe(clase, tomar);
+      if (recorrerClases(
+          clases, indice + 1, creditos + creditosTomados, materias + agregados, seleccion, s)) {
+        return true;
+      }
+      for (int i = 0; i < agregados; i++) {
+        seleccion.remove(seleccion.size() - 1);
+      }
+    }
+    return false;
+  }
+
+  private int maximoUtil(List<Integer> clase) {
+    int materia = clase.get(0);
+    int grupo = modelo.gruposDeMateria(materia)[0];
+    int faltan = modelo.faltan(grupo, D, asignacion, extraRequeridas);
+    if (faltan <= 0) {
+      return 0;
+    }
+    int creditos = modelo.creditos(materia);
+    return Math.min(clase.size(), (faltan + creditos - 1) / creditos);
+  }
+
+  private int creditosDe(List<Integer> clase, int cantidad) {
+    int total = 0;
+    for (int i = 0; i < cantidad; i++) {
+      total += modelo.creditos(clase.get(i));
+    }
+    return total;
+  }
+
+  private boolean probarSubconjunto(List<Integer> seleccion, int creditosX, int materiasX, int s) {
+    for (int i = 0; i < n; i++) {
+      if ((restricciones.semestreFijo[i] == s || restricciones.semestreMaximo[i] == s)
+          && !D.contiene(i)
+          && !seleccion.contains(i)) {
+        return false;
+      }
+    }
+    ConjuntoDeMaterias DX = D.copia();
+    for (int materia : seleccion) {
+      DX.agregar(materia);
+    }
+    for (int materia : seleccion) {
+      if (!modelo.clausulasCumplidas(modelo.correquisitos(materia), DX)) {
+        return false;
+      }
+    }
+    int[] asignacionesPrevias = new int[seleccion.size()];
+    for (int i = 0; i < seleccion.size(); i++) {
+      int materia = seleccion.get(i);
+      asignacionesPrevias[i] = asignacion[materia];
+      if (asignacion[materia] < 0) {
+        int mejorGrupo = -1;
+        int mejorFaltan = -1;
+        for (int grupo : modelo.gruposDeMateria(materia)) {
+          int faltan = modelo.faltan(grupo, DX, asignacion, extraRequeridas);
+          if (faltan > mejorFaltan) {
+            mejorFaltan = faltan;
+            mejorGrupo = grupo;
+          }
+        }
+        if (mejorGrupo >= 0) {
+          asignacion[materia] = mejorGrupo;
+        }
+      }
+    }
+
+    int maximoBloque = Math.min(libre, tope.limiteCreditos() - creditosX);
+    for (int b = maximoBloque; b >= 0; b--) {
+      if ((++contadorSubconjuntos & 1023) == 0 && cancelacion.cancelado()) {
+        metricas.cancelada = true;
+        return false;
+      }
+      if (libreInicial >= 3) {
+        if (b > 0 && b < 3) {
+          continue;
+        }
+      } else if (b > 0 && b != libreInicial) {
+        continue;
+      }
+      if (materiasX + ceilDiv(b, 3) > tope.limiteMaterias()) {
+        continue;
+      }
+      if (creditosX + b == 0) {
+        continue;
+      }
+      if (restricciones.bloqueFijo != null
+          && restricciones.bloqueFijo[s] != null
+          && restricciones.bloqueFijo[s] != b) {
+        continue;
+      }
+      boolean marcado = creditosX + b < modelo.minimoPorPeriodo();
+      if (marcado && marcados + 1 > restricciones.maxSemestresMarcados) {
+        continue;
+      }
+
+      int librePrevio = libre;
+      int marcadosPrevios = marcados;
+      int optativasPrevias = creditosOptativas;
+      for (int materia : seleccion) {
+        D.agregar(materia);
+        semestre[materia] = s;
+        if (!modelo.requeridas().contiene(materia)) {
+          creditosOptativas += modelo.creditos(materia);
+        }
+      }
+      libre -= b;
+      bloque[s] = b;
+      creditosPorSemestre[s] = creditosX + b;
+      if (marcado) {
+        marcados++;
+      }
+      boolean resultado = dfs(s + 1);
+      libre = librePrevio;
+      marcados = marcadosPrevios;
+      creditosOptativas = optativasPrevias;
+      bloque[s] = 0;
+      creditosPorSemestre[s] = 0;
+      for (int materia : seleccion) {
+        D.quitar(materia);
+        semestre[materia] = -1;
+      }
+      for (int i = 0; i < seleccion.size(); i++) {
+        asignacion[seleccion.get(i)] = asignacionesPrevias[i];
+      }
+      if (resultado) {
+        return true;
+      }
+    }
+    for (int i = 0; i < seleccion.size(); i++) {
+      asignacion[seleccion.get(i)] = asignacionesPrevias[i];
+    }
+    return false;
+  }
+
+  private boolean cerrarPlan() {
+    if (libre != 0
+        || !modelo.todoCubierto(D, asignacion)
+        || !D.contieneTodas(restricciones.obligatoriasExtra.palabras())) {
+      return false;
+    }
+    for (int i = 0; i < n; i++) {
+      if (restricciones.semestreFijo[i] >= 0 && !D.contiene(i)) {
+        return false;
+      }
+      if (restricciones.semestreMaximo[i] < Integer.MAX_VALUE
+          && !D.contiene(i)
+          && restricciones.semestreMaximo[i] <= k
+          && (modelo.requeridas().contiene(i) || restricciones.incluidas.contiene(i))) {
+        return false;
+      }
+      if (D.contiene(i) && semestre[i] > restricciones.semestreMaximo[i]) {
+        return false;
+      }
+    }
+    if (marcados > restricciones.maxSemestresMarcados
+        || creditosOptativas > restricciones.maxCreditosOptativas) {
+      return false;
+    }
+    if (!optativasMinimas()) {
+      return false;
+    }
+    encontrado = true;
+    if (capturar) {
+      plan =
+          new Plan(
+              k,
+              semestre.clone(),
+              asignacion.clone(),
+              Arrays.copyOf(bloque, k + 1),
+              marcados,
+              creditosOptativas,
+              Arrays.copyOf(creditosPorSemestre, k + 1));
+    }
+    return true;
+  }
+
+  private boolean optativasMinimas() {
+    int[] libreAntes = new int[k + 1];
+    for (int s = 1; s <= k; s++) {
+      libreAntes[s] = libreAntes[s - 1] + bloque[s - 1];
+    }
+    for (int m = 0; m < n; m++) {
+      if (semestre[m] <= 0 || modelo.requeridas().contiene(m)) {
+        continue;
+      }
+      ConjuntoDeMaterias sinM = D.copia();
+      sinM.quitar(m);
+      int[] asignacionSinM = asignacion.clone();
+      asignacionSinM[m] = -1;
+      boolean necesaria = !modelo.todoCubierto(sinM, asignacionSinM);
+      if (!necesaria) {
+        necesaria = rompeRestricciones(sinM, asignacionSinM, libreAntes);
+      }
+      if (!necesaria) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private boolean rompeRestricciones(
+      ConjuntoDeMaterias sinM, int[] asignacionSinM, int[] libreAntes) {
+    for (int j = 0; j < n; j++) {
+      if (semestre[j] <= 0 || !sinM.contiene(j)) {
+        continue;
+      }
+      ConjuntoDeMaterias antes = a0.copia();
+      ConjuntoDeMaterias hasta = a0.copia();
+      for (int p = 0; p < n; p++) {
+        if (p == j || !sinM.contiene(p) || semestre[p] <= 0) {
+          continue;
+        }
+        if (semestre[p] < semestre[j]) {
+          antes.agregar(p);
+        }
+        if (semestre[p] <= semestre[j]) {
+          hasta.agregar(p);
+        }
+      }
+      if (!modelo.clausulasCumplidas(modelo.prerrequisitos(j), antes)) {
+        return true;
+      }
+      if (!modelo.habilitacionesCumplidas(
+          j, antes, libreAntes[Math.min(semestre[j], k)], asignacionSinM)) {
+        return true;
+      }
+      if (!modelo.clausulasCumplidas(modelo.correquisitos(j), hasta)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static int ceilDiv(int numerador, int denominador) {
+    return (numerador + denominador - 1) / denominador;
+  }
+
+  private static final class Estado {
+    private final int s;
+    private final int libre;
+    private final int marcados;
+    private final long[] palabras;
+    private final int[] asignacion;
+
+    private Estado(int s, int libre, int marcados, long[] palabras, int[] asignacion) {
+      this.s = s;
+      this.libre = libre;
+      this.marcados = marcados;
+      this.palabras = palabras;
+      this.asignacion = asignacion;
+    }
+
+    @Override
+    public boolean equals(Object objeto) {
+      if (this == objeto) {
+        return true;
+      }
+      if (!(objeto instanceof Estado otro)) {
+        return false;
+      }
+      return s == otro.s
+          && libre == otro.libre
+          && marcados == otro.marcados
+          && Arrays.equals(palabras, otro.palabras)
+          && Arrays.equals(asignacion, otro.asignacion);
+    }
+
+    @Override
+    public int hashCode() {
+      int resultado = 31 * s + libre;
+      resultado = 31 * resultado + marcados;
+      resultado = 31 * resultado + Arrays.hashCode(palabras);
+      return 31 * resultado + Arrays.hashCode(asignacion);
+    }
+  }
+}
