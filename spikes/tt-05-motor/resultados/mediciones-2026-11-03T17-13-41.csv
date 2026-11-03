@@ -1,0 +1,439 @@
+fase,escenario,tope,corrida,resultado,k,c2,c3,optativas,bloques,ms_existencia,ms_optimos,ms_total,nodos,memo,llamadas,huella,verificador
+medida,E0,T1,0,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,127,0,0,0,,
+medida,E0,T1,1,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,117,0,0,0,,
+medida,E0,T1,2,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,116,0,0,0,,
+medida,E0,T1,3,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,124,0,0,0,,
+medida,E0,T1,4,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,110,0,0,0,,
+medida,E0,T1,5,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,111,0,0,0,,
+medida,E0,T1,6,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,111,0,0,0,,
+medida,E0,T1,7,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,111,0,0,0,,
+medida,E0,T1,8,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,111,0,0,0,,
+medida,E0,T1,9,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,110,0,0,0,,
+medida,E0,T1,10,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,107,0,0,0,,
+medida,E0,T1,11,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,107,0,0,0,,
+medida,E0,T1,12,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,113,0,0,0,,
+medida,E0,T1,13,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,107,0,0,0,,
+medida,E0,T1,14,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,106,0,0,0,,
+medida,E0,T1,15,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,107,0,0,0,,
+medida,E0,T1,16,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,106,0,0,0,,
+medida,E0,T1,17,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,106,0,0,0,,
+medida,E0,T1,18,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,107,0,0,0,,
+medida,E0,T1,19,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,107,0,0,0,,
+medida,E0,T2,0,calculado,10,0,78,23,4,2,138,140,0,0,3,922220668,OK
+medida,E0,T2,1,calculado,10,0,78,23,4,2,137,139,0,0,3,922220668,OK
+medida,E0,T2,2,calculado,10,0,78,23,4,1,134,136,0,0,3,922220668,OK
+medida,E0,T2,3,calculado,10,0,78,23,4,1,131,133,0,0,3,922220668,OK
+medida,E0,T2,4,calculado,10,0,78,23,4,1,126,128,0,0,3,922220668,OK
+medida,E0,T2,5,calculado,10,0,78,23,4,1,125,127,0,0,3,922220668,OK
+medida,E0,T2,6,calculado,10,0,78,23,4,1,122,124,0,0,3,922220668,OK
+medida,E0,T2,7,calculado,10,0,78,23,4,1,122,124,0,0,3,922220668,OK
+medida,E0,T2,8,calculado,10,0,78,23,4,1,123,124,0,0,3,922220668,OK
+medida,E0,T2,9,calculado,10,0,78,23,4,1,122,124,0,0,3,922220668,OK
+medida,E0,T2,10,calculado,10,0,78,23,4,1,122,123,0,0,3,922220668,OK
+medida,E0,T2,11,calculado,10,0,78,23,4,1,124,125,0,0,3,922220668,OK
+medida,E0,T2,12,calculado,10,0,78,23,4,1,122,124,0,0,3,922220668,OK
+medida,E0,T2,13,calculado,10,0,78,23,4,1,122,124,0,0,3,922220668,OK
+medida,E0,T2,14,calculado,10,0,78,23,4,1,121,123,0,0,3,922220668,OK
+medida,E0,T2,15,calculado,10,0,78,23,4,1,121,123,0,0,3,922220668,OK
+medida,E0,T2,16,calculado,10,0,78,23,4,1,122,124,0,0,3,922220668,OK
+medida,E0,T2,17,calculado,10,0,78,23,4,1,123,125,0,0,3,922220668,OK
+medida,E0,T2,18,calculado,10,0,78,23,4,1,122,123,0,0,3,922220668,OK
+medida,E0,T2,19,calculado,10,0,78,23,4,1,122,124,0,0,3,922220668,OK
+medida,E0,T3,0,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,103,0,0,0,,
+medida,E0,T3,1,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,104,0,0,0,,
+medida,E0,T3,2,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,105,0,0,0,,
+medida,E0,T3,3,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,104,0,0,0,,
+medida,E0,T3,4,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,104,0,0,0,,
+medida,E0,T3,5,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,104,0,0,0,,
+medida,E0,T3,6,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,100,0,0,0,,
+medida,E0,T3,7,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,100,0,0,0,,
+medida,E0,T3,8,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,99,0,0,0,,
+medida,E0,T3,9,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,99,0,0,0,,
+medida,E0,T3,10,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,99,0,0,0,,
+medida,E0,T3,11,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,99,0,0,0,,
+medida,E0,T3,12,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,99,0,0,0,,
+medida,E0,T3,13,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,99,0,0,0,,
+medida,E0,T3,14,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,99,0,0,0,,
+medida,E0,T3,15,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,100,0,0,0,,
+medida,E0,T3,16,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,99,0,0,0,,
+medida,E0,T3,17,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,99,0,0,0,,
+medida,E0,T3,18,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,98,0,0,0,,
+medida,E0,T3,19,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,99,0,0,0,,
+medida,E0,T4,0,tiempo agotado,,,,,,,,30000,207871,4919,4,,
+medida,E0,T5,0,tiempo agotado,,,,,,,,30000,209555,3553,1,,
+medida,E1,T1,0,calculado,7,0,63,19,2,1,89,91,0,0,3,1434506510,OK
+medida,E1,T1,1,calculado,7,0,63,19,2,1,90,92,0,0,3,1434506510,OK
+medida,E1,T1,2,calculado,7,0,63,19,2,1,89,90,0,0,3,1434506510,OK
+medida,E1,T1,3,calculado,7,0,63,19,2,1,89,91,0,0,3,1434506510,OK
+medida,E1,T1,4,calculado,7,0,63,19,2,1,89,91,0,0,3,1434506510,OK
+medida,E1,T1,5,calculado,7,0,63,19,2,1,89,90,0,0,3,1434506510,OK
+medida,E1,T1,6,calculado,7,0,63,19,2,1,90,91,0,0,3,1434506510,OK
+medida,E1,T1,7,calculado,7,0,63,19,2,1,89,91,0,0,3,1434506510,OK
+medida,E1,T1,8,calculado,7,0,63,19,2,1,89,91,0,0,3,1434506510,OK
+medida,E1,T1,9,calculado,7,0,63,19,2,1,89,91,0,0,3,1434506510,OK
+medida,E1,T1,10,calculado,7,0,63,19,2,1,89,91,0,0,3,1434506510,OK
+medida,E1,T1,11,calculado,7,0,63,19,2,1,90,92,0,0,3,1434506510,OK
+medida,E1,T1,12,calculado,7,0,63,19,2,1,92,93,0,0,3,1434506510,OK
+medida,E1,T1,13,calculado,7,0,63,19,2,1,85,86,0,0,3,1434506510,OK
+medida,E1,T1,14,calculado,7,0,63,19,2,1,85,86,0,0,3,1434506510,OK
+medida,E1,T1,15,calculado,7,0,63,19,2,1,86,87,0,0,3,1434506510,OK
+medida,E1,T1,16,calculado,7,0,63,19,2,1,88,89,0,0,3,1434506510,OK
+medida,E1,T1,17,calculado,7,0,63,19,2,1,85,86,0,0,3,1434506510,OK
+medida,E1,T1,18,calculado,7,0,63,19,2,1,85,86,0,0,3,1434506510,OK
+medida,E1,T1,19,calculado,7,0,63,19,2,1,85,87,0,0,3,1434506510,OK
+medida,E1,T2,0,calculado,8,0,63,19,2,1,97,98,0,0,3,-516556724,OK
+medida,E1,T2,1,calculado,8,0,63,19,2,1,97,98,0,0,3,-516556724,OK
+medida,E1,T2,2,calculado,8,0,63,19,2,1,96,98,0,0,3,-516556724,OK
+medida,E1,T2,3,calculado,8,0,63,19,2,1,97,98,0,0,3,-516556724,OK
+medida,E1,T2,4,calculado,8,0,63,19,2,1,98,100,0,0,3,-516556724,OK
+medida,E1,T2,5,calculado,8,0,63,19,2,1,97,98,0,0,3,-516556724,OK
+medida,E1,T2,6,calculado,8,0,63,19,2,1,97,98,0,0,3,-516556724,OK
+medida,E1,T2,7,calculado,8,0,63,19,2,1,96,98,0,0,3,-516556724,OK
+medida,E1,T2,8,calculado,8,0,63,19,2,1,96,97,0,0,3,-516556724,OK
+medida,E1,T2,9,calculado,8,0,63,19,2,1,98,99,0,0,3,-516556724,OK
+medida,E1,T2,10,calculado,8,0,63,19,2,1,96,98,0,0,3,-516556724,OK
+medida,E1,T2,11,calculado,8,0,63,19,2,1,96,98,0,0,3,-516556724,OK
+medida,E1,T2,12,calculado,8,0,63,19,2,1,96,97,0,0,3,-516556724,OK
+medida,E1,T2,13,calculado,8,0,63,19,2,1,96,98,0,0,3,-516556724,OK
+medida,E1,T2,14,calculado,8,0,63,19,2,1,97,98,0,0,3,-516556724,OK
+medida,E1,T2,15,calculado,8,0,63,19,2,1,97,98,0,0,3,-516556724,OK
+medida,E1,T2,16,calculado,8,0,63,19,2,1,96,98,0,0,3,-516556724,OK
+medida,E1,T2,17,calculado,8,0,63,19,2,1,98,99,0,0,3,-516556724,OK
+medida,E1,T2,18,calculado,8,0,63,19,2,1,97,99,0,0,3,-516556724,OK
+medida,E1,T2,19,calculado,8,0,63,19,2,1,97,99,0,0,3,-516556724,OK
+medida,E1,T3,0,tiempo agotado,,,,,,,,30000,211340,8781,4,,
+medida,E1,T4,0,calculado,9,0,63,19,3,1,109,110,0,0,3,-1575459898,OK
+medida,E1,T4,1,calculado,9,0,63,19,3,1,109,111,0,0,3,-1575459898,OK
+medida,E1,T4,2,calculado,9,0,63,19,3,1,109,111,0,0,3,-1575459898,OK
+medida,E1,T4,3,calculado,9,0,63,19,3,1,110,112,0,0,3,-1575459898,OK
+medida,E1,T4,4,calculado,9,0,63,19,3,1,110,112,0,0,3,-1575459898,OK
+medida,E1,T4,5,calculado,9,0,63,19,3,1,110,112,0,0,3,-1575459898,OK
+medida,E1,T4,6,calculado,9,0,63,19,3,1,109,110,0,0,3,-1575459898,OK
+medida,E1,T4,7,calculado,9,0,63,19,3,1,109,110,0,0,3,-1575459898,OK
+medida,E1,T4,8,calculado,9,0,63,19,3,1,109,111,0,0,3,-1575459898,OK
+medida,E1,T4,9,calculado,9,0,63,19,3,1,109,110,0,0,3,-1575459898,OK
+medida,E1,T4,10,calculado,9,0,63,19,3,1,109,111,0,0,3,-1575459898,OK
+medida,E1,T4,11,calculado,9,0,63,19,3,1,109,111,0,0,3,-1575459898,OK
+medida,E1,T4,12,calculado,9,0,63,19,3,1,110,111,0,0,3,-1575459898,OK
+medida,E1,T4,13,calculado,9,0,63,19,3,1,110,112,0,0,3,-1575459898,OK
+medida,E1,T4,14,calculado,9,0,63,19,3,1,110,111,0,0,3,-1575459898,OK
+medida,E1,T4,15,calculado,9,0,63,19,3,1,111,112,0,0,3,-1575459898,OK
+medida,E1,T4,16,calculado,9,0,63,19,3,1,110,112,0,0,3,-1575459898,OK
+medida,E1,T4,17,calculado,9,0,63,19,3,1,110,111,0,0,3,-1575459898,OK
+medida,E1,T4,18,calculado,9,0,63,19,3,1,109,111,0,0,3,-1575459898,OK
+medida,E1,T4,19,calculado,9,0,63,19,3,1,109,111,0,0,3,-1575459898,OK
+medida,E1,T5,0,tiempo agotado,,,,,,,,30000,212727,3223,1,,
+medida,E2,T1,0,calculado,4,0,24,7,3,0,49,50,0,0,3,1186588129,OK
+medida,E2,T1,1,calculado,4,0,24,7,3,0,50,50,0,0,3,1186588129,OK
+medida,E2,T1,2,calculado,4,0,24,7,3,0,48,49,0,0,3,1186588129,OK
+medida,E2,T1,3,calculado,4,0,24,7,3,0,49,50,0,0,3,1186588129,OK
+medida,E2,T1,4,calculado,4,0,24,7,3,0,49,50,0,0,3,1186588129,OK
+medida,E2,T1,5,calculado,4,0,24,7,3,0,48,49,0,0,3,1186588129,OK
+medida,E2,T1,6,calculado,4,0,24,7,3,0,48,49,0,0,3,1186588129,OK
+medida,E2,T1,7,calculado,4,0,24,7,3,0,48,49,0,0,3,1186588129,OK
+medida,E2,T1,8,calculado,4,0,24,7,3,0,48,49,0,0,3,1186588129,OK
+medida,E2,T1,9,calculado,4,0,24,7,3,0,48,49,0,0,3,1186588129,OK
+medida,E2,T1,10,calculado,4,0,24,7,3,0,49,49,0,0,3,1186588129,OK
+medida,E2,T1,11,calculado,4,0,24,7,3,0,48,49,0,0,3,1186588129,OK
+medida,E2,T1,12,calculado,4,0,24,7,3,0,49,50,0,0,3,1186588129,OK
+medida,E2,T1,13,calculado,4,0,24,7,3,0,49,50,0,0,3,1186588129,OK
+medida,E2,T1,14,calculado,4,0,24,7,3,0,48,49,0,0,3,1186588129,OK
+medida,E2,T1,15,calculado,4,0,24,7,3,0,48,49,0,0,3,1186588129,OK
+medida,E2,T1,16,calculado,4,0,24,7,3,0,48,49,0,0,3,1186588129,OK
+medida,E2,T1,17,calculado,4,0,24,7,3,0,49,50,0,0,3,1186588129,OK
+medida,E2,T1,18,calculado,4,0,24,7,3,0,50,51,0,0,3,1186588129,OK
+medida,E2,T1,19,calculado,4,0,24,7,3,1,50,51,0,0,3,1186588129,OK
+medida,E2,T2,0,calculado,4,0,24,7,2,0,48,49,0,0,3,-909313792,OK
+medida,E2,T2,1,calculado,4,0,24,7,2,0,48,49,0,0,3,-909313792,OK
+medida,E2,T2,2,calculado,4,0,24,7,2,0,48,49,0,0,3,-909313792,OK
+medida,E2,T2,3,calculado,4,0,24,7,2,0,49,50,0,0,3,-909313792,OK
+medida,E2,T2,4,calculado,4,0,24,7,2,0,50,51,0,0,3,-909313792,OK
+medida,E2,T2,5,calculado,4,0,24,7,2,0,49,50,0,0,3,-909313792,OK
+medida,E2,T2,6,calculado,4,0,24,7,2,0,48,49,0,0,3,-909313792,OK
+medida,E2,T2,7,calculado,4,0,24,7,2,0,48,49,0,0,3,-909313792,OK
+medida,E2,T2,8,calculado,4,0,24,7,2,0,48,49,0,0,3,-909313792,OK
+medida,E2,T2,9,calculado,4,0,24,7,2,0,48,49,0,0,3,-909313792,OK
+medida,E2,T2,10,calculado,4,0,24,7,2,0,48,49,0,0,3,-909313792,OK
+medida,E2,T2,11,calculado,4,0,24,7,2,0,48,49,0,0,3,-909313792,OK
+medida,E2,T2,12,calculado,4,0,24,7,2,0,48,49,0,0,3,-909313792,OK
+medida,E2,T2,13,calculado,4,0,24,7,2,0,48,49,0,0,3,-909313792,OK
+medida,E2,T2,14,calculado,4,0,24,7,2,0,48,49,0,0,3,-909313792,OK
+medida,E2,T2,15,calculado,4,0,24,7,2,0,48,49,0,0,3,-909313792,OK
+medida,E2,T2,16,calculado,4,0,24,7,2,0,48,49,0,0,3,-909313792,OK
+medida,E2,T2,17,calculado,4,0,24,7,2,0,48,49,0,0,3,-909313792,OK
+medida,E2,T2,18,calculado,4,0,24,7,2,0,48,49,0,0,3,-909313792,OK
+medida,E2,T2,19,calculado,4,0,24,7,2,0,48,49,0,0,3,-909313792,OK
+medida,E2,T3,0,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,356,0,0,0,,
+medida,E2,T3,1,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,350,0,0,0,,
+medida,E2,T3,2,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,354,0,0,0,,
+medida,E2,T3,3,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,345,0,0,0,,
+medida,E2,T3,4,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,344,0,0,0,,
+medida,E2,T3,5,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,344,0,0,0,,
+medida,E2,T3,6,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,343,0,0,0,,
+medida,E2,T3,7,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,344,0,0,0,,
+medida,E2,T3,8,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,343,0,0,0,,
+medida,E2,T3,9,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,344,0,0,0,,
+medida,E2,T3,10,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,345,0,0,0,,
+medida,E2,T3,11,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,344,0,0,0,,
+medida,E2,T3,12,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,346,0,0,0,,
+medida,E2,T3,13,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,343,0,0,0,,
+medida,E2,T3,14,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,343,0,0,0,,
+medida,E2,T3,15,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,344,0,0,0,,
+medida,E2,T3,16,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,344,0,0,0,,
+medida,E2,T3,17,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,344,0,0,0,,
+medida,E2,T3,18,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,343,0,0,0,,
+medida,E2,T3,19,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,344,0,0,0,,
+medida,E2,T4,0,calculado,5,0,24,7,3,1,59,60,0,0,3,-148985319,OK
+medida,E2,T4,1,calculado,5,0,24,7,3,1,59,60,0,0,3,-148985319,OK
+medida,E2,T4,2,calculado,5,0,24,7,3,1,59,60,0,0,3,-148985319,OK
+medida,E2,T4,3,calculado,5,0,24,7,3,1,59,60,0,0,3,-148985319,OK
+medida,E2,T4,4,calculado,5,0,24,7,3,1,59,60,0,0,3,-148985319,OK
+medida,E2,T4,5,calculado,5,0,24,7,3,0,59,60,0,0,3,-148985319,OK
+medida,E2,T4,6,calculado,5,0,24,7,3,1,60,61,0,0,3,-148985319,OK
+medida,E2,T4,7,calculado,5,0,24,7,3,0,59,60,0,0,3,-148985319,OK
+medida,E2,T4,8,calculado,5,0,24,7,3,1,59,60,0,0,3,-148985319,OK
+medida,E2,T4,9,calculado,5,0,24,7,3,1,59,60,0,0,3,-148985319,OK
+medida,E2,T4,10,calculado,5,0,24,7,3,1,59,60,0,0,3,-148985319,OK
+medida,E2,T4,11,calculado,5,0,24,7,3,1,59,60,0,0,3,-148985319,OK
+medida,E2,T4,12,calculado,5,0,24,7,3,1,59,60,0,0,3,-148985319,OK
+medida,E2,T4,13,calculado,5,0,24,7,3,1,58,59,0,0,3,-148985319,OK
+medida,E2,T4,14,calculado,5,0,24,7,3,1,59,60,0,0,3,-148985319,OK
+medida,E2,T4,15,calculado,5,0,24,7,3,1,59,60,0,0,3,-148985319,OK
+medida,E2,T4,16,calculado,5,0,24,7,3,1,59,60,0,0,3,-148985319,OK
+medida,E2,T4,17,calculado,5,0,24,7,3,1,59,60,0,0,3,-148985319,OK
+medida,E2,T4,18,calculado,5,0,24,7,3,0,59,60,0,0,3,-148985319,OK
+medida,E2,T4,19,calculado,5,0,24,7,3,0,59,60,0,0,3,-148985319,OK
+medida,E2,T5,0,tiempo agotado,,,,,,,,30000,219435,6608,1,,
+medida,E3,T1,0,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T1,1,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T1,2,calculado,1,0,9,2,1,0,12,13,0,0,3,-1743141566,OK
+medida,E3,T1,3,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T1,4,calculado,1,0,9,2,1,0,13,13,0,0,3,-1743141566,OK
+medida,E3,T1,5,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T1,6,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T1,7,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T1,8,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T1,9,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T1,10,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T1,11,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T1,12,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T1,13,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T1,14,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T1,15,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T1,16,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T1,17,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T1,18,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T1,19,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T2,0,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T2,1,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T2,2,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T2,3,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T2,4,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T2,5,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T2,6,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T2,7,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T2,8,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T2,9,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T2,10,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T2,11,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T2,12,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T2,13,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T2,14,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T2,15,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T2,16,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T2,17,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T2,18,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T2,19,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T3,0,calculado,2,1,9,2,1,0,36,37,204,74,4,-855637854,OK
+medida,E3,T3,1,calculado,2,1,9,2,1,0,36,36,204,74,4,-855637854,OK
+medida,E3,T3,2,calculado,2,1,9,2,1,0,36,36,204,74,4,-855637854,OK
+medida,E3,T3,3,calculado,2,1,9,2,1,0,36,37,204,74,4,-855637854,OK
+medida,E3,T3,4,calculado,2,1,9,2,1,0,36,36,204,74,4,-855637854,OK
+medida,E3,T3,5,calculado,2,1,9,2,1,0,36,36,204,74,4,-855637854,OK
+medida,E3,T3,6,calculado,2,1,9,2,1,0,35,36,204,74,4,-855637854,OK
+medida,E3,T3,7,calculado,2,1,9,2,1,0,36,36,204,74,4,-855637854,OK
+medida,E3,T3,8,calculado,2,1,9,2,1,0,35,36,204,74,4,-855637854,OK
+medida,E3,T3,9,calculado,2,1,9,2,1,0,35,36,204,74,4,-855637854,OK
+medida,E3,T3,10,calculado,2,1,9,2,1,0,36,36,204,74,4,-855637854,OK
+medida,E3,T3,11,calculado,2,1,9,2,1,0,35,36,204,74,4,-855637854,OK
+medida,E3,T3,12,calculado,2,1,9,2,1,0,36,36,204,74,4,-855637854,OK
+medida,E3,T3,13,calculado,2,1,9,2,1,0,35,36,204,74,4,-855637854,OK
+medida,E3,T3,14,calculado,2,1,9,2,1,0,35,36,204,74,4,-855637854,OK
+medida,E3,T3,15,calculado,2,1,9,2,1,0,35,36,204,74,4,-855637854,OK
+medida,E3,T3,16,calculado,2,1,9,2,1,0,35,36,204,74,4,-855637854,OK
+medida,E3,T3,17,calculado,2,1,9,2,1,0,36,36,204,74,4,-855637854,OK
+medida,E3,T3,18,calculado,2,1,9,2,1,0,35,36,204,74,4,-855637854,OK
+medida,E3,T3,19,calculado,2,1,9,2,1,0,38,38,204,74,4,-855637854,OK
+medida,E3,T4,0,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T4,1,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T4,2,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T4,3,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T4,4,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T4,5,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T4,6,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T4,7,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T4,8,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T4,9,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T4,10,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T4,11,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T4,12,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T4,13,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T4,14,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T4,15,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T4,16,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T4,17,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T4,18,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T4,19,calculado,1,0,9,2,1,0,12,12,0,0,3,-1743141566,OK
+medida,E3,T5,0,calculado,3,3,9,2,1,0,111,111,515,100,6,915801694,OK
+medida,E3,T5,1,calculado,3,3,9,2,1,0,109,110,515,100,6,915801694,OK
+medida,E3,T5,2,calculado,3,3,9,2,1,0,108,109,515,100,6,915801694,OK
+medida,E3,T5,3,calculado,3,3,9,2,1,0,108,108,515,100,6,915801694,OK
+medida,E3,T5,4,calculado,3,3,9,2,1,0,107,108,515,100,6,915801694,OK
+medida,E3,T5,5,calculado,3,3,9,2,1,0,107,107,515,100,6,915801694,OK
+medida,E3,T5,6,calculado,3,3,9,2,1,0,106,107,515,100,6,915801694,OK
+medida,E3,T5,7,calculado,3,3,9,2,1,0,106,107,515,100,6,915801694,OK
+medida,E3,T5,8,calculado,3,3,9,2,1,0,106,107,515,100,6,915801694,OK
+medida,E3,T5,9,calculado,3,3,9,2,1,0,106,107,515,100,6,915801694,OK
+medida,E3,T5,10,calculado,3,3,9,2,1,0,108,108,515,100,6,915801694,OK
+medida,E3,T5,11,calculado,3,3,9,2,1,0,106,107,515,100,6,915801694,OK
+medida,E3,T5,12,calculado,3,3,9,2,1,0,106,107,515,100,6,915801694,OK
+medida,E3,T5,13,calculado,3,3,9,2,1,0,106,106,515,100,6,915801694,OK
+medida,E3,T5,14,calculado,3,3,9,2,1,0,106,106,515,100,6,915801694,OK
+medida,E3,T5,15,calculado,3,3,9,2,1,0,106,107,515,100,6,915801694,OK
+medida,E3,T5,16,calculado,3,3,9,2,1,0,109,109,515,100,6,915801694,OK
+medida,E3,T5,17,calculado,3,3,9,2,1,0,106,107,515,100,6,915801694,OK
+medida,E3,T5,18,calculado,3,3,9,2,1,0,106,107,515,100,6,915801694,OK
+medida,E3,T5,19,calculado,3,3,9,2,1,0,106,107,515,100,6,915801694,OK
+medida,E4,T1,0,tiempo agotado,,,,,,,,30000,495014,4333,1,,
+medida,E4,T2,0,calculado,8,0,61,18,4,1,97,99,0,0,3,197830764,OK
+medida,E4,T2,1,calculado,8,0,61,18,4,1,92,94,0,0,3,197830764,OK
+medida,E4,T2,2,calculado,8,0,61,18,4,1,93,94,0,0,3,197830764,OK
+medida,E4,T2,3,calculado,8,0,61,18,4,1,93,94,0,0,3,197830764,OK
+medida,E4,T2,4,calculado,8,0,61,18,4,1,93,94,0,0,3,197830764,OK
+medida,E4,T2,5,calculado,8,0,61,18,4,1,94,95,0,0,3,197830764,OK
+medida,E4,T2,6,calculado,8,0,61,18,4,1,94,95,0,0,3,197830764,OK
+medida,E4,T2,7,calculado,8,0,61,18,4,1,93,94,0,0,3,197830764,OK
+medida,E4,T2,8,calculado,8,0,61,18,4,1,93,94,0,0,3,197830764,OK
+medida,E4,T2,9,calculado,8,0,61,18,4,1,94,95,0,0,3,197830764,OK
+medida,E4,T2,10,calculado,8,0,61,18,4,1,96,97,0,0,3,197830764,OK
+medida,E4,T2,11,calculado,8,0,61,18,4,1,93,94,0,0,3,197830764,OK
+medida,E4,T2,12,calculado,8,0,61,18,4,1,93,94,0,0,3,197830764,OK
+medida,E4,T2,13,calculado,8,0,61,18,4,1,93,94,0,0,3,197830764,OK
+medida,E4,T2,14,calculado,8,0,61,18,4,1,93,95,0,0,3,197830764,OK
+medida,E4,T2,15,calculado,8,0,61,18,4,1,92,94,0,0,3,197830764,OK
+medida,E4,T2,16,calculado,8,0,61,18,4,1,93,95,0,0,3,197830764,OK
+medida,E4,T2,17,calculado,8,0,61,18,4,1,93,94,0,0,3,197830764,OK
+medida,E4,T2,18,calculado,8,0,61,18,4,1,92,94,0,0,3,197830764,OK
+medida,E4,T2,19,calculado,8,0,61,18,4,1,93,94,0,0,3,197830764,OK
+medida,E4,T3,0,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,3325,0,0,0,,
+medida,E4,T3,1,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,3300,0,0,0,,
+medida,E4,T3,2,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,3309,0,0,0,,
+medida,E4,T3,3,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,3313,0,0,0,,
+medida,E4,T3,4,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,3299,0,0,0,,
+medida,E4,T3,5,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,3274,0,0,0,,
+medida,E4,T3,6,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,3282,0,0,0,,
+medida,E4,T3,7,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,3275,0,0,0,,
+medida,E4,T3,8,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,3290,0,0,0,,
+medida,E4,T3,9,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,3285,0,0,0,,
+medida,E4,T3,10,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,3295,0,0,0,,
+medida,E4,T3,11,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,3284,0,0,0,,
+medida,E4,T3,12,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,3309,0,0,0,,
+medida,E4,T3,13,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,3288,0,0,0,,
+medida,E4,T3,14,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,3293,0,0,0,,
+medida,E4,T3,15,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,3295,0,0,0,,
+medida,E4,T3,16,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,3304,0,0,0,,
+medida,E4,T3,17,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,3289,0,0,0,,
+medida,E4,T3,18,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,3295,0,0,0,,
+medida,E4,T3,19,sin plan: No se pudo reconstruir el plan inicial,,,,,,,,3293,0,0,0,,
+medida,E4,T4,0,calculado,8,0,61,18,3,1,95,96,0,0,3,-1423197973,OK
+medida,E4,T4,1,calculado,8,0,61,18,3,1,95,96,0,0,3,-1423197973,OK
+medida,E4,T4,2,calculado,8,0,61,18,3,1,95,96,0,0,3,-1423197973,OK
+medida,E4,T4,3,calculado,8,0,61,18,3,1,95,96,0,0,3,-1423197973,OK
+medida,E4,T4,4,calculado,8,0,61,18,3,1,97,99,0,0,3,-1423197973,OK
+medida,E4,T4,5,calculado,8,0,61,18,3,1,97,99,0,0,3,-1423197973,OK
+medida,E4,T4,6,calculado,8,0,61,18,3,1,96,98,0,0,3,-1423197973,OK
+medida,E4,T4,7,calculado,8,0,61,18,3,1,97,98,0,0,3,-1423197973,OK
+medida,E4,T4,8,calculado,8,0,61,18,3,1,96,98,0,0,3,-1423197973,OK
+medida,E4,T4,9,calculado,8,0,61,18,3,1,96,98,0,0,3,-1423197973,OK
+medida,E4,T4,10,calculado,8,0,61,18,3,1,95,97,0,0,3,-1423197973,OK
+medida,E4,T4,11,calculado,8,0,61,18,3,1,96,97,0,0,3,-1423197973,OK
+medida,E4,T4,12,calculado,8,0,61,18,3,1,95,97,0,0,3,-1423197973,OK
+medida,E4,T4,13,calculado,8,0,61,18,3,1,95,96,0,0,3,-1423197973,OK
+medida,E4,T4,14,calculado,8,0,61,18,3,1,95,96,0,0,3,-1423197973,OK
+medida,E4,T4,15,calculado,8,0,61,18,3,1,95,96,0,0,3,-1423197973,OK
+medida,E4,T4,16,calculado,8,0,61,18,3,1,95,97,0,0,3,-1423197973,OK
+medida,E4,T4,17,calculado,8,0,61,18,3,1,95,96,0,0,3,-1423197973,OK
+medida,E4,T4,18,calculado,8,0,61,18,3,1,96,97,0,0,3,-1423197973,OK
+medida,E4,T4,19,calculado,8,0,61,18,3,1,95,97,0,0,3,-1423197973,OK
+medida,E4,T5,0,tiempo agotado,,,,,,,,30000,213990,3534,1,,
+medida,V-F,T2,0,tiempo agotado,,,,,,,,30000,255228,930,1,,
+medida,V-C,T2,0,calculado,8,0,63,19,2,1,102,104,0,0,3,-516556724,OK
+medida,V-C,T2,1,calculado,8,0,63,19,2,1,102,104,0,0,3,-516556724,OK
+medida,V-C,T2,2,calculado,8,0,63,19,2,1,99,100,0,0,3,-516556724,OK
+medida,V-C,T2,3,calculado,8,0,63,19,2,1,96,98,0,0,3,-516556724,OK
+medida,V-C,T2,4,calculado,8,0,63,19,2,1,96,98,0,0,3,-516556724,OK
+medida,V-C,T2,5,calculado,8,0,63,19,2,1,96,98,0,0,3,-516556724,OK
+medida,V-C,T2,6,calculado,8,0,63,19,2,1,96,98,0,0,3,-516556724,OK
+medida,V-C,T2,7,calculado,8,0,63,19,2,1,97,98,0,0,3,-516556724,OK
+medida,V-C,T2,8,calculado,8,0,63,19,2,1,97,98,0,0,3,-516556724,OK
+medida,V-C,T2,9,calculado,8,0,63,19,2,1,96,98,0,0,3,-516556724,OK
+medida,V-C,T2,10,calculado,8,0,63,19,2,1,97,99,0,0,3,-516556724,OK
+medida,V-C,T2,11,calculado,8,0,63,19,2,1,96,98,0,0,3,-516556724,OK
+medida,V-C,T2,12,calculado,8,0,63,19,2,1,96,98,0,0,3,-516556724,OK
+medida,V-C,T2,13,calculado,8,0,63,19,2,1,97,98,0,0,3,-516556724,OK
+medida,V-C,T2,14,calculado,8,0,63,19,2,1,96,98,0,0,3,-516556724,OK
+medida,V-C,T2,15,calculado,8,0,63,19,2,1,97,99,0,0,3,-516556724,OK
+medida,V-C,T2,16,calculado,8,0,63,19,2,1,96,98,0,0,3,-516556724,OK
+medida,V-C,T2,17,calculado,8,0,63,19,2,1,97,98,0,0,3,-516556724,OK
+medida,V-C,T2,18,calculado,8,0,63,19,2,1,96,98,0,0,3,-516556724,OK
+medida,V-C,T2,19,calculado,8,0,63,19,2,1,96,98,0,0,3,-516556724,OK
+medida,V-C2,T2,0,calculado,8,0,63,19,2,1,96,97,0,0,3,-516556724,OK
+medida,V-C2,T2,1,calculado,8,0,63,19,2,1,96,98,0,0,3,-516556724,OK
+medida,V-C2,T2,2,calculado,8,0,63,19,2,1,96,98,0,0,3,-516556724,OK
+medida,V-C2,T2,3,calculado,8,0,63,19,2,1,97,98,0,0,3,-516556724,OK
+medida,V-C2,T2,4,calculado,8,0,63,19,2,1,97,98,0,0,3,-516556724,OK
+medida,V-C2,T2,5,calculado,8,0,63,19,2,1,97,98,0,0,3,-516556724,OK
+medida,V-C2,T2,6,calculado,8,0,63,19,2,1,97,98,0,0,3,-516556724,OK
+medida,V-C2,T2,7,calculado,8,0,63,19,2,1,97,99,0,0,3,-516556724,OK
+medida,V-C2,T2,8,calculado,8,0,63,19,2,1,99,100,0,0,3,-516556724,OK
+medida,V-C2,T2,9,calculado,8,0,63,19,2,1,98,99,0,0,3,-516556724,OK
+medida,V-C2,T2,10,calculado,8,0,63,19,2,1,97,98,0,0,3,-516556724,OK
+medida,V-C2,T2,11,calculado,8,0,63,19,2,1,97,99,0,0,3,-516556724,OK
+medida,V-C2,T2,12,calculado,8,0,63,19,2,1,98,99,0,0,3,-516556724,OK
+medida,V-C2,T2,13,calculado,8,0,63,19,2,1,99,100,0,0,3,-516556724,OK
+medida,V-C2,T2,14,calculado,8,0,63,19,2,1,99,101,0,0,3,-516556724,OK
+medida,V-C2,T2,15,calculado,8,0,63,19,2,1,98,99,0,0,3,-516556724,OK
+medida,V-C2,T2,16,calculado,8,0,63,19,2,1,97,99,0,0,3,-516556724,OK
+medida,V-C2,T2,17,calculado,8,0,63,19,2,1,97,98,0,0,3,-516556724,OK
+medida,V-C2,T2,18,calculado,8,0,63,19,2,1,98,100,0,0,3,-516556724,OK
+medida,V-C2,T2,19,calculado,8,0,63,19,2,1,98,100,0,0,3,-516556724,OK
+medida,V-D3,T2,0,calculado,10,0,78,23,4,1,122,124,0,0,3,922220668,OK
+medida,V-D3,T2,1,calculado,10,0,78,23,4,1,123,125,0,0,3,922220668,OK
+medida,V-D3,T2,2,calculado,10,0,78,23,4,1,122,123,0,0,3,922220668,OK
+medida,V-D3,T2,3,calculado,10,0,78,23,4,1,122,124,0,0,3,922220668,OK
+medida,V-D3,T2,4,calculado,10,0,78,23,4,1,122,124,0,0,3,922220668,OK
+medida,V-D3,T2,5,calculado,10,0,78,23,4,1,123,124,0,0,3,922220668,OK
+medida,V-D3,T2,6,calculado,10,0,78,23,4,1,123,124,0,0,3,922220668,OK
+medida,V-D3,T2,7,calculado,10,0,78,23,4,1,122,124,0,0,3,922220668,OK
+medida,V-D3,T2,8,calculado,10,0,78,23,4,1,122,124,0,0,3,922220668,OK
+medida,V-D3,T2,9,calculado,10,0,78,23,4,1,123,125,0,0,3,922220668,OK
+medida,V-D3,T2,10,calculado,10,0,78,23,4,1,123,125,0,0,3,922220668,OK
+medida,V-D3,T2,11,calculado,10,0,78,23,4,1,123,125,0,0,3,922220668,OK
+medida,V-D3,T2,12,calculado,10,0,78,23,4,1,122,124,0,0,3,922220668,OK
+medida,V-D3,T2,13,calculado,10,0,78,23,4,1,122,124,0,0,3,922220668,OK
+medida,V-D3,T2,14,calculado,10,0,78,23,4,1,121,123,0,0,3,922220668,OK
+medida,V-D3,T2,15,calculado,10,0,78,23,4,1,123,125,0,0,3,922220668,OK
+medida,V-D3,T2,16,calculado,10,0,78,23,4,1,123,125,0,0,3,922220668,OK
+medida,V-D3,T2,17,calculado,10,0,78,23,4,1,127,129,0,0,3,922220668,OK
+medida,V-D3,T2,18,calculado,10,0,78,23,4,1,122,124,0,0,3,922220668,OK
+medida,V-D3,T2,19,calculado,10,0,78,23,4,1,122,124,0,0,3,922220668,OK
+uc04-secuencial,UC04-secuencial,T1,0,calculado,7,0,63,19,2,1,86,87,0,0,3,1434506510,OK
+uc04-secuencial,UC04-secuencial,T2,0,calculado,8,0,63,19,2,1,99,100,0,0,3,-516556724,OK
+uc04-secuencial,UC04-secuencial,T3,0,tiempo agotado,,,,,,,,30000,211835,8793,4,,
+uc04-secuencial,UC04-secuencial,T4,0,calculado,9,0,63,19,3,1,109,111,0,0,3,-1575459898,OK
+uc04-secuencial,UC04-secuencial,T5,0,tiempo agotado,,,,,,,,30000,212542,3222,1,,
+uc04-paralelo,UC04-paralelo,T1,0,calculado,7,0,63,19,2,1,88,95,0,0,3,1434506510,OK
+uc04-paralelo,UC04-paralelo,T2,0,calculado,8,0,63,19,2,1,100,102,0,0,3,-516556724,OK
+uc04-paralelo,UC04-paralelo,T3,0,tiempo agotado,,,,,,,,30000,203214,8600,4,,
+uc04-paralelo,UC04-paralelo,T4,0,calculado,9,0,63,19,3,1,112,30000,0,0,3,-1575459898,OK
+uc04-paralelo,UC04-paralelo,T5,0,tiempo agotado,,,,,,,,30000,204874,3149,1,,
