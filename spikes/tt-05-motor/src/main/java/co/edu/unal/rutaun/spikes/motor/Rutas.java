@@ -1,6 +1,7 @@
 package co.edu.unal.rutaun.spikes.motor;
 
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -12,6 +13,8 @@ public final class Rutas {
 
   private static final DateTimeFormatter MARCA =
       DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH-mm-ss");
+
+  private static final int MAXIMO_DE_INTENTOS = 1_000;
 
   private Rutas() {}
 
@@ -39,6 +42,19 @@ public final class Rutas {
     } catch (IOException e) {
       throw new IllegalStateException("No puedo crear " + base, e);
     }
-    return base.resolve("mediciones-" + MARCA.format(LocalDateTime.now()) + ".csv");
+    // El archivo se crea aquí y nunca se reutiliza: dos corridas en el mismo segundo no pueden
+    // pisar la evidencia de la otra.
+    String marca = "mediciones-" + MARCA.format(LocalDateTime.now());
+    for (int intento = 0; intento < MAXIMO_DE_INTENTOS; intento++) {
+      Path candidato = base.resolve(marca + (intento == 0 ? "" : "-" + intento) + ".csv");
+      try {
+        return Files.createFile(candidato);
+      } catch (FileAlreadyExistsException e) {
+        continue;
+      } catch (IOException e) {
+        throw new IllegalStateException("No puedo crear " + candidato, e);
+      }
+    }
+    throw new IllegalStateException("No encuentro un nombre libre para el CSV en " + base);
   }
 }
