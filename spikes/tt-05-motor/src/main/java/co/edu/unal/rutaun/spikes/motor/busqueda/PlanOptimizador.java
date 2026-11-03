@@ -19,17 +19,24 @@ public final class PlanOptimizador {
       Tope tope,
       Plan plan,
       int maxMarcados,
-      int k) {
+      int k,
+      Cancelacion cancelacion) {
     int n = modelo.cantidadMaterias();
     int[] semestre = plan.semestrePorMateria().clone();
     int[] bloque = plan.bloquePorSemestre().clone();
     Plan actual = plan;
     for (int materia = 0; materia < n; materia++) {
+      if (cancelacion.cancelado()) {
+        return null;
+      }
       if (semestre[materia] <= 0 || a0.contiene(materia)) {
         continue;
       }
       int original = semestre[materia];
       for (int s = 1; s < original; s++) {
+        if (cancelacion.cancelado()) {
+          return null;
+        }
         semestre[materia] = s;
         Plan candidato = PlanEstandar.reconstruir(modelo, semestre, bloque, actual.asignacion());
         if (candidato.k() <= k
@@ -52,13 +59,20 @@ public final class PlanOptimizador {
       int libreInicial,
       Tope tope,
       Plan plan,
-      int maxMarcados) {
+      int maxMarcados,
+      Cancelacion cancelacion) {
     Plan actual = plan;
     for (int s = 1; s <= actual.k(); s++) {
+      if (cancelacion.cancelado()) {
+        return null;
+      }
       int[] bloqueActual = actual.bloquePorSemestre().clone();
       int actualBloque = bloqueActual[s];
       int maximo = Math.min(libreInicial, tope.limiteCreditos());
       for (int b = maximo; b > actualBloque; b--) {
+        if (cancelacion.cancelado()) {
+          return null;
+        }
         if (libreInicial >= 3 && b > 0 && b < 3) {
           continue;
         }

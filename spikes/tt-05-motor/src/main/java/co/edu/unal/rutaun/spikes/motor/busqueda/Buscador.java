@@ -55,7 +55,7 @@ public final class Buscador {
     this.cancelacion = cancelacion;
     this.restricciones = restricciones;
     this.extraRequeridas = restricciones.obligatoriasExtra;
-    this.cotas = new Cotas(modelo, tope, libreInicial, extraRequeridas);
+    this.cotas = new Cotas(modelo, tope, libreInicial, extraRequeridas, cancelacion);
     this.n = modelo.cantidadMaterias();
   }
 
@@ -97,12 +97,17 @@ public final class Buscador {
     if (modelo.motivoSinPlan() != null) {
       return false;
     }
-    Plan testigo = ConstructorTestigo.construir(modelo, a0, libreInicial, tope, restricciones);
+    Plan testigo =
+        ConstructorTestigo.construir(modelo, a0, libreInicial, tope, restricciones, cancelacion);
     if (testigo != null && testigo.k() <= k) {
       this.plan = testigo;
       this.encontrado = true;
       this.metricas.tamanoMemoizacion = 0;
       return true;
+    }
+    if (cancelacion.cancelado()) {
+      this.metricas.cancelada = true;
+      return false;
     }
     boolean resultado = dfs(1);
     this.metricas.tamanoMemoizacion = Math.max(metricas.tamanoMemoizacion, fallidos.size());
@@ -115,7 +120,7 @@ public final class Buscador {
 
   private boolean dfs(int s) {
     metricas.nodos++;
-    if ((metricas.nodos & 1023) == 0 && cancelacion.cancelado()) {
+    if (cancelacion.cancelado()) {
       metricas.cancelada = true;
       return false;
     }

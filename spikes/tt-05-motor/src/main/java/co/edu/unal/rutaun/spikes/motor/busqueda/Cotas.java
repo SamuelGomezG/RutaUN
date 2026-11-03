@@ -13,17 +13,26 @@ public final class Cotas {
   private final int libreInicial;
   private final ConjuntoDeMaterias requeridas;
   private final ConjuntoDeMaterias extraRequeridas;
+  private final Cancelacion cancelacion;
 
   public Cotas(
-      ModeloDeCalculo modelo, Tope tope, int libreInicial, ConjuntoDeMaterias extraRequeridas) {
+      ModeloDeCalculo modelo,
+      Tope tope,
+      int libreInicial,
+      ConjuntoDeMaterias extraRequeridas,
+      Cancelacion cancelacion) {
     this.modelo = modelo;
     this.tope = tope;
     this.libreInicial = libreInicial;
     this.requeridas = modelo.requeridas();
     this.extraRequeridas = extraRequeridas;
+    this.cancelacion = cancelacion;
   }
 
   public int cotaInferior(ConjuntoDeMaterias D, int L, int[] asignacion) {
+    if (cancelacion.cancelado()) {
+      return ModeloDeCalculo.INFINITO;
+    }
     int creditosPendientes = 0;
     int materiasPendientes = 0;
     int cadena = 0;
@@ -32,6 +41,9 @@ public final class Cotas {
     int habilitaciones = 0;
     long[] palabras = requeridas.palabras();
     for (int i = 0; i < modelo.cantidadMaterias(); i++) {
+      if (cancelacion.cancelado()) {
+        return ModeloDeCalculo.INFINITO;
+      }
       if ((palabras[i >>> 6] & (1L << (i & 63))) == 0 || D.contiene(i)) {
         continue;
       }

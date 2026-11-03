@@ -75,7 +75,12 @@ class MallaRealTest {
     restricciones.maxSemestres = 9;
     assertThat(
             ConstructorTestigo.construir(
-                modelo, new ConjuntoDeMaterias(modelo.cantidadMaterias()), 33, t2, restricciones))
+                modelo,
+                new ConjuntoDeMaterias(modelo.cantidadMaterias()),
+                33,
+                t2,
+                restricciones,
+                new Cancelacion(30_000)))
         .isNull();
   }
 
@@ -89,6 +94,26 @@ class MallaRealTest {
     assertThat(resultado).isInstanceOf(ResultadoCalculo.Calculado.class);
     Plan plan = ((ResultadoCalculo.Calculado) resultado).plan();
     assertThat(plan.k()).isEqualTo(semestres);
+  }
+
+  @Test
+  void tt05_plazoVencidoDevuelveTiempoAgotado() {
+    ModeloDeCalculo modelo = new ModeloDeCalculo(malla, ModeloDeCalculo.Configuracion.vacia());
+    CalculoDelPlan calculo =
+        new CalculoDelPlan(modelo, escenario("E0"), tope("T2"), new Cancelacion(0));
+    assertThat(calculo.calcular()).isInstanceOf(ResultadoCalculo.TiempoAgotado.class);
+  }
+
+  @Test
+  void tt05_cancelacionRespetaElPlazo() {
+    ModeloDeCalculo modelo = new ModeloDeCalculo(malla, ModeloDeCalculo.Configuracion.vacia());
+    CalculoDelPlan calculo =
+        new CalculoDelPlan(modelo, escenario("E0"), tope("T5"), new Cancelacion(2_000));
+    long inicio = System.nanoTime();
+    ResultadoCalculo resultado = calculo.calcular();
+    long ms = (System.nanoTime() - inicio) / 1_000_000L;
+    assertThat(resultado).isInstanceOf(ResultadoCalculo.TiempoAgotado.class);
+    assertThat(ms).isLessThan(2_500L);
   }
 
   @Test
