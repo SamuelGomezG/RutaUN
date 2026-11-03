@@ -246,6 +246,10 @@ public final class Buscador {
       clave.append(Arrays.toString(clausula)).append(';');
     }
     clave.append('|');
+    for (long[] clausula : modelo.correquisitos(materia)) {
+      clave.append(Arrays.toString(clausula)).append(';');
+    }
+    clave.append('|');
     for (Habilitacion habilitacion : modelo.habilitaciones(materia)) {
       clave.append(habilitacion.medida()).append(':').append(habilitacion.umbral()).append(';');
     }
