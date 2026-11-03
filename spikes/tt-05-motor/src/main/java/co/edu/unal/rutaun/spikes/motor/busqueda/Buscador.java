@@ -39,6 +39,9 @@ public final class Buscador {
   private Plan plan;
   private Set<Estado> fallidos;
   private final Metricas metricas = new Metricas();
+  private long limiteDeNodos = Long.MAX_VALUE;
+  private long nodosVisitados;
+  private boolean limiteAlcanzado;
 
   public Buscador(
       ModeloDeCalculo modelo,
@@ -62,6 +65,14 @@ public final class Buscador {
     return metricas;
   }
 
+  /**
+   * Corta la búsqueda en profundidad tras {@code limite} nodos. A diferencia de la cancelación, el
+   * corte es determinista: no depende del reloj, y {@link #buscar} responde que no encontró plan.
+   */
+  public void limitarNodos(long limite) {
+    this.limiteDeNodos = limite;
+  }
+
   public Plan plan() {
     return plan;
   }
@@ -71,6 +82,8 @@ public final class Buscador {
     this.capturar = capturar;
     this.encontrado = false;
     this.plan = null;
+    this.nodosVisitados = 0;
+    this.limiteAlcanzado = false;
     this.cursadas = a0.copia();
     this.libre = libreInicial;
     this.asignacion = modelo.asignacionInicial();
@@ -113,6 +126,10 @@ public final class Buscador {
 
   private boolean dfs(int s) {
     metricas.registrarNodo();
+    if (limiteAlcanzado || ++nodosVisitados > limiteDeNodos) {
+      limiteAlcanzado = true;
+      return false;
+    }
     if (cancelacion.cancelado()) {
       metricas.marcarCancelada();
       return false;
@@ -259,6 +276,9 @@ public final class Buscador {
       int materias,
       List<Integer> seleccion,
       int s) {
+    if (limiteAlcanzado) {
+      return false;
+    }
     if (cancelacion.cancelado()) {
       metricas.marcarCancelada();
       return false;
