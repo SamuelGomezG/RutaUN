@@ -288,19 +288,9 @@ public final class ModeloDeCalculo {
     }
     this.fijas = fijasTemporal;
 
-    // Asignación inicial de las fijas: primera agrupación (determinista).
-    int[] asignacionInicial = new int[cantidadMaterias];
-    for (int i = 0; i < cantidadMaterias; i++) {
-      asignacionInicial[i] = gruposDeMateria.get(i).length == 1 ? gruposDeMateria.get(i)[0] : -1;
-    }
-    for (int i = 0; i < cantidadMaterias; i++) {
-      if (fijas.contiene(i)) {
-        int[] gruposMateria = gruposDeMateria.get(i);
-        if (gruposMateria.length > 0) {
-          asignacionInicial[i] = gruposMateria[0];
-        }
-      }
-    }
+    // Asignación inicial de las fijas y de las obligatorias que están en varias agrupaciones:
+    // la primera (determinista). Así cada una suma sus créditos a una sola agrupación.
+    final int[] asignacionInicial = calcularAsignacionInicial();
 
     // Requeridas = obligatorias + fijas.
     ConjuntoDeMaterias requeridasTemporal = new ConjuntoDeMaterias(cantidadMaterias);
@@ -331,18 +321,18 @@ public final class ModeloDeCalculo {
       grupo.creditosRequeridasDirectas += creditos[i];
     }
     for (int i = 0; i < cantidadMaterias; i++) {
-      if (!obligatoria[i]) {
+      if (!obligatoria[i] || asignacionInicial[i] < 0) {
         continue;
       }
-      for (int grupoIndice : gruposDeMateria.get(i)) {
-        Grupo grupo = grupos.get(grupoIndice);
-        grupo.mascaraRequeridasDirectas[i >>> 6] |= 1L << (i & 63);
-        grupo.creditosRequeridasDirectas += creditos[i];
-      }
+      Grupo grupo = grupos.get(asignacionInicial[i]);
+      grupo.mascaraRequeridasDirectas[i >>> 6] |= 1L << (i & 63);
+      grupo.creditosRequeridasDirectas += creditos[i];
     }
     for (Grupo grupo : grupos) {
       for (int materia : grupo.materiasDirectas) {
-        if ((grupo.mascaraRequeridasDirectas[materia >>> 6] & (1L << (materia & 63))) == 0) {
+        // Una obligatoria no es opción de las agrupaciones a las que no está asignada.
+        if ((grupo.mascaraRequeridasDirectas[materia >>> 6] & (1L << (materia & 63))) == 0
+            && !obligatoria[materia]) {
           grupo.mascaraOptativasDirectas[materia >>> 6] |= 1L << (materia & 63);
         }
       }
@@ -655,14 +645,18 @@ public final class ModeloDeCalculo {
   }
 
   public int[] asignacionInicial() {
+    return calcularAsignacionInicial();
+  }
+
+  private int[] calcularAsignacionInicial() {
     int[] asignacion = new int[cantidadMaterias];
     for (int i = 0; i < cantidadMaterias; i++) {
-      asignacion[i] = gruposDeMateria.get(i).length == 1 ? gruposDeMateria.get(i)[0] : -1;
-    }
-    for (int i = 0; i < cantidadMaterias; i++) {
-      if (fijas.contiene(i) && gruposDeMateria.get(i).length > 0) {
-        asignacion[i] = gruposDeMateria.get(i)[0];
-      }
+      int[] gruposMateria = gruposDeMateria.get(i);
+      boolean sinElegir = fijas.contiene(i) || obligatoria[i];
+      asignacion[i] =
+          gruposMateria.length == 1 || (sinElegir && gruposMateria.length > 0)
+              ? gruposMateria[0]
+              : -1;
     }
     return asignacion;
   }
