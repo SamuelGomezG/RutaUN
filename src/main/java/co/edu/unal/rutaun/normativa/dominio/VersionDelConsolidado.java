@@ -1,6 +1,5 @@
 package co.edu.unal.rutaun.normativa.dominio;
 
-import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.ProgramaId;
 import co.edu.unal.rutaun.compartido.ReglaId;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
@@ -72,8 +71,10 @@ public final class VersionDelConsolidado {
 
   /**
    * Crea la versión que sigue a esta, con las reglas ya validadas. La versión actual no cambia. El
-   * número de la versión del plan sube solo si las reglas de estructura de {@code resultante} son
-   * distintas de las de esta versión: otras o con otro estado.
+   * número de la versión del plan sube solo si cambia el conjunto de reglas de estructura: se
+   * agregó o se retiró alguna. Que una regla de estructura cambie de estado (por ejemplo, de
+   * programada a vigente en una versión automática) no lo hace subir: esa versión no incorpora
+   * normas ni cambia reglas (glosario, «Versión del consolidado»).
    *
    * @throws IllegalArgumentException si las reglas validadas son de otro programa
    */
@@ -145,17 +146,17 @@ public final class VersionDelConsolidado {
   }
 
   private static boolean cambiaLaEstructura(List<Regla> antes, List<Regla> despues) {
-    return !huellaDeEstructura(antes).equals(huellaDeEstructura(despues));
+    return !idsDeEstructura(antes).equals(idsDeEstructura(despues));
   }
 
-  private static Set<ReglaConEstado> huellaDeEstructura(List<Regla> reglas) {
-    Set<ReglaConEstado> huella = new HashSet<>();
+  private static Set<ReglaId> idsDeEstructura(List<Regla> reglas) {
+    Set<ReglaId> ids = new HashSet<>();
     for (Regla regla : reglas) {
       if (esDeEstructura(regla)) {
-        huella.add(new ReglaConEstado(regla.id(), regla.estado()));
+        ids.add(regla.id());
       }
     }
-    return huella;
+    return ids;
   }
 
   /**
@@ -179,6 +180,4 @@ public final class VersionDelConsolidado {
       case DatosDeRegla.DeOtraCategoria otra -> false;
     };
   }
-
-  private record ReglaConEstado(ReglaId id, EstadoRegla estado) {}
 }
