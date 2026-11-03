@@ -4,16 +4,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import co.edu.unal.rutaun.spikes.motor.busqueda.CalculoDelPlan;
 import co.edu.unal.rutaun.spikes.motor.busqueda.Cancelacion;
+import co.edu.unal.rutaun.spikes.motor.busqueda.ConstructorTestigo;
 import co.edu.unal.rutaun.spikes.motor.busqueda.Plan;
+import co.edu.unal.rutaun.spikes.motor.busqueda.Restricciones;
 import co.edu.unal.rutaun.spikes.motor.busqueda.ResultadoCalculo;
 import co.edu.unal.rutaun.spikes.motor.busqueda.Tope;
 import co.edu.unal.rutaun.spikes.motor.malla.LectorDeMalla;
 import co.edu.unal.rutaun.spikes.motor.malla.ModelosJson;
+import co.edu.unal.rutaun.spikes.motor.modelo.ConjuntoDeMaterias;
 import co.edu.unal.rutaun.spikes.motor.modelo.ModeloDeCalculo;
 import co.edu.unal.rutaun.spikes.motor.verificacion.VerificadorDePlan;
 import java.nio.file.Path;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 class MallaRealTest {
 
@@ -60,6 +65,30 @@ class MallaRealTest {
     assertThat(
             new VerificadorDePlan(modelo).verificar(plan, calculo.a0(), calculo.libreInicial(), t2))
         .isEmpty();
+  }
+
+  @Test
+  void tt05_constructorSinSemestresSuficientesNoDevuelvePlan() {
+    ModeloDeCalculo modelo = new ModeloDeCalculo(malla, ModeloDeCalculo.Configuracion.vacia());
+    Tope t2 = tope("T2");
+    Restricciones restricciones = new Restricciones(modelo.cantidadMaterias());
+    restricciones.maxSemestres = 9;
+    assertThat(
+            ConstructorTestigo.construir(
+                modelo, new ConjuntoDeMaterias(modelo.cantidadMaterias()), 33, t2, restricciones))
+        .isNull();
+  }
+
+  @ParameterizedTest
+  @CsvSource({"E0,T2,10", "E1,T1,7", "E1,T2,8", "E1,T4,9", "E2,T2,4", "E3,T2,1", "E4,T2,8"})
+  void tt05_elPlanFinalTieneLosSemestresDeLaCota(String idEscenario, String idTope, int semestres) {
+    ModeloDeCalculo modelo = new ModeloDeCalculo(malla, ModeloDeCalculo.Configuracion.vacia());
+    CalculoDelPlan calculo =
+        new CalculoDelPlan(modelo, escenario(idEscenario), tope(idTope), new Cancelacion(30_000));
+    ResultadoCalculo resultado = calculo.calcular();
+    assertThat(resultado).isInstanceOf(ResultadoCalculo.Calculado.class);
+    Plan plan = ((ResultadoCalculo.Calculado) resultado).plan();
+    assertThat(plan.k()).isEqualTo(semestres);
   }
 
   @Test

@@ -36,7 +36,13 @@ public final class ConstructorTestigo {
     }
     int[] semestre = new int[n];
     Arrays.fill(semestre, -1);
-    int maximoSemestres = Math.min(200, modelo.cantidadMaterias() + libreInicial + 1);
+    int maximoSemestres =
+        Math.min(
+            restricciones.maxSemestres,
+            Math.min(200, modelo.cantidadMaterias() + libreInicial + 1));
+    if (maximoSemestres < 1) {
+      return null;
+    }
     int[] bloque = new int[maximoSemestres + 1];
     int[] creditosPorSemestre = new int[maximoSemestres + 1];
     int L = libreInicial;

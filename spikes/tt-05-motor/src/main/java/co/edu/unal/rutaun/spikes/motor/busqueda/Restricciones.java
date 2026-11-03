@@ -7,6 +7,7 @@ import co.edu.unal.rutaun.spikes.motor.modelo.ModeloDeCalculo;
 public final class Restricciones {
 
   public int maxSemestresMarcados = Integer.MAX_VALUE;
+  public int maxSemestres = Integer.MAX_VALUE;
   public int maxCreditosOptativas = Integer.MAX_VALUE;
   public boolean soloIncluidas;
   public ConjuntoDeMaterias incluidas;
@@ -29,6 +30,7 @@ public final class Restricciones {
   public Restricciones copia() {
     Restricciones copia = new Restricciones(semestreFijo.length);
     copia.maxSemestresMarcados = maxSemestresMarcados;
+    copia.maxSemestres = maxSemestres;
     copia.maxCreditosOptativas = maxCreditosOptativas;
     copia.soloIncluidas = soloIncluidas;
     copia.incluidas = incluidas.copia();
