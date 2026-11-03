@@ -11,15 +11,19 @@ Sistemas y Computación en menos de 30 s (S3), también cinco veces seguidas
 
 ## Respuesta
 
-**No para una búsqueda exacta.** En los casos reportados la búsqueda en
+**No para una búsqueda exacta sin límite.** En los casos curados la búsqueda en
 profundidad no expandió ningún nodo (`nodos=0`): el plan lo encontró el
-constructor testigo. Cuando la búsqueda corrió de respaldo, agotó el plazo.
+constructor testigo. Y como único oráculo del criterio 4 tampoco sirve:
+demostrar que una optativa no cabe obliga a agotar el espacio, y E1/T2, que
+calcula en ~20 ms, agotaba el plazo (3,5 millones de nodos sin terminar).
 
-**Sí para un híbrido de cotas y constructor testigo** en T2 para E0–E4 y en
-T1/T4 para E1–E4: calcula en milisegundos un plan que demuestra c1 (k coincide
-con la cota inferior), c2 y c3; c4–c6 salen de una heurística determinista sin
-prueba exhaustiva de optimalidad. T3 y T5 solo se completan en E3; la variante
-F y el estrés de malla duplicada no se completaron.
+**Sí para un híbrido de cotas, constructor testigo y búsqueda acotada.** En 20
+de los 25 pares escenario–tope calcula en menos de 1,1 s (mediana) un plan que
+pasa el verificador: T1–T4 para E0–E3, T2–T4 para E4 y T5 solo en E3. k, c2 y c3
+están demostrados (k coincide con la cota inferior en todos); c4–c6 salen de
+heurísticas deterministas sin prueba de optimalidad. Quedan sin calcular
+E0/T5, E1/T5, E2/T5, E4/T1, E4/T5 y la variante F (tiempo agotado). El estrés de
+malla duplicada no se hizo.
 
 ## Enfoques comparados
 
@@ -34,12 +38,37 @@ F y el estrés de malla duplicada no se completaron.
 
 ## Qué hizo cada parte
 
-El modelo compacto (índices, bitsets de dos `long`, CNF y máscaras de
-agrupaciones) y el verificador independiente funcionan. La búsqueda exacta
-queda como respaldo y como oráculo de pruebas, pero no es la que produce los
-planes medidos: por eso el CSV muestra `nodos=0`. La fijación sucesiva usa el
-constructor testigo como oráculo rápido: primero k, después c2, c3, c4 y una
-mejora local para c5 y c6. El plan final siempre pasa `VerificadorDePlan`.
+El modelo compacto (índices, bitsets, CNF y máscaras de agrupaciones) y el
+verificador independiente funcionan. La fijación sucesiva usa como oráculo de
+existencia `buscar`: el constructor testigo primero y, solo si falla, la
+búsqueda en profundidad con cancelación. Con él se fijan k, c2 y c3, que son
+exactos mientras la búsqueda termine. Después:
+
+- **c4, vía rápida:** decide el constructor cada inclusión de optativa y el plan
+  es su reconstrucción final. Resuelve los casos curados, con las mismas huellas
+  que antes de la segunda ronda.
+- **c4, vía de rescate:** si el constructor no reconstruye el plan (antes era un
+  falso «sin plan»), decide `buscar` con un tope determinista de 1000 nodos por
+  inclusión y el plan es el último que devolvió. Una exclusión por rescate
+  significa «no se halló plan con ese tope», no «no existe»: **c4 por rescate no
+  está demostrado mínimo.**
+- **c5 y c6:** mejora local verificada.
+
+La búsqueda sí aporta en la vía de rescate. Inclusiones de optativas por cada
+camino y exclusiones (todas por agotar el tope; ninguna demostrada):
+
+| Caso | Por el constructor | Por la búsqueda | Exclusiones por tope |
+| --- | ---: | ---: | ---: |
+| E0/T1 | 15 | 8 | 48 |
+| E0/T3 | 0 | 2 | 69 |
+| E0/T4 | 7 | 0 | 64 |
+| E1/T3 | 10 | 13 | 48 |
+| E2/T3 | 0 | 24 | 47 |
+| E4/T3 | 22 | 1 | 48 |
+
+Los rescates exitosos necesitaron entre 13 y 79 nodos, salvo uno de E0/T3 con
+17.543, que el tope de 1000 deja fuera (por eso E0/T3 incluye 2 y no 3 por la
+búsqueda). El plan final siempre pasa `VerificadorDePlan`.
 
 ## Datos usados
 
@@ -48,8 +77,12 @@ mejora local para c5 y c6. El plan final siempre pasa `VerificadorDePlan`.
   créditos y 19 subagrupaciones, 83 prerrequisitos, 14 habilitaciones, 0
   correquisitos, 3 externas, 2 no cursables. Cadena más larga: 7 materias.
 - Orden del consolidado: malla estándar 2023 del programa.
-- Escenarios: E0 a E4, topes T1 a T5, variantes C (correquisito trivial), C2
-  (correquisito pendiente) y D3 («o» de Sistemas de Información).
+- Escenarios: E0 a E4, topes T1 a T5 y las variantes F (materias fijadas), C
+  (correquisito trivial), C2 (correquisito de un semestre posterior: 1000017
+  exige 2016699), CC (cadena de correquisitos: 1000017 exige 2016699 y 2016699
+  exige 2016697), D3 («o» de Sistemas de Información), IMP (ciclo de
+  prerrequisitos: 2016699 exige 2025967) y ESC (ciclo con salida por «o»:
+  2016699 exige 2025967 o 2016353). Todas, salvo F y D3, son sintéticas.
 - Ambiente: AMD Ryzen 7 5825U, 16 hilos, 13 GiB de RAM, Ubuntu 24.04, OpenJDK
   21.0.12.1, con el equipo en corriente.
 
@@ -75,57 +108,107 @@ normativa en #93/DOC-05.
 
 ## Mediciones
 
-CSV completo: `spikes/tt-05-motor/resultados/mediciones-2026-11-03T17-13-41.csv`.
-La corrida `curado` dejó además
-`spikes/tt-05-motor/resultados/mediciones-2026-11-03T17-05-46.csv`. Cada caso
+CSV completo: `spikes/tt-05-motor/resultados/mediciones-2026-11-03T18-41-05.csv`
+(`todos`). La corrida `curado` dejó además
+`spikes/tt-05-motor/resultados/mediciones-2026-11-03T18-35-39.csv`. Cada caso
 hizo 3 calentamientos y 20 medidas; los tiempos son milisegundos sin arranque
-de la JVM. La huella del plan coincide entre las dos corridas para todos los
-casos comunes.
+de la JVM, y la mediana de 20 medidas es el promedio de la décima y la
+undécima. La huella del plan coincide entre las dos corridas para los 23 casos
+comunes y es única dentro de cada caso. La columna «Vía c4» es `rápida` (decide
+el constructor) o `rescate`.
 
-| Escenario | Tope | k | c2 | c3 | Opt. | Bloques | Mediana | p95 | Máx. |
-| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| E0 | T2 | 10 | 0 | 78 | 23 | 4 | 124 | 139 | 140 |
-| E1 | T1 | 7 | 0 | 63 | 19 | 2 | 91 | 92 | 93 |
-| E1 | T2 | 8 | 0 | 63 | 19 | 2 | 98 | 99 | 100 |
-| E1 | T4 | 9 | 0 | 63 | 19 | 3 | 111 | 112 | 112 |
-| E2 | T1 | 4 | 0 | 24 | 7 | 3 | 49 | 51 | 51 |
-| E2 | T2 | 4 | 0 | 24 | 7 | 2 | 49 | 50 | 51 |
-| E2 | T4 | 5 | 0 | 24 | 7 | 3 | 60 | 60 | 61 |
-| E3 | T1 | 1 | 0 | 9 | 2 | 1 | 12 | 13 | 13 |
-| E3 | T2 | 1 | 0 | 9 | 2 | 1 | 12 | 12 | 12 |
-| E3 | T3 | 2 | 1 | 9 | 2 | 1 | 36 | 37 | 38 |
-| E3 | T5 | 3 | 3 | 9 | 2 | 1 | 107 | 110 | 111 |
-| E4 | T2 | 8 | 0 | 61 | 18 | 4 | 94 | 97 | 99 |
-| E4 | T4 | 8 | 0 | 61 | 18 | 3 | 97 | 99 | 99 |
-| V-C | T2 | 8 | 0 | 63 | 19 | 2 | 98 | 104 | 104 |
-| V-C2 | T2 | 8 | 0 | 63 | 19 | 2 | 99 | 100 | 101 |
-| V-D3 | T2 | 10 | 0 | 78 | 23 | 4 | 124 | 125 | 129 |
+Nota sobre los tiempos: la primera versión de la cancelación multiplicó el
+tiempo por 5,5 al consultar el reloj en cada iteración de los bucles internos
+(E1/T2: de 18 a 100 ms); ahora se consulta cada 256 llamadas y E1/T2 vuelve a
+~17 ms. Los tiempos de la ronda anterior no son comparables con estos.
+
+| Escenario | Tope | k | c2 | c3 | Opt. | Bloques | Vía c4 | Mediana | p95 | Máx. |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | --- | ---: | ---: | ---: |
+| E0 | T1 | 8 | 0 | 78 | 23 | 4 | rescate | 165 | 180 | 185 |
+| E0 | T2 | 10 | 0 | 78 | 23 | 4 | rápida | 26,5 | 31 | 37 |
+| E0 | T3 | 14 | 0 | 78 | 23 | 10 | rescate | 1052 | 1076 | 1083 |
+| E0 | T4 | 11 | 0 | 78 | 23 | 6 | rescate | 664,5 | 702 | 705 |
+| E1 | T1 | 7 | 0 | 63 | 19 | 2 | rápida | 19 | 19 | 21 |
+| E1 | T2 | 8 | 0 | 63 | 19 | 2 | rápida | 17 | 18 | 20 |
+| E1 | T3 | 12 | 0 | 63 | 19 | 6 | rescate | 304,5 | 315 | 325 |
+| E1 | T4 | 9 | 0 | 63 | 19 | 3 | rápida | 14 | 15 | 16 |
+| E2 | T1 | 4 | 0 | 24 | 7 | 3 | rápida | 4 | 4 | 4 |
+| E2 | T2 | 4 | 0 | 24 | 7 | 2 | rápida | 4 | 4 | 4 |
+| E2 | T3 | 6 | 0 | 24 | 7 | 3 | rescate | 273 | 286 | 287 |
+| E2 | T4 | 5 | 0 | 24 | 7 | 3 | rápida | 5 | 5 | 5 |
+| E3 | T1 | 1 | 0 | 9 | 2 | 1 | rápida | 1 | 1 | 1 |
+| E3 | T2 | 1 | 0 | 9 | 2 | 1 | rápida | 1 | 1 | 1 |
+| E3 | T3 | 2 | 1 | 9 | 2 | 1 | rápida | 3 | 3 | 3 |
+| E3 | T4 | 1 | 0 | 9 | 2 | 1 | rápida | 1 | 1 | 1 |
+| E3 | T5 | 3 | 3 | 9 | 2 | 1 | rápida | 7 | 7 | 7 |
+| E4 | T2 | 8 | 0 | 61 | 18 | 4 | rápida | 13 | 14 | 15 |
+| E4 | T3 | 11 | 0 | 61 | 18 | 4 | rescate | 256 | 260 | 261 |
+| E4 | T4 | 8 | 0 | 61 | 18 | 3 | rápida | 11 | 12 | 13 |
+| V-C | T2 | 8 | 0 | 63 | 19 | 2 | rápida | 15 | 15 | 15 |
+| V-C2 | T2 | 8 | 0 | 63 | 19 | 4 | rápida | 19 | 19 | 19 |
+| V-CC | T2 | 8 | 0 | 63 | 19 | 4 | rápida | 15 | 16 | 16 |
+| V-ESC | T2 | 8 | 0 | 63 | 19 | 2 | rápida | 13 | 14 | 16 |
+| V-D3 | T2 | 10 | 0 | 78 | 23 | 4 | rápida | 19 | 20 | 20 |
 
 Todos los planes calculados pasan el verificador. En todos, k coincide con la
 cota inferior. E3/T3 con T3 tiene `c2=1`, la prueba de UC01 ext. 6a; E3/T5 con
-T5 tiene `c2=k=3`.
+T5 tiene `c2=k=3`. Los E0/T1, E0/T3, E0/T4, E1/T3, E2/T3 y E4/T3 son los casos
+de rescate. Los tiempos de rescate (0,17 a 1,1 s) son los más altos porque cada
+exclusión por tope agota sus 1000 nodos; con el oráculo sin tope esos casos
+agotaban el plazo.
 
-Casos no completados (la tabla del CSV los conserva):
+Casos que no terminan en calculado:
 
-| Escenario | Tope | Resultado | Corridas | Mediana | Máx. |
-| --- | --- | --- | ---: | ---: | ---: |
-| E0 | T1 | sin plan | 20 | 110 | 127 |
-| E0 | T3 | sin plan | 20 | 99 | 105 |
-| E0 | T4 | tiempo agotado | 1 | 30000 | 30000 |
-| E0 | T5 | tiempo agotado | 1 | 30000 | 30000 |
-| E1 | T3 | tiempo agotado | 1 | 30000 | 30000 |
-| E1 | T5 | tiempo agotado | 1 | 30000 | 30000 |
-| E2 | T3 | sin plan | 20 | 344 | 356 |
-| E2 | T5 | tiempo agotado | 1 | 30000 | 30000 |
-| E4 | T1 | tiempo agotado | 1 | 30000 | 30000 |
-| E4 | T3 | sin plan | 20 | 3295 | 3325 |
-| E4 | T5 | tiempo agotado | 1 | 30000 | 30000 |
-| V-F | T2 | tiempo agotado | 1 | 30000 | 30000 |
+| Fase | Escenario | Tope | Resultado | Corridas | Mediana | Máx. |
+| --- | --- | --- | --- | ---: | ---: | ---: |
+| calentamiento | E0 | T5 | tiempo agotado | 1 | 30000 | 30000 |
+| calentamiento | E1 | T5 | tiempo agotado | 1 | 30000 | 30000 |
+| calentamiento | E2 | T5 | tiempo agotado | 1 | 30000 | 30000 |
+| calentamiento | E4 | T1 | tiempo agotado | 1 | 30000 | 30000 |
+| calentamiento | E4 | T5 | tiempo agotado | 1 | 30000 | 30000 |
+| calentamiento | V-F | T2 | tiempo agotado | 1 | 30000 | 30000 |
+| medida | V-IMP | T2 | sin plan (esperado, ver «Ciclos de prerrequisitos») | 20 | 0 | 0 |
 
-UC04 sobre E1 con T1–T5: secuencial 60 384 ms; en paralelo con hilos virtuales
-y `CompletableFuture.orTimeout`, 30 029 ms. T3 y T5 terminan en tiempo agotado
-y se muestran como no calculadas; T1, T2 y T4 calculan en unos 90–110 ms.
-En paralelo, T4 quedó en el límite de los 30 s por la contención con T3/T5.
+La fase `calentamiento` indica que el primer calentamiento agotó el plazo y el
+caso no se repitió; ninguno de esos seis llegó a medirse. En todos el plazo se
+agotó dentro de la primera búsqueda de existencia (k igual a la cota), tras 2,6
+a 6,7 millones de nodos sin hallar plan ni terminar de agotar el espacio.
+
+**Por qué antes salían «sin plan».** E0/T1, E0/T3, E2/T3 y E4/T3 devolvían
+`SinPlanPosible("No se pudo reconstruir el plan inicial")` después de haber
+hallado un plan con k semestres; en UC01 eso es la ext. 5b y culpa al
+consolidado. Había dos causas:
+
+- **El constructor no resuelve la instancia** (E0/T1, E0/T3, E2/T3): k, c2 y c3
+  los fijaba la búsqueda (entre 61 y 218 nodos), pero en c4 el único oráculo era
+  el constructor, que falla con todas las inclusiones, así que se excluían las 71
+  optativas y ya nada era factible.
+- **Exclusiones posteriores al último testigo válido** (E4/T3): hubo un testigo
+  válido (k=11, c3=61), pero se excluyeron 59 materias después y la
+  reconstrucción final fallaba.
+
+La vía de rescate resuelve ambas. E0/T4 y E1/T3, que antes agotaban el plazo,
+también calculan ahora. Los fallos internos que aún puedan darse se devuelven
+como `NoCalculado` (ver «Resultados del cálculo»); ninguno apareció.
+
+UC04 sobre E1 con T1–T5, una corrida por tope. Duración de cada tarea, medida
+dentro de la tarea:
+
+| Tope | Secuencial (ms) | En paralelo (ms) | Resultado |
+| --- | ---: | ---: | --- |
+| T1 | 12 | 13 | calculado, k=7 |
+| T2 | 12 | 14 | calculado, k=8 |
+| T3 | 313 | 315 | calculado, k=12 (rescate) |
+| T4 | 14 | 15 | calculado, k=9 |
+| T5 | 30000 | 29999 | tiempo agotado |
+
+El total secuencial fue de 30 354 ms y el paralelo, con hilos virtuales y
+`CompletableFuture.orTimeout`, de 30 007 ms: ambos los fija el plazo de T5, y el
+paralelo no gana nada mientras T5 siga sin terminar. El trabajo útil de T1–T4
+suma unos 0,35 s. En la ronda
+anterior el informe atribuía el tiempo de T4 en paralelo a una contención con
+T3/T5; era un error de medición (`msTotal` se tomaba tras cada `join()` en
+orden, de modo que T4 heredaba la espera de T3).
 
 La cancelación se midió: E0/T5 termina en 30 s, no en 300 s. La prueba con plazo
 de 2 s devuelve `TiempoAgotado` en menos de 2,5 s.
@@ -139,51 +222,160 @@ de 2 s devuelve `TiempoAgotado` en menos de 2,5 s.
   rechazan por prerrequisito, habilitación y cobertura/libre elección.
 - **Verificador:** se ejecutó sobre todos los planes calculados; no hay filas
   con `calculado` que tengan errores.
-- **Pruebas:** 20 pruebas en verde con `verify`. La prueba de determinismo ahora
+- **Pruebas:** 43 pruebas en verde con `verify`. La prueba de determinismo
   compara los vectores completos y construye un modelo nuevo en cada vuelta; la
   anterior usaba un centinela negativo y no comparaba nada. La huella del plan
-  coincide entre procesos.
-- **Correquisitos:** V-C era trivial porque 2016353 ya estaba aprobada en E1.
-  V-C2 exige 2016698 junto con 2016353; el constructor los pone en el mismo
-  semestre y el verificador lo acepta.
+  coincide entre procesos. Las pruebas de esta ronda se comprobaron por
+  mutación: fallan contra el código que corrigen (ver abajo).
+- **Cancelación:** la primera versión consultaba `System.nanoTime()` en cada
+  iteración de los bucles internos y multiplicó por 5,5 el tiempo del cálculo
+  (E1/T2: de 18 a 100 ms). Ahora `Cancelacion` lee el reloj en la primera
+  llamada y luego cada 256; E1/T2 vuelve a ~20 ms y la latencia de cancelación
+  sigue por debajo de 0,5 s (la prueba de 2 s termina en menos de 2,5 s).
+- **Correquisitos:**
+  - V-C era trivial porque 2016353 ya estaba aprobada en E1.
+  - La primera V-C2 (2016353 con 2016698) también pasaba con el código anterior
+    a la corrección: el codicioso viejo las dejaba juntas en el semestre 1 sin
+    emparejarlas, con la misma huella que E1/T2 sin correquisito. La nueva V-C2
+    es «1000017 exige 2016699» (semestres sugeridos 3 y 4; las dos se pueden
+    cursar con lo aprobado en E1). Mutación: sobre `d27c516` (sin la corrección)
+    la prueba `tt05_correquisitoDeUnSemestrePosteriorNoQuedaDespues` falla, y el
+    motor de entonces respondía `SinPlanPosible`; sobre el código vigente da
+    `calculado k=8` con el verificador en OK.
+  - **Ciclo del constructor:** con correquisitos encadenados (M exige P y P
+    exige Q, con Q todavía no cursable) el bucle de `ConstructorTestigo`
+    agregaba P, lo quitaba y lo volvía a agregar sin fin; solo lo detenía el
+    plazo. Ahora cada semestre lleva las materias descartadas y
+    `buscarCorrequisito` no vuelve a proponerlas. Termina porque, en un semestre,
+    cada materia entra como pareja a lo sumo una vez (al quitarla queda
+    descartada) y se quita a lo sumo una vez: el bucle da como mucho 2·n vueltas.
+  - **Variante CC.** El plan de correcciones proponía la cadena 2016353 →
+    2016698 → 2025967, pero no tiene plan: 2025967 (obligatoria) exige 2016697,
+    esta exige 2016698 (2016498 no es cursable) y la cadena obligaría a 2016698
+    a cursarse con 2025967 o después, así que el ciclo es mixto
+    (prerrequisito–correquisito). Se usa 1000017 → 2016699 → 2016697, que es
+    realizable. Mutación: con el código anterior CC agota el plazo con `nodos=0`
+    (atascado en el constructor); con el vigente calcula `k=8` en ~22 ms.
+- **Ciclos de prerrequisitos:** `ModeloDeCalculo.profundidad` no marcaba las
+  materias que estaba visitando, así que IMP (2016699 exige 2025967, que ya
+  exige 2016699) terminaba en `StackOverflowError` en vez de informar la causa
+  que pide la ext. 5b de UC01. Ahora marca la materia «en curso» y, si la
+  recursión vuelve a una en curso, ese camino vale infinito (un camino circular
+  nunca es el más corto). **No memoriza los valores contaminados por el
+  ciclo:** si el valor de una materia dependió de otra que seguía en curso, se
+  devuelve pero no se guarda; con «A exige (B o C)» y «B exige A», memorizar B
+  como infinita dejaría la cota inferior por encima del mínimo real aunque A se
+  alcance por C, y volverían los falsos «sin plan». ESC (2016699 exige 2025967
+  o 2016353) lo prueba: calcula con el verificador en OK; memorizando los
+  contaminados daría «sin plan». Con la cota infinita, el resultado nombra la
+  primera materia requerida inalcanzable en el orden del consolidado: «La
+  materia 2016699 (Estructuras de datos) no se puede alcanzar: prerrequisito
+  circular o no cursable». En la malla real no hay ciclos; el costo extra solo
+  aparece si los hay.
+- **El 3 como dato:** los créditos por materia de libre elección salen de
+  `libreEleccion.creditosPorMateria`; ya no quedan literales en el constructor,
+  el optimizador ni los mensajes del verificador. Si el campo falta, la carga
+  falla con un mensaje claro (un dato que falta no se inventa). Con el dato en 4,
+  E1/T2 calcula y el verificador acepta el plan.
+- **UC04 en paralelo:** `msTotal` se tomaba después de cada `join()` en orden, así
+  que T4 heredaba la espera de T3, y el `catch` registraba cualquier excepción
+  como tiempo agotado. Ahora cada tarea mide su duración dentro de la tarea, solo
+  la `TimeoutException` se registra como `TiempoAgotado` y cualquier otra falla
+  se relanza.
+- **Revisión automática del PR (15 comentarios):** se verificó cada uno contra el
+  código. Se corrigieron: `claveClase` (no incluía los correquisitos propios de la
+  materia), `kMaximo` (no contaba los prerrequisitos opcionales), el Javadoc de
+  `CalculoDelPlan` (prometía optimalidad), la validación de `Tope`, el doble
+  conteo de una obligatoria fijada, el tamaño fijo de las máscaras (128 materias),
+  la mediana de un número par de muestras, la etiqueta de las filas de
+  calentamiento, el CSV único por corrida y las rutas del README. Ya estaban
+  resueltos los dos de `Medir` sobre UC04 (`6429041`). No se aplicó el orden de
+  `RevisarMalla` (desde `05d0500`, `profundidad` tolera ciclos) ni los dos que
+  piden decisiones de diseño (asignación de agrupación guardada y
+  `maximoPorPeriodo`); quedan en «Limitaciones».
 - **Oráculo de fuerza bruta:** no se implementó; queda para PRU-02 (#61). Por
   eso c4–c6 no tienen prueba exhaustiva de optimalidad.
-- **Checkstyle:** se usa la copia local del proyecto que omite solo las reglas de
-  Javadoc; se corrigieron nombres (`D`, `L`, `DX`, `n`, `k`), líneas largas y
-  distancias de declaración.
+- **Checkstyle:** se usa la copia local del proyecto, que omite las reglas de
+  Javadoc; las supresiones también se limitan a Javadoc (0 violaciones con las
+  demás reglas). Se corrigieron nombres (`D`, `L`, `DX`, `n`, `k`, `creditosX`,
+  `materiasX`), líneas largas y distancias de declaración.
+
+## Resultados del cálculo
+
+`CalculoDelPlan` devuelve un resultado sellado de cuatro formas. Ninguna debe
+confundirse con otra: cada una pide una respuesta distinta al estudiante.
+
+| Resultado | Cuándo aparece | Extensión de UC01 |
+| --- | --- | --- |
+| `Calculado` | Hay plan: k, c2 y c3 demostrados y c4–c6 por la vía descrita arriba. Lleva `c4Aplicado` y `c4PorRescate` | Flujo normal |
+| `SinPlanPosible` | De verdad no hay plan: la cota inferior es infinita (el mensaje nombra la materia inalcanzable, p. ej. un ciclo de prerrequisitos) o no existe plan hasta el máximo de semestres | 5b |
+| `TiempoAgotado` | El plazo venció (30 s); el cálculo se cancela y no se muestra ningún plan | 5a |
+| `NoCalculado` | Ya se demostró que existe un plan con k semestres, pero un paso posterior del motor no pudo fijar c2 o c3 o reconstruir el plan. Es un fallo del motor, no una conclusión sobre la normativa | Propuesta |
+
+`NoCalculado` no aparece en ninguno de los casos medidos. El SRS no lo
+contempla: **propuesta para el sprint 2** (laguna que va al PR de requisitos
+aparte, regla de oro 3): tratarlo como la ext. 5a, sin plan parcial, con la
+sugerencia de reintentar o probar otro tope, pero con un incidente técnico y no
+de normativa, porque la causa es del motor y no del consolidado. Antes de esta
+ronda esos fallos se devolvían como `SinPlanPosible` y producían falsos 5b: el
+estudiante habría leído que el consolidado no tiene plan cuando sí lo tenía.
 
 ## Limitaciones
 
-- La fase c2–c6 usa el constructor testigo y una mejora local; no agota el
-  espacio de planes. El resultado es determinista y válido, pero no se probó
-  que sea el óptimo lexicográfico en todos los casos.
-- No se completaron E0/T1, E0/T3, E0/T4, E0/T5, E1/T3, E1/T5, E2/T3, E2/T5,
-  E4/T1, E4/T3, E4/T5 ni V-F. T3 es un tope realista, así que la respuesta
-  «escala» no cubre toda la franja T1–T3.
-- El estrés de malla duplicada no se implementó.
+- k, c2 y c3 son exactos mientras la búsqueda termine; **c4–c6 no están probados
+  óptimos.** El resultado es determinista y válido, pero no se probó que sea el
+  óptimo lexicográfico. En particular, c4 por rescate excluye optativas por
+  agotar un tope de 1000 nodos (hasta 69 exclusiones en un caso), no por haber
+  demostrado que no caben. Por eso la lista de optativas elegidas puede no ser
+  la lexicográficamente menor.
+- No se completaron E0/T5, E1/T5, E2/T5, E4/T1, E4/T5 ni V-F (tiempo agotado en
+  la primera búsqueda de existencia). T5 (8 créditos y 3 materias) y E4/T1 son
+  topes estrechos; T1–T4 se completan en casi todo E0–E4, pero la respuesta
+  «escala» no cubre los topes estrechos.
+- `NoCalculado` no apareció en ninguna medición, así que su manejo solo está
+  razonado, no ejercitado.
+- El estrés de malla duplicada no se implementó (las máscaras ya escalan con la
+  cantidad de materias: hay una prueba con 150).
 - No se modelan materias que ya no rigen, restricciones inciertas ni reglas
   temporales, programadas o informativas. Los correquisitos y la habilitación
   con medida del programa solo se ejercitaron con datos sintéticos.
+- Una materia aprobada que está en más de una agrupación toma la primera
+  (`grupos[0]`). En la aplicación debe salir de la asignación que el estudiante
+  guardó en su avance, y no elegirse una si no hay ninguna guardada; el esquema
+  de escenarios del spike no la trae.
+- `maximoPorPeriodo` de la malla es `null` en la transcripción y ni el motor ni
+  el verificador lo aplican. Si una norma lo fija, debe entrar a la vez en el
+  tope efectivo de la búsqueda, del constructor y del verificador.
 - «Profundización» no se modela: la libre elección son bloques (D9). El 3 de
   créditos por materia de libre elección es un supuesto del prototipo, no una
-  norma; en el sprint 2 debe salir de la normativa o de `04-supuestos.md`.
+  norma: ya es un dato obligatorio de la malla (`libreEleccion.creditosPorMateria`)
+  y en el sprint 2 debe salir de la normativa o de `04-supuestos.md`.
 - CP-SAT y la ramificación y acotamiento completa no se probaron.
 
 ## Tiempo invertido
 
 - Spike original: unas 7 h (estimación del equipo; el máximo del issue era 6–8 h).
-- Correcciones de la revisión: unas 5 h (estimación), incluidas las mediciones
-  de 20 corridas y UC04.
+- Correcciones de la primera revisión: unas 5 h (estimación), incluidas las
+  mediciones de 20 corridas y UC04.
+- Segunda ronda de correcciones: unas 5 h previstas en el plan, más el triaje de
+  los 15 comentarios de la revisión automática. Es una estimación del plan, no
+  un registro: quien cierra el spike debe corregirla con su tiempo real.
 
 Las horas reales deben registrarse en el campo «Horas reales» del tablero.
 
 ## Propuesta de S3
 
-- Mantener **30 s por cálculo**.
+- Mantener **30 s por cálculo**. El caso más lento que calcula tarda 1,1 s; los
+  que no calculan agotan el plazo.
 - Latencia de cancelación objetivo: **≤ 0,5 s**; la prueba de 2 s cumple con
   margen.
 - Calcular las alternativas de UC04 **en paralelo** con hilos virtuales y
-  `orTimeout`; las que agoten el plazo se muestran como no calculadas.
+  `orTimeout`; las que agoten el plazo se muestran como no calculadas. Con una
+  alternativa que no termina el total lo fija el plazo; el paralelo evita que
+  esa espera se sume a la de las demás.
+- Resultado `NoCalculado`: tratarlo como la ext. 5a (sin plan parcial, con
+  sugerencia de reintentar o probar otro tope) pero con un incidente técnico y
+  no de normativa. No está en el SRS: va como laguna en el PR de requisitos.
 - El cambio de `04-supuestos.md` y `07-lagunas.md` va en un PR de requisitos
   aparte.
 
@@ -193,11 +385,13 @@ Las horas reales deben registrarse en el campo «Horas reales» del tablero.
   verificador y el constructor testigo; dejar la búsqueda exacta como respaldo
   y oráculo de pruebas.
 - Completar PRU-02 (#61) con el oráculo de fuerza bruta en mallas pequeñas y
-  usarlo para validar c4–c6.
-- Resolver los casos que hoy no terminan: E0/T1, E0/T3, E1/T3, E1/T5, E2/T3,
-  E2/T5, E4/T1, E4/T3, E4/T5 y V-F. Opciones: mejorar el constructor o evaluar
-  CP-SAT.
+  usarlo para validar c4–c6 y medir cuánto se aleja c4 por rescate del mínimo.
+- Resolver los casos que hoy no terminan: E0/T5, E1/T5, E2/T5, E4/T1, E4/T5 y
+  V-F. Opciones: mejorar el constructor para topes estrechos o evaluar CP-SAT.
+  Para c4, sustituir el tope de nodos por una poda que demuestre las exclusiones.
 - Implementar el estrés de malla duplicada y la prueba de cancelación a 30 s.
+- Decidir con la normativa dos puntos que el spike deja abiertos: la asignación
+  de agrupación de las materias aprobadas y `maximoPorPeriodo`.
 - Llevar a la semilla D1, D3, D4, D5, D6 y D9 (#92, #100) y documentar el
   formato en DOC-05 (#93).
 
