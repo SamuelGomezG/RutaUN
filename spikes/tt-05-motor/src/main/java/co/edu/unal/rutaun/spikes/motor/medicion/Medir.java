@@ -145,7 +145,7 @@ public final class Medir {
       for (int i = 0; i < CALENTAMIENTO; i++) {
         Ejecucion ejecucion = ejecutar(modelo, escenario, tope);
         if (ejecucion.resultado() instanceof ResultadoCalculo.TiempoAgotado) {
-          registrar(modelo, etiquetaEscenario, etiquetaTope, fase, 0, ejecucion);
+          registrar(modelo, etiquetaEscenario, etiquetaTope, "calentamiento", 0, ejecucion);
           return;
         }
       }
@@ -355,7 +355,11 @@ public final class Medir {
         tiempos.add(fila.msTotal);
       }
       tiempos.sort(Comparator.naturalOrder());
-      long mediana = tiempos.get(tiempos.size() / 2);
+      int cantidad = tiempos.size();
+      double mediana =
+          cantidad % 2 == 1
+              ? tiempos.get(cantidad / 2)
+              : (tiempos.get(cantidad / 2 - 1) + tiempos.get(cantidad / 2)) / 2.0;
       int indiceP95 = (int) Math.ceil(0.95 * tiempos.size()) - 1;
       if (indiceP95 < 0) {
         indiceP95 = 0;
@@ -363,7 +367,7 @@ public final class Medir {
       long p95 = tiempos.get(indiceP95);
       long maximo = tiempos.get(tiempos.size() - 1);
       System.out.printf(
-          "%-32s mediana=%6d p95=%6d máximo=%6d%n", entrada.getKey(), mediana, p95, maximo);
+          "%-32s mediana=%8.1f p95=%6d máximo=%6d%n", entrada.getKey(), mediana, p95, maximo);
     }
   }
 
