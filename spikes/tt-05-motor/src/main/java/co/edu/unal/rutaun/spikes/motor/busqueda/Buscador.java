@@ -339,7 +339,8 @@ public final class Buscador {
     return total;
   }
 
-  private boolean probarSubconjunto(List<Integer> seleccion, int creditosX, int materiasX, int s) {
+  private boolean probarSubconjunto(
+      List<Integer> seleccion, int creditosDelSemestre, int materiasDelSemestre, int s) {
     for (int i = 0; i < cantidadMaterias; i++) {
       if ((restricciones.semestreFijo[i] == s || restricciones.semestreMaximo[i] == s)
           && !cursadas.contiene(i)
@@ -363,7 +364,7 @@ public final class Buscador {
       Seleccion.elegirAgrupacion(modelo, materia, cursadasConSeleccion, asignacion, restricciones);
     }
 
-    int maximoBloque = Math.min(libre, tope.limiteCreditos() - creditosX);
+    int maximoBloque = Math.min(libre, tope.limiteCreditos() - creditosDelSemestre);
     for (int b = maximoBloque; b >= 0; b--) {
       if (cancelacion.cancelado()) {
         metricas.marcarCancelada();
@@ -377,10 +378,11 @@ public final class Buscador {
       } else if (b > 0 && b != libreInicial) {
         continue;
       }
-      if (materiasX + Math.ceilDiv(b, modelo.creditosPorMateriaLibre()) > tope.limiteMaterias()) {
+      if (materiasDelSemestre + Math.ceilDiv(b, modelo.creditosPorMateriaLibre())
+          > tope.limiteMaterias()) {
         continue;
       }
-      if (creditosX + b == 0) {
+      if (creditosDelSemestre + b == 0) {
         continue;
       }
       if (restricciones.bloqueFijo != null
@@ -388,7 +390,7 @@ public final class Buscador {
           && restricciones.bloqueFijo[s] != b) {
         continue;
       }
-      boolean marcado = creditosX + b < modelo.minimoPorPeriodo();
+      boolean marcado = creditosDelSemestre + b < modelo.minimoPorPeriodo();
       if (marcado && marcados + 1 > restricciones.maxSemestresMarcados) {
         continue;
       }
@@ -405,7 +407,7 @@ public final class Buscador {
       }
       libre -= b;
       bloque[s] = b;
-      creditosPorSemestre[s] = creditosX + b;
+      creditosPorSemestre[s] = creditosDelSemestre + b;
       if (marcado) {
         marcados++;
       }
