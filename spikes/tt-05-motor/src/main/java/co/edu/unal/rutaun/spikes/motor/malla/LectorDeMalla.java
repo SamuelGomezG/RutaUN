@@ -159,8 +159,13 @@ public final class LectorDeMalla {
           "Falta libreEleccion.creditosPorMateria en la malla: los créditos de una materia de "
               + "libre elección son un dato de la normativa y no tienen valor por omisión");
     }
+    int creditosPorMateria = n.get("creditosPorMateria").asInt();
+    if (creditosPorMateria <= 0) {
+      throw new IllegalArgumentException(
+          "libreEleccion.creditosPorMateria debe ser positivo y es " + creditosPorMateria);
+    }
     return new ModelosJson.LibreEleccionJson(
-        n.get("creditos").asInt(), n.get("creditosPorMateria").asInt(), sugeridos);
+        n.get("creditos").asInt(), creditosPorMateria, sugeridos);
   }
 
   private static List<ModelosJson.PrerrequisitoJson> prerrequisitos(JsonNode nodo) {
