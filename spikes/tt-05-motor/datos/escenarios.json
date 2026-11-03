@@ -213,14 +213,14 @@
     },
     {
       "id": "C2",
-      "nombre": "Correquisito pendiente",
+      "nombre": "Correquisito de un semestre posterior",
       "sintetica": true,
       "escenario": "E1",
       "tope": "T2",
       "correquisitos": [
         {
-          "materia": "2016353",
-          "expresion": "2016698"
+          "materia": "1000017",
+          "expresion": "2016699"
         }
       ]
     },

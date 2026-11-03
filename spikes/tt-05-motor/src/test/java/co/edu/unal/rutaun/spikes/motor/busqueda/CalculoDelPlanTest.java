@@ -111,21 +111,19 @@ class CalculoDelPlanTest {
   }
 
   @Test
-  void tt05_correquisitoPendienteVaEnElMismoSemestre() {
-    ModelosJson.VarianteJson variante = variante("C2");
-    ModeloDeCalculo modelo =
-        new ModeloDeCalculo(
-            malla,
-            new ModeloDeCalculo.Configuracion(
-                variante.fijadas(), variante.prerrequisitos(), variante.correquisitos()));
+  void tt05_correquisitoDeUnSemestrePosteriorNoQuedaDespues() {
+    // 1000017 (semestre sugerido 3) exige 2016699 (semestre sugerido 4): un plan que ponga cada
+    // materia en su semestre sugerido o la ordene por su número de semestre las separaría.
+    ModeloDeCalculo modelo = modeloDe(variante("C2"));
     Tope t2 = tope("T2");
     CalculoDelPlan calculo =
         new CalculoDelPlan(modelo, escenario("E1"), t2, new Cancelacion(30_000));
     ResultadoCalculo resultado = calculo.calcular();
     assertThat(resultado).isInstanceOf(ResultadoCalculo.Calculado.class);
     Plan plan = ((ResultadoCalculo.Calculado) resultado).plan();
-    assertThat(plan.semestre(modelo.indiceDe("2016353")))
-        .isEqualTo(plan.semestre(modelo.indiceDe("2016698")));
+    assertThat(plan.semestre(modelo.indiceDe("2016699")))
+        .isPositive()
+        .isLessThanOrEqualTo(plan.semestre(modelo.indiceDe("1000017")));
     assertThat(
             new VerificadorDePlan(modelo).verificar(plan, calculo.a0(), calculo.libreInicial(), t2))
         .isEmpty();
