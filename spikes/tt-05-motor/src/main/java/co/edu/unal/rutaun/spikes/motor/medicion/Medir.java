@@ -386,15 +386,21 @@ public final class Medir {
     System.out.println("UC04 en paralelo (hilos virtuales):");
     long inicio = System.nanoTime();
     try (ExecutorService ejecutor = Executors.newVirtualThreadPerTaskExecutor()) {
-      List<CompletableFuture<ResultadoCalculo>> futuros = new ArrayList<>();
+      List<CompletableFuture<ResultadoConTiempo>> futuros = new ArrayList<>();
       List<CalculoDelPlan> calculos = new ArrayList<>();
-      List<Long> inicios = new ArrayList<>();
       for (String id : ids) {
         Cancelacion cancelacion = new Cancelacion(plazoMs());
         CalculoDelPlan calculo = new CalculoDelPlan(modelo, escenario, tope(id), cancelacion);
-        long inicioTarea = System.nanoTime();
-        CompletableFuture<ResultadoCalculo> futuro =
-            CompletableFuture.supplyAsync(calculo::calcular, ejecutor)
+        // Cada tarea mide su duración al terminar de calcular, no cuando se recoge su resultado.
+        CompletableFuture<ResultadoConTiempo> futuro =
+            CompletableFuture.supplyAsync(
+                    () -> {
+                      long inicioTarea = System.nanoTime();
+                      ResultadoCalculo resultado = calculo.calcular();
+                      return new ResultadoConTiempo(
+                          resultado, (System.nanoTime() - inicioTarea) / 1_000_000L);
+                    },
+                    ejecutor)
                 .orTimeout(plazoMs(), TimeUnit.MILLISECONDS)
                 .whenComplete(
                     (resultado, error) -> {
@@ -404,19 +410,24 @@ public final class Medir {
                     });
         futuros.add(futuro);
         calculos.add(calculo);
-        inicios.add(inicioTarea);
       }
       for (int i = 0; i < ids.length; i++) {
-        String id = ids[i];
         ResultadoCalculo resultado;
+        long msTarea;
         try {
-          resultado = futuros.get(i).join();
+          ResultadoConTiempo terminado = futuros.get(i).join();
+          resultado = terminado.resultado();
+          msTarea = terminado.ms();
         } catch (CompletionException e) {
+          if (!esTimeout(e)) {
+            // Cualquier otra falla se relanza: la medición debe fallar a la vista.
+            throw e;
+          }
           resultado = new ResultadoCalculo.TiempoAgotado(new Metricas(), plazoMs());
+          msTarea = plazoMs();
         }
-        long msTotal = (System.nanoTime() - inicios.get(i)) / 1_000_000L;
-        Ejecucion ejecucion = new Ejecucion(calculos.get(i), resultado, msTotal);
-        registrar(modelo, "UC04-paralelo", id, "uc04-paralelo", 0, ejecucion);
+        Ejecucion ejecucion = new Ejecucion(calculos.get(i), resultado, msTarea);
+        registrar(modelo, "UC04-paralelo", ids[i], "uc04-paralelo", 0, ejecucion);
       }
     }
     long msParalelo = (System.nanoTime() - inicio) / 1_000_000L;
@@ -459,6 +470,8 @@ public final class Medir {
   }
 
   private record Ejecucion(CalculoDelPlan calculo, ResultadoCalculo resultado, long msTotal) {}
+
+  private record ResultadoConTiempo(ResultadoCalculo resultado, long ms) {}
 
   private static final class Fila {
     private String fase;
