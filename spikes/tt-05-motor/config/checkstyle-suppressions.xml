@@ -3,9 +3,8 @@
           "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
           "https://checkstyle.org/dtds/suppressions_1_2.dtd">
 <suppressions>
-  <!-- El spike es un prototipo: se relajan Javadoc y nombres de variables
-       internas, pero se conservan las demás reglas del proyecto. -->
-  <suppress files=".*"
-            checks="MissingJavadocType,MissingJavadocMethod,ParameterName,GoogleNonConstantFieldName,VariableDeclarationUsageDistance,AbbreviationAsWordInName"/>
+  <!-- El spike es un prototipo: solo se omite el Javadoc; las demás reglas del
+       proyecto se aplican tal cual. -->
+  <suppress files=".*" checks="MissingJavadocType,MissingJavadocMethod"/>
   <suppress files="[\\/]package-info\.java" checks=".*"/>
 </suppressions>

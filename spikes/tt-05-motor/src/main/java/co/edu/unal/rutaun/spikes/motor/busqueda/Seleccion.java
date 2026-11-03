@@ -11,7 +11,6 @@ final class Seleccion {
   static long[] clausulasUtiles(
       ModeloDeCalculo modelo, ConjuntoDeMaterias cursadas, Restricciones restricciones) {
     long[] utiles = new long[ConjuntoDeMaterias.palabrasNecesarias(modelo.cantidadMaterias())];
-    long[] requeridas = modelo.requeridas().palabras();
     for (int i = 0; i < modelo.cantidadMaterias(); i++) {
       if (!esRequerida(i, modelo, restricciones) || cursadas.contiene(i)) {
         continue;
