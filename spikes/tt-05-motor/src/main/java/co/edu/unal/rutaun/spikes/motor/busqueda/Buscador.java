@@ -114,10 +114,6 @@ public final class Buscador {
     return resultado && encontrado;
   }
 
-  public boolean existe(int k) {
-    return buscar(k, false);
-  }
-
   private boolean dfs(int s) {
     metricas.nodos++;
     if (cancelacion.cancelado()) {
