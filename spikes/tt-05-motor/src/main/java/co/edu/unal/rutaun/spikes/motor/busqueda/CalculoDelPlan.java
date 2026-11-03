@@ -80,6 +80,7 @@ public final class CalculoDelPlan {
     long inicioOptimos = System.nanoTime();
 
     Restricciones base = new Restricciones(n);
+    base.maxSemestres = k;
 
     // c2: menos semestres con marca de autorización.
     int c2 = -1;
@@ -157,6 +158,10 @@ public final class CalculoDelPlan {
     Plan planC5 =
         PlanOptimizador.optimizarSemestres(modelo, a0, libreInicial, tope, planBase, c2, k);
     Plan planFinal = PlanOptimizador.optimizarBloques(modelo, a0, libreInicial, tope, planC5, c2);
+    if (planFinal.k() != k) {
+      throw new IllegalStateException(
+          "El plan final tiene " + planFinal.k() + " semestres y la cota fijó " + k);
+    }
     long msOptimos = (System.nanoTime() - inicioOptimos) / 1_000_000L;
     return new ResultadoCalculo.Calculado(planFinal, metricas.copia(), msExistencia, msOptimos);
   }
