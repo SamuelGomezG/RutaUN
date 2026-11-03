@@ -18,6 +18,13 @@ public final class CalculoDelPlan {
   private final int cantidadMaterias;
   private final Metricas metricas = new Metricas();
 
+  /**
+   * Tope de nodos de la búsqueda en profundidad por cada inclusión de la vía de rescate del
+   * criterio 4. Los rescates que tuvieron éxito en los escenarios medidos necesitaron entre 13 y 79
+   * nodos, salvo uno de E0/T3 con 17.543. No es una norma académica: es un parámetro del motor.
+   */
+  private static final long NODOS_POR_INCLUSION = 1_000;
+
   public CalculoDelPlan(
       ModeloDeCalculo modelo,
       ModelosJson.EscenarioJson escenario,
@@ -106,7 +113,7 @@ public final class CalculoDelPlan {
       }
     }
     if (c2 < 0) {
-      return new ResultadoCalculo.SinPlanPosible("No se pudo fijar el criterio 2");
+      return new ResultadoCalculo.NoCalculado("No se pudo fijar el criterio 2");
     }
 
     // c3: menos créditos en optativas elegidas no fijadas.
@@ -115,7 +122,7 @@ public final class CalculoDelPlan {
       return tiempoAgotado(inicio);
     }
     if (conPlan.plan() == null) {
-      return new ResultadoCalculo.SinPlanPosible("No se pudo fijar una cota para el criterio 3");
+      return new ResultadoCalculo.NoCalculado("No se pudo fijar una cota para el criterio 3");
     }
     int inferiorC3 = 0;
     for (ModeloDeCalculo.Grupo grupo : modelo.grupos()) {
@@ -128,49 +135,40 @@ public final class CalculoDelPlan {
       if (cancelacion.cancelado()) {
         return tiempoAgotado(inicio);
       }
-      return new ResultadoCalculo.SinPlanPosible("No se pudo fijar el criterio 3");
+      return new ResultadoCalculo.NoCalculado("No se pudo fijar el criterio 3");
     }
     base.maxCreditosOptativas = c3;
 
-    // c4: lista de optativas elegidas, en orden del consolidado, lexicográficamente menor.
-    base.soloIncluidas = false;
-    base.incluidas = new ConjuntoDeMaterias(cantidadMaterias);
-    base.obligatoriasExtra = new ConjuntoDeMaterias(cantidadMaterias);
-    base.excluidas = new ConjuntoDeMaterias(cantidadMaterias);
-    for (int materia = 0; materia < cantidadMaterias; materia++) {
-      if (cancelacion.cancelado()) {
-        return tiempoAgotado(inicio);
-      }
-      if (!modelo.cursable(materia) || modelo.requeridas().contiene(materia)) {
-        continue;
-      }
-      base.incluidas.agregar(materia);
-      base.obligatoriasExtra.agregar(materia);
-      Plan testigoC4 =
-          ConstructorTestigo.construir(modelo, a0, libreInicial, tope, base, cancelacion);
-      if (testigoC4 == null) {
-        if (cancelacion.cancelado()) {
-          return tiempoAgotado(inicio);
-        }
-        base.incluidas.quitar(materia);
-        base.obligatoriasExtra.quitar(materia);
-        base.excluidas.agregar(materia);
-      }
-    }
-
-    Plan planBase = ConstructorTestigo.construir(modelo, a0, libreInicial, tope, base, cancelacion);
-    if (planBase == null && cancelacion.cancelado()) {
+    // Plan que cumple los criterios 1 a 3; sirve de respaldo si el criterio 4 no puede aplicarse.
+    ResultadoBusqueda conC3 = buscar(k, base, true);
+    if (conC3.cancelada()) {
       return tiempoAgotado(inicio);
     }
+    Plan planC3 = conC3.plan();
+
+    // c4: lista de optativas elegidas, en orden del consolidado. Vía rápida: el constructor decide
+    // cada inclusión. Si no logra reconstruir el plan, vía de rescate: la búsqueda en profundidad,
+    // con un tope de nodos por inclusión, decide en su lugar.
+    ResultadoC4 listaRapida = fijarListaDeOptativas(k, base, false);
+    if (listaRapida.cancelada()) {
+      return tiempoAgotado(inicio);
+    }
+    Plan planBase = listaRapida.plan();
+    boolean c4PorRescate = false;
     if (planBase == null) {
-      ResultadoBusqueda respaldo = buscar(k, base, true);
-      if (respaldo.cancelada()) {
+      ResultadoC4 listaRescate = fijarListaDeOptativas(k, base, true);
+      if (listaRescate.cancelada()) {
         return tiempoAgotado(inicio);
       }
-      planBase = respaldo.plan();
+      planBase = listaRescate.plan();
+      c4PorRescate = planBase != null;
+    }
+    final boolean c4Aplicado = planBase != null;
+    if (!c4Aplicado) {
+      planBase = planC3;
     }
     if (planBase == null) {
-      return new ResultadoCalculo.SinPlanPosible("No se pudo reconstruir el plan inicial");
+      return new ResultadoCalculo.NoCalculado("No se pudo reconstruir el plan");
     }
 
     Plan planC5 =
@@ -189,7 +187,61 @@ public final class CalculoDelPlan {
           "El plan final tiene " + planFinal.k() + " semestres y la cota fijó " + k);
     }
     long msOptimos = (System.nanoTime() - inicioOptimos) / 1_000_000L;
-    return new ResultadoCalculo.Calculado(planFinal, metricas.copia(), msExistencia, msOptimos);
+    return new ResultadoCalculo.Calculado(
+        planFinal, metricas.copia(), msExistencia, msOptimos, c4Aplicado, c4PorRescate);
+  }
+
+  /**
+   * Recorre las optativas en el orden del consolidado y deja en la lista las que admiten un plan.
+   * Con {@code conRescate} falso decide el constructor y el plan es su reconstrucción final; con
+   * {@code conRescate} verdadero decide {@link #buscar} con un tope de {@link #NODOS_POR_INCLUSION}
+   * nodos y el plan es el último que devolvió. Una exclusión por rescate significa «no se halló
+   * plan con ese tope», no «no existe».
+   */
+  private ResultadoC4 fijarListaDeOptativas(int k, Restricciones baseC3, boolean conRescate) {
+    Restricciones lista = baseC3.copia();
+    lista.soloIncluidas = false;
+    lista.incluidas = new ConjuntoDeMaterias(cantidadMaterias);
+    lista.obligatoriasExtra = new ConjuntoDeMaterias(cantidadMaterias);
+    lista.excluidas = new ConjuntoDeMaterias(cantidadMaterias);
+    Plan ultimoPlan = null;
+    for (int materia = 0; materia < cantidadMaterias; materia++) {
+      if (cancelacion.cancelado()) {
+        return ResultadoC4.CANCELADO;
+      }
+      if (!modelo.cursable(materia) || modelo.requeridas().contiene(materia)) {
+        continue;
+      }
+      lista.incluidas.agregar(materia);
+      lista.obligatoriasExtra.agregar(materia);
+      Plan testigo;
+      if (conRescate) {
+        ResultadoBusqueda inclusion = buscar(k, lista, true, NODOS_POR_INCLUSION);
+        if (inclusion.cancelada()) {
+          return ResultadoC4.CANCELADO;
+        }
+        testigo = inclusion.plan();
+      } else {
+        testigo = ConstructorTestigo.construir(modelo, a0, libreInicial, tope, lista, cancelacion);
+      }
+      if (testigo != null) {
+        ultimoPlan = testigo;
+      } else {
+        if (cancelacion.cancelado()) {
+          return ResultadoC4.CANCELADO;
+        }
+        lista.incluidas.quitar(materia);
+        lista.obligatoriasExtra.quitar(materia);
+        lista.excluidas.agregar(materia);
+      }
+    }
+    if (!conRescate) {
+      ultimoPlan = ConstructorTestigo.construir(modelo, a0, libreInicial, tope, lista, cancelacion);
+      if (ultimoPlan == null && cancelacion.cancelado()) {
+        return ResultadoC4.CANCELADO;
+      }
+    }
+    return new ResultadoC4(ultimoPlan, false);
   }
 
   private int busquedaBinariaC3(
@@ -239,7 +291,13 @@ public final class CalculoDelPlan {
   }
 
   private ResultadoBusqueda buscar(int k, Restricciones restricciones, boolean capturar) {
+    return buscar(k, restricciones, capturar, Long.MAX_VALUE);
+  }
+
+  private ResultadoBusqueda buscar(
+      int k, Restricciones restricciones, boolean capturar, long limiteDeNodos) {
     Buscador buscador = new Buscador(modelo, a0, libreInicial, tope, cancelacion, restricciones);
+    buscador.limitarNodos(limiteDeNodos);
     boolean encontrado = buscador.buscar(k, capturar);
     Metricas parciales = buscador.metricas();
     metricas.sumar(parciales);
@@ -261,4 +319,8 @@ public final class CalculoDelPlan {
   }
 
   private record ResultadoBusqueda(boolean encontrado, Plan plan, boolean cancelada) {}
+
+  private record ResultadoC4(Plan plan, boolean cancelada) {
+    private static final ResultadoC4 CANCELADO = new ResultadoC4(null, true);
+  }
 }

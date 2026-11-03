@@ -90,6 +90,56 @@ class CalculoDelPlanTest {
     assertThat(plan.k()).isEqualTo(semestres);
   }
 
+  /**
+   * Con estos topes el constructor solo no reconstruía el plan tras fijar el criterio 4 y el motor
+   * respondía «sin plan» (en UC01, la ext. 5b) aunque la búsqueda ya había hallado un plan con k
+   * semestres. Ahora la vía de rescate lo calcula; k es el que fija la búsqueda de existencia.
+   */
+  @ParameterizedTest
+  @CsvSource({"E0,T1,8", "E0,T3,14", "E2,T3,6", "E4,T3,11"})
+  void tt05_topeHolgadoNoDiceSinPlan(String idEscenario, String idTope, int semestres) {
+    ModeloDeCalculo modelo = new ModeloDeCalculo(malla, ModeloDeCalculo.Configuracion.vacia());
+    Tope tope = tope(idTope);
+    CalculoDelPlan calculo =
+        new CalculoDelPlan(modelo, escenario(idEscenario), tope, new Cancelacion(30_000));
+    ResultadoCalculo resultado = calculo.calcular();
+    assertThat(resultado).isNotInstanceOf(ResultadoCalculo.SinPlanPosible.class);
+    assertThat(resultado).isInstanceOf(ResultadoCalculo.Calculado.class);
+    ResultadoCalculo.Calculado calculado = (ResultadoCalculo.Calculado) resultado;
+    assertThat(calculado.plan().k()).isEqualTo(semestres);
+    assertThat(calculado.c4PorRescate()).isTrue();
+    assertThat(
+            new VerificadorDePlan(modelo)
+                .verificar(calculado.plan(), calculo.a0(), calculo.libreInicial(), tope))
+        .isEmpty();
+  }
+
+  /**
+   * En los casos curados el constructor ya resolvía el criterio 4: la vía de rescate no debe
+   * intervenir ni cambiar el plan. Las huellas son las del motor anterior a la vía de rescate.
+   */
+  @ParameterizedTest
+  @CsvSource({
+    "E0,T2,922220668",
+    "E1,T1,1434506510",
+    "E1,T2,-516556724",
+    "E1,T4,-1575459898",
+    "E2,T2,-909313792",
+    "E3,T2,-1743141566",
+    "E4,T2,197830764"
+  })
+  void tt05_c4SeAplicaEnLosCasosCurados(String idEscenario, String idTope, int huella) {
+    ModeloDeCalculo modelo = new ModeloDeCalculo(malla, ModeloDeCalculo.Configuracion.vacia());
+    CalculoDelPlan calculo =
+        new CalculoDelPlan(modelo, escenario(idEscenario), tope(idTope), new Cancelacion(30_000));
+    ResultadoCalculo resultado = calculo.calcular();
+    assertThat(resultado).isInstanceOf(ResultadoCalculo.Calculado.class);
+    ResultadoCalculo.Calculado calculado = (ResultadoCalculo.Calculado) resultado;
+    assertThat(calculado.c4Aplicado()).isTrue();
+    assertThat(calculado.c4PorRescate()).isFalse();
+    assertThat(calculado.plan().huella()).isEqualTo(huella);
+  }
+
   @Test
   void tt05_plazoVencidoDevuelveTiempoAgotado() {
     ModeloDeCalculo modelo = new ModeloDeCalculo(malla, ModeloDeCalculo.Configuracion.vacia());

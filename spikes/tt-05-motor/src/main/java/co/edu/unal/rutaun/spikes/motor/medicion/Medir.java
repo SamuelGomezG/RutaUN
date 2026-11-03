@@ -227,6 +227,8 @@ public final class Medir {
       fila.memo = metricas.tamanoMemoizacion();
       fila.llamadas = metricas.llamadasExistencia();
       fila.huella = calculado.plan().huella();
+      fila.c4Aplicado = calculado.c4Aplicado();
+      fila.c4PorRescate = calculado.c4PorRescate();
     } else if (resultado instanceof ResultadoCalculo.TiempoAgotado agotado) {
       fila.resultado = "tiempo agotado";
       Metricas.Instantanea metricas = agotado.metricas().instantanea();
@@ -235,6 +237,8 @@ public final class Medir {
       fila.llamadas = metricas.llamadasExistencia();
     } else if (resultado instanceof ResultadoCalculo.SinPlanPosible sinPlan) {
       fila.resultado = "sin plan: " + sinPlan.motivo();
+    } else if (resultado instanceof ResultadoCalculo.NoCalculado noCalculado) {
+      fila.resultado = "no calculado: " + noCalculado.causa();
     }
     return fila;
   }
@@ -252,7 +256,7 @@ public final class Medir {
   private static void imprimir(Fila fila) {
     System.out.printf(
         "%-16s %-4s %-2s #%d: %-12s k=%s c2=%s c3=%s opt=%s bloques=%s "
-            + "ms=%d (exist=%s opt=%s) nodos=%s memo=%s llamadas=%s huella=%s ver=%s%n",
+            + "ms=%d (exist=%s opt=%s) nodos=%s memo=%s llamadas=%s huella=%s c4=%s/%s ver=%s%n",
         fila.fase,
         fila.escenario,
         fila.tope,
@@ -270,6 +274,8 @@ public final class Medir {
         fila.memo,
         fila.llamadas,
         fila.huella,
+        fila.c4Aplicado,
+        fila.c4PorRescate,
         fila.verificador);
   }
 
@@ -277,7 +283,8 @@ public final class Medir {
     StringBuilder csv = new StringBuilder();
     csv.append(
         "fase,escenario,tope,corrida,resultado,k,c2,c3,optativas,bloques,"
-            + "ms_existencia,ms_optimos,ms_total,nodos,memo,llamadas,huella,verificador\n");
+            + "ms_existencia,ms_optimos,ms_total,nodos,memo,llamadas,huella,c4_aplicado,"
+            + "c4_por_rescate,verificador\n");
     for (Fila fila : filas) {
       csv.append(fila.fase)
           .append(',')
@@ -312,6 +319,10 @@ public final class Medir {
           .append(fila.llamadas)
           .append(',')
           .append(valor(fila.huella))
+          .append(',')
+          .append(valor(fila.c4Aplicado))
+          .append(',')
+          .append(valor(fila.c4PorRescate))
           .append(',')
           .append(fila.verificador == null ? "" : fila.verificador.replace(',', ';'))
           .append('\n');
@@ -463,6 +474,8 @@ public final class Medir {
     private long memo;
     private long llamadas;
     private Integer huella;
+    private Boolean c4Aplicado;
+    private Boolean c4PorRescate;
     private String verificador;
   }
 }
