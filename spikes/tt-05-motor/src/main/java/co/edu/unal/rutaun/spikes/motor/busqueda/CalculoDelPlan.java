@@ -47,17 +47,23 @@ public final class CalculoDelPlan {
   }
 
   public ResultadoCalculo calcular() {
+    long inicio = System.nanoTime();
     if (modelo.motivoSinPlan() != null) {
       return new ResultadoCalculo.SinPlanPosible(modelo.motivoSinPlan());
     }
+    if (cancelacion.cancelado()) {
+      return tiempoAgotado(inicio);
+    }
     int[] asignacionInicial = modelo.asignacionInicial();
-    Cotas cotas = new Cotas(modelo, tope, libreInicial, new ConjuntoDeMaterias(n));
+    Cotas cotas = new Cotas(modelo, tope, libreInicial, new ConjuntoDeMaterias(n), cancelacion);
     int cota = cotas.cotaInferior(a0, libreInicial, asignacionInicial);
     if (cota >= ModeloDeCalculo.INFINITO) {
+      if (cancelacion.cancelado()) {
+        return tiempoAgotado(inicio);
+      }
       return new ResultadoCalculo.SinPlanPosible("La cota inferior no es finita");
     }
     int kMax = Math.max(cota, kMaximo(asignacionInicial));
-    long inicio = System.nanoTime();
     int k = -1;
     for (int candidato = Math.max(1, cota); candidato <= kMax; candidato++) {
       if (cancelacion.cancelado()) {
@@ -130,20 +136,30 @@ public final class CalculoDelPlan {
     base.obligatoriasExtra = new ConjuntoDeMaterias(n);
     base.excluidas = new ConjuntoDeMaterias(n);
     for (int materia = 0; materia < n; materia++) {
+      if (cancelacion.cancelado()) {
+        return tiempoAgotado(inicio);
+      }
       if (!modelo.cursable(materia) || modelo.requeridas().contiene(materia)) {
         continue;
       }
       base.incluidas.agregar(materia);
       base.obligatoriasExtra.agregar(materia);
-      Plan testigoC4 = ConstructorTestigo.construir(modelo, a0, libreInicial, tope, base);
+      Plan testigoC4 =
+          ConstructorTestigo.construir(modelo, a0, libreInicial, tope, base, cancelacion);
       if (testigoC4 == null) {
+        if (cancelacion.cancelado()) {
+          return tiempoAgotado(inicio);
+        }
         base.incluidas.quitar(materia);
         base.obligatoriasExtra.quitar(materia);
         base.excluidas.agregar(materia);
       }
     }
 
-    Plan planBase = ConstructorTestigo.construir(modelo, a0, libreInicial, tope, base);
+    Plan planBase = ConstructorTestigo.construir(modelo, a0, libreInicial, tope, base, cancelacion);
+    if (planBase == null && cancelacion.cancelado()) {
+      return tiempoAgotado(inicio);
+    }
     if (planBase == null) {
       ResultadoBusqueda respaldo = buscar(k, base, true);
       if (respaldo.cancelada()) {
@@ -156,8 +172,16 @@ public final class CalculoDelPlan {
     }
 
     Plan planC5 =
-        PlanOptimizador.optimizarSemestres(modelo, a0, libreInicial, tope, planBase, c2, k);
-    Plan planFinal = PlanOptimizador.optimizarBloques(modelo, a0, libreInicial, tope, planC5, c2);
+        PlanOptimizador.optimizarSemestres(
+            modelo, a0, libreInicial, tope, planBase, c2, k, cancelacion);
+    if (planC5 == null) {
+      return tiempoAgotado(inicio);
+    }
+    Plan planFinal =
+        PlanOptimizador.optimizarBloques(modelo, a0, libreInicial, tope, planC5, c2, cancelacion);
+    if (planFinal == null) {
+      return tiempoAgotado(inicio);
+    }
     if (planFinal.k() != k) {
       throw new IllegalStateException(
           "El plan final tiene " + planFinal.k() + " semestres y la cota fijó " + k);

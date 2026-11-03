@@ -22,7 +22,11 @@ public final class ConstructorTestigo {
       ConjuntoDeMaterias a0,
       int libreInicial,
       Tope tope,
-      Restricciones restricciones) {
+      Restricciones restricciones,
+      Cancelacion cancelacion) {
+    if (cancelacion.cancelado()) {
+      return null;
+    }
     int n = modelo.cantidadMaterias();
     ConjuntoDeMaterias D = a0.copia();
     int[] asignacion = modelo.asignacionInicial();
@@ -51,6 +55,9 @@ public final class ConstructorTestigo {
     int k = 0;
 
     for (int s = 1; s <= maximoSemestres; s++) {
+      if (cancelacion.cancelado()) {
+        return null;
+      }
       if (L == 0
           && modelo.todoCubierto(D, asignacion)
           && todasRequeridas(D, modelo, restricciones)) {
@@ -69,6 +76,9 @@ public final class ConstructorTestigo {
       List<Integer> requeridos = new ArrayList<>();
       List<Integer> optativas = new ArrayList<>();
       for (int i = 0; i < n; i++) {
+        if (cancelacion.cancelado()) {
+          return null;
+        }
         if (D.contiene(i) || !modelo.cursable(i) || restricciones.excluidas.contiene(i)) {
           continue;
         }
@@ -137,6 +147,9 @@ public final class ConstructorTestigo {
         D.agregar(materia);
       }
       for (int materia : optativas) {
+        if (cancelacion.cancelado()) {
+          return null;
+        }
         if (!cabe(modelo, materia, creditos, materias, tope)) {
           continue;
         }
