@@ -164,12 +164,12 @@ class ReglasDelProgramaEstadosTest {
                             List.of(
                                 "Regla uno",
                                 "Resolución",
-                                "5 de 2026 del Consejo de prueba, art. 3",
+                                "5 de 2026, Consejo de prueba, art. 3",
                                 "Regla dos",
                                 "sin fuente registrada",
                                 "Regla tres",
                                 "Circular",
-                                "11 de 2026 del Consejo de prueba, num. 2",
+                                "11 de 2026, Consejo de prueba, num. 2",
                                 "Regla cuatro",
                                 "sin fuente registrada"))))
             .andReturn()
