@@ -35,15 +35,15 @@ public final class Plan {
   }
 
   public int[] semestrePorMateria() {
-    return semestrePorMateria;
+    return semestrePorMateria.clone();
   }
 
   public int[] asignacion() {
-    return asignacion;
+    return asignacion.clone();
   }
 
   public int[] bloquePorSemestre() {
-    return bloquePorSemestre;
+    return bloquePorSemestre.clone();
   }
 
   public int marcados() {
