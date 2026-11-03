@@ -222,7 +222,7 @@ de 2 s devuelve `TiempoAgotado` en menos de 2,5 s.
   rechazan por prerrequisito, habilitación y cobertura/libre elección.
 - **Verificador:** se ejecutó sobre todos los planes calculados; no hay filas
   con `calculado` que tengan errores.
-- **Pruebas:** 43 pruebas en verde con `verify`. La prueba de determinismo
+- **Pruebas:** 48 pruebas en verde con `verify`. La prueba de determinismo
   compara los vectores completos y construye un modelo nuevo en cada vuelta; la
   anterior usaba un centinela negativo y no comparaba nada. La huella del plan
   coincide entre procesos. Las pruebas de esta ronda se comprobaron por
@@ -293,6 +293,17 @@ de 2 s devuelve `TiempoAgotado` en menos de 2,5 s.
   `RevisarMalla` (desde `05d0500`, `profundidad` tolera ciclos) ni los dos que
   piden decisiones de diseño (asignación de agrupación guardada y
   `maximoPorPeriodo`); quedan en «Limitaciones».
+- **Tercera revisión automática (6 comentarios):** se corrigieron cinco y se
+  comprobó que no cambian ninguna de las 25 filas escenario–tope ni de las 5
+  variantes publicadas (k, huella y vía de c4 idénticas). El reparto de bloques
+  de libre elección ya no acepta un donante que deje a un receptor vacío con
+  menos de un bloque válido; una obligatoria que está en varias agrupaciones
+  suma sus créditos en la primera y no en todas (en la malla real no hay
+  ninguna); la carga rechaza `creditosPorMateria` menor o igual a cero; el CSV
+  reemplaza las comas y los saltos de línea del resultado; y la prueba de 150
+  materias también cubre `todoCubierto`. No se corrigió `clausulasUtiles` (ver
+  «Limitaciones»). El arreglo del reparto de bloques no tiene prueba dedicada: la
+  función es privada y ningún plan medido cambió.
 - **Oráculo de fuerza bruta:** no se implementó; queda para PRU-02 (#61). Por
   eso c4–c6 no tienen prueba exhaustiva de optimalidad.
 - **Checkstyle:** se usa la copia local del proyecto, que omite las reglas de
@@ -343,6 +354,19 @@ estudiante habría leído que el consolidado no tiene plan cuando sí lo tenía.
   (`grupos[0]`). En la aplicación debe salir de la asignación que el estudiante
   guardó en su avance, y no elegirse una si no hay ninguna guardada; el esquema
   de escenarios del spike no la trae.
+- **Completitud de la búsqueda.** `Seleccion.clausulasUtiles` solo marca como
+  útiles los prerrequisitos de las materias *requeridas*, no los de una optativa
+  que se elige para cubrir una agrupación. Si el único camino a los créditos de una
+  agrupación pasa por un prerrequisito optativo cuya propia agrupación ya está
+  llena, ni el constructor ni la búsqueda lo consideran y el motor podría
+  responder que no hay plan (o no hallarlo). No se buscó un caso así de forma
+  sistemática: los que calculan no lo necesitaron, pero eso no demuestra que
+  no exista. No se corrigió porque el arreglo directo (marcar como
+  útil todo prerrequisito de cualquier optativa pendiente) haría que el
+  constructor eligiera optativas que luego el verificador rechaza por innecesarias
+  y agrandaría el espacio de la búsqueda; un arreglo seguro debe razonar sobre las
+  optativas *efectivamente elegidas*. Queda para el sprint 2 con PRU-02, que lo
+  detectaría con mallas pequeñas.
 - `maximoPorPeriodo` de la malla es `null` en la transcripción y ni el motor ni
   el verificador lo aplican. Si una norma lo fija, debe entrar a la vez en el
   tope efectivo de la búsqueda, del constructor y del verificador.
@@ -390,6 +414,8 @@ Las horas reales deben registrarse en el campo «Horas reales» del tablero.
   V-F. Opciones: mejorar el constructor para topes estrechos o evaluar CP-SAT.
   Para c4, sustituir el tope de nodos por una poda que demuestre las exclusiones.
 - Implementar el estrés de malla duplicada y la prueba de cancelación a 30 s.
+- Hacer completo el criterio de «útil» de `clausulasUtiles` para los
+  prerrequisitos de las optativas elegidas (ver «Limitaciones»).
 - Decidir con la normativa dos puntos que el spike deja abiertos: la asignación
   de agrupación de las materias aprobadas y `maximoPorPeriodo`.
 - Llevar a la semilla D1, D3, D4, D5, D6 y D9 (#92, #100) y documentar el
