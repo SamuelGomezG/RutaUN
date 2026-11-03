@@ -9,6 +9,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.ProgramaId;
+import co.edu.unal.rutaun.incidentes.persistencia.IncidenteEntidad;
+import co.edu.unal.rutaun.incidentes.persistencia.IncidenteJpaRepository;
 import co.edu.unal.rutaun.normativa.ClasificacionRegla;
 import co.edu.unal.rutaun.normativa.ConsolidadoVista;
 import co.edu.unal.rutaun.normativa.ConsultaNormativaFacade;
@@ -121,6 +123,8 @@ class ReglasDelProgramaEstadosTest {
 
   @Autowired private MockMvc mockMvc;
 
+  @Autowired private IncidenteJpaRepository incidentes;
+
   @Test
   void uc06_paso4_cadaReglaMuestraSuEstado() throws Exception {
     mockMvc
@@ -181,12 +185,34 @@ class ReglasDelProgramaEstadosTest {
   }
 
   @Test
-  void uc06_paso4_conVersionSinReglasLaPaginaLoDice() throws Exception {
+  void uc06_ext4a_conVersionSinReglasLaPaginaLoDiceYAvisaQueYaSeInformoAlAdministrador()
+      throws Exception {
     mockMvc
         .perform(get(ruta(SIN_REGLAS)))
         .andExpect(status().isOk())
         .andExpect(content().string(containsString("Versión del consolidado: 2")))
-        .andExpect(content().string(containsString("No hay reglas para mostrar.")));
+        .andExpect(content().string(containsString("No hay reglas para mostrar.")))
+        .andExpect(
+            content()
+                .string(
+                    containsString(
+                        "El consolidado normativo del programa tiene un problema que ya se"
+                            + " informó al administrador de normativa.")));
+  }
+
+  @Test
+  void uc06_ext4a_conVersionSinReglasQuedaRegistradoUnIncidenteConProgramaYVersion()
+      throws Exception {
+    mockMvc.perform(get(ruta(SIN_REGLAS))).andExpect(status().isOk());
+
+    List<IncidenteEntidad> delPrograma =
+        incidentes.findAll().stream()
+            .filter(incidente -> SIN_REGLAS.valor().equals(incidente.getProgramaId()))
+            .toList();
+    assertThat(delPrograma).hasSize(1);
+    assertThat(delPrograma.get(0).getCasoDeUso()).isEqualTo("UC06");
+    assertThat(delPrograma.get(0).getPaso()).isEqualTo("ext. 4a");
+    assertThat(delPrograma.get(0).getVersionConsolidado()).isEqualTo(2);
   }
 
   @Test

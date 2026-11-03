@@ -22,7 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-class ProgramasControllerTest {
+class NormativaControllerTest {
 
   private static final String RUTA_DE_SISTEMAS =
       "/programas/" + ConsultaNormativaFalsa.SISTEMAS.valor() + "/reglas";
