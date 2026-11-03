@@ -1,6 +1,7 @@
 package co.edu.unal.rutaun.normativa.web;
 
 import co.edu.unal.rutaun.compartido.ProgramaId;
+import co.edu.unal.rutaun.normativa.ConsolidadoVista;
 import co.edu.unal.rutaun.normativa.ConsultaNormativaFacade;
 import co.edu.unal.rutaun.normativa.ProgramaVista;
 import java.util.UUID;
@@ -41,19 +42,34 @@ class ProgramasController {
     return new ModelAndView("publico/programas", "programas", fachada.programas());
   }
 
-  /** Página de las reglas del programa elegido; responde 404 si el programa no está cargado. */
+  /**
+   * Página de las reglas del programa elegido, agrupadas por categoría, con la versión del
+   * consolidado y su fecha (UC06 paso 4). Responde 404 si el programa no está cargado o no tiene
+   * una versión vigente del consolidado.
+   */
   @GetMapping("/programas/{id}/reglas")
   ModelAndView reglas(@PathVariable UUID id) {
     ConsultaNormativaFacade fachada = consulta.getIfAvailable();
     if (fachada == null) {
       return noDisponible();
     }
+    ProgramaId programaId = new ProgramaId(id);
     ProgramaVista programa =
         fachada
-            .programa(new ProgramaId(id))
+            .programa(programaId)
             .orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "programa no cargado"));
-    return new ModelAndView("publico/reglas", "programa", programa);
+    ConsolidadoVista consolidado =
+        fachada
+            .consolidadoVigente(programaId)
+            .orElseThrow(
+                () ->
+                    new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "el programa no tiene una versión vigente"));
+    ModelAndView vista = new ModelAndView("publico/reglas");
+    vista.addObject("programa", programa);
+    vista.addObject("consolidado", consolidado);
+    return vista;
   }
 
   private static ModelAndView noDisponible() {

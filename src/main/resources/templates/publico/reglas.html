@@ -8,6 +8,24 @@
     <p><a th:href="@{/programas}">Volver a los programas</a></p>
     <h1 th:text="${programa.nombre()}">Programa</h1>
     <p th:text="${programa.facultad()}">Facultad</p>
-    <p>Aquí se mostrarán las reglas del programa.</p>
+    <p th:text="'Versión del consolidado: ' + ${consolidado.version()}">Versión del consolidado: 1</p>
+    <p th:text="'Fecha de actualización: ' + ${consolidado.fecha()}">Fecha de actualización: 2026-01-01</p>
+    <p th:if="${consolidado.sinReglas()}">No hay reglas para mostrar.</p>
+    <section th:each="categoria : ${consolidado.reglasPorCategoria()}">
+      <h2 th:text="${categoria.key}">Categoría</h2>
+      <ul>
+        <li th:each="regla : ${categoria.value}">
+          <span th:text="${regla.enunciado()}">Enunciado de la regla</span>
+          <span th:switch="${regla.estado().name()}">
+            <em th:case="'VIGENTE'">vigente</em>
+            <em th:case="'PROGRAMADA'">programada</em>
+            <em th:case="'YA_NO_RIGE'">ya no rige</em>
+            <em th:case="'EN_REVISION'">en revisión</em>
+          </span>
+          <strong th:if="${regla.temporal()}">temporal</strong>
+        </li>
+      </ul>
+    </section>
+    <p>RutaUN no es la fuente oficial: la fuente oficial es el documento publicado en Régimen Legal.</p>
   </body>
 </html>
