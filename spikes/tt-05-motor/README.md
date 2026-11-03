@@ -28,8 +28,10 @@ La corrida `curado` hace 3 calentamientos y 20 medidas por caso y resume
 mediana, p95 y máximo; `todos` recorre además los casos extremos. Cada fila
 lleva la fase y la huella del plan para comprobar el determinismo.
 
-El proyecto usa una copia local de `config/checkstyle/checkstyle.xml` que omite
-solo las reglas de Javadoc; las demás reglas del proyecto se conservan.
+El proyecto usa su propia copia de la configuración de Checkstyle,
+`config/checkstyle.xml`, sin las reglas de Javadoc. `config/checkstyle-suppressions.xml`
+limita las supresiones a esas mismas reglas (`MissingJavadocType` y
+`MissingJavadocMethod`); las demás reglas del proyecto se aplican tal cual.
 
 ## Datos
 
