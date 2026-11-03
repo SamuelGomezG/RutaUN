@@ -25,7 +25,7 @@ public final class PlanEstandar {
   private static final int[] BLOQUES = {0, 5, 0, 0, 0, 0, 0, 0, 0, 16, 12};
 
   public static Plan adaptado(ModeloDeCalculo modelo) {
-    int n = modelo.cantidadMaterias();
+    final int n = modelo.cantidadMaterias();
     int[] semestre = new int[n];
     java.util.Arrays.fill(semestre, -1);
     for (int s = 0; s < SEMESTRES.size(); s++) {
@@ -62,7 +62,7 @@ public final class PlanEstandar {
 
   public static Plan reconstruir(
       ModeloDeCalculo modelo, int[] semestre, int[] bloque, int[] asignacionBase) {
-    int n = modelo.cantidadMaterias();
+    final int n = modelo.cantidadMaterias();
     int k = 0;
     for (int valor : semestre) {
       k = Math.max(k, valor);

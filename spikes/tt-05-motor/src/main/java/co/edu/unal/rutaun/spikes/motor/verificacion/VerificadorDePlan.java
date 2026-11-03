@@ -11,24 +11,24 @@ import java.util.List;
 public final class VerificadorDePlan {
 
   private final ModeloDeCalculo modelo;
-  private final int n;
+  private final int cantidadMaterias;
 
   public VerificadorDePlan(ModeloDeCalculo modelo) {
     this.modelo = modelo;
-    this.n = modelo.cantidadMaterias();
+    this.cantidadMaterias = modelo.cantidadMaterias();
   }
 
   public List<String> verificar(Plan plan, ConjuntoDeMaterias a0, int libreInicial, Tope tope) {
     List<String> errores = new ArrayList<>();
     int[] semestre = plan.semestrePorMateria();
     int[] bloque = plan.bloquePorSemestre();
-    int[] asignacion = plan.asignacion();
+    final int[] asignacion = plan.asignacion();
     int k = plan.k();
     if (bloque.length != k + 1) {
       errores.add("El vector de bloques no mide k + 1");
     }
-    ConjuntoDeMaterias D = a0.copia();
-    for (int i = 0; i < n; i++) {
+    ConjuntoDeMaterias cursadas = a0.copia();
+    for (int i = 0; i < cantidadMaterias; i++) {
       if (semestre[i] < -1 || semestre[i] > k) {
         errores.add("Semestre fuera de rango para " + modelo.codigo(i) + ": " + semestre[i]);
       }
@@ -36,10 +36,10 @@ public final class VerificadorDePlan {
         if (!modelo.cursable(i)) {
           errores.add("Materia no cursable en el plan: " + modelo.codigo(i));
         }
-        if (D.contiene(i)) {
+        if (cursadas.contiene(i)) {
           errores.add("Materia repetida entre avance y plan: " + modelo.codigo(i));
         }
-        D.agregar(i);
+        cursadas.agregar(i);
       }
     }
 
@@ -50,7 +50,7 @@ public final class VerificadorDePlan {
       int creditos = bloque[s];
       int materias = Math.ceilDiv(bloque[s], modelo.creditosPorMateriaLibre());
       int materiasDelSemestre = 0;
-      for (int i = 0; i < n; i++) {
+      for (int i = 0; i < cantidadMaterias; i++) {
         if (semestre[i] == s) {
           creditos += modelo.creditos(i);
           materiasDelSemestre++;
@@ -91,13 +91,13 @@ public final class VerificadorDePlan {
       }
     }
 
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < cantidadMaterias; i++) {
       if (semestre[i] <= 0) {
         continue;
       }
       ConjuntoDeMaterias antes = a0.copia();
       ConjuntoDeMaterias hasta = a0.copia();
-      for (int j = 0; j < n; j++) {
+      for (int j = 0; j < cantidadMaterias; j++) {
         if (semestre[j] <= 0 || j == i) {
           continue;
         }
@@ -120,32 +120,32 @@ public final class VerificadorDePlan {
     }
 
     long[] palabrasRequeridas = modelo.requeridas().palabras();
-    for (int i = 0; i < n; i++) {
-      if ((palabrasRequeridas[i >>> 6] & (1L << (i & 63))) != 0 && !D.contiene(i)) {
+    for (int i = 0; i < cantidadMaterias; i++) {
+      if ((palabrasRequeridas[i >>> 6] & (1L << (i & 63))) != 0 && !cursadas.contiene(i)) {
         errores.add("Falta una materia requerida: " + modelo.codigo(i));
       }
     }
-    if (!modelo.todoCubierto(D, asignacion)) {
+    if (!modelo.todoCubierto(cursadas, asignacion)) {
       errores.add("Alguna agrupación o componente queda sin cubrir");
     }
-    if (!optativasMinimas(D, semestre, bloque, a0, asignacion, libreAntes)) {
+    if (!optativasMinimas(cursadas, semestre, bloque, a0, asignacion, libreAntes)) {
       errores.add("Hay una optativa elegida que no es necesaria");
     }
     return errores;
   }
 
   private boolean optativasMinimas(
-      ConjuntoDeMaterias D,
+      ConjuntoDeMaterias cursadas,
       int[] semestre,
       int[] bloque,
       ConjuntoDeMaterias a0,
       int[] asignacion,
       int[] libreAntes) {
-    for (int m = 0; m < n; m++) {
+    for (int m = 0; m < cantidadMaterias; m++) {
       if (semestre[m] <= 0 || modelo.requeridas().contiene(m)) {
         continue;
       }
-      ConjuntoDeMaterias sinM = D.copia();
+      ConjuntoDeMaterias sinM = cursadas.copia();
       sinM.quitar(m);
       int[] asignacionSinM = asignacion.clone();
       asignacionSinM[m] = -1;
@@ -166,13 +166,13 @@ public final class VerificadorDePlan {
       int[] asignacion,
       ConjuntoDeMaterias a0,
       int[] libreAntes) {
-    for (int j = 0; j < n; j++) {
+    for (int j = 0; j < cantidadMaterias; j++) {
       if (semestre[j] <= 0 || !sinM.contiene(j)) {
         continue;
       }
       ConjuntoDeMaterias antes = a0.copia();
       ConjuntoDeMaterias hasta = a0.copia();
-      for (int p = 0; p < n; p++) {
+      for (int p = 0; p < cantidadMaterias; p++) {
         if (p == j || semestre[p] <= 0 || !sinM.contiene(p)) {
           continue;
         }

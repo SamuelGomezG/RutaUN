@@ -28,10 +28,11 @@ public final class ConstructorTestigo {
       return null;
     }
     int n = modelo.cantidadMaterias();
-    ConjuntoDeMaterias D = a0.copia();
+    ConjuntoDeMaterias cursadas = a0.copia();
     int[] asignacion = modelo.asignacionInicial();
     for (int i = 0; i < n; i++) {
-      if ((D.contiene(i) || restricciones.obligatoriasExtra.contiene(i)) && asignacion[i] < 0) {
+      if ((cursadas.contiene(i) || restricciones.obligatoriasExtra.contiene(i))
+          && asignacion[i] < 0) {
         int[] grupos = modelo.gruposDeMateria(i);
         if (grupos.length > 0) {
           asignacion[i] = grupos[0];
@@ -50,7 +51,7 @@ public final class ConstructorTestigo {
     }
     int[] bloque = new int[maximoSemestres + 1];
     int[] creditosPorSemestre = new int[maximoSemestres + 1];
-    int L = libreInicial;
+    int libreRestante = libreInicial;
     int marcados = 0;
     int creditosOptativas = 0;
     int k = 0;
@@ -59,28 +60,28 @@ public final class ConstructorTestigo {
       if (cancelacion.cancelado()) {
         return null;
       }
-      if (L == 0
-          && modelo.todoCubierto(D, asignacion)
-          && todasRequeridas(D, modelo, restricciones)) {
+      if (libreRestante == 0
+          && modelo.todoCubierto(cursadas, asignacion)
+          && todasRequeridas(cursadas, modelo, restricciones)) {
         k = s - 1;
         break;
       }
       for (int i = 0; i < n; i++) {
         if (restricciones.semestreFijo[i] >= 0
             && restricciones.semestreFijo[i] < s
-            && !D.contiene(i)) {
+            && !cursadas.contiene(i)) {
           return null;
         }
       }
 
-      long[] utiles = Seleccion.clausulasUtiles(modelo, D, restricciones);
+      long[] utiles = Seleccion.clausulasUtiles(modelo, cursadas, restricciones);
       List<Integer> requeridos = new ArrayList<>();
       List<Integer> optativas = new ArrayList<>();
       for (int i = 0; i < n; i++) {
         if (cancelacion.cancelado()) {
           return null;
         }
-        if (D.contiene(i) || !modelo.cursable(i) || restricciones.excluidas.contiene(i)) {
+        if (cursadas.contiene(i) || !modelo.cursable(i) || restricciones.excluidas.contiene(i)) {
           continue;
         }
         if (restricciones.semestreFijo[i] >= 0 && restricciones.semestreFijo[i] != s) {
@@ -89,10 +90,11 @@ public final class ConstructorTestigo {
         if (restricciones.semestreMaximo[i] < s) {
           continue;
         }
-        if (!modelo.clausulasCumplidas(modelo.prerrequisitos(i), D)) {
+        if (!modelo.clausulasCumplidas(modelo.prerrequisitos(i), cursadas)) {
           continue;
         }
-        if (!modelo.habilitacionesCumplidas(i, D, libreInicial - L, asignacion)) {
+        if (!modelo.habilitacionesCumplidas(
+            i, cursadas, libreInicial - libreRestante, asignacion)) {
           continue;
         }
         if (Seleccion.esRequerida(i, modelo, restricciones)) {
@@ -103,7 +105,7 @@ public final class ConstructorTestigo {
           }
           boolean porAgrupacion = false;
           for (int grupo : modelo.gruposDeMateria(i)) {
-            if (modelo.faltan(grupo, D, asignacion, restricciones.obligatoriasExtra) > 0) {
+            if (modelo.faltan(grupo, cursadas, asignacion, restricciones.obligatoriasExtra) > 0) {
               porAgrupacion = true;
               break;
             }
@@ -120,7 +122,7 @@ public final class ConstructorTestigo {
       int creditos = 0;
       int materias = 0;
       List<Integer> seleccion = new ArrayList<>();
-      ConjuntoDeMaterias seleccionadas = D.copia();
+      ConjuntoDeMaterias seleccionadas = cursadas.copia();
       int[] asignacionSeleccion = asignacion.clone();
       for (int materia : requeridos) {
         if (restricciones.semestreFijo[materia] == s
@@ -169,14 +171,14 @@ public final class ConstructorTestigo {
               buscarCorrequisito(
                   modelo,
                   materia,
-                  D,
+                  cursadas,
                   seleccionadas,
                   asignacionSeleccion,
                   restricciones,
                   tope,
                   creditos,
                   materias,
-                  libreInicial - L,
+                  libreInicial - libreRestante,
                   s,
                   cancelacion);
           if (par >= 0) {
@@ -197,7 +199,7 @@ public final class ConstructorTestigo {
           break;
         }
       }
-      D = seleccionadas;
+      cursadas = seleccionadas;
       asignacion = asignacionSeleccion;
       for (int materia : seleccion) {
         semestre[materia] = s;
@@ -206,21 +208,23 @@ public final class ConstructorTestigo {
         }
       }
       for (int materia : requeridos) {
-        if (!D.contiene(materia) && restricciones.semestreFijo[materia] == s) {
+        if (!cursadas.contiene(materia) && restricciones.semestreFijo[materia] == s) {
           return null;
         }
       }
       for (int i = 0; i < n; i++) {
-        if (restricciones.semestreMaximo[i] == s && !D.contiene(i)) {
+        if (restricciones.semestreMaximo[i] == s && !cursadas.contiene(i)) {
           return null;
         }
       }
 
-      int b = bloquePermitido(modelo, restricciones, s, L, creditos, materias, tope, libreInicial);
+      int b =
+          bloquePermitido(
+              modelo, restricciones, s, libreRestante, creditos, materias, tope, libreInicial);
       if (b < 0) {
         return null;
       }
-      L -= b;
+      libreRestante -= b;
       bloque[s] = b;
       creditosPorSemestre[s] = creditos + b;
       boolean marcado = creditosPorSemestre[s] < modelo.minimoPorPeriodo();
@@ -232,9 +236,9 @@ public final class ConstructorTestigo {
       }
       k = s;
     }
-    if (L != 0
-        || !modelo.todoCubierto(D, asignacion)
-        || !todasRequeridas(D, modelo, restricciones)) {
+    if (libreRestante != 0
+        || !modelo.todoCubierto(cursadas, asignacion)
+        || !todasRequeridas(cursadas, modelo, restricciones)) {
       return null;
     }
     redistribuirBloques(
@@ -265,14 +269,14 @@ public final class ConstructorTestigo {
       ModeloDeCalculo modelo,
       Restricciones restricciones,
       int s,
-      int L,
+      int libreRestante,
       int creditos,
       int materias,
       Tope tope,
       int libreInicial) {
     if (restricciones.bloqueFijo != null && restricciones.bloqueFijo[s] != null) {
       int fijo = restricciones.bloqueFijo[s];
-      if (fijo > L
+      if (fijo > libreRestante
           || creditos + fijo > tope.limiteCreditos()
           || materias + Math.ceilDiv(fijo, modelo.creditosPorMateriaLibre())
               > tope.limiteMaterias()) {
@@ -280,7 +284,7 @@ public final class ConstructorTestigo {
       }
       return fijo;
     }
-    int maximo = Math.min(L, tope.limiteCreditos() - creditos);
+    int maximo = Math.min(libreRestante, tope.limiteCreditos() - creditos);
     for (int b = maximo; b >= 0; b--) {
       int creditosPorMateria = modelo.creditosPorMateriaLibre();
       if (libreInicial >= creditosPorMateria) {
@@ -298,13 +302,13 @@ public final class ConstructorTestigo {
   }
 
   private static boolean todasRequeridas(
-      ConjuntoDeMaterias D, ModeloDeCalculo modelo, Restricciones restricciones) {
+      ConjuntoDeMaterias cursadas, ModeloDeCalculo modelo, Restricciones restricciones) {
     long[] requeridas = modelo.requeridas().palabras();
     for (int i = 0; i < modelo.cantidadMaterias(); i++) {
-      if ((requeridas[i >>> 6] & (1L << (i & 63))) != 0 && !D.contiene(i)) {
+      if ((requeridas[i >>> 6] & (1L << (i & 63))) != 0 && !cursadas.contiene(i)) {
         return false;
       }
-      if (restricciones.obligatoriasExtra.contiene(i) && !D.contiene(i)) {
+      if (restricciones.obligatoriasExtra.contiene(i) && !cursadas.contiene(i)) {
         return false;
       }
     }
@@ -368,11 +372,11 @@ public final class ConstructorTestigo {
   private static boolean sigueSiendoUtil(
       ModeloDeCalculo modelo,
       int materia,
-      ConjuntoDeMaterias D,
+      ConjuntoDeMaterias cursadas,
       int[] asignacion,
       Restricciones restricciones) {
     for (int grupo : modelo.gruposDeMateria(materia)) {
-      if (modelo.faltan(grupo, D, asignacion, restricciones.obligatoriasExtra) > 0) {
+      if (modelo.faltan(grupo, cursadas, asignacion, restricciones.obligatoriasExtra) > 0) {
         return true;
       }
     }
@@ -381,11 +385,11 @@ public final class ConstructorTestigo {
       boolean esRequerida =
           (requeridas[i >>> 6] & (1L << (i & 63))) != 0
               || restricciones.obligatoriasExtra.contiene(i);
-      if (!esRequerida || D.contiene(i)) {
+      if (!esRequerida || cursadas.contiene(i)) {
         continue;
       }
       for (long[] clausula : modelo.prerrequisitos(i)) {
-        if (!D.contieneAlguna(clausula)
+        if (!cursadas.contieneAlguna(clausula)
             && (clausula[materia >>> 6] & (1L << (materia & 63))) != 0) {
           return true;
         }

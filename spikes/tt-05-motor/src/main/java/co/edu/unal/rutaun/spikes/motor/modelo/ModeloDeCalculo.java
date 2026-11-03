@@ -131,7 +131,7 @@ public final class ModeloDeCalculo {
   }
 
   private final ModelosJson.MallaJson malla;
-  private final int n;
+  private final int cantidadMaterias;
   private final String[] codigos;
   private final String[] nombres;
   private final int[] creditos;
@@ -230,18 +230,18 @@ public final class ModeloDeCalculo {
             .thenComparing(m -> !m.mostrada)
             .thenComparing(m -> m.codigo));
 
-    n = materiasTemporales.size();
-    codigos = new String[n];
-    nombres = new String[n];
-    creditos = new int[n];
-    obligatoria = new boolean[n];
-    semestre = new Integer[n];
-    mostrada = new boolean[n];
-    cursable = new boolean[n];
-    gruposDeMateria = new ArrayList<>(n);
+    cantidadMaterias = materiasTemporales.size();
+    codigos = new String[cantidadMaterias];
+    nombres = new String[cantidadMaterias];
+    creditos = new int[cantidadMaterias];
+    obligatoria = new boolean[cantidadMaterias];
+    semestre = new Integer[cantidadMaterias];
+    mostrada = new boolean[cantidadMaterias];
+    cursable = new boolean[cantidadMaterias];
+    gruposDeMateria = new ArrayList<>(cantidadMaterias);
     porCodigo = new HashMap<>();
-    Set<String> codigosFijas = new LinkedHashSet<>(configuracion.fijas());
-    for (int i = 0; i < n; i++) {
+    final Set<String> codigosFijas = new LinkedHashSet<>(configuracion.fijas());
+    for (int i = 0; i < cantidadMaterias; i++) {
       MateriaDatos materia = materiasTemporales.get(i);
       codigos[i] = materia.codigo;
       nombres[i] = materia.nombre;
@@ -259,7 +259,7 @@ public final class ModeloDeCalculo {
     for (Grupo grupo : grupos) {
       grupo.materiasDirectas.clear();
     }
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < cantidadMaterias; i++) {
       MateriaDatos materia = materiasTemporales.get(i);
       int[] gruposMateria = materia.grupos.stream().mapToInt(Integer::intValue).toArray();
       gruposDeMateria.set(i, gruposMateria);
@@ -276,7 +276,7 @@ public final class ModeloDeCalculo {
     }
     componenteDisciplinar = buscarComponente("DISCIPLINAR");
 
-    ConjuntoDeMaterias fijasTemporal = new ConjuntoDeMaterias(n);
+    ConjuntoDeMaterias fijasTemporal = new ConjuntoDeMaterias(cantidadMaterias);
     for (String codigo : codigosFijas) {
       Integer indice = porCodigo.get(codigo);
       if (indice == null) {
@@ -287,11 +287,11 @@ public final class ModeloDeCalculo {
     this.fijas = fijasTemporal;
 
     // Asignación inicial de las fijas: primera agrupación (determinista).
-    int[] asignacionInicial = new int[n];
-    for (int i = 0; i < n; i++) {
+    int[] asignacionInicial = new int[cantidadMaterias];
+    for (int i = 0; i < cantidadMaterias; i++) {
       asignacionInicial[i] = gruposDeMateria.get(i).length == 1 ? gruposDeMateria.get(i)[0] : -1;
     }
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < cantidadMaterias; i++) {
       if (fijas.contiene(i)) {
         int[] gruposMateria = gruposDeMateria.get(i);
         if (gruposMateria.length > 0) {
@@ -301,8 +301,8 @@ public final class ModeloDeCalculo {
     }
 
     // Requeridas = obligatorias + fijas.
-    ConjuntoDeMaterias requeridasTemporal = new ConjuntoDeMaterias(n);
-    for (int i = 0; i < n; i++) {
+    ConjuntoDeMaterias requeridasTemporal = new ConjuntoDeMaterias(cantidadMaterias);
+    for (int i = 0; i < cantidadMaterias; i++) {
       if (obligatoria[i] || fijas.contiene(i)) {
         requeridasTemporal.agregar(i);
       }
@@ -319,7 +319,7 @@ public final class ModeloDeCalculo {
       }
     }
     // Las fijas cuentan como requeridas de la agrupación asignada.
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < cantidadMaterias; i++) {
       if (!fijas.contiene(i) || asignacionInicial[i] < 0) {
         continue;
       }
@@ -327,7 +327,7 @@ public final class ModeloDeCalculo {
       grupo.mascaraRequeridasDirectas[i >>> 6] |= 1L << (i & 63);
       grupo.creditosRequeridasDirectas += creditos[i];
     }
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < cantidadMaterias; i++) {
       if (!obligatoria[i]) {
         continue;
       }
@@ -356,12 +356,12 @@ public final class ModeloDeCalculo {
     }
 
     // CNF de prerrequisitos y correquisitos.
-    prerrequisitos = new ArrayList<>(n);
-    for (int i = 0; i < n; i++) {
+    prerrequisitos = new ArrayList<>(cantidadMaterias);
+    for (int i = 0; i < cantidadMaterias; i++) {
       prerrequisitos.add(new ArrayList<>());
     }
-    correquisitos = new ArrayList<>(n);
-    for (int i = 0; i < n; i++) {
+    correquisitos = new ArrayList<>(cantidadMaterias);
+    for (int i = 0; i < cantidadMaterias; i++) {
       correquisitos.add(new ArrayList<>());
     }
     Set<String> nivelacion = new HashSet<>(externasNivelacion);
@@ -402,14 +402,14 @@ public final class ModeloDeCalculo {
     boolean cambio = true;
     while (cambio) {
       cambio = false;
-      for (int i = 0; i < n; i++) {
+      for (int i = 0; i < cantidadMaterias; i++) {
         if (!cursable[i]) {
           continue;
         }
         List<long[]> clausulas = prerrequisitos.get(i);
         for (long[] clausula : clausulas) {
           boolean tieneCursable = false;
-          for (int j = 0; j < n; j++) {
+          for (int j = 0; j < cantidadMaterias; j++) {
             if ((clausula[j >>> 6] & (1L << (j & 63))) != 0 && cursable[j]) {
               tieneCursable = true;
               break;
@@ -423,12 +423,12 @@ public final class ModeloDeCalculo {
         }
       }
     }
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < cantidadMaterias; i++) {
       if (!cursable[i]) {
         prerrequisitos.get(i).clear();
       } else {
         for (long[] clausula : prerrequisitos.get(i)) {
-          for (int j = 0; j < n; j++) {
+          for (int j = 0; j < cantidadMaterias; j++) {
             if (!cursable[j]) {
               clausula[j >>> 6] &= ~(1L << (j & 63));
             }
@@ -438,8 +438,8 @@ public final class ModeloDeCalculo {
     }
 
     // Habilitaciones.
-    habilitaciones = new ArrayList<>(n);
-    for (int i = 0; i < n; i++) {
+    habilitaciones = new ArrayList<>(cantidadMaterias);
+    for (int i = 0; i < cantidadMaterias; i++) {
       habilitaciones.add(new ArrayList<>());
     }
     for (ModelosJson.HabilitacionJson habilitacion : malla.habilitaciones()) {
@@ -462,7 +462,7 @@ public final class ModeloDeCalculo {
     }
 
     String motivo = null;
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < cantidadMaterias; i++) {
       if (obligatoria[i] && !cursable[i]) {
         motivo = "La obligatoria " + codigos[i] + " no es cursable desde el programa";
         break;
@@ -560,7 +560,7 @@ public final class ModeloDeCalculo {
   }
 
   public int cantidadMaterias() {
-    return n;
+    return cantidadMaterias;
   }
 
   public String codigo(int materia) {
@@ -656,11 +656,11 @@ public final class ModeloDeCalculo {
   }
 
   public int[] asignacionInicial() {
-    int[] asignacion = new int[n];
-    for (int i = 0; i < n; i++) {
+    int[] asignacion = new int[cantidadMaterias];
+    for (int i = 0; i < cantidadMaterias; i++) {
       asignacion[i] = gruposDeMateria.get(i).length == 1 ? gruposDeMateria.get(i)[0] : -1;
     }
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < cantidadMaterias; i++) {
       if (fijas.contiene(i) && gruposDeMateria.get(i).length > 0) {
         asignacion[i] = gruposDeMateria.get(i)[0];
       }
@@ -668,21 +668,24 @@ public final class ModeloDeCalculo {
     return asignacion;
   }
 
-  public int faltan(int grupoIndice, ConjuntoDeMaterias D, int[] asignacion) {
-    return faltan(grupoIndice, D, asignacion, null);
+  public int faltan(int grupoIndice, ConjuntoDeMaterias cursadas, int[] asignacion) {
+    return faltan(grupoIndice, cursadas, asignacion, null);
   }
 
   public int faltan(
-      int grupoIndice, ConjuntoDeMaterias D, int[] asignacion, ConjuntoDeMaterias extraRequeridas) {
+      int grupoIndice,
+      ConjuntoDeMaterias cursadas,
+      int[] asignacion,
+      ConjuntoDeMaterias extraRequeridas) {
     Grupo grupo = grupos.get(grupoIndice);
     int cubierto = grupo.creditosRequeridasDirectas + grupo.creditosHijas;
     long[] mascaraOptativas = grupo.mascaraOptativasDirectas;
     long[] extra = extraRequeridas == null ? null : extraRequeridas.palabras();
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < cantidadMaterias; i++) {
       if ((mascaraOptativas[i >>> 6] & (1L << (i & 63))) == 0 || asignacion[i] != grupoIndice) {
         continue;
       }
-      boolean cuenta = D.contiene(i);
+      boolean cuenta = cursadas.contiene(i);
       if (!cuenta && extra != null) {
         cuenta = (extra[i >>> 6] & (1L << (i & 63))) != 0;
       }
@@ -693,25 +696,25 @@ public final class ModeloDeCalculo {
     return Math.max(0, grupo.creditos - cubierto);
   }
 
-  public boolean cubierta(int grupoIndice, ConjuntoDeMaterias D, int[] asignacion) {
+  public boolean cubierta(int grupoIndice, ConjuntoDeMaterias cursadas, int[] asignacion) {
     Grupo grupo = grupos.get(grupoIndice);
-    if (!D.contieneTodas(grupo.mascaraRequeridasDirectas)) {
+    if (!cursadas.contieneTodas(grupo.mascaraRequeridasDirectas)) {
       return false;
     }
-    if (faltan(grupoIndice, D, asignacion) > 0) {
+    if (faltan(grupoIndice, cursadas, asignacion) > 0) {
       return false;
     }
     for (int hija : grupo.hijos) {
-      if (!cubierta(hija, D, asignacion)) {
+      if (!cubierta(hija, cursadas, asignacion)) {
         return false;
       }
     }
     return true;
   }
 
-  public boolean todoCubierto(ConjuntoDeMaterias D, int[] asignacion) {
+  public boolean todoCubierto(ConjuntoDeMaterias cursadas, int[] asignacion) {
     for (Grupo grupo : grupos) {
-      if (grupo.padre() < 0 && !cubierta(grupo.indice(), D, asignacion)) {
+      if (grupo.padre() < 0 && !cubierta(grupo.indice(), cursadas, asignacion)) {
         return false;
       }
     }
@@ -719,37 +722,38 @@ public final class ModeloDeCalculo {
   }
 
   /** Créditos de una agrupación, contando hijos y topando en lo exigido. */
-  public int creditosGrupo(int grupoIndice, ConjuntoDeMaterias D, int[] asignacion) {
+  public int creditosGrupo(int grupoIndice, ConjuntoDeMaterias cursadas, int[] asignacion) {
     Grupo grupo = grupos.get(grupoIndice);
     int bruto = 0;
     for (int materia : grupo.materiasDirectas) {
-      if (D.contiene(materia) && asignacion[materia] == grupoIndice) {
+      if (cursadas.contiene(materia) && asignacion[materia] == grupoIndice) {
         bruto += creditos[materia];
       }
     }
     for (int hija : grupo.hijos) {
-      bruto += creditosGrupo(hija, D, asignacion);
+      bruto += creditosGrupo(hija, cursadas, asignacion);
     }
     return Math.min(grupo.creditos, bruto);
   }
 
-  public int creditosMedida(int medida, ConjuntoDeMaterias D, int libreColocado, int[] asignacion) {
+  public int creditosMedida(
+      int medida, ConjuntoDeMaterias cursadas, int libreColocado, int[] asignacion) {
     if (medida == PROGRAMA) {
       int total = 0;
       for (Grupo grupo : grupos) {
         if (grupo.padre() < 0) {
-          total += creditosGrupo(grupo.indice(), D, asignacion);
+          total += creditosGrupo(grupo.indice(), cursadas, asignacion);
         }
       }
       return total + Math.min(libreColocado, libreEleccion);
     }
-    return creditosGrupo(medida, D, asignacion);
+    return creditosGrupo(medida, cursadas, asignacion);
   }
 
   public boolean habilitacionesCumplidas(
-      int materia, ConjuntoDeMaterias D, int libreColocado, int[] asignacion) {
+      int materia, ConjuntoDeMaterias cursadas, int libreColocado, int[] asignacion) {
     for (Habilitacion habilitacion : habilitaciones.get(materia)) {
-      if (creditosMedida(habilitacion.medida(), D, libreColocado, asignacion)
+      if (creditosMedida(habilitacion.medida(), cursadas, libreColocado, asignacion)
           < habilitacion.umbral()) {
         return false;
       }
@@ -757,22 +761,26 @@ public final class ModeloDeCalculo {
     return true;
   }
 
-  public boolean clausulasCumplidas(List<long[]> clausulas, ConjuntoDeMaterias D) {
+  public boolean clausulasCumplidas(List<long[]> clausulas, ConjuntoDeMaterias cursadas) {
     for (long[] clausula : clausulas) {
-      if (!D.contieneAlguna(clausula)) {
+      if (!cursadas.contieneAlguna(clausula)) {
         return false;
       }
     }
     return true;
   }
 
-  public int minimoCreditosOptativos(int grupoIndice, ConjuntoDeMaterias D, int[] asignacion) {
-    return minimoCreditosOptativos(grupoIndice, D, asignacion, null);
+  public int minimoCreditosOptativos(
+      int grupoIndice, ConjuntoDeMaterias cursadas, int[] asignacion) {
+    return minimoCreditosOptativos(grupoIndice, cursadas, asignacion, null);
   }
 
   public int minimoCreditosOptativos(
-      int grupoIndice, ConjuntoDeMaterias D, int[] asignacion, ConjuntoDeMaterias extraRequeridas) {
-    int necesidad = faltan(grupoIndice, D, asignacion, extraRequeridas);
+      int grupoIndice,
+      ConjuntoDeMaterias cursadas,
+      int[] asignacion,
+      ConjuntoDeMaterias extraRequeridas) {
+    int necesidad = faltan(grupoIndice, cursadas, asignacion, extraRequeridas);
     if (necesidad <= 0) {
       return 0;
     }
@@ -781,7 +789,7 @@ public final class ModeloDeCalculo {
     int maximo = 0;
     long[] extra = extraRequeridas == null ? null : extraRequeridas.palabras();
     for (int materia : grupo.materiasDirectas) {
-      if (D.contiene(materia) || !cursable[materia]) {
+      if (cursadas.contiene(materia) || !cursable[materia]) {
         continue;
       }
       if (extra != null && (extra[materia >>> 6] & (1L << (materia & 63))) != 0) {
@@ -813,13 +821,17 @@ public final class ModeloDeCalculo {
     return INFINITO;
   }
 
-  public int minimoMateriasOptativas(int grupoIndice, ConjuntoDeMaterias D, int[] asignacion) {
-    return minimoMateriasOptativas(grupoIndice, D, asignacion, null);
+  public int minimoMateriasOptativas(
+      int grupoIndice, ConjuntoDeMaterias cursadas, int[] asignacion) {
+    return minimoMateriasOptativas(grupoIndice, cursadas, asignacion, null);
   }
 
   public int minimoMateriasOptativas(
-      int grupoIndice, ConjuntoDeMaterias D, int[] asignacion, ConjuntoDeMaterias extraRequeridas) {
-    int necesidad = faltan(grupoIndice, D, asignacion, extraRequeridas);
+      int grupoIndice,
+      ConjuntoDeMaterias cursadas,
+      int[] asignacion,
+      ConjuntoDeMaterias extraRequeridas) {
+    int necesidad = faltan(grupoIndice, cursadas, asignacion, extraRequeridas);
     if (necesidad <= 0) {
       return 0;
     }
@@ -828,7 +840,7 @@ public final class ModeloDeCalculo {
     int maximo = 0;
     long[] extra = extraRequeridas == null ? null : extraRequeridas.palabras();
     for (int materia : grupo.materiasDirectas) {
-      if (D.contiene(materia) || !cursable[materia]) {
+      if (cursadas.contiene(materia) || !cursable[materia]) {
         continue;
       }
       if (extra != null && (extra[materia >>> 6] & (1L << (materia & 63))) != 0) {
@@ -862,9 +874,9 @@ public final class ModeloDeCalculo {
     return mejor;
   }
 
-  /** Profundidad de la cadena de prerrequisitos de una materia desde D. */
-  public int profundidad(int materia, ConjuntoDeMaterias D, int[] memo) {
-    if (D.contiene(materia)) {
+  /** Profundidad de la cadena de prerrequisitos de una materia desde cursadas. */
+  public int profundidad(int materia, ConjuntoDeMaterias cursadas, int[] memo) {
+    if (cursadas.contiene(materia)) {
       return 0;
     }
     if (memo[materia] >= 0) {
@@ -881,14 +893,14 @@ public final class ModeloDeCalculo {
     }
     int maximo = 0;
     for (long[] clausula : clausulas) {
-      if (D.contieneAlguna(clausula)) {
+      if (cursadas.contieneAlguna(clausula)) {
         continue;
       }
       int minimo = INFINITO;
-      for (int i = 0; i < n; i++) {
+      for (int i = 0; i < cantidadMaterias; i++) {
         if ((clausula[i >>> 6] & (1L << (i & 63))) != 0) {
-          if (!D.contiene(i)) {
-            minimo = Math.min(minimo, profundidad(i, D, memo));
+          if (!cursadas.contiene(i)) {
+            minimo = Math.min(minimo, profundidad(i, cursadas, memo));
           }
         }
       }

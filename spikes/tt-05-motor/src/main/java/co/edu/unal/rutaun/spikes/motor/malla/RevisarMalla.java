@@ -26,7 +26,7 @@ public final class RevisarMalla {
   public static void main(String[] args) {
     Path raiz = args.length > 0 ? Path.of(args[0]) : Rutas.datos();
     ModelosJson.MallaJson malla = LectorDeMalla.leer(raiz.resolve("malla-sistemas.json"));
-    ModelosJson.EscenariosJson escenarios =
+    final ModelosJson.EscenariosJson escenarios =
         LectorDeMalla.leerEscenarios(raiz.resolve("escenarios.json"));
     ModeloDeCalculo modelo = new ModeloDeCalculo(malla, ModeloDeCalculo.Configuracion.vacia());
     int n = modelo.cantidadMaterias();

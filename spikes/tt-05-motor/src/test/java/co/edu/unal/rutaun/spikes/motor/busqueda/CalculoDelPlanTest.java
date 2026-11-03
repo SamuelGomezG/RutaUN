@@ -1,14 +1,8 @@
-package co.edu.unal.rutaun.spikes.motor;
+package co.edu.unal.rutaun.spikes.motor.busqueda;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import co.edu.unal.rutaun.spikes.motor.busqueda.CalculoDelPlan;
-import co.edu.unal.rutaun.spikes.motor.busqueda.Cancelacion;
-import co.edu.unal.rutaun.spikes.motor.busqueda.ConstructorTestigo;
-import co.edu.unal.rutaun.spikes.motor.busqueda.Plan;
-import co.edu.unal.rutaun.spikes.motor.busqueda.Restricciones;
-import co.edu.unal.rutaun.spikes.motor.busqueda.ResultadoCalculo;
-import co.edu.unal.rutaun.spikes.motor.busqueda.Tope;
+import co.edu.unal.rutaun.spikes.motor.Rutas;
 import co.edu.unal.rutaun.spikes.motor.malla.LectorDeMalla;
 import co.edu.unal.rutaun.spikes.motor.malla.ModelosJson;
 import co.edu.unal.rutaun.spikes.motor.modelo.ConjuntoDeMaterias;
@@ -20,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-class MallaRealTest {
+class CalculoDelPlanTest {
 
   private static ModelosJson.MallaJson malla;
   private static ModelosJson.EscenariosJson escenarios;
