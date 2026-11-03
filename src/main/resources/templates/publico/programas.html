@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8"/>
+    <title>Programas · RutaUN</title>
+  </head>
+  <body>
+    <h1>Consultar las reglas de un programa</h1>
+    <h2>Cualquier programa</h2>
+    <p>Elige un programa para ver sus reglas.</p>
+    <ul th:if="${!programas.isEmpty()}">
+      <li th:each="programa : ${programas}">
+        <a th:href="@{/programas/{id}/reglas(id=${programa.id().valor()})}"
+           th:text="${programa.nombre()}">Programa</a>
+        <span th:text="${programa.facultad()}">Facultad</span>
+      </li>
+    </ul>
+    <p th:if="${programas.isEmpty()}">No hay programas cargados.</p>
+  </body>
+</html>
