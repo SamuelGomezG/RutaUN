@@ -83,6 +83,7 @@ public final class Medir {
     correrEscenario("E3", "T2");
     correrEscenario("E4", "T2");
     correrVariante("C", null);
+    correrVariante("C2", null);
     correrVariante("D3", null);
     correrUc04();
   }
@@ -97,6 +98,7 @@ public final class Medir {
     }
     correrVariante("F", null);
     correrVariante("C", null);
+    correrVariante("C2", null);
     correrVariante("D3", null);
     correrUc04();
     correrEstres();

@@ -119,6 +119,8 @@ public final class ConstructorTestigo {
       int creditos = 0;
       int materias = 0;
       List<Integer> seleccion = new ArrayList<>();
+      ConjuntoDeMaterias seleccionadas = D.copia();
+      int[] asignacionSeleccion = asignacion.clone();
       for (int materia : requeridos) {
         if (restricciones.semestreFijo[materia] == s
             && !cabe(modelo, materia, creditos, materias, tope)) {
@@ -128,23 +130,9 @@ public final class ConstructorTestigo {
           seleccion.add(materia);
           creditos += modelo.creditos(materia);
           materias++;
+          asignarGrupo(modelo, materia, seleccionadas, asignacionSeleccion, restricciones);
+          seleccionadas.agregar(materia);
         }
-      }
-      for (int materia : seleccion) {
-        int[] gruposMateria = modelo.gruposDeMateria(materia);
-        if (asignacion[materia] < 0 && gruposMateria.length > 0) {
-          int mejor = gruposMateria[0];
-          int mejorFaltan = -1;
-          for (int grupo : gruposMateria) {
-            int faltan = modelo.faltan(grupo, D, asignacion, restricciones.obligatoriasExtra);
-            if (faltan > mejorFaltan) {
-              mejorFaltan = faltan;
-              mejor = grupo;
-            }
-          }
-          asignacion[materia] = mejor;
-        }
-        D.agregar(materia);
       }
       for (int materia : optativas) {
         if (cancelacion.cancelado()) {
@@ -153,27 +141,60 @@ public final class ConstructorTestigo {
         if (!cabe(modelo, materia, creditos, materias, tope)) {
           continue;
         }
-        if (!sigueSiendoUtil(modelo, materia, D, asignacion, restricciones)) {
+        if (!sigueSiendoUtil(modelo, materia, seleccionadas, asignacionSeleccion, restricciones)) {
           continue;
         }
         seleccion.add(materia);
         creditos += modelo.creditos(materia);
         materias++;
-        int[] gruposMateria = modelo.gruposDeMateria(materia);
-        if (asignacion[materia] < 0 && gruposMateria.length > 0) {
-          int mejor = gruposMateria[0];
-          int mejorFaltan = -1;
-          for (int grupo : gruposMateria) {
-            int faltan = modelo.faltan(grupo, D, asignacion, restricciones.obligatoriasExtra);
-            if (faltan > mejorFaltan) {
-              mejorFaltan = faltan;
-              mejor = grupo;
-            }
-          }
-          asignacion[materia] = mejor;
-        }
-        D.agregar(materia);
+        asignarGrupo(modelo, materia, seleccionadas, asignacionSeleccion, restricciones);
+        seleccionadas.agregar(materia);
       }
+
+      boolean cambio = true;
+      while (cambio) {
+        if (cancelacion.cancelado()) {
+          return null;
+        }
+        cambio = false;
+        for (int indice = 0; indice < seleccion.size(); indice++) {
+          int materia = seleccion.get(indice);
+          if (modelo.clausulasCumplidas(modelo.correquisitos(materia), seleccionadas)) {
+            continue;
+          }
+          int par =
+              buscarCorrequisito(
+                  modelo,
+                  materia,
+                  D,
+                  seleccionadas,
+                  asignacionSeleccion,
+                  restricciones,
+                  tope,
+                  creditos,
+                  materias,
+                  libreInicial - L,
+                  s,
+                  cancelacion);
+          if (par >= 0) {
+            seleccion.add(par);
+            creditos += modelo.creditos(par);
+            materias++;
+            asignarGrupo(modelo, par, seleccionadas, asignacionSeleccion, restricciones);
+            seleccionadas.agregar(par);
+          } else {
+            seleccion.remove(indice);
+            creditos -= modelo.creditos(materia);
+            materias--;
+            seleccionadas.quitar(materia);
+            asignacionSeleccion[materia] = -1;
+          }
+          cambio = true;
+          break;
+        }
+      }
+      D = seleccionadas;
+      asignacion = asignacionSeleccion;
       for (int materia : seleccion) {
         semestre[materia] = s;
         if (!modelo.requeridas().contiene(materia)) {
@@ -312,6 +333,82 @@ public final class ConstructorTestigo {
       int materia, ModeloDeCalculo modelo, Restricciones restricciones) {
     return modelo.requeridas().contiene(materia)
         || restricciones.obligatoriasExtra.contiene(materia);
+  }
+
+  private static void asignarGrupo(
+      ModeloDeCalculo modelo,
+      int materia,
+      ConjuntoDeMaterias seleccionadas,
+      int[] asignacion,
+      Restricciones restricciones) {
+    int[] gruposMateria = modelo.gruposDeMateria(materia);
+    if (asignacion[materia] >= 0 || gruposMateria.length == 0) {
+      return;
+    }
+    int mejor = gruposMateria[0];
+    int mejorFaltan = -1;
+    for (int grupo : gruposMateria) {
+      int faltan = modelo.faltan(grupo, seleccionadas, asignacion, restricciones.obligatoriasExtra);
+      if (faltan > mejorFaltan) {
+        mejorFaltan = faltan;
+        mejor = grupo;
+      }
+    }
+    asignacion[materia] = mejor;
+  }
+
+  private static int buscarCorrequisito(
+      ModeloDeCalculo modelo,
+      int materia,
+      ConjuntoDeMaterias previas,
+      ConjuntoDeMaterias seleccionadas,
+      int[] asignacion,
+      Restricciones restricciones,
+      Tope tope,
+      int creditos,
+      int materias,
+      int libreColocado,
+      int semestre,
+      Cancelacion cancelacion) {
+    for (long[] clausula : modelo.correquisitos(materia)) {
+      if (seleccionadas.contieneAlguna(clausula)) {
+        continue;
+      }
+      for (int i = 0; i < modelo.cantidadMaterias(); i++) {
+        if (cancelacion.cancelado()) {
+          return -1;
+        }
+        if ((clausula[i >>> 6] & (1L << (i & 63))) == 0
+            || seleccionadas.contiene(i)
+            || !modelo.cursable(i)
+            || restricciones.excluidas.contiene(i)) {
+          continue;
+        }
+        if (restricciones.semestreFijo[i] >= 0 && restricciones.semestreFijo[i] != semestre) {
+          continue;
+        }
+        if (restricciones.semestreMaximo[i] < semestre) {
+          continue;
+        }
+        if (!esRequerida(i, modelo, restricciones)
+            && restricciones.soloIncluidas
+            && !restricciones.incluidas.contiene(i)) {
+          continue;
+        }
+        if (!modelo.clausulasCumplidas(modelo.prerrequisitos(i), previas)) {
+          continue;
+        }
+        if (!modelo.habilitacionesCumplidas(i, previas, libreColocado, asignacion)) {
+          continue;
+        }
+        if (!cabe(modelo, i, creditos, materias, tope)) {
+          continue;
+        }
+        return i;
+      }
+      return -1;
+    }
+    return -1;
   }
 
   private static boolean sigueSiendoUtil(
