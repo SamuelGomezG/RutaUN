@@ -36,6 +36,7 @@ class ProgramasControllerSinFachadaTest {
   void uc06_hu01_sinFachadaLaPaginaDeReglasDiceQueNoEstaDisponible() throws Exception {
     mockMvc
         .perform(get("/programas/" + UUID.randomUUID() + "/reglas"))
-        .andExpect(status().isServiceUnavailable());
+        .andExpect(status().isServiceUnavailable())
+        .andExpect(content().string(containsString("no está disponible")));
   }
 }
