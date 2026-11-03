@@ -85,6 +85,8 @@ public final class Medir {
     correrVariante("C", null);
     correrVariante("C2", null);
     correrVariante("CC", null);
+    correrVariante("IMP", null);
+    correrVariante("ESC", null);
     correrVariante("D3", null);
     correrUc04();
   }
@@ -101,6 +103,8 @@ public final class Medir {
     correrVariante("C", null);
     correrVariante("C2", null);
     correrVariante("CC", null);
+    correrVariante("IMP", null);
+    correrVariante("ESC", null);
     correrVariante("D3", null);
     correrUc04();
     correrEstres();

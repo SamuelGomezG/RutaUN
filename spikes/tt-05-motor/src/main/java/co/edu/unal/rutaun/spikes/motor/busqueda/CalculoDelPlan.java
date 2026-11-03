@@ -70,6 +70,15 @@ public final class CalculoDelPlan {
       if (cancelacion.cancelado()) {
         return tiempoAgotado(inicio);
       }
+      int inalcanzable = cotas.primeraRequeridaInalcanzable(a0);
+      if (inalcanzable >= 0) {
+        return new ResultadoCalculo.SinPlanPosible(
+            "La materia "
+                + modelo.codigo(inalcanzable)
+                + " ("
+                + modelo.nombre(inalcanzable)
+                + ") no se puede alcanzar: prerrequisito circular o no cursable");
+      }
       return new ResultadoCalculo.SinPlanPosible("La cota inferior no es finita");
     }
     int maximoSemestres = Math.max(cota, kMaximo(asignacionInicial));

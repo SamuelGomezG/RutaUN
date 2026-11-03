@@ -874,13 +874,32 @@ public final class ModeloDeCalculo {
     return mejor;
   }
 
-  /** Profundidad de la cadena de prerrequisitos de una materia desde cursadas. */
+  /**
+   * Profundidad de la cadena de prerrequisitos de una materia desde cursadas. {@code memo} debe
+   * venir lleno de -1 (sin calcular). Un prerrequisito circular no tumba el cálculo: el camino que
+   * vuelve a una materia en curso vale {@link #INFINITO}, porque un camino circular nunca es el más
+   * corto.
+   */
   public int profundidad(int materia, ConjuntoDeMaterias cursadas, int[] memo) {
+    return profundidad(materia, cursadas, memo, 0, new int[] {Integer.MAX_VALUE});
+  }
+
+  /**
+   * Mientras una materia se recorre, {@code memo} guarda {@code -2 - nivel} (nivel de la pila de
+   * recursión). {@code bajo[0]} es el nivel más bajo de una materia en curso que el recorrido tocó.
+   */
+  private int profundidad(
+      int materia, ConjuntoDeMaterias cursadas, int[] memo, int nivel, int[] bajo) {
     if (cursadas.contiene(materia)) {
       return 0;
     }
-    if (memo[materia] >= 0) {
-      return memo[materia];
+    int guardado = memo[materia];
+    if (guardado >= 0) {
+      return guardado;
+    }
+    if (guardado < -1) {
+      bajo[0] = Math.min(bajo[0], -guardado - 2);
+      return INFINITO;
     }
     if (!cursable[materia]) {
       memo[materia] = INFINITO;
@@ -891,6 +910,9 @@ public final class ModeloDeCalculo {
       memo[materia] = 1;
       return 1;
     }
+    memo[materia] = -2 - nivel;
+    final int bajoDelPadre = bajo[0];
+    bajo[0] = Integer.MAX_VALUE;
     int maximo = 0;
     for (long[] clausula : clausulas) {
       if (cursadas.contieneAlguna(clausula)) {
@@ -898,20 +920,24 @@ public final class ModeloDeCalculo {
       }
       int minimo = INFINITO;
       for (int i = 0; i < cantidadMaterias; i++) {
-        if ((clausula[i >>> 6] & (1L << (i & 63))) != 0) {
-          if (!cursadas.contiene(i)) {
-            minimo = Math.min(minimo, profundidad(i, cursadas, memo));
-          }
+        if ((clausula[i >>> 6] & (1L << (i & 63))) != 0 && !cursadas.contiene(i)) {
+          minimo = Math.min(minimo, profundidad(i, cursadas, memo, nivel + 1, bajo));
         }
       }
       if (minimo == INFINITO) {
-        memo[materia] = INFINITO;
-        return INFINITO;
+        maximo = INFINITO;
+        break;
       }
       maximo = Math.max(maximo, minimo);
     }
-    memo[materia] = 1 + maximo;
-    return memo[materia];
+    int resultado = maximo == INFINITO ? INFINITO : 1 + maximo;
+    // Si el valor dependió de una materia anterior de la pila que sigue en curso, no se memoriza:
+    // con «A exige (B o C)» y «B exige A», memorizar B como infinita dejaría la cota inferior por
+    // encima del mínimo real aunque A se alcance por C, y volverían los falsos «sin plan».
+    boolean contaminado = bajo[0] < nivel;
+    memo[materia] = contaminado ? -1 : resultado;
+    bajo[0] = Math.min(bajoDelPadre, bajo[0]);
+    return resultado;
   }
 
   private static final class MateriaDatos {

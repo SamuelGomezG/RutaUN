@@ -212,6 +212,39 @@ class CalculoDelPlanTest {
   }
 
   @Test
+  void tt05_cicloDePrerrequisitosNoTieneCamino() {
+    // 2016699 exige 2025967, que ya exigía 2016699: antes el cálculo se caía con
+    // StackOverflowError.
+    ModeloDeCalculo modelo = modeloDe(variante("IMP"));
+    CalculoDelPlan calculo =
+        new CalculoDelPlan(modelo, escenario("E1"), tope("T2"), new Cancelacion(10_000));
+    ResultadoCalculo resultado = calculo.calcular();
+    assertThat(resultado).isInstanceOf(ResultadoCalculo.SinPlanPosible.class);
+    String motivo = ((ResultadoCalculo.SinPlanPosible) resultado).motivo();
+    assertThat(motivo).containsAnyOf("2016699", "2025967");
+    assertThat(motivo).contains("no se puede alcanzar");
+  }
+
+  @Test
+  void tt05_cicloConSalidaPorOTienePlan() {
+    // 2016699 exige (2025967 o 2016353): el ciclo existe, pero 2016353 es la salida. Si se
+    // memorizara un infinito falso para 2025967, la cota diría «sin plan».
+    ModeloDeCalculo modelo = modeloDe(variante("ESC"));
+    Tope t2 = tope("T2");
+    CalculoDelPlan calculo =
+        new CalculoDelPlan(modelo, escenario("E1"), t2, new Cancelacion(10_000));
+    ResultadoCalculo resultado = calculo.calcular();
+    assertThat(resultado).isInstanceOf(ResultadoCalculo.Calculado.class);
+    Plan plan = ((ResultadoCalculo.Calculado) resultado).plan();
+    assertThat(
+            new VerificadorDePlan(modelo).verificar(plan, calculo.a0(), calculo.libreInicial(), t2))
+        .isEmpty();
+    assertThat(plan.semestre(modelo.indiceDe("2016353")))
+        .isPositive()
+        .isLessThan(plan.semestre(modelo.indiceDe("2016699")));
+  }
+
+  @Test
   void tt05_determinismoRepiteElMismoPlan() {
     ModelosJson.EscenarioJson e1 = escenario("E1");
     Tope t2 = tope("T2");
