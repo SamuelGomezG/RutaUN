@@ -78,5 +78,78 @@ class ModeloDeCalculoTest {
     assertThat(modelo.clausulasCumplidas(modelo.prerrequisitos(destino), avance)).isFalse();
     avance.agregar(requisito);
     assertThat(modelo.clausulasCumplidas(modelo.prerrequisitos(destino), avance)).isTrue();
+
+    // Todas son obligatorias: con solo los índices 0 a 127 queda sin cubrir la del índice 128 o
+    // más, y con las 150 la malla queda cubierta.
+    int[] asignacion = modelo.asignacionInicial();
+    ConjuntoDeMaterias primeras = new ConjuntoDeMaterias(cantidad);
+    for (int i = 0; i < 128; i++) {
+      primeras.agregar(i);
+    }
+    assertThat(modelo.todoCubierto(primeras, asignacion)).isFalse();
+    ConjuntoDeMaterias todas = new ConjuntoDeMaterias(cantidad);
+    for (int i = 0; i < cantidad; i++) {
+      todas.agregar(i);
+    }
+    assertThat(modelo.todoCubierto(todas, asignacion)).isTrue();
+  }
+
+  @Test
+  void tt05_unaObligatoriaEnDosAgrupacionesSumaEnUnaSola() {
+    // SH es obligatoria y aparece en A y en B (6 créditos cada una, con una optativa propia).
+    // Debe contar solo en A, la primera: antes contaba en las dos y a B le faltaban 3 en vez de 6.
+    ModelosJson.MateriaJson compartida =
+        new ModelosJson.MateriaJson("SH", "Compartida", 3, true, 1);
+    ModelosJson.AgrupacionJson a =
+        new ModelosJson.AgrupacionJson(
+            "A",
+            "Agrupación A",
+            6,
+            List.of(compartida, new ModelosJson.MateriaJson("OA", "Optativa A", 3, false, 1)),
+            List.of());
+    ModelosJson.AgrupacionJson b =
+        new ModelosJson.AgrupacionJson(
+            "B",
+            "Agrupación B",
+            6,
+            List.of(compartida, new ModelosJson.MateriaJson("OB", "Optativa B", 3, false, 1)),
+            List.of());
+    ModelosJson.MallaJson malla =
+        new ModelosJson.MallaJson(
+            new ModelosJson.FuenteJson("sintética", "sintética", "sintética", "sintética"),
+            12,
+            10,
+            null,
+            List.of(
+                new ModelosJson.ComponenteJson("DISCIPLINAR", 12, 3, 9, List.of(), List.of(a, b))),
+            new ModelosJson.LibreEleccionJson(0, 3, Map.of()),
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of());
+
+    ModeloDeCalculo modelo = new ModeloDeCalculo(malla, ModeloDeCalculo.Configuracion.vacia());
+
+    int grupoA = indiceDeGrupo(modelo, "A");
+    int grupoB = indiceDeGrupo(modelo, "B");
+    ConjuntoDeMaterias nada = new ConjuntoDeMaterias(modelo.cantidadMaterias());
+    int[] asignacion = modelo.asignacionInicial();
+    assertThat(asignacion[modelo.indiceDe("SH")]).isEqualTo(grupoA);
+    assertThat(modelo.faltan(grupoA, nada, asignacion)).isEqualTo(3);
+    assertThat(modelo.faltan(grupoB, nada, asignacion)).isEqualTo(6);
+
+    ConjuntoDeMaterias conCompartida =
+        ConjuntoDeMaterias.de(modelo.cantidadMaterias(), modelo.indiceDe("SH"));
+    assertThat(modelo.creditosGrupo(grupoA, conCompartida, asignacion)).isEqualTo(3);
+    assertThat(modelo.creditosGrupo(grupoB, conCompartida, asignacion)).isZero();
+  }
+
+  private static int indiceDeGrupo(ModeloDeCalculo modelo, String id) {
+    for (ModeloDeCalculo.Grupo grupo : modelo.grupos()) {
+      if (id.equals(grupo.id())) {
+        return grupo.indice();
+      }
+    }
+    throw new IllegalArgumentException("Grupo desconocido: " + id);
   }
 }
