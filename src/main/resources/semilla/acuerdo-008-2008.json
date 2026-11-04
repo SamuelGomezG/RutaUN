@@ -1,0 +1,119 @@
+{
+  "schemaVersion": "1.0",
+  "programa": {
+    "codigoSia": "2879",
+    "nombre": "Ingeniería de Sistemas y Computación",
+    "facultad": "Ingeniería"
+  },
+  "norma": {
+    "tipo": "ACUERDO",
+    "numero": "008",
+    "anio": 2008,
+    "organo": "Consejo Superior Universitario",
+    "tipoDeEfecto": "BASE",
+    "fechaExpedicion": "2008-04-15",
+    "vigencia": {
+      "aplicaDesde": {
+        "tipo": "FECHA",
+        "fecha": "2009-01-01"
+      },
+      "vigenteHasta": null
+    },
+    "enlaceRegimenLegal": null,
+    "alcance": {
+      "tipo": "TODOS",
+      "facultades": [],
+      "programas": [],
+      "exclusiones": [],
+      "texto": "El Acuerdo establece el régimen estudiantil de la Universidad Nacional de Colombia. Para esta incorporación se considera aplicable al programa de Ingeniería de Sistemas y Computación, por tratarse de una norma general de alcance institucional."
+    }
+  },
+  "reglas": [
+    {
+      "categoria": "CARGA_POR_PERIODO",
+      "objeto": "Mínimo de créditos por periodo (pregrado)",
+      "enunciado": "En cada período académico los estudiantes o admitidos a un programa de pregrado deben inscribir asignaturas que sumen diez (10) créditos como mínimo; los Consejos de Facultad pueden autorizar un número inferior, previa solicitud justificada del estudiante.",
+      "articulo": "art. 10",
+      "vigenciaPropia": null,
+      "clasificacion": "DEL_PLAN",
+      "afectacion": null,
+      "datos": {
+        "tipo": "CARGA_POR_PERIODO",
+        "creditos": 10,
+        "tipoCarga": "MINIMA"
+      }
+    },
+    {
+      "categoria": "OTRA",
+      "objeto": "Cupo de créditos para inscripción (pregrado)",
+      "enunciado": "Cada estudiante de pregrado tiene un cupo de créditos para inscribir asignaturas: los créditos del plan de estudios más un cupo adicional, igual a la mitad del mínimo de créditos del plan y hasta un máximo de ochenta (80), que se obtiene gradualmente sumando dos (2) créditos por cada crédito aprobado.",
+      "articulo": "art. 11",
+      "vigenciaPropia": null,
+      "clasificacion": "INFORMATIVA",
+      "afectacion": null,
+      "datos": {
+        "tipo": "OTRA"
+      }
+    },
+    {
+      "categoria": "OTRA",
+      "objeto": "Pruebas de validación",
+      "enunciado": "Las pruebas de validación son voluntarias, para asignaturas validables; las programa la Unidad Académica que ofrece la asignatura y las califica un jurado de no menos de dos de sus profesores. Los créditos de las asignaturas validadas en pregrado se descuentan del cupo de créditos para inscripción (si se presentan por haber reprobado en el período inmediatamente anterior, solo el 50%).",
+      "articulo": "art. 29",
+      "vigenciaPropia": null,
+      "clasificacion": "INFORMATIVA",
+      "afectacion": null,
+      "datos": {
+        "tipo": "OTRA"
+      }
+    },
+    {
+      "categoria": "OTRA",
+      "objeto": "Límite de homologaciones, convalidaciones y validaciones",
+      "enunciado": "El total de créditos de homologaciones, convalidaciones y validaciones autorizado a un estudiante no puede superar el 50% del mínimo de créditos del plan de estudios; si un convenio de doble titulación con una universidad extranjera lo exige por reciprocidad, puede autorizarse un porcentaje mayor, sin superar el 75%.",
+      "articulo": "art. 38",
+      "vigenciaPropia": null,
+      "clasificacion": "INFORMATIVA",
+      "afectacion": null,
+      "datos": {
+        "tipo": "OTRA"
+      }
+    },
+    {
+      "categoria": "OTRA",
+      "objeto": "Pérdida de la calidad de estudiante por renovación de matrícula",
+      "enunciado": "Un estudiante de pregrado pierde la calidad de estudiante si no cumple los requisitos exigidos para la renovación de la matrícula en los plazos señalados por la Universidad.",
+      "articulo": "art. 44, numeral 2",
+      "vigenciaPropia": null,
+      "clasificacion": "INFORMATIVA",
+      "afectacion": null,
+      "datos": {
+        "tipo": "OTRA"
+      }
+    },
+    {
+      "categoria": "OTRA",
+      "objeto": "Pérdida de la calidad de estudiante por falta de cupo de créditos",
+      "enunciado": "Un estudiante de pregrado pierde la calidad de estudiante si no dispone de un cupo de créditos suficiente para inscribir las asignaturas del plan de estudios pendientes de aprobación.",
+      "articulo": "art. 44, numeral 4",
+      "vigenciaPropia": null,
+      "clasificacion": "INFORMATIVA",
+      "afectacion": null,
+      "datos": {
+        "tipo": "OTRA"
+      }
+    },
+    {
+      "categoria": "REQUISITO_DE_GRADO",
+      "objeto": "Requisitos para obtener el título",
+      "enunciado": "Para obtener un título se requiere haber aprobado el mínimo de créditos del programa curricular según su plan de estudios y haber cumplido los demás requisitos académicos adicionales y administrativos que reglamente el Consejo Académico.",
+      "articulo": "art. 52",
+      "vigenciaPropia": null,
+      "clasificacion": "INFORMATIVA",
+      "afectacion": null,
+      "datos": {
+        "tipo": "REQUISITO_DE_GRADO"
+      }
+    }
+  ]
+}

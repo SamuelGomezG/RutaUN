@@ -11,92 +11,43 @@
     "anio": 2022,
     "organo": "Consejo Académico",
     "tipoDeEfecto": "BASE",
-    "fechaExpedicion": "2022-05-25",
+    "fechaExpedicion": "2022-10-14",
     "vigencia": {
-      "aplicaDesde": { "tipo": "FECHA", "fecha": "2022-08-01" },
+      "aplicaDesde": {
+        "tipo": "FECHA",
+        "fecha": "2023-11-01"
+      },
       "vigenteHasta": null
     },
     "enlaceRegimenLegal": null,
     "alcance": {
       "tipo": "PROGRAMAS",
       "facultades": [],
-      "programas": ["2879"],
+      "programas": [
+        "2879"
+      ],
       "exclusiones": [],
-      "texto": "Semilla mínima de prueba para Ingeniería de Sistemas y Computación."
+      "texto": "El Acuerdo modifica la estructura del plan de estudios del programa curricular de Ingeniería de Sistemas y Computación de la Facultad de Ingeniería de la Universidad Nacional de Colombia, Sede Bogotá."
     }
   },
   "reglas": [
     {
-      "categoria": "MATERIA",
-      "objeto": "2024042 Cálculo diferencial",
-      "enunciado": "Cálculo diferencial pertenece a la agrupación Matemáticas.",
-      "articulo": "art. 2",
+      "categoria": "PROGRAMA",
+      "objeto": "Plan de estudios",
+      "enunciado": "El plan de estudios tiene un total de ciento sesenta y cinco (165) créditos exigidos.",
+      "articulo": "art. 3",
       "vigenciaPropia": null,
       "clasificacion": "DEL_PLAN",
       "afectacion": null,
       "datos": {
-        "tipo": "MATERIA",
-        "materia": {
-          "codigo": "2024042",
-          "nombre": "Cálculo diferencial",
-          "creditos": 4,
-          "obligatoriedad": "OBLIGATORIA",
-          "semestreSugerido": 1
-        },
-        "contenedor": {
-          "componente": "Componente de Fundamentación",
-          "agrupacion": "Matemáticas"
-        }
-      }
-    },
-    {
-      "categoria": "MATERIA",
-      "objeto": "2024043 Cálculo integral",
-      "enunciado": "Cálculo integral pertenece a la agrupación Matemáticas.",
-      "articulo": "art. 2",
-      "vigenciaPropia": null,
-      "clasificacion": "DEL_PLAN",
-      "afectacion": null,
-      "datos": {
-        "tipo": "MATERIA",
-        "materia": {
-          "codigo": "2024043",
-          "nombre": "Cálculo integral",
-          "creditos": 4,
-          "obligatoriedad": "OBLIGATORIA",
-          "semestreSugerido": 2
-        },
-        "contenedor": {
-          "componente": "Componente de Fundamentación",
-          "agrupacion": "Matemáticas"
-        }
-      }
-    },
-    {
-      "categoria": "AGRUPACION",
-      "objeto": "Agrupación Matemáticas",
-      "enunciado": "La agrupación Matemáticas exige 8 créditos.",
-      "articulo": "art. 5",
-      "vigenciaPropia": null,
-      "clasificacion": "DEL_PLAN",
-      "afectacion": null,
-      "datos": {
-        "tipo": "AGRUPACION",
-        "agrupacion": {
-          "nombre": "Matemáticas",
-          "creditosExigidos": 8,
-          "desglose": null
-        },
-        "contenedor": {
-          "componente": "Componente de Fundamentación",
-          "agrupacion": null
-        }
+        "tipo": "PROGRAMA",
+        "creditosExigidos": 165
       }
     },
     {
       "categoria": "COMPONENTE",
       "objeto": "Componente de Fundamentación",
-      "enunciado": "El componente de fundamentación exige 12 créditos.",
+      "enunciado": "Componente de Fundamentación: 51 créditos exigidos, de los cuales 15 corresponden a asignaturas obligatorias y 36 a asignaturas optativas.",
       "articulo": "art. 4",
       "vigenciaPropia": null,
       "clasificacion": "DEL_PLAN",
@@ -106,72 +57,346 @@
         "componente": {
           "nombre": "Componente de Fundamentación",
           "tipo": "FUNDAMENTACION",
-          "creditosExigidos": 12,
+          "creditosExigidos": 51,
+          "desglose": {
+            "obligatorios": 15,
+            "optativos": 36
+          }
+        }
+      }
+    },
+    {
+      "categoria": "COMPONENTE",
+      "objeto": "Componente de Formación Disciplinar o Profesional",
+      "enunciado": "Componente de Formación Disciplinar o Profesional: 81 créditos exigidos, de los cuales 39 corresponden a asignaturas obligatorias y 42 a asignaturas optativas.",
+      "articulo": "art. 4",
+      "vigenciaPropia": null,
+      "clasificacion": "DEL_PLAN",
+      "afectacion": null,
+      "datos": {
+        "tipo": "COMPONENTE",
+        "componente": {
+          "nombre": "Componente de Formación Disciplinar o Profesional",
+          "tipo": "DISCIPLINAR",
+          "creditosExigidos": 81,
+          "desglose": {
+            "obligatorios": 39,
+            "optativos": 42
+          }
+        }
+      }
+    },
+    {
+      "categoria": "COMPONENTE",
+      "objeto": "Componente de Libre Elección",
+      "enunciado": "Componente de Libre Elección: 33 créditos exigidos, que corresponden al 20% del total de créditos del plan de estudios.",
+      "articulo": "art. 4",
+      "vigenciaPropia": null,
+      "clasificacion": "DEL_PLAN",
+      "afectacion": null,
+      "datos": {
+        "tipo": "COMPONENTE",
+        "componente": {
+          "nombre": "Componente de Libre Elección",
+          "tipo": "LIBRE_ELECCION",
+          "creditosExigidos": 33,
           "desglose": null
         }
       }
     },
     {
-      "categoria": "PRERREQUISITO",
-      "objeto": "2024043 Cálculo integral",
-      "enunciado": "Cálculo integral exige Cálculo diferencial.",
-      "articulo": "art. 2",
+      "categoria": "AGRUPACION",
+      "objeto": "Matemáticas",
+      "enunciado": "Agrupación Matemáticas del Componente de Fundamentación: 0 créditos obligatorios, 16 optativos, 16 créditos exigidos.",
+      "articulo": "art. 5, literal a",
       "vigenciaPropia": null,
       "clasificacion": "DEL_PLAN",
       "afectacion": null,
       "datos": {
-        "tipo": "PRERREQUISITO",
-        "materia": "2024043",
-        "expresion": { "tipo": "MATERIA_DEL_PROGRAMA", "codigo": "2024042" }
+        "tipo": "AGRUPACION",
+        "agrupacion": {
+          "nombre": "Matemáticas",
+          "creditosExigidos": 16,
+          "desglose": {
+            "obligatorios": 0,
+            "optativos": 16
+          }
+        },
+        "contenedor": {
+          "componente": "Componente de Fundamentación",
+          "agrupacion": null
+        }
       }
     },
     {
-      "categoria": "CORREQUISITO",
-      "objeto": "2024043 Cálculo integral",
-      "enunciado": "Cálculo integral debe cursarse con Cálculo diferencial o antes.",
-      "articulo": "art. 2",
+      "categoria": "AGRUPACION",
+      "objeto": "Probabilidad y Estadística",
+      "enunciado": "Agrupación Probabilidad y Estadística del Componente de Fundamentación: 0 créditos obligatorios, 3 optativos, 3 créditos exigidos.",
+      "articulo": "art. 5, literal a",
       "vigenciaPropia": null,
       "clasificacion": "DEL_PLAN",
       "afectacion": null,
       "datos": {
-        "tipo": "CORREQUISITO",
-        "materia": "2024043",
-        "expresion": { "tipo": "MATERIA_DEL_PROGRAMA", "codigo": "2024042" }
+        "tipo": "AGRUPACION",
+        "agrupacion": {
+          "nombre": "Probabilidad y Estadística",
+          "creditosExigidos": 3,
+          "desglose": {
+            "obligatorios": 0,
+            "optativos": 3
+          }
+        },
+        "contenedor": {
+          "componente": "Componente de Fundamentación",
+          "agrupacion": null
+        }
       }
     },
     {
-      "categoria": "CARGA_POR_PERIODO",
-      "objeto": "Mínimo por periodo",
-      "enunciado": "El mínimo por periodo es de 10 créditos.",
-      "articulo": "art. 10",
+      "categoria": "AGRUPACION",
+      "objeto": "Física",
+      "enunciado": "Agrupación Física del Componente de Fundamentación: 8 créditos obligatorios, 0 optativos, 8 créditos exigidos.",
+      "articulo": "art. 5, literal a",
       "vigenciaPropia": null,
       "clasificacion": "DEL_PLAN",
       "afectacion": null,
       "datos": {
-        "tipo": "CARGA_POR_PERIODO",
-        "creditos": 10,
-        "tipoCarga": "MINIMA"
+        "tipo": "AGRUPACION",
+        "agrupacion": {
+          "nombre": "Física",
+          "creditosExigidos": 8,
+          "desglose": {
+            "obligatorios": 8,
+            "optativos": 0
+          }
+        },
+        "contenedor": {
+          "componente": "Componente de Fundamentación",
+          "agrupacion": null
+        }
       }
     },
     {
-      "categoria": "CARGA_POR_PERIODO",
-      "objeto": "Máximo por periodo",
-      "enunciado": "El máximo por periodo es de 23 créditos.",
-      "articulo": "art. 10",
+      "categoria": "AGRUPACION",
+      "objeto": "Ciencias de la Computación",
+      "enunciado": "Agrupación Ciencias de la Computación del Componente de Fundamentación: 7 créditos obligatorios, 11 optativos, 18 créditos exigidos.",
+      "articulo": "art. 5, literal a",
       "vigenciaPropia": null,
       "clasificacion": "DEL_PLAN",
       "afectacion": null,
       "datos": {
-        "tipo": "CARGA_POR_PERIODO",
-        "creditos": 23,
-        "tipoCarga": "MAXIMA"
+        "tipo": "AGRUPACION",
+        "agrupacion": {
+          "nombre": "Ciencias de la Computación",
+          "creditosExigidos": 18,
+          "desglose": {
+            "obligatorios": 7,
+            "optativos": 11
+          }
+        },
+        "contenedor": {
+          "componente": "Componente de Fundamentación",
+          "agrupacion": null
+        }
+      }
+    },
+    {
+      "categoria": "AGRUPACION",
+      "objeto": "Ciencias Económicas y Administrativas",
+      "enunciado": "Agrupación Ciencias Económicas y Administrativas del Componente de Fundamentación: 0 créditos obligatorios, 6 optativos, 6 créditos exigidos.",
+      "articulo": "art. 5, literal a",
+      "vigenciaPropia": null,
+      "clasificacion": "DEL_PLAN",
+      "afectacion": null,
+      "datos": {
+        "tipo": "AGRUPACION",
+        "agrupacion": {
+          "nombre": "Ciencias Económicas y Administrativas",
+          "creditosExigidos": 6,
+          "desglose": {
+            "obligatorios": 0,
+            "optativos": 6
+          }
+        },
+        "contenedor": {
+          "componente": "Componente de Fundamentación",
+          "agrupacion": null
+        }
+      }
+    },
+    {
+      "categoria": "AGRUPACION",
+      "objeto": "Métodos y Tecnologías de Software",
+      "enunciado": "Agrupación Métodos y Tecnologías de Software del Componente de Formación Disciplinar o Profesional: 15 créditos obligatorios, 6 optativos, 21 créditos exigidos.",
+      "articulo": "art. 5, literal b",
+      "vigenciaPropia": null,
+      "clasificacion": "DEL_PLAN",
+      "afectacion": null,
+      "datos": {
+        "tipo": "AGRUPACION",
+        "agrupacion": {
+          "nombre": "Métodos y Tecnologías de Software",
+          "creditosExigidos": 21,
+          "desglose": {
+            "obligatorios": 15,
+            "optativos": 6
+          }
+        },
+        "contenedor": {
+          "componente": "Componente de Formación Disciplinar o Profesional",
+          "agrupacion": null
+        }
+      }
+    },
+    {
+      "categoria": "AGRUPACION",
+      "objeto": "Infraestructura Computacional, de Comunicaciones y de Información",
+      "enunciado": "Agrupación Infraestructura Computacional, de Comunicaciones y de Información del Componente de Formación Disciplinar o Profesional: 15 créditos obligatorios, 15 optativos, 30 créditos exigidos.",
+      "articulo": "art. 5, literal b",
+      "vigenciaPropia": null,
+      "clasificacion": "DEL_PLAN",
+      "afectacion": null,
+      "datos": {
+        "tipo": "AGRUPACION",
+        "agrupacion": {
+          "nombre": "Infraestructura Computacional, de Comunicaciones y de Información",
+          "creditosExigidos": 30,
+          "desglose": {
+            "obligatorios": 15,
+            "optativos": 15
+          }
+        },
+        "contenedor": {
+          "componente": "Componente de Formación Disciplinar o Profesional",
+          "agrupacion": null
+        }
+      }
+    },
+    {
+      "categoria": "AGRUPACION",
+      "objeto": "Computación Aplicada",
+      "enunciado": "Agrupación Computación Aplicada del Componente de Formación Disciplinar o Profesional: 0 créditos obligatorios, 3 optativos, 3 créditos exigidos.",
+      "articulo": "art. 5, literal b",
+      "vigenciaPropia": null,
+      "clasificacion": "DEL_PLAN",
+      "afectacion": null,
+      "datos": {
+        "tipo": "AGRUPACION",
+        "agrupacion": {
+          "nombre": "Computación Aplicada",
+          "creditosExigidos": 3,
+          "desglose": {
+            "obligatorios": 0,
+            "optativos": 3
+          }
+        },
+        "contenedor": {
+          "componente": "Componente de Formación Disciplinar o Profesional",
+          "agrupacion": null
+        }
+      }
+    },
+    {
+      "categoria": "AGRUPACION",
+      "objeto": "Sistemas Inteligentes",
+      "enunciado": "Agrupación Sistemas Inteligentes del Componente de Formación Disciplinar o Profesional: 0 créditos obligatorios, 3 optativos, 3 créditos exigidos.",
+      "articulo": "art. 5, literal b",
+      "vigenciaPropia": null,
+      "clasificacion": "DEL_PLAN",
+      "afectacion": null,
+      "datos": {
+        "tipo": "AGRUPACION",
+        "agrupacion": {
+          "nombre": "Sistemas Inteligentes",
+          "creditosExigidos": 3,
+          "desglose": {
+            "obligatorios": 0,
+            "optativos": 3
+          }
+        },
+        "contenedor": {
+          "componente": "Componente de Formación Disciplinar o Profesional",
+          "agrupacion": null
+        }
+      }
+    },
+    {
+      "categoria": "AGRUPACION",
+      "objeto": "Modelos, Sistemas, Optimización y Simulación",
+      "enunciado": "Agrupación Modelos, Sistemas, Optimización y Simulación del Componente de Formación Disciplinar o Profesional: 6 créditos obligatorios, 6 optativos, 12 créditos exigidos.",
+      "articulo": "art. 5, literal b",
+      "vigenciaPropia": null,
+      "clasificacion": "DEL_PLAN",
+      "afectacion": null,
+      "datos": {
+        "tipo": "AGRUPACION",
+        "agrupacion": {
+          "nombre": "Modelos, Sistemas, Optimización y Simulación",
+          "creditosExigidos": 12,
+          "desglose": {
+            "obligatorios": 6,
+            "optativos": 6
+          }
+        },
+        "contenedor": {
+          "componente": "Componente de Formación Disciplinar o Profesional",
+          "agrupacion": null
+        }
+      }
+    },
+    {
+      "categoria": "AGRUPACION",
+      "objeto": "Contexto Profesional e Interdisciplinario",
+      "enunciado": "Agrupación Contexto Profesional e Interdisciplinario del Componente de Formación Disciplinar o Profesional: 3 créditos obligatorios, 3 optativos, 6 créditos exigidos.",
+      "articulo": "art. 5, literal b",
+      "vigenciaPropia": null,
+      "clasificacion": "DEL_PLAN",
+      "afectacion": null,
+      "datos": {
+        "tipo": "AGRUPACION",
+        "agrupacion": {
+          "nombre": "Contexto Profesional e Interdisciplinario",
+          "creditosExigidos": 6,
+          "desglose": {
+            "obligatorios": 3,
+            "optativos": 3
+          }
+        },
+        "contenedor": {
+          "componente": "Componente de Formación Disciplinar o Profesional",
+          "agrupacion": null
+        }
+      }
+    },
+    {
+      "categoria": "AGRUPACION",
+      "objeto": "Trabajo de Grado",
+      "enunciado": "Agrupación Trabajo de Grado del Componente de Formación Disciplinar o Profesional: 0 créditos obligatorios, 6 optativos, 6 créditos exigidos.",
+      "articulo": "art. 5, literal b",
+      "vigenciaPropia": null,
+      "clasificacion": "DEL_PLAN",
+      "afectacion": null,
+      "datos": {
+        "tipo": "AGRUPACION",
+        "agrupacion": {
+          "nombre": "Trabajo de Grado",
+          "creditosExigidos": 6,
+          "desglose": {
+            "obligatorios": 0,
+            "optativos": 6
+          }
+        },
+        "contenedor": {
+          "componente": "Componente de Formación Disciplinar o Profesional",
+          "agrupacion": null
+        }
       }
     },
     {
       "categoria": "REQUISITO_DE_GRADO",
-      "objeto": "Requisitos de grado",
-      "enunciado": "Para graduarse se deben cumplir los requisitos de grado.",
-      "articulo": "art. 8",
+      "objeto": "Suficiencia en lengua extranjera (inglés)",
+      "enunciado": "El inglés es la lengua extranjera fundamental para la formación disciplinar; según el resultado de la prueba específica de idioma de la Dirección Nacional de Admisiones, los estudiantes deben cursar los niveles de inglés necesarios para demostrar suficiencia en una lengua extranjera.",
+      "articulo": "art. 9",
       "vigenciaPropia": null,
       "clasificacion": "INFORMATIVA",
       "afectacion": null,
@@ -181,13 +406,34 @@
     },
     {
       "categoria": "OTRA",
-      "objeto": "Medida programada de prueba",
-      "enunciado": "Medida informativa programada para probar la carga.",
-      "articulo": "art. 9",
-      "vigenciaPropia": {
-        "aplicaDesde": { "tipo": "FECHA", "fecha": "2027-01-01" },
-        "vigenteHasta": null
-      },
+      "objeto": "Cursos nivelatorios (matemáticas básicas, lecto-escritura e inglés)",
+      "enunciado": "Los admitidos que, según el examen de admisión, requieran nivelación en matemáticas básicas, lecto-escritura e inglés deben inscribirse de manera obligatoria en los cursos nivelatorios desde el primer período académico cursado.",
+      "articulo": "art. 10",
+      "vigenciaPropia": null,
+      "clasificacion": "INFORMATIVA",
+      "afectacion": null,
+      "datos": {
+        "tipo": "OTRA"
+      }
+    },
+    {
+      "categoria": "OTRA",
+      "objeto": "Modalidades de trabajo de grado",
+      "enunciado": "Las modalidades de trabajo de grado son Trabajos Investigativos, Prácticas de Extensión y Asignaturas de Posgrado.",
+      "articulo": "art. 11",
+      "vigenciaPropia": null,
+      "clasificacion": "INFORMATIVA",
+      "afectacion": null,
+      "datos": {
+        "tipo": "OTRA"
+      }
+    },
+    {
+      "categoria": "OTRA",
+      "objeto": "Régimen de transición",
+      "enunciado": "La modificación del plan rige desde la cohorte que ingresa en 2023-2S y migra a este plan a los estudiantes con historia académica activa, en reserva de cupo, nuevos admitidos, con reingreso aprobado o con doble titulación cuando este sea el segundo plan; el Consejo de Facultad establece el plan de transición, las equivalencias y las convalidaciones.",
+      "articulo": "art. 12",
+      "vigenciaPropia": null,
       "clasificacion": "INFORMATIVA",
       "afectacion": null,
       "datos": {
