@@ -10,7 +10,7 @@
 |---|---|
 | Requisitos (SRS), fuente de verdad | `docs/requisitos/`; empieza por su `README.md` (router tarea→archivos) |
 | Diseño y arquitectura | `docs/diseno/` (pendiente, DOC-04; se escribe módulo por módulo) |
-| Formato del JSON de normativa | `docs/datos/formato-normativa.md` (pendiente, DOC-05) |
+| Formato del JSON de normativa | `docs/datos/formato-normativa.md` (DOC-05) |
 | Definición de Hecho | `docs/proceso/definicion-de-hecho.md` |
 | Convención de pruebas | `docs/proceso/pruebas.md` (PRU-01) |
 | Flujo de ramas, commits y solicitudes de integración | `CONTRIBUTING.md` |

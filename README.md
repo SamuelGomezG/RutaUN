@@ -122,7 +122,7 @@ Cada prueba lleva en su nombre el ID del requisito que verifica, por ejemplo `uc
 | [`docs/proceso/definicion-de-hecho.md`](docs/proceso/definicion-de-hecho.md) | Cuándo un elemento cuenta como terminado |
 | [`docs/proceso/pruebas.md`](docs/proceso/pruebas.md) | La convención de pruebas: pirámide, nombres y cómo correrlas |
 | `docs/diseno/` | Arquitectura y decisiones (pendiente) |
-| `docs/datos/formato-normativa.md` | Formato del JSON de normativa (pendiente) |
+| `docs/datos/formato-normativa.md` | Formato del JSON de normativa |
 
 ## Estructura del repositorio
 
