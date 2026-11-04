@@ -163,15 +163,22 @@ public final class IncorporacionJsonReader {
       throw new IllegalArgumentException(
           "la categoría " + categoria + " no coincide con datos.tipo " + tipo);
     }
-    return Regla.registrar(
-        texto(nodo, "objeto"),
-        texto(nodo, "enunciado"),
-        new Fuente(norma.id(), texto(nodo, "articulo")),
-        vigenciaPropia(nodo),
-        ClasificacionRegla.valueOf(texto(nodo, "clasificacion")),
-        EstadoRegla.VIGENTE,
-        afectacion(nodo, norma),
-        datos);
+    String objeto = texto(nodo, "objeto");
+    String articulo = texto(nodo, "articulo");
+    try {
+      return Regla.registrar(
+          objeto,
+          texto(nodo, "enunciado"),
+          new Fuente(norma.id(), articulo),
+          vigenciaPropia(nodo),
+          ClasificacionRegla.valueOf(texto(nodo, "clasificacion")),
+          EstadoRegla.VIGENTE,
+          afectacion(nodo, norma),
+          datos);
+    } catch (IllegalArgumentException e) {
+      throw new IllegalArgumentException(
+          "La regla \"" + objeto + "\" (" + articulo + ") no es válida: " + e.getMessage(), e);
+    }
   }
 
   private static Optional<Vigencia> vigenciaPropia(JsonNode nodo) {
