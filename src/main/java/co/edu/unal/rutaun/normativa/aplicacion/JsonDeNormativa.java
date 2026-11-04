@@ -16,14 +16,13 @@ import tools.jackson.databind.json.JsonMapper;
  * para los tipos con subtipos, de modo que el dominio no lleva anotaciones de Jackson.
  *
  * <p>TT-04-T3 (#91). Es provisional: el diseño pide records propios de persistencia y un campo
- * {@code esquema} en cada JSON guardado (R-09, revisión del sprint 1), y cuando eso exista este
- * mapper desaparece. Mientras tanto el formato guardado sigue las clases del dominio: si una
- * cambia, los datos que ya están en {@code data/} dejan de leerse, y se borra {@code data/} y se
- * recarga la semilla.
+ * {@code esquema} en cada JSON guardado (DOC-09, R-09), y cuando eso exista este mapper desaparece.
+ * Mientras tanto el formato guardado sigue las clases del dominio: si una cambia, los datos que ya
+ * están en {@code data/} dejan de leerse, y se borra {@code data/} y se recarga la semilla.
  *
  * <p>El discriminante se llama {@code @tipo} y no {@code tipo} porque {@link Componente} y {@link
  * ExpresionDeMaterias.MateriaExterna} ya tienen un campo {@code tipo}: con el mismo nombre el JSON
- * saldría con la clave repetida y no sería válido para una columna {@code JSON}. Los nombres de los
+ * saldría con la clave repetida, y un JSON con una clave repetida no es válido. Los nombres de los
  * subtipos de las expresiones son los del formato de UC07-HU03 (#93).
  *
  * <p>La categoría de primer nivel de unos datos no lleva discriminante: la dice la columna {@code
