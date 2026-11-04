@@ -27,12 +27,13 @@ import tools.jackson.core.JacksonException;
  * <p>El estado de la regla no está en la fila de {@code regla} sino en {@code regla_en_version},
  * porque una misma regla tiene un estado distinto en cada versión del consolidado. Por eso {@link
  * #aEntidad} no lo guarda y {@link #aDominio} lo recibe: quien lee una versión lo toma de la fila
- * de esa versión (R-14, revisión del sprint 1, lo saca de {@code Regla}).
+ * de esa versión (DOC-09, R-14, lo saca de {@code Regla}).
  *
  * <p>La tabla no puede guardar todo lo que el dominio admite, y el mapper lo rechaza en vez de
- * inventar datos: una vigencia propia dada por periodos (R-05), una afectación a un artículo y una
- * afectación con un momento «desde» (R-05). La categoría va en su columna y los datos propios de la
- * categoría, como JSON (provisional hasta R-09; ver {@link JsonDeNormativa}).
+ * inventar datos: una vigencia propia dada por periodos (DOC-09, R-05), una afectación a un
+ * artículo y una afectación con un momento «desde» (DOC-09, R-05). La categoría va en su columna y
+ * los datos propios de la categoría, como JSON (provisional hasta DOC-09, R-09; ver {@link
+ * JsonDeNormativa}).
  */
 public final class ReglaMapper {
 
