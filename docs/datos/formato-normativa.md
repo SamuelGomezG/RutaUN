@@ -84,8 +84,9 @@ de prueba de `src/test/resources/json/`.
 | `nombre` | texto | Sí | Nombre del programa. |
 | `facultad` | texto | Sí | Nombre de la facultad a la que pertenece. |
 
-El lector resuelve el programa por `codigoSia`. El archivo no lleva identificadores UUID: los
-identificadores internos los genera RutaUN.
+La importación resuelve el programa por `codigoSia` contra los programas ya cargados. El lector no
+crea programas ni identificadores internos: el archivo no lleva UUID y los identificadores los
+genera o resuelve RutaUN en pasos posteriores.
 
 ### `norma`
 
