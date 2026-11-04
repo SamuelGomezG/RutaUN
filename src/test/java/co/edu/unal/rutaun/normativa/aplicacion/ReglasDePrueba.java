@@ -70,6 +70,20 @@ final class ReglasDePrueba {
         datos);
   }
 
+  /** La misma regla, con el mismo identificador, pero con otro estado. */
+  static Regla conEstado(Regla regla, EstadoRegla estado) {
+    return Regla.reconstituir(
+        regla.id(),
+        regla.objeto(),
+        regla.enunciado(),
+        regla.fuente(),
+        regla.vigenciaPropia(),
+        regla.clasificacion(),
+        estado,
+        regla.afectacion(),
+        regla.datos());
+  }
+
   /** Datos de las once categorías, más los del componente de libre elección y uno anidado. */
   static List<DatosDeRegla> datosDeTodasLasCategorias() {
     Malla malla = MallaDePrueba.pequena();
