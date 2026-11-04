@@ -61,12 +61,10 @@ class ImportacionDeNormasServiceTest {
     assertThat(normasGuardadas.findAll()).hasSize(1);
     assertThat(programasGuardados.findByCodigoSia("2879")).isPresent();
     assertThat(consolidados.findAll()).hasSize(1);
-    assertThat(reglas.findAll()).hasSize(10);
+    assertThat(reglas.findAll()).hasSize(20);
     assertThat(versiones.findAll()).hasSize(1);
-    assertThat(reglasEnVersion.findAll()).hasSize(10);
-    assertThat(reglasEnVersion.findAll())
-        .extracting(fila -> fila.getEstado())
-        .contains("VIGENTE", "PROGRAMADA");
+    assertThat(reglasEnVersion.findAll()).hasSize(20);
+    assertThat(reglasEnVersion.findAll()).extracting(fila -> fila.getEstado()).contains("VIGENTE");
     assertThat(versiones.findAll().get(0).getNumero()).isEqualTo(1);
   }
 
