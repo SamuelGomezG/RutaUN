@@ -230,6 +230,22 @@ class VersionDelConsolidadoMapperTest {
   }
 
   @Test
+  void tt04_versionConUnMotivoDeExactamenteElLargoDeLaColumnaSeGuarda() {
+    // Se mide lo que ocupa el JSON sin el administrador, para llenar la columna justo hasta 300.
+    int sinAdministrador =
+        JsonDeNormativa.mapper().writeValueAsString(new MotivoDeVersion.PorCorreccion("a")).length()
+            - 1;
+    VersionDelConsolidado justa =
+        version(
+            1, new MotivoDeVersion.PorCorreccion("a".repeat(300 - sinAdministrador)), List.of());
+
+    UUID versionId = guardar(justa);
+
+    assertThat(versiones.findById(versionId).orElseThrow().getDetalleMotivo()).hasSize(300);
+    assertThat(leer(versionId)).usingRecursiveComparison().isEqualTo(justa);
+  }
+
+  @Test
   void tt04_guardarDosVecesLaMismaVersionFalla() {
     Regla regla = guardarRegla(new DatosDeRegla.DeOtraCategoria(), EstadoRegla.VIGENTE);
     VersionDelConsolidado original =
