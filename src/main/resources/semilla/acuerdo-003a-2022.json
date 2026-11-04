@@ -1,0 +1,198 @@
+{
+  "schemaVersion": "1.0",
+  "programa": {
+    "codigoSia": "2879",
+    "nombre": "Ingeniería de Sistemas y Computación",
+    "facultad": "Ingeniería"
+  },
+  "norma": {
+    "tipo": "ACUERDO",
+    "numero": "003-A",
+    "anio": 2022,
+    "organo": "Consejo Académico",
+    "tipoDeEfecto": "BASE",
+    "fechaExpedicion": "2022-05-25",
+    "vigencia": {
+      "aplicaDesde": { "tipo": "FECHA", "fecha": "2022-08-01" },
+      "vigenteHasta": null
+    },
+    "enlaceRegimenLegal": null,
+    "alcance": {
+      "tipo": "PROGRAMAS",
+      "facultades": [],
+      "programas": ["2879"],
+      "exclusiones": [],
+      "texto": "Semilla mínima de prueba para Ingeniería de Sistemas y Computación."
+    }
+  },
+  "reglas": [
+    {
+      "categoria": "MATERIA",
+      "objeto": "2024042 Cálculo diferencial",
+      "enunciado": "Cálculo diferencial pertenece a la agrupación Matemáticas.",
+      "articulo": "art. 2",
+      "vigenciaPropia": null,
+      "clasificacion": "DEL_PLAN",
+      "afectacion": null,
+      "datos": {
+        "tipo": "MATERIA",
+        "materia": {
+          "codigo": "2024042",
+          "nombre": "Cálculo diferencial",
+          "creditos": 4,
+          "obligatoriedad": "OBLIGATORIA",
+          "semestreSugerido": 1
+        },
+        "contenedor": {
+          "componente": "Componente de Fundamentación",
+          "agrupacion": "Matemáticas"
+        }
+      }
+    },
+    {
+      "categoria": "MATERIA",
+      "objeto": "2024043 Cálculo integral",
+      "enunciado": "Cálculo integral pertenece a la agrupación Matemáticas.",
+      "articulo": "art. 2",
+      "vigenciaPropia": null,
+      "clasificacion": "DEL_PLAN",
+      "afectacion": null,
+      "datos": {
+        "tipo": "MATERIA",
+        "materia": {
+          "codigo": "2024043",
+          "nombre": "Cálculo integral",
+          "creditos": 4,
+          "obligatoriedad": "OBLIGATORIA",
+          "semestreSugerido": 2
+        },
+        "contenedor": {
+          "componente": "Componente de Fundamentación",
+          "agrupacion": "Matemáticas"
+        }
+      }
+    },
+    {
+      "categoria": "AGRUPACION",
+      "objeto": "Agrupación Matemáticas",
+      "enunciado": "La agrupación Matemáticas exige 8 créditos.",
+      "articulo": "art. 5",
+      "vigenciaPropia": null,
+      "clasificacion": "DEL_PLAN",
+      "afectacion": null,
+      "datos": {
+        "tipo": "AGRUPACION",
+        "agrupacion": {
+          "nombre": "Matemáticas",
+          "creditosExigidos": 8,
+          "desglose": null
+        },
+        "contenedor": {
+          "componente": "Componente de Fundamentación",
+          "agrupacion": null
+        }
+      }
+    },
+    {
+      "categoria": "COMPONENTE",
+      "objeto": "Componente de Fundamentación",
+      "enunciado": "El componente de fundamentación exige 12 créditos.",
+      "articulo": "art. 4",
+      "vigenciaPropia": null,
+      "clasificacion": "DEL_PLAN",
+      "afectacion": null,
+      "datos": {
+        "tipo": "COMPONENTE",
+        "componente": {
+          "nombre": "Componente de Fundamentación",
+          "tipo": "FUNDAMENTACION",
+          "creditosExigidos": 12,
+          "desglose": null
+        }
+      }
+    },
+    {
+      "categoria": "PRERREQUISITO",
+      "objeto": "2024043 Cálculo integral",
+      "enunciado": "Cálculo integral exige Cálculo diferencial.",
+      "articulo": "art. 2",
+      "vigenciaPropia": null,
+      "clasificacion": "DEL_PLAN",
+      "afectacion": null,
+      "datos": {
+        "tipo": "PRERREQUISITO",
+        "materia": "2024043",
+        "expresion": { "tipo": "MATERIA_DEL_PROGRAMA", "codigo": "2024042" }
+      }
+    },
+    {
+      "categoria": "CORREQUISITO",
+      "objeto": "2024043 Cálculo integral",
+      "enunciado": "Cálculo integral debe cursarse con Cálculo diferencial o antes.",
+      "articulo": "art. 2",
+      "vigenciaPropia": null,
+      "clasificacion": "DEL_PLAN",
+      "afectacion": null,
+      "datos": {
+        "tipo": "CORREQUISITO",
+        "materia": "2024043",
+        "expresion": { "tipo": "MATERIA_DEL_PROGRAMA", "codigo": "2024042" }
+      }
+    },
+    {
+      "categoria": "CARGA_POR_PERIODO",
+      "objeto": "Mínimo por periodo",
+      "enunciado": "El mínimo por periodo es de 10 créditos.",
+      "articulo": "art. 10",
+      "vigenciaPropia": null,
+      "clasificacion": "DEL_PLAN",
+      "afectacion": null,
+      "datos": {
+        "tipo": "CARGA_POR_PERIODO",
+        "creditos": 10,
+        "tipoCarga": "MINIMA"
+      }
+    },
+    {
+      "categoria": "CARGA_POR_PERIODO",
+      "objeto": "Máximo por periodo",
+      "enunciado": "El máximo por periodo es de 23 créditos.",
+      "articulo": "art. 10",
+      "vigenciaPropia": null,
+      "clasificacion": "DEL_PLAN",
+      "afectacion": null,
+      "datos": {
+        "tipo": "CARGA_POR_PERIODO",
+        "creditos": 23,
+        "tipoCarga": "MAXIMA"
+      }
+    },
+    {
+      "categoria": "REQUISITO_DE_GRADO",
+      "objeto": "Requisitos de grado",
+      "enunciado": "Para graduarse se deben cumplir los requisitos de grado.",
+      "articulo": "art. 8",
+      "vigenciaPropia": null,
+      "clasificacion": "INFORMATIVA",
+      "afectacion": null,
+      "datos": {
+        "tipo": "REQUISITO_DE_GRADO"
+      }
+    },
+    {
+      "categoria": "OTRA",
+      "objeto": "Medida programada de prueba",
+      "enunciado": "Medida informativa programada para probar la carga.",
+      "articulo": "art. 9",
+      "vigenciaPropia": {
+        "aplicaDesde": { "tipo": "FECHA", "fecha": "2027-01-01" },
+        "vigenteHasta": null
+      },
+      "clasificacion": "INFORMATIVA",
+      "afectacion": null,
+      "datos": {
+        "tipo": "OTRA"
+      }
+    }
+  ]
+}
