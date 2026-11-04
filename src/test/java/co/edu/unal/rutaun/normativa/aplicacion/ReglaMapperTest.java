@@ -174,8 +174,8 @@ class ReglaMapperTest {
   }
 
   @Test
-  void tt04_reglaConDatosQueNoSonDeSuCategoriaNoSeReconstituye() {
-    // «PROGRAMA» exige creditosExigidos; el JSON vacío lo deja sin él.
+  void tt04_reglaConDatosIncompletosNoSeReconstituye() {
+    // «PROGRAMA» exige creditosExigidos; el JSON vacío no lo trae.
     ReglaEntidad invalida = entidadAMano("PROGRAMA", "{}");
 
     assertThatThrownBy(() -> ReglaMapper.aDominio(invalida, EstadoRegla.VIGENTE))
