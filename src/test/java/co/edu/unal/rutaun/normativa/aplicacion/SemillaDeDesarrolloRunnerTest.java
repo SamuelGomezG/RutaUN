@@ -2,13 +2,17 @@ package co.edu.unal.rutaun.normativa.aplicacion;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.InputStream;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.springframework.boot.DefaultApplicationArguments;
 import org.springframework.context.annotation.Profile;
 
@@ -20,31 +24,38 @@ import org.springframework.context.annotation.Profile;
 class SemillaDeDesarrolloRunnerTest {
 
   @Test
-  void sop03_elRunnerEnviaAlServicioElArchivoRealDeProgramas() {
-    ImportacionDeProgramasService servicio = mock(ImportacionDeProgramasService.class);
-    when(servicio.importar(anyString())).thenReturn(new ResultadoDeCargaDeProgramas(1, 0));
-    SemillaDeDesarrolloRunner runner = new SemillaDeDesarrolloRunner(servicio);
+  void uc07_hu03_t4_elRunnerEnviaAlServicioElArchivoRealDeProgramasYDespuesLasNormas() {
+    ImportacionDeProgramasService programas = mock(ImportacionDeProgramasService.class);
+    ImportacionDeNormasService normas = mock(ImportacionDeNormasService.class);
+    when(programas.importar(anyString())).thenReturn(new ResultadoDeCargaDeProgramas(1, 0));
+    when(normas.importar(any(InputStream.class)))
+        .thenReturn(new ResultadoDeImportacionDeNormas(true, "ACUERDO 003-A de 2022", 1));
+    SemillaDeDesarrolloRunner runner = new SemillaDeDesarrolloRunner(programas, normas);
 
     runner.run(new DefaultApplicationArguments());
 
     ArgumentCaptor<String> json = ArgumentCaptor.forClass(String.class);
-    verify(servicio).importar(json.capture());
+    verify(programas).importar(json.capture());
     assertThat(json.getValue()).contains("2879");
+    InOrder orden = inOrder(programas, normas);
+    orden.verify(programas).importar(anyString());
+    orden.verify(normas).importar(any(InputStream.class));
   }
 
   @Test
   void sop03_siElArchivoEsInvalidoElArranqueFalla() {
-    ImportacionDeProgramasService servicio = mock(ImportacionDeProgramasService.class);
-    when(servicio.importar(anyString()))
+    ImportacionDeProgramasService programas = mock(ImportacionDeProgramasService.class);
+    ImportacionDeNormasService normas = mock(ImportacionDeNormasService.class);
+    when(programas.importar(anyString()))
         .thenThrow(new ArchivoDeProgramasInvalidoException("archivo inválido"));
-    SemillaDeDesarrolloRunner runner = new SemillaDeDesarrolloRunner(servicio);
+    SemillaDeDesarrolloRunner runner = new SemillaDeDesarrolloRunner(programas, normas);
 
     assertThatThrownBy(() -> runner.run(new DefaultApplicationArguments()))
         .isInstanceOf(ArchivoDeProgramasInvalidoException.class);
   }
 
   @Test
-  void sop03_elRunnerSoloSeActivaConElPerfilDev() {
+  void uc07_hu03_t4_elRunnerSoloSeActivaConElPerfilDev() {
     Profile perfil = SemillaDeDesarrolloRunner.class.getAnnotation(Profile.class);
 
     assertThat(perfil.value()).containsExactly("dev");

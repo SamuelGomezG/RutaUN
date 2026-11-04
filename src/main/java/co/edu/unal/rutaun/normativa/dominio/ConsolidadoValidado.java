@@ -21,6 +21,18 @@ public final class ConsolidadoValidado {
     this.reglas = ArgumentChecks.copiaSinNulos(reglas, "reglas");
   }
 
+  /**
+   * Reúne reglas que ya pasaron la validación de UC07-HU03-T3. Es la fábrica que usa la importación
+   * mientras no exista el validador completo del consolidado.
+   *
+   * @param programa programa al que pertenecen las reglas
+   * @param reglas reglas ya validadas
+   * @return consolidado validado
+   */
+  public static ConsolidadoValidado paraImportacion(ProgramaId programa, List<Regla> reglas) {
+    return new ConsolidadoValidado(programa, reglas);
+  }
+
   /** Programa al que pertenecen las reglas. */
   public ProgramaId programa() {
     return programa;
