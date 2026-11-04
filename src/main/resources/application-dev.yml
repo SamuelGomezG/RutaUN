@@ -1,5 +1,6 @@
 # Perfil de desarrollo: nivel de log del paquete del proyecto.
-# TT-04 (#51) enganchará aquí la carga de la semilla de Sistemas al arranque.
+# Con este perfil, SemillaDeDesarrolloRunner carga la semilla al arrancar: hoy los programas
+# (SOP-03, #55); las normas se agregarán después de ellos con UC07-HU03 (#41, TT-04 #51).
 logging:
   level:
     co.edu.unal.rutaun: DEBUG
