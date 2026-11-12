@@ -1,4 +1,19 @@
+---
+title: "0001 · Motor del cálculo del plan (TT-05)"
+doc_type: "decisión"
+depends_on:
+  - ../../requisitos/casos/UC01-generar-plan-de-carrera.md
+  - ../../requisitos/01-invariantes.md
+---
+
 # 0001 · Motor del cálculo del plan (TT-05)
+
+## 0′ · Cuándo cargar este archivo
+
+Al implementar o cambiar el motor de UC01/UC02/UC04, al interpretar
+`Calculado`, `SinPlanPosible`, `TiempoAgotado` o `NoCalculado`, y al revisar el
+plazo de S3. El registro de `NoCalculado` y el cierre de S3 en el SRS están en
+DOC-14 (#188).
 
 Fecha: 2026-11-03 · Estado: **aceptada con reservas**
 
