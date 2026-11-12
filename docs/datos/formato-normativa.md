@@ -344,6 +344,8 @@ UC07-HU03-T2.
 ## Archivos de prueba y cómo ejecutarlos
 
 - Válido: `src/test/resources/json/validos/consolidado-prueba.json`.
+- Válido, con todas sus reglas informativas (UC07 ext. 5a):
+  `src/test/resources/json/validos/norma-toda-informativa.json`.
 - Inválidos: `src/test/resources/json/invalidos/`.
 
 La prueba de contrato `FormatoNormativaTest` lee los archivos desde el classpath y comprueba que el
@@ -355,8 +357,8 @@ el defecto esperado.
 ```
 
 Estos archivos **no se cargan solos en la aplicación**: son fixtures de prueba. La carga real de la
-semilla la hará el runner de UC07-HU03-T4 (#96) desde `src/main/resources/semilla/`. Para probar esa
-carga cuando esté integrada, se reinicia la base H2 local:
+semilla la hace el runner de UC07-HU03-T4 (#96) desde `src/main/resources/semilla/`. Para probar esa
+carga, se reinicia la base H2 local:
 
 ```bash
 rm -f data/rutaun.mv.db
