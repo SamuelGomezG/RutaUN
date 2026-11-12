@@ -270,6 +270,7 @@ def leer_decisiones(indice: Indice) -> None:
         titulo = datos.get("title") or next((l[2:].strip() for l in lineas if l.startswith("# ")), "")
         en_linea = re.search(r"Fecha:\s*(\d{4}-\d\d-\d\d)\s*·\s*Estado:\s*\*{0,2}([^*\n]+)", texto)
         declarados = datos.get("srs_ids")
+        presente = isinstance(declarados, list)
         citados = list(dict.fromkeys(i for linea in lineas for i in menciones(linea)))
         reemplaza = datos.get("reemplaza") or []
         if isinstance(reemplaza, str):
@@ -279,8 +280,8 @@ def leer_decisiones(indice: Indice) -> None:
             "titulo": titulo,
             "estado": (datos.get("estado") or (en_linea[2].strip() if en_linea else "")).lower(),
             "fecha": datos.get("fecha") or (en_linea[1] if en_linea else ""),
-            "ids": declarados if isinstance(declarados, list) and declarados else citados,
-            "ids_declarados": bool(declarados),
+            "ids": declarados if presente else citados,
+            "ids_declarados": presente,
             "reemplaza": [str(r)[:4] for r in reemplaza],
             "reemplazada_por": [],
         }
