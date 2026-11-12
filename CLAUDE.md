@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Notas para Claude Code
 
-- **Requisitos.** Empieza por `docs/requisitos/README.md` y carga solo los archivos que tu tarea necesita (el router tarea→archivos ya los lista). Cada archivo es corto y no hay un documento único gigante; busca por ID (`UC06-HU01`, `S18`, `ext. 4a`).
+- **Requisitos.** Empieza por `docs/requisitos/README.md` y carga solo los archivos que tu tarea necesita (el router tarea→archivos ya los lista). Cada archivo es corto y no hay un documento único gigante; busca por ID (`UC06-HU01`, `S18`, `ext. 4a`). Para una sola historia, `herramientas/indice_ids.py UCnn-HUmm --contexto` trae su texto, lo que cita y solo los términos del glosario que usa; sin `--contexto`, dice qué código y qué pruebas mencionan un ID.
 - **Diseño.** El diseño de clases completo no está en este repositorio. Lo vigente para programar está en `AGENTS.md`; si necesitas un detalle que no está ahí ni en `docs/diseno/`, pregunta en vez de inventarlo (regla de oro 3).
 - **Antes de dar algo por terminado**, corre `./mvnw verify` (formato, estilo, arquitectura y pruebas). Si algo falla, dilo con la salida; no lo ocultes. Ejecuta además el flujo que cambiaste y comprueba que el resultado sea el esperado: la Definición de Hecho lo exige.
 - **Cambios pequeños.** Un issue, un cambio, y cita los IDs que cubre (`#n`, `UCnn-HUmm`).
