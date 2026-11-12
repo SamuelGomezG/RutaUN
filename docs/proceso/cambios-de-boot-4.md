@@ -54,10 +54,12 @@ en `AGENTS.md`; el diseño, en `docs/diseno/`.
   se guardan como `@Lob String` y los escribe y lee `JsonDeNormativa`, un
   `JsonMapper` con mix-ins y discriminante `@tipo`; los mappers de `aplicacion`
   convierten entre dominio y texto. No se usa
-  `@JdbcTypeCode(SqlTypes.JSON)`. Si cambia el dominio, hay que borrar `data/`
-  y volver a cargar la semilla; eso también borra las normas incorporadas con
-  UC07 que no estén en `semilla/`, así que respalda el archivo o usa una base
-  desechable.
+  `@JdbcTypeCode(SqlTypes.JSON)`. Si cambia el dominio, en una base de
+  **desarrollo desechable** borra `data/` y vuelve a cargar la semilla. Si la
+  base contiene datos que debes conservar —normas incorporadas con UC07 fuera
+  de `semilla/`, incidentes o, cuando existan, avances y planes—, no la borres:
+  respáldala y migra esos datos al dominio nuevo; el respaldo solo no los
+  recupera con el dominio nuevo.
 - **Flyway 12 con H2 2.4** mantiene el WARN de versión, pero no bloquea; el
   arranque y las pruebas pasan. El esquema lo posee Flyway (`ddl-auto:
   validate`).
