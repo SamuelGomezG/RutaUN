@@ -5,7 +5,7 @@ import java.util.List;
 
 /**
  * Incidente que no está atado a un programa: falta registrar el periodo en curso o un error interno
- * (UC01 ext. 11a, paso 2e).
+ * (UC01 ext. 2e, UC01 ext. 11a).
  *
  * @param casoDeUso caso de uso en que ocurrió
  * @param paso paso o extensión en que ocurrió
