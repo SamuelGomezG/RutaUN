@@ -9,7 +9,7 @@
 | Qué | Dónde |
 |---|---|
 | Requisitos (SRS), fuente de verdad | `docs/requisitos/`; empieza por su `README.md` (router tarea→archivos) |
-| Diseño y arquitectura | `docs/diseno/` (pendiente, DOC-04; se escribe módulo por módulo) |
+| Diseño y arquitectura | `docs/diseno/` (pendiente, DOC-04; se escribe módulo por módulo); las decisiones, en `docs/diseno/decisiones/` (convención en su `README.md`) |
 | Formato del JSON de normativa | `docs/datos/formato-normativa.md` (DOC-05) |
 | Definición de Hecho | `docs/proceso/definicion-de-hecho.md` |
 | Convención de pruebas | `docs/proceso/pruebas.md` (PRU-01) |
