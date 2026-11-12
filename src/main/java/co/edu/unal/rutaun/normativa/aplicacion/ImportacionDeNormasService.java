@@ -23,9 +23,11 @@ import co.edu.unal.rutaun.utilidades.ArgumentChecks;
 import java.io.InputStream;
 import java.time.Clock;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -36,9 +38,11 @@ import org.springframework.transaction.annotation.Transactional;
  * Confirma una incorporación leída de un archivo JSON: guarda la norma y sus reglas, y crea una
  * versión nueva del consolidado por cada programa del alcance. La operación es atómica por archivo.
  *
- * <p>UC07-HU03-T4 (#96). La norma ya registrada por su identificación se omite. Los programas se
- * resuelven contra los ya cargados por SOP-03; no se generan identificadores de programa. La
- * versión se crea con las reglas ya validadas por {@link ValidadorDeIncorporacion}.
+ * <p>UC07-HU03-T4 (#96, #130). La norma ya registrada por su identificación se omite. Los programas
+ * se resuelven contra los ya cargados por SOP-03; no se generan identificadores de programa. La
+ * versión nueva del consolidado lleva las reglas de la versión anterior del programa, con el estado
+ * que tenían en ella, más las de la norma incorporada validadas por {@link
+ * ValidadorDeIncorporacion}; las afectaciones todavía no se aplican al armar la versión (#175).
  */
 @Service
 public class ImportacionDeNormasService {
@@ -213,17 +217,32 @@ public class ImportacionDeNormasService {
             .orElseGet(
                 () ->
                     consolidados.save(new ConsolidadoEntidad(UUID.randomUUID(), programa.getId())));
+    Optional<VersionDelConsolidado> anterior =
+        versiones.findTopByProgramaIdOrderByNumeroDesc(programa.getId()).map(this::cargarVersion);
+    List<Regla> resultantes =
+        reglasAcumuladas(anterior.map(VersionDelConsolidado::reglas).orElse(List.of()), reglas);
     ConsolidadoValidado validado =
-        ConsolidadoValidado.paraImportacion(new ProgramaId(programa.getId()), reglas);
+        ConsolidadoValidado.paraImportacion(new ProgramaId(programa.getId()), resultantes);
     VersionDelConsolidado version =
-        versiones
-            .findTopByProgramaIdOrderByNumeroDesc(programa.getId())
-            .map(anterior -> cargarVersion(anterior).siguiente(validado, motivo, fecha))
+        anterior
+            .map(v -> v.siguiente(validado, motivo, fecha))
             .orElseGet(() -> VersionDelConsolidado.primera(validado, motivo, fecha));
     VersionDelConsolidadoMapper.Filas filas =
         VersionDelConsolidadoMapper.aEntidades(version, consolidado.getId());
     versiones.save(filas.version());
     reglasEnVersion.saveAll(filas.reglasEnVersion());
+  }
+
+  /**
+   * Las reglas de la versión siguiente: las de la anterior, con el estado que tenían en ella, más
+   * las nuevas. Todavía no aplica afectaciones (#175). R-33 (#154) lleva esta unión al validador
+   * del consolidado.
+   */
+  static List<Regla> reglasAcumuladas(List<Regla> anteriores, List<Regla> nuevas) {
+    List<Regla> resultantes = new ArrayList<>(anteriores.size() + nuevas.size());
+    resultantes.addAll(anteriores);
+    resultantes.addAll(nuevas);
+    return resultantes;
   }
 
   private VersionDelConsolidado cargarVersion(VersionEntidad entidad) {
