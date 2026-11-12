@@ -13,4 +13,12 @@ class ResultadoDeImportacionDeNormasTest {
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("no se incorporó");
   }
+
+  @Test
+  void uc07_hu03_t4_unNumeroDeVersionesNegativoSeRechaza() {
+    assertThatThrownBy(
+            () -> new ResultadoDeImportacionDeNormas(true, "ACUERDO 003-A de 2022", -1, false))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("versionesCreadas no puede ser negativo");
+  }
 }

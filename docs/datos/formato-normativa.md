@@ -348,9 +348,10 @@ UC07-HU03-T2.
   `src/test/resources/json/validos/norma-toda-informativa.json`.
 - Inválidos: `src/test/resources/json/invalidos/`.
 
-La prueba de contrato `FormatoNormativaTest` lee los archivos desde el classpath y comprueba que el
-válido tiene `schemaVersion`, programa, norma y reglas, y que los inválidos son JSON parseables con
-el defecto esperado.
+La prueba de contrato `FormatoNormativaTest` lee `consolidado-prueba.json` desde el classpath y
+comprueba que tiene `schemaVersion`, programa, norma y reglas, y que los inválidos son JSON
+parseables con el defecto esperado. El archivo `norma-toda-informativa.json` lo ejercita
+`ImportacionDeNormasServiceTest`, que lo importa con el lector real.
 
 ```bash
 ./mvnw test -Dtest=FormatoNormativaTest
