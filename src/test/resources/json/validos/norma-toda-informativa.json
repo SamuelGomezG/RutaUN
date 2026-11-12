@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "1.0",
+  "programa": {
+    "codigoSia": "2879",
+    "nombre": "Ingeniería de Sistemas y Computación",
+    "facultad": "Ingeniería"
+  },
+  "norma": {
+    "tipo": "CIRCULAR",
+    "numero": "99",
+    "anio": 2026,
+    "organo": "Vicerrectoría Académica (datos de prueba)",
+    "tipoDeEfecto": "EXCEPCION_O_MEDIDA_TEMPORAL",
+    "fechaExpedicion": "2026-01-15",
+    "vigencia": {
+      "aplicaDesde": { "tipo": "FECHA", "fecha": "2026-01-15" },
+      "vigenteHasta": { "tipo": "FECHA", "fecha": "2099-12-31" }
+    },
+    "enlaceRegimenLegal": null,
+    "alcance": {
+      "tipo": "PROGRAMAS",
+      "facultades": [],
+      "programas": ["2879"],
+      "exclusiones": [],
+      "texto": "Norma ficticia para pruebas: aplica al programa de Ingeniería de Sistemas y Computación (datos de prueba)."
+    }
+  },
+  "reglas": [
+    {
+      "categoria": "OTRA",
+      "objeto": "Calendario de cancelaciones (datos de prueba)",
+      "enunciado": "Durante el periodo, la cancelación de asignaturas se tramita hasta la semana doce (datos de prueba).",
+      "articulo": "numeral 1",
+      "vigenciaPropia": null,
+      "clasificacion": "INFORMATIVA",
+      "afectacion": null,
+      "datos": { "tipo": "OTRA" }
+    },
+    {
+      "categoria": "OTRA",
+      "objeto": "Atención de trámites (datos de prueba)",
+      "enunciado": "Durante el periodo, los trámites estudiantiles se atienden por medios virtuales (datos de prueba).",
+      "articulo": "numeral 2",
+      "vigenciaPropia": null,
+      "clasificacion": "INFORMATIVA",
+      "afectacion": null,
+      "datos": { "tipo": "OTRA" }
+    }
+  ]
+}

@@ -21,7 +21,8 @@ import org.springframework.stereotype.Component;
  *
  * <p>SOP-03 (#55) carga primero los programas. Después, UC07-HU03-T4 (#96) carga los archivos de
  * normas de {@code semilla/*.json}, omitiendo {@code programas.json}. Si un archivo es inválido, el
- * arranque falla; repetir el arranque no duplica programas ni normas.
+ * arranque falla; repetir el arranque no duplica programas ni normas. Si una norma incorporada
+ * tiene todas sus reglas informativas, el log lo informa (UC07 ext. 5a, #135).
  */
 @Component
 @Profile("dev")
@@ -63,6 +64,11 @@ public class SemillaDeDesarrolloRunner implements ApplicationRunner {
           existentes++;
         }
         versiones += resultadoNorma.versionesCreadas();
+        if (resultadoNorma.ningunPlanQuedaDesactualizado()) {
+          LOG.info(
+              "La norma {} no deja ningún plan desactualizado: todas sus reglas son informativas.",
+              resultadoNorma.identificacion());
+        }
       } catch (IOException e) {
         throw new IllegalStateException(
             "No se pudo leer el archivo de normativa " + recurso.getFilename(), e);

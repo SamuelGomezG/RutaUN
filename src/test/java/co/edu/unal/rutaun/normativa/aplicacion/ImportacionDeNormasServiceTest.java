@@ -129,6 +129,47 @@ class ImportacionDeNormasServiceTest {
   }
 
   @Test
+  void uc07_ext5a_unaNormaConTodasSusReglasInformativasLoInforma() throws IOException {
+    cargarProgramas();
+    importarNorma("semilla/acuerdo-003a-2022.json");
+
+    ResultadoDeImportacionDeNormas resultado =
+        importarNorma("json/validos/norma-toda-informativa.json");
+
+    assertThat(resultado.creada()).isTrue();
+    assertThat(resultado.versionesCreadas()).isEqualTo(1);
+    assertThat(resultado.ningunPlanQuedaDesactualizado()).isTrue();
+    assertThat(normasGuardadas.count()).isEqualTo(2);
+    assertThat(versiones.count()).isEqualTo(2);
+    assertThat(reglasPorVersion()).containsEntry(2, 22);
+  }
+
+  @Test
+  void uc07_ext5a_unaNormaConReglasDelPlanNoLoInforma() throws IOException {
+    cargarProgramas();
+
+    ResultadoDeImportacionDeNormas resultado = importarNorma("semilla/acuerdo-003a-2022.json");
+
+    assertThat(resultado.creada()).isTrue();
+    assertThat(resultado.ningunPlanQuedaDesactualizado()).isFalse();
+  }
+
+  @Test
+  void uc07_ext5a_laNormaYaCargadaNoLoInforma() throws IOException {
+    cargarProgramas();
+    ResultadoDeImportacionDeNormas primera =
+        importarNorma("json/validos/norma-toda-informativa.json");
+
+    ResultadoDeImportacionDeNormas segunda =
+        importarNorma("json/validos/norma-toda-informativa.json");
+
+    assertThat(primera.ningunPlanQuedaDesactualizado()).isTrue();
+    assertThat(segunda.creada()).isFalse();
+    assertThat(segunda.versionesCreadas()).isZero();
+    assertThat(segunda.ningunPlanQuedaDesactualizado()).isFalse();
+  }
+
+  @Test
   void uc07_hu03_t4_laVersionVigenteTieneLasReglasDeLasTresNormas() throws IOException {
     cargarProgramas();
     importarNorma("semilla/acuerdo-003a-2022.json");

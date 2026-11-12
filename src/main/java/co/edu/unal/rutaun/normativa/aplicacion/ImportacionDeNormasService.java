@@ -43,7 +43,8 @@ import org.springframework.transaction.annotation.Transactional;
  * se resuelven contra los ya cargados por SOP-03; no se generan identificadores de programa. La
  * versión nueva del consolidado lleva las reglas de la versión anterior del programa, con el estado
  * que tenían en ella, más las de la norma incorporada validadas por {@link
- * ValidadorDeIncorporacion}; las afectaciones todavía no se aplican al armar la versión (#175).
+ * ValidadorDeIncorporacion}; las afectaciones todavía no se aplican al armar la versión (#175). El
+ * resultado informa si ningún plan queda desactualizado (UC07 ext. 5a, #135).
  */
 @Service
 public class ImportacionDeNormasService {
@@ -80,7 +81,8 @@ public class ImportacionDeNormasService {
    * Importa una norma desde JSON.
    *
    * @param entrada contenido del archivo
-   * @return si se creó la norma y cuántas versiones se crearon
+   * @return si se creó la norma, cuántas versiones se crearon y si ningún plan queda desactualizado
+   *     por ella
    * @throws ArchivoDeNormativaInvalidoException si el JSON o las reglas no pasan la validación
    */
   @Transactional
@@ -89,8 +91,8 @@ public class ImportacionDeNormasService {
     if (lectura instanceof ValidadorDeIncorporacion.ResultadoDeValidacion.Invalida invalida) {
       throw new ArchivoDeNormativaInvalidoException(String.join(" ", invalida.motivos()));
     }
-    IncorporacionLeida incorporacion =
-        ((ValidadorDeIncorporacion.ResultadoDeValidacion.Valida) lectura).incorporacion();
+    var valida = (ValidadorDeIncorporacion.ResultadoDeValidacion.Valida) lectura;
+    IncorporacionLeida incorporacion = valida.incorporacion();
     NormaLeida normaLeida = incorporacion.norma();
     String identificacion = identificacion(normaLeida);
     if (normas
@@ -100,7 +102,7 @@ public class ImportacionDeNormasService {
             normaLeida.identificacion().anio(),
             normaLeida.identificacion().organo())
         .isPresent()) {
-      return new ResultadoDeImportacionDeNormas(false, identificacion, 0);
+      return new ResultadoDeImportacionDeNormas(false, identificacion, 0, false);
     }
 
     Alcance alcance = alcance(normaLeida.alcance());
@@ -131,7 +133,8 @@ public class ImportacionDeNormasService {
       crearVersion(programa, reglasConEstado, motivo, fecha);
       creadas++;
     }
-    return new ResultadoDeImportacionDeNormas(true, identificacion, creadas);
+    return new ResultadoDeImportacionDeNormas(
+        true, identificacion, creadas, valida.ningunPlanQuedaDesactualizado());
   }
 
   private static List<Regla> conEstado(List<Regla> reglas, NormaLeida norma, LocalDate hoy) {
