@@ -493,6 +493,8 @@ def resolver(indice: Indice, consulta: str) -> str | None:
     if m0 := re.fullmatch(r"(?:decisi[oó]n\s+|ADR[- ]?)?(\d{4})", consulta, re.I):
         return f"decisión {m0[1]}" if m0[1] in indice.decisiones else None
     hallados = menciones(consulta)
+    if consulta in hallados and consulta not in indice.ids:
+        return None
     for ident in reversed(hallados):
         if ident in indice.ids:
             return ident
