@@ -336,15 +336,17 @@ confundirse con otra: cada una pide una respuesta distinta al estudiante.
 | `Calculado` | Hay plan: k, c2 y c3 demostrados y c4–c6 por la vía descrita arriba. Lleva `c4Aplicado` y `c4PorRescate` | Flujo normal |
 | `SinPlanPosible` | De verdad no hay plan: la cota inferior es infinita (el mensaje nombra la materia inalcanzable, p. ej. un ciclo de prerrequisitos) o no existe plan hasta el máximo de semestres | 5b |
 | `TiempoAgotado` | El plazo venció (30 s); el cálculo se cancela y no se muestra ningún plan | 5a |
-| `NoCalculado` | Ya se demostró que existe un plan con k semestres, pero un paso posterior del motor no pudo fijar c2 o c3 o reconstruir el plan. Es un fallo del motor, no una conclusión sobre la normativa | Propuesta |
+| `NoCalculado` | Ya se demostró que existe un plan con k semestres, pero un paso posterior del motor no pudo fijar c2 o c3 o reconstruir el plan. Es un fallo del motor, no una conclusión sobre la normativa | Ext. 5a (UC01/UC04) y ext. 6a (UC02); laguna registrada en DOC-14 (#188) |
 
-`NoCalculado` no aparece en ninguno de los casos medidos. El SRS no lo
-contempla: **propuesta para el sprint 2** (laguna que va al PR de requisitos
-aparte, regla de oro 3): tratarlo como la ext. 5a, sin plan parcial, con la
-sugerencia de reintentar o probar otro tope, pero con un incidente técnico y no
-de normativa, porque la causa es del motor y no del consolidado. Antes de esta
-ronda esos fallos se devolvían como `SinPlanPosible` y producían falsos 5b: el
-estudiante habría leído que el consolidado no tiene plan cuando sí lo tenía.
+`NoCalculado` no aparece en ninguno de los casos medidos. El SRS lo registra
+como laguna en `07-lagunas.md` §14.1 (DOC-14, #188): en UC01 se trata como la
+ext. 5a (sin plan parcial, con la sugerencia de reintentar o probar otro tope);
+en UC02, como la ext. 6a (no se reemplaza el plan vigente); y en UC04, como la
+ext. 5a (se muestran las demás alternativas). En todos los casos el incidente
+es técnico y no de normativa, porque la causa es del motor y no del consolidado.
+Antes de esta ronda esos fallos se devolvían como `SinPlanPosible` y producían
+falsos 5b: el estudiante habría leído que el consolidado no tiene plan cuando
+sí lo tenía.
 
 ## Limitaciones
 
@@ -404,19 +406,19 @@ Las horas reales deben registrarse en el campo «Horas reales» del tablero.
 
 ## Propuesta de S3
 
-- Mantener **30 s por cálculo**. El caso más lento que calcula tarda 1,1 s; los
-  que no calculan agotan el plazo.
+- Mantener **30 s por cálculo**. En 20 de los 25 pares la mediana es inferior a
+  1,1 s; los que no calculan agotan el plazo. Quedan 6 casos sin calcular y el
+  estrés de malla duplicada no se ejecutó.
 - Latencia de cancelación objetivo: **≤ 0,5 s**; la prueba de 2 s cumple con
   margen.
 - Calcular las alternativas de UC04 **en paralelo** con hilos virtuales y
   `orTimeout`; las que agoten el plazo se muestran como no calculadas. Con una
   alternativa que no termina el total lo fija el plazo; el paralelo evita que
   esa espera se sume a la de las demás.
-- Resultado `NoCalculado`: tratarlo como la ext. 5a (sin plan parcial, con
-  sugerencia de reintentar o probar otro tope) pero con un incidente técnico y
-  no de normativa. No está en el SRS: va como laguna en el PR de requisitos.
-- El cambio de `04-supuestos.md` y `07-lagunas.md` va en un PR de requisitos
-  aparte.
+- Resultado `NoCalculado`: tratarlo como la ext. 5a de UC01/UC04 y la ext. 6a
+  de UC02, con un incidente técnico y no de normativa. Queda registrado como
+  laguna en `07-lagunas.md` §14.1 (DOC-14, #188).
+- El cambio de `04-supuestos.md` y `07-lagunas.md` quedó en DOC-14 (#188).
 
 ## Qué cambia en el sprint 2
 
