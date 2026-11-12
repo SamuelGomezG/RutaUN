@@ -16,7 +16,7 @@ import tools.jackson.databind.json.JsonMapper;
  * para los tipos con subtipos, de modo que el dominio no lleva anotaciones de Jackson.
  *
  * <p>TT-04-T3 (#91). Es provisional: el diseño pide records propios de persistencia y un campo
- * {@code esquema} en cada JSON guardado (DOC-09, R-09), y cuando eso exista este mapper desaparece.
+ * {@code esquema} en cada JSON guardado (#145), y cuando eso exista este mapper desaparece.
  * Mientras tanto el formato guardado sigue las clases del dominio: si una cambia, los datos que ya
  * están en {@code data/} dejan de leerse, y se borra {@code data/} y se recarga la semilla.
  *

@@ -28,17 +28,18 @@ import tools.jackson.core.JacksonException;
  * identificadores nuevos, y guardar dos veces la misma versión choca con la restricción de unicidad
  * del programa y el número, que es lo que se espera.
  *
- * <p>Lo que el esquema y el dominio de hoy no calzan, y qué hace el mapper (DOC-09 lo corrige):
+ * <p>Lo que el esquema y el dominio de hoy no calzan, y qué hace el mapper (lo corrigen #142, #145
+ * y #152):
  *
  * <ul>
  *   <li>El administrador del motivo es un texto en el dominio y {@code administrador_id} es un
  *       UUID: va dentro de {@code detalle_motivo} y la columna queda en {@code null} (D-11, #91).
  *   <li>La tabla {@code consolidado} no existe en el dominio: {@code consolidadoId} entra como
- *       parámetro (DOC-09, R-06).
+ *       parámetro (#142).
  *   <li>{@code regla_en_version} no guarda el orden de las reglas: se leen ordenadas por
- *       identificador (pendiente; anotado en DOC-09, R-14).
+ *       identificador (pendiente; anotado en #152).
  *   <li>La columna {@code cambios} no tiene contraparte en el dominio todavía: queda en {@code
- *       null} (pendiente; anotado en DOC-09, R-09).
+ *       null} (pendiente; anotado en #145).
  * </ul>
  */
 public final class VersionDelConsolidadoMapper {
