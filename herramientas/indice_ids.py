@@ -50,7 +50,7 @@ RE_UC = re.compile(r"\bUC(0[1-7])\b")
 RE_HU = re.compile(r"\bUC(0[1-7])-HU(\d\d)(-T\d+)?\b")
 RE_CLAVE = re.compile(
     r"\b(pasos?|ext\.|extensi[oó]n(?:es)?|GM|GE)\s+"
-    r"(\d+[a-z]?(?:(?:, | y | o | a )\d+[a-z]?)*)(?![\w])"
+    r"(\d+[a-z]?(?:(?:, | y | o | a |\s*(?:–|-)\s*)\d+[a-z]?)*)(?![\w])"
 )
 RE_SUPUESTO = re.compile(r"(?<![\w-])S(1[0-8]|[1-9])\b(?!-)")
 RE_TAREA = re.compile(r"\b(TT|SOP|PRU|DOC|ENT)-(\d\d)(-T\d+)?\b")
@@ -307,6 +307,14 @@ def expandir(clave: str, lista: str, uc: str) -> list[str]:
     rango = re.fullmatch(r"(\d+)([a-z]) a (\d+)([a-z])", lista)
     if rango and rango[1] == rango[3]:
         fichas = [f"{rango[1]}{chr(c)}" for c in range(ord(rango[2]), ord(rango[4]) + 1)]
+    else:
+        guion = re.fullmatch(r"(\d+)([a-z])?\s*(?:–|-)\s*(\d+)([a-z])?", lista)
+        if guion:
+            ini, li, fin, lf = guion.groups()
+            if li and lf and ini == fin:
+                fichas = [f"{ini}{chr(c)}" for c in range(ord(li), ord(lf) + 1)]
+            elif not li and not lf and int(fin) >= int(ini):
+                fichas = [str(n) for n in range(int(ini), int(fin) + 1)]
     return [f"{uc} {tipo} {f}" for f in fichas]
 
 
