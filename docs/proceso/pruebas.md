@@ -42,13 +42,13 @@ Las pruebas de integración corren con el perfil `test`
    (`ArgumentChecksTest`, `InicioControllerTest`), en el paquete espejo del
    código que prueba.
 
-## Pirámide y ejemplos que ya corren
+## Pirámide y ejemplos
 
 | Nivel | Qué se prueba | Herramienta | Ejemplo en el código |
 | --- | --- | --- | --- |
 | Unitarias de dominio | Valores y restricciones, sin Spring | JUnit 6 y AssertJ | `utilidades/ArgumentChecksTest` |
 | Propiedades | Determinismo del cálculo, cumplimiento del tope y de restricciones | jqwik | `utilidades/ArgumentChecksPropiedadesTest` |
-| Oráculo de optimalidad | El plan mínimo y los seis criterios del cálculo, contra fuerza bruta | JUnit 6 con mallas sintéticas | Oráculo de PRU-02 (#61); el prototipo está en `spikes/tt-05-motor/` |
+| Oráculo de optimalidad | El plan mínimo y los seis criterios del cálculo, contra fuerza bruta | JUnit 6 con mallas sintéticas | *(pendiente, PRU-02 #61)*; el prototipo de `spikes/tt-05-motor/` no demuestra optimalidad de c4–c6 |
 | Orquestadores | Flujos y extensiones de cada caso con fachadas falsas | Mockito con `Clock` fijo | *(sprint 2)* |
 | Arquitectura | Reglas de capas, módulos y nombres | Modulith `verify()` y ArchUnit | `arquitectura/ModulosTest`, `CapasTest`, `NombresTest` |
 | Integración | Repositorios, restricción única, eventos, sesión, reserva de UC07 | `@PruebaDeIntegracion` (contexto completo, H2 en memoria) | `PersistenciaHumoTest` |
