@@ -645,6 +645,7 @@ def contexto(indice: Indice, ident: str) -> None:
     if supuestos:
         print("## Supuestos del equipo que lo tocan\n")
         for sid in sorted(supuestos, key=orden):
+            terminos.update(dict.fromkeys(indice.ids[sid]["terminos"]))
             print(f"<!-- {lugar(indice.ids[sid]['dueno'])} -->\n{verbatim(indice.ids[sid]['dueno'])}\n")
     vigentes = [l for i in sorted(del_pack) for l in decisiones_de(indice, i)]
     if vigentes:
