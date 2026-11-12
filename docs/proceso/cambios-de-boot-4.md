@@ -55,7 +55,9 @@ en `AGENTS.md`; el diseño, en `docs/diseno/`.
   `JsonMapper` con mix-ins y discriminante `@tipo`; los mappers de `aplicacion`
   convierten entre dominio y texto. No se usa
   `@JdbcTypeCode(SqlTypes.JSON)`. Si cambia el dominio, hay que borrar `data/`
-  y volver a cargar la semilla.
+  y volver a cargar la semilla; eso también borra las normas incorporadas con
+  UC07 que no estén en `semilla/`, así que respalda el archivo o usa una base
+  desechable.
 - **Flyway 12 con H2 2.4** mantiene el WARN de versión, pero no bloquea; el
   arranque y las pruebas pasan. El esquema lo posee Flyway (`ddl-auto:
   validate`).
