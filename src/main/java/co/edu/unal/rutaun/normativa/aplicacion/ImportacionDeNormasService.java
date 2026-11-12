@@ -3,6 +3,7 @@ package co.edu.unal.rutaun.normativa.aplicacion;
 import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.Momento;
 import co.edu.unal.rutaun.compartido.ProgramaId;
+import co.edu.unal.rutaun.compartido.ReglaId;
 import co.edu.unal.rutaun.normativa.dominio.Alcance;
 import co.edu.unal.rutaun.normativa.dominio.ConsolidadoValidado;
 import co.edu.unal.rutaun.normativa.dominio.MotivoDeVersion;
@@ -237,8 +238,33 @@ public class ImportacionDeNormasService {
    * Las reglas de la versión siguiente: las de la anterior, con el estado que tenían en ella, más
    * las nuevas. Todavía no aplica afectaciones (#175). R-33 (#154) lleva esta unión al validador
    * del consolidado.
+   *
+   * <p>El rechazo compara {@link ReglaId}. El lector crea cada regla con {@link Regla#registrar},
+   * que genera un id nuevo, así que hoy no se puede provocar desde un archivo: la comprobación
+   * defiende a los llamadores programáticos y al futuro validador del consolidado.
+   *
+   * @throws ArchivoDeNormativaInvalidoException si una regla nueva ya está en la versión anterior o
+   *     está repetida entre las nuevas
    */
   static List<Regla> reglasAcumuladas(List<Regla> anteriores, List<Regla> nuevas) {
+    Set<ReglaId> idsDeLasAnteriores =
+        anteriores.stream().map(Regla::id).collect(Collectors.toSet());
+    Set<ReglaId> idsDeLasNuevas = new HashSet<>();
+    for (Regla regla : nuevas) {
+      boolean yaEnLaAnterior = idsDeLasAnteriores.contains(regla.id());
+      boolean yaEntreLasNuevas = !idsDeLasNuevas.add(regla.id());
+      if (yaEnLaAnterior || yaEntreLasNuevas) {
+        throw new ArchivoDeNormativaInvalidoException(
+            "La regla \""
+                + regla.objeto()
+                + "\" ("
+                + regla.fuente().articulo()
+                + ") "
+                + (yaEnLaAnterior
+                    ? "ya está en la versión anterior del consolidado."
+                    : "está repetida en la norma que se importa."));
+      }
+    }
     List<Regla> resultantes = new ArrayList<>(anteriores.size() + nuevas.size());
     resultantes.addAll(anteriores);
     resultantes.addAll(nuevas);
