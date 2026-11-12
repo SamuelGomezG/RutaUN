@@ -183,7 +183,7 @@ def leer_casos(indice: Indice) -> None:
                 historia = None
 
         for n, linea in enumerate(lineas, 1):
-            if linea.startswith("# ") and uc not in indice.ids:
+            if linea.startswith("# "):
                 indice.registrar(uc, "caso", ruta, n, total, linea[2:].strip())
             elif linea.startswith("### "):
                 cerrar_historia(n - 1)
