@@ -9,11 +9,12 @@
 | Qué | Dónde |
 |---|---|
 | Requisitos (SRS), fuente de verdad | `docs/requisitos/`; empieza por su `README.md` (router tarea→archivos) |
-| Diseño y arquitectura | `docs/diseno/` (pendiente, DOC-04; se escribe módulo por módulo) |
+| Diseño y arquitectura | `docs/diseno/` (pendiente, DOC-04; se escribe módulo por módulo); las decisiones, en `docs/diseno/decisiones/` (convención en su `README.md`) |
 | Formato del JSON de normativa | `docs/datos/formato-normativa.md` (DOC-05) |
 | Definición de Hecho | `docs/proceso/definicion-de-hecho.md` |
 | Convención de pruebas | `docs/proceso/pruebas.md` (PRU-01) |
 | Flujo de ramas, commits y solicitudes de integración | `CONTRIBUTING.md` |
+| Índice de IDs (derivado): dueño de un ID, qué cita y quién lo menciona | `herramientas/indice_ids.py`; uso en `docs/requisitos/README.md` |
 | Backlog | Tablero «RutaUN» (GitHub Projects) e issues de `SamuelGomezG/RutaUN` |
 
 El diseño de clases completo vive fuera del repositorio. Lo vigente para programar está en este archivo; si necesitas un detalle que no está aquí ni en `docs/diseno/`, pregunta en vez de inventarlo.
@@ -53,6 +54,7 @@ project/                          raíz del repositorio
 │  ├─ proceso/                    definicion-de-hecho.md · pruebas.md
 │  └─ uso/                        guia-de-uso.md (al final)
 ├─ config/checkstyle/             checkstyle.xml · suppressions.xml
+├─ herramientas/ ▸                indice_ids.py (índice de IDs derivado; Python 3, sin dependencias)
 ├─ pom.xml · mvnw · mvnw.cmd · .mvn/wrapper/
 ├─ data/                          archivo H2; lo crea la app y git lo ignora
 └─ src/
@@ -122,6 +124,7 @@ project/                          raíz del repositorio
 ./mvnw spotless:apply                                # formatea el código
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev   # arranca y carga la semilla de Sistemas
 .githooks/probar.sh                                  # prueba los hooks de git (commit-msg, pre-commit y pre-push) sin tocar tu repositorio
+herramientas/indice_ids.py UC06-HU01 --contexto      # texto del SRS que una historia necesita (ver docs/requisitos/README.md)
 ```
 
 ## Definición de terminado

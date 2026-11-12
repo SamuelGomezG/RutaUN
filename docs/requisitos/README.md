@@ -45,6 +45,20 @@
 | Issues, commits, PRs | `05-trazabilidad.md` |
 | Cerrar hueco o supuesto | `04-supuestos.md` + `07-lagunas.md` |
 
+## Índice de IDs (derivado)
+
+`herramientas/indice_ids.py` recorre este árbol, el código y las pruebas y responde por ID. No es fuente: lo que imprime sale de aquí, con su `archivo:línea`, y si algo no coincide manda el archivo dueño. No guarda nada en `docs/`.
+
+| Para | Comando (desde la raíz del repositorio) |
+|---|---|
+| Saber dónde vive un ID, qué cita y qué código y pruebas lo mencionan | `herramientas/indice_ids.py "UC06 ext. 4a"` |
+| Trabajar una sola historia sin cargar el caso entero ni los 5 archivos del glosario | `herramientas/indice_ids.py UC06-HU01 --contexto` |
+| Ver qué términos del glosario usa un caso, por archivo | `herramientas/indice_ids.py UC06` |
+| Saber qué decisiones de diseño rigen y cuáles tocan un ID | `herramientas/indice_ids.py --decisiones` (convención en `docs/diseno/decisiones/README.md`) |
+| Comprobar que ninguna referencia apunta a un ID que no existe | `herramientas/indice_ids.py --verificar` |
+
+`--contexto` copia verbatim la historia, los pasos, extensiones y garantías que citan sus criterios, los supuestos que los nombran y solo los términos del glosario que esos textos usan (por ejemplo, 12 de 71 para UC06-HU01). Los términos se detectan por su nombre: si un texto usa un concepto con otras palabras, no aparece, así que ante la duda carga el archivo del glosario. `01-invariantes.md` y `04-supuestos.md` se cargan siempre, como dice el router.
+
 ## Convenciones de IDs
 
 - `UCnn` caso de uso · `UCnn-HUmm` historia de usuario · `#n` issue GitHub
