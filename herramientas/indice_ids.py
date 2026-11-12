@@ -309,7 +309,7 @@ def expandir(clave: str, lista: str, uc: str) -> list[str]:
     if rango and rango[1] == rango[3]:
         fichas = [f"{rango[1]}{chr(c)}" for c in range(ord(rango[2]), ord(rango[4]) + 1)]
     else:
-        guion = re.fullmatch(r"(\d+)([a-z])?\s*(?:–|-)\s*(\d+)([a-z])?", lista)
+        guion = re.fullmatch(r"(\d+)([a-z])?\s*(?:–|-|a)\s*(\d+)([a-z])?", lista)
         if guion:
             ini, li, fin, lf = guion.groups()
             if li and lf and ini == fin:
