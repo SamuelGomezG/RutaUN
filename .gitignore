@@ -11,6 +11,7 @@ data/
 *.iml
 .vscode/
 .obsidian/
+.opencode/
 
 # Sistema
 .DS_Store
