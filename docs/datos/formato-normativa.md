@@ -309,6 +309,26 @@ para ese tipo, `desglose` debe ser `null`.
 
 No llevan más datos. Son siempre informativas.
 
+## Datos provisionales de la semilla
+
+Las fechas de `fechaExpedicion` y `aplicaDesde` de la semilla real
+(`src/main/resources/semilla/`) se toman de Régimen Legal, que las escribe como **día/mes/año**:
+«11/01/2023» es el 11 de enero de 2023. En el JSON van como `AAAA-MM-DD`.
+
+| Norma | Dato en la semilla | Lo que dice la norma | Por qué es provisional | Cuándo se corrige |
+|---|---|---|---|---|
+| Acuerdo 008 de 2008, CSU | `aplicaDesde`: fecha `2009-01-01` («fecha de entrada en vigencia» de Régimen Legal) | Art. 61: rige «a partir del primer período académico de 2009» | La tabla `norma` todavía no guarda periodos académicos | Con R-05 (#141) pasa a `{ "tipo": "PERIODO", "periodo": "2009-1" }` |
+
+El Acuerdo 003-A de 2022 tiene como fecha de aplicación la de su publicación (art. 13): 11 de
+enero de 2023. Su art. 12 (régimen de transición) dice además que el plan empieza a regir «a
+partir de la cohorte que ingresa en el período 2023-2S». La semilla no registra ese periodo; se
+revisa cuando el esquema guarde periodos (R-05, #141), donde queda anotado junto con la
+actualización del Acuerdo 008 y de la prueba de fechas.
+
+La importación omite una norma ya registrada (por tipo, número, año y órgano). Para que una base
+de desarrollo tome un dato corregido de la semilla hay que borrar `data/` y volver a arrancar con
+el perfil `dev`.
+
 ## Errores que los archivos inválidos deben provocar
 
 | Archivo | Caso | Resultado esperado |
