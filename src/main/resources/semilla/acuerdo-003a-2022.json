@@ -15,7 +15,7 @@
     "vigencia": {
       "aplicaDesde": {
         "tipo": "FECHA",
-        "fecha": "2023-11-01"
+        "fecha": "2023-01-11"
       },
       "vigenteHasta": null
     },
