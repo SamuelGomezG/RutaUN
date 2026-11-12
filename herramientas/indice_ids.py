@@ -288,6 +288,13 @@ def leer_decisiones(indice: Indice) -> None:
     for numero, decision in indice.decisiones.items():
         if not decision["estado"]:
             indice.problemas.append(f"decisión sin estado: {decision['archivo']}")
+        if decision["ids_declarados"]:
+            for ident in decision["ids"]:
+                if tipo_de(ident) in ("caso", "historia", "supuesto", "elemento") and (
+                    ident not in indice.ids or not indice.ids[ident]["dueno"]
+                ):
+                    indice.problemas.append(
+                        f"referencia sin dueño: {ident} declarado en {decision['archivo']}")
         for otra in decision["reemplaza"]:
             if otra not in indice.decisiones:
                 indice.problemas.append(f"decisión {numero} reemplaza a {otra}, que no existe")
