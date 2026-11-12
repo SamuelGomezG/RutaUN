@@ -1,6 +1,19 @@
 ---
 title: "0001 · Motor del cálculo del plan (TT-05)"
 doc_type: "decisión"
+estado: "aceptada con reservas"
+fecha: "2026-11-03"
+srs_ids:
+  - TT-05
+  - S3
+  - UC01
+  - UC02
+  - UC04
+  - UC01 ext. 5a
+  - UC02 ext. 6a
+  - UC04 ext. 5a
+  - UC04 ext. 5c
+reemplaza: []
 depends_on:
   - ../../requisitos/casos/UC01-generar-plan-de-carrera.md
   - ../../requisitos/01-invariantes.md
