@@ -67,7 +67,7 @@ Acceso autenticado del estudiante o del administrador a RutaUN con su cuenta de 
 
 ## Supuestos del equipo
 
-Decisiones que el equipo tomó donde las normas o la entrevista no dicen nada; cada una se señala como «supuesto del equipo» donde se aplica. Siguen por confirmar el (1), que las normas revisadas no tratan, y la cifra de (3), que se ajustará en la implementación. **La lista completa S1–S17 está en §8.**
+Decisiones que el equipo tomó donde las normas o la entrevista no dicen nada; cada una se señala como «supuesto del equipo» donde se aplica. Sigue por confirmar el (1), que las normas revisadas no tratan; la cifra de (3) se mantiene con el respaldo de TT-05. **La lista completa S1–S18 está en §8.**
 
 ## Visitante
 

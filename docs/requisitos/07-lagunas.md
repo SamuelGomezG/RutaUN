@@ -5,6 +5,9 @@ srs_ids:
   - §14
   - S1
   - S3
+  - UC01
+  - UC02
+  - UC04
 depends_on:
   - 00-contexto.md
   - 01-invariantes.md
@@ -18,8 +21,9 @@ depends_on:
 
 ## 14.1 Pendientes explícitos del documento
 - **S1** (los créditos excedentes de una agrupación no reducen lo exigido a otra, a la que la contiene ni a la libre elección) está **por confirmar**: las normas revisadas no tratan el tema.
-- **S3:** la cota de **30 s** por cálculo se ajustará/validará en la implementación (el spike TT-05 del sprint 1 la medirá); la de **60 s** de UC07, S9, es igualmente un supuesto.
-- **S18** es una **decisión ya aplicada** (25 de octubre de 2026): estados de una restricción por certeza. Quedan por confirmar solo S1 y S3.
+- **S3:** la cota de **30 s** por cálculo se mantiene con el respaldo de TT-05; quedan pendientes 6 casos sin calcular y el estrés de malla duplicada. La de **60 s** de UC07, S9, sigue como supuesto.
+- **S18** es una **decisión ya aplicada** (25 de octubre de 2026): estados de una restricción por certeza. Queda por confirmar solo S1.
+- **Resultado `NoCalculado` (motor):** resuelto en DOC-14 (#188): se trata en las extensiones de UC01, UC02 y UC04 (ver cada caso), con incidente técnico y sin confundirlo con el error de consolidado (ext. 5b).
 - Las reformas del plan de estudios ya son **versiones del mismo programa** (ver «Programa»); la convivencia por cohorte queda fuera de alcance.
 - Acta ZEUS-02 §6–§7: sin resolver si las normas que el SIA no aplica son un problema general o anecdótico, y si afecta a Sistemas, a Diseño Industrial o a ambas; confirmar con el entrevistado que entiende que doble titulación está fuera de alcance.
 

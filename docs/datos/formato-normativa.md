@@ -1,4 +1,17 @@
+---
+title: "Formato del JSON de normativa"
+doc_type: "datos"
+depends_on:
+  - ../requisitos/casos/UC07-incorporar-acuerdo-al-consolidado.md
+---
+
 # Formato del JSON de normativa
+
+## 0′ · Cuándo cargar este archivo
+
+Antes de leer o escribir el JSON de UC07-HU03, al cambiar el contrato y al
+agregar fixtures en `src/test/resources/json/`. El estado de cada regla no se
+digita: lo calcula el importador.
 
 Este documento fija el contrato del archivo JSON con el que UC07 incorpora una norma y sus reglas
 al consolidado de un programa. Es la referencia para el lector de UC07-HU03-T2 y para los archivos

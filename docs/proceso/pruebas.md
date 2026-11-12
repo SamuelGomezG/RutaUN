@@ -1,4 +1,17 @@
+---
+title: "Convención de pruebas (PRU-01)"
+doc_type: "proceso"
+depends_on:
+  - ../requisitos/00-contexto.md
+---
+
 # Convención de pruebas (PRU-01)
+
+## 0′ · Cuándo cargar este archivo
+
+Antes de escribir o mover una prueba, al cambiar la pirámide o al tocar las
+reglas de arquitectura. La Definición de Hecho está en
+`definicion-de-hecho.md`.
 
 Este documento fija cómo se nombran, se marcan y se corren las pruebas de
 RutaUN, y dónde están los ejemplos de cada nivel. El build falla si algo de
@@ -29,21 +42,21 @@ Las pruebas de integración corren con el perfil `test`
    (`ArgumentChecksTest`, `InicioControllerTest`), en el paquete espejo del
    código que prueba.
 
-## Pirámide y ejemplos que ya corren
+## Pirámide y ejemplos
 
 | Nivel | Qué se prueba | Herramienta | Ejemplo en el código |
 | --- | --- | --- | --- |
 | Unitarias de dominio | Valores y restricciones, sin Spring | JUnit 6 y AssertJ | `utilidades/ArgumentChecksTest` |
 | Propiedades | Determinismo del cálculo, cumplimiento del tope y de restricciones | jqwik | `utilidades/ArgumentChecksPropiedadesTest` |
-| Oráculo de optimalidad | El plan mínimo y los seis criterios del cálculo, contra fuerza bruta | JUnit 6 con mallas sintéticas | *(sprint 2, con TT-05)* |
+| Oráculo de optimalidad | El plan mínimo y los seis criterios del cálculo, contra fuerza bruta | JUnit 6 con mallas sintéticas | *(pendiente, PRU-02 #61)*; el prototipo de `spikes/tt-05-motor/` no demuestra optimalidad de c4–c6 |
 | Orquestadores | Flujos y extensiones de cada caso con fachadas falsas | Mockito con `Clock` fijo | *(sprint 2)* |
 | Arquitectura | Reglas de capas, módulos y nombres | Modulith `verify()` y ArchUnit | `arquitectura/ModulosTest`, `CapasTest`, `NombresTest` |
 | Integración | Repositorios, restricción única, eventos, sesión, reserva de UC07 | `@PruebaDeIntegracion` (contexto completo, H2 en memoria) | `PersistenciaHumoTest` |
 | Web | Controladores, rutas, Post/Redirect/Get, errores de formulario | MockMvc (`@SpringBootTest` + `@AutoConfigureMockMvc`) | `web/InicioControllerTest` |
-| Contrato | Formato JSON de importación, válido e inválido | JUnit 6 con archivos de `src/test/resources/json/` | *(con UC07-HU03, #41)* |
+| Contrato | Formato JSON de importación, válido e inválido | JUnit 6 con archivos de `src/test/resources/json/` | `normativa/aplicacion/FormatoNormativaTest` |
 | Aceptación | Criterios de las 47 historias de usuario | Escenarios con datos de la semilla | *(sprint 2)* |
 
-## Reglas de arquitectura que se encuestan
+## Reglas de arquitectura que se verifican
 
 `CapasTest` (AGENTS.md, «Capas y módulos»):
 
@@ -53,8 +66,8 @@ Las pruebas de integración corren con el perfil `test`
   la presentación.
 - La aplicación no depende de la presentación; la presentación no toca
   persistencia ni Spring Data (los repositorios los usa solo `aplicacion`;
-  la regla explícita «solo `aplicacion` usa los repositorios» se encuesta con
-  firmeza cuando TT-04 los cree). Los selectores de `web` quedan acotados a
+  desde que TT-04 creó los repositorios, la regla se verifica sobre las clases
+  reales). Los selectores de `web` quedan acotados a
   `co.edu.unal.rutaun..web..` para cubrir los `web/` de cada módulo sin
   matchear paquetes de frameworks.
 
@@ -69,7 +82,7 @@ ASCII. Las reglas sobre paquetes que aún no tienen clases no fallan
 
 - **jqwik (decisión D8, resuelta):** el humo con JUnit 6 corrió en el PR 2:
   jqwik 1.10.2 descubre y ejecuta propiedades junto a JUnit 6.0.3 sin
-  conflicto de motores. Las propiedades reales del cálculo llegan en el
-  sprint 2 (TT-05).
+  conflicto de motores. Las propiedades reales del cálculo llegan con TT-08
+  (#174) y su oráculo, PRU-02 (#61).
 - **Datos de prueba:** mallas sintéticas en `soporte/` y archivos JSON en
   `src/test/resources/json/`; nunca datos personales reales (regla de oro 7).
