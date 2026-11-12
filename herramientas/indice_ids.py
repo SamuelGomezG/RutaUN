@@ -46,13 +46,13 @@ SECCIONES = {
 }
 CLAVES = {"paso": "paso", "pasos": "paso", "ext.": "ext.", "gm": "GM", "ge": "GE"}
 
-RE_UC = re.compile(r"\bUC(0[1-7])\b")
-RE_HU = re.compile(r"\bUC(0[1-7])-HU(\d\d)(-T\d+)?\b")
+RE_UC = re.compile(r"\bUC(\d\d)\b")
+RE_HU = re.compile(r"\bUC(\d\d)-HU(\d\d)(-T\d+)?\b")
 RE_CLAVE = re.compile(
     r"\b(pasos?|ext\.|extensi[oó]n(?:es)?|GM|GE)\s+"
     r"(\d+[a-z]?(?:(?:, | y | o | a |\s*(?:–|-)\s*)\d+[a-z]?)*)(?![\w])"
 )
-RE_SUPUESTO = re.compile(r"(?<![\w-])S(1[0-8]|[1-9])\b(?!-)")
+RE_SUPUESTO = re.compile(r"(?<![\w-])S(\d{1,2})\b(?!-)")
 RE_TAREA = re.compile(r"\b(TT|SOP|PRU|DOC|ENT)-(\d\d)(-T\d+)?\b")
 RE_ISSUE = re.compile(r"(?<![\w&#])#(\d{1,3})\b(?![\w-])")
 RE_CITA_TERMINO = re.compile(r"«([^»]+)»")
@@ -329,7 +329,7 @@ def menciones(linea: str, uc_contexto: str | None = None) -> list[str]:
     previo_fin, previo_uc = -1, None
     for m in RE_CLAVE.finditer(linea):
         antes = linea[: m.start()]
-        pegado = re.search(r"UC(0[1-7])[,:]?\s*\(?$", antes)
+        pegado = re.search(r"UC(\d\d)[,:]?\s*\(?$", antes)
         if pegado:
             uc = f"UC{pegado[1]}"
         elif previo_uc and re.fullmatch(r"(,|;| y| o|,? y también)\s+", linea[previo_fin : m.start()]):
@@ -353,7 +353,7 @@ def ids_de_prueba(nombre: str) -> list[str]:
     hallados: list[str] = []
     uc = hu = None
     for ficha in nombre.split("_")[:-1]:
-        if m := re.fullmatch(r"uc(0[1-7])", ficha):
+        if m := re.fullmatch(r"uc(\d\d)", ficha):
             uc, hu = f"UC{m[1]}", None
             hallados.append(uc)
         elif (m := re.fullmatch(r"hu(\d\d)", ficha)) and uc:
@@ -366,7 +366,7 @@ def ids_de_prueba(nombre: str) -> list[str]:
             hallados.append(f"{uc} {clave} {m[2]}")
         elif m := re.fullmatch(r"(tt|sop|pru|doc|ent)(\d\d)", ficha):
             hallados.append(f"{m[1].upper()}-{m[2]}")
-        elif m := re.fullmatch(r"s(1[0-8]|[1-9])", ficha):
+        elif m := re.fullmatch(r"s(\d{1,2})", ficha):
             hallados.append(f"S{m[1]}")
         else:
             break
