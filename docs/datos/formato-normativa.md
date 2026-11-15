@@ -330,12 +330,12 @@ Las fechas de `fechaExpedicion` y `aplicaDesde` de la semilla real
 
 | Norma | Dato en la semilla | Lo que dice la norma | Por qué es provisional | Cuándo se corrige |
 |---|---|---|---|---|
-| Acuerdo 008 de 2008, CSU | `aplicaDesde`: fecha `2009-01-01` («fecha de entrada en vigencia» de Régimen Legal) | Art. 61: rige «a partir del primer período académico de 2009» | La tabla `norma` todavía no guarda periodos académicos | Con R-05 (#141) pasa a `{ "tipo": "PERIODO", "periodo": "2009-1" }` |
+| Acuerdo 008 de 2008, CSU | `aplicaDesde`: fecha `2009-01-01` («fecha de entrada en vigencia» de Régimen Legal) | Art. 61: rige «a partir del primer período académico de 2009» | La tabla `norma` todavía no guarda periodos académicos | Con #141 pasa a `{ "tipo": "PERIODO", "periodo": "2009-1" }` |
 
 El Acuerdo 003-A de 2022 tiene como fecha de aplicación la de su publicación (art. 13): 11 de
 enero de 2023. Su art. 12 (régimen de transición) dice además que el plan empieza a regir «a
 partir de la cohorte que ingresa en el período 2023-2S». La semilla no registra ese periodo; se
-revisa cuando el esquema guarde periodos (R-05, #141), donde queda anotado junto con la
+revisa cuando el esquema guarde periodos (#141), donde queda anotado junto con la
 actualización del Acuerdo 008 y de la prueba de fechas.
 
 La importación omite una norma ya registrada (por tipo, número, año y órgano). Para que una base
@@ -352,6 +352,13 @@ todavía no puede aportar:
 | `datos-de-prueba-vigentes.json` | Acuerdo 901 de 2026, Consejo de Facultad de Ingeniería (datos de prueba) | Un máximo de créditos por periodo, un correquisito entre dos materias de la malla y una regla informativa con «vigencia hasta» |
 | `datos-de-prueba-programados.json` | Acuerdo 902 de 2026, Consejo de Facultad de Ingeniería (datos de prueba) | Una norma que aplica desde una fecha futura, para que sus reglas queden `PROGRAMADA`; es toda informativa y provoca el aviso de UC07 ext. 5a |
 
+**Efecto en el cálculo.** Con el perfil `dev`, el máximo de 25 créditos y el correquisito son
+reglas del plan: UC01, UC03 y UC05 los aplican. El glosario dice que RutaUN no supone ningún
+máximo permanente; este tope es un dato cargado de prueba (regla de oro 2), no un supuesto del
+código. Quien haga la demostración con `dev` verá y aplicará normas que no existen, distinguibles
+solo por la marca. La decisión está en
+[`0002`](../diseno/decisiones/0002-datos-de-prueba-en-la-semilla.md).
+
 **Convención de marcado.** Un archivo es de datos de prueba si su nombre empieza por
 `datos-de-prueba-`. En esos archivos, el órgano de la norma y el enunciado y el objeto de cada regla
 contienen el texto exacto «(datos de prueba)»; en los demás archivos de normas ese texto no aparece
@@ -359,17 +366,22 @@ en ningún campo. `DatosDePruebaDeLaSemillaTest` vigila la convención.
 
 **Por qué no se usan las normas reales.** La Circular 11 de 2026 (máximo de 23 créditos) y la
 Resolución 057 de 2026 rigen por periodo académico, y las tablas `norma` y `regla` solo guardan
-fechas; los periodos llegan con R-05 ([#141](https://github.com/SamuelGomezG/RutaUN/issues/141)).
+fechas; los periodos llegan con [#141](https://github.com/SamuelGomezG/RutaUN/issues/141).
 Además, el importador todavía no aplica afectaciones
 ([#175](https://github.com/SamuelGomezG/RutaUN/issues/175)). Las fechas futuras (2099) son
-deliberadas: no se vencen durante la vida del proyecto y delatan que los datos son ficticios.
+deliberadas: no se vencen durante la vida del proyecto y delatan que los datos son ficticios. Las
+dos normas tienen fechas de expedición distintas (14 y 15 de enero de 2026) para que el orden por
+fecha de #146 y el de UC06 no dependan de un desempate.
 
 **Cuándo se borran.** Cada dato ficticio cubre un caso distinto: se quita solo el que pase a estar
 cubierto por una norma real y se conservan los demás, aunque otro caso ya lo esté. Si al quitar
 reglas una norma ficticia se queda sin ninguna, se borra su archivo, porque el validador rechaza
 una incorporación sin reglas. Las cifras de `SemillaDeSistemasTest` y de «Qué deja la semilla» en
 [`esquema-de-la-base.md`](esquema-de-la-base.md) se recalculan con los datos que queden, no con la
-suposición de que desaparecen los dos archivos completos.
+suposición de que desaparecen los dos archivos completos; `DatosDePruebaDeLaSemillaTest` y
+`SoporteDeSemilla` descubren los archivos por su nombre y no fijan cifras. Retirar un archivo del
+repositorio no lo saca de una base ya cargada: hay que borrar `data/` y volver a arrancar con el
+perfil `dev`.
 
 Los datos de prueba no traen reglas de estructura (`MATERIA`, `AGRUPACION`, `COMPONENTE` ni
 `PROGRAMA`) ni afectaciones: no deben mover la versión del plan de estudios ni depender de #175.
