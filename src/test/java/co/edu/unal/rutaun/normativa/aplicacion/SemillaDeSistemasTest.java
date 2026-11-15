@@ -1,0 +1,177 @@
+package co.edu.unal.rutaun.normativa.aplicacion;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoJpaRepository;
+import co.edu.unal.rutaun.normativa.persistencia.NormaJpaRepository;
+import co.edu.unal.rutaun.normativa.persistencia.ProgramaJpaRepository;
+import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntidad;
+import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionJpaRepository;
+import co.edu.unal.rutaun.normativa.persistencia.ReglaEntidad;
+import co.edu.unal.rutaun.normativa.persistencia.ReglaJpaRepository;
+import co.edu.unal.rutaun.normativa.persistencia.VersionEntidad;
+import co.edu.unal.rutaun.normativa.persistencia.VersionJpaRepository;
+import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.DefaultApplicationArguments;
+import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * Verifica que la semilla real de Sistemas se carga completa con el runner de desarrollo.
+ *
+ * <p>TT-04-T5 (#131, #100): corre {@link SemillaDeDesarrolloRunner} sobre H2 en memoria y comprueba
+ * programas, normas, reglas, consolidados, versiones y reglas por versión, una y dos veces.
+ *
+ * <p>Las cifras son las de la semilla del 2026-11-14. Cambian con #133 (casos que faltan), #178
+ * (agrupaciones repetidas) y #146 (orden de carga): quien las cambie actualiza las constantes de
+ * esta clase, el número de llamadas de {@code SemillaDeDesarrolloRunnerTest} y la prueba de #130 en
+ * {@code ImportacionDeNormasServiceTest}.
+ *
+ * <p>{@code src/test/resources/semilla/} no debe existir: cualquier archivo ahí oculta la semilla
+ * real en las pruebas, porque {@code classpath:semilla/*.json} resuelve solo la primera carpeta
+ * {@code semilla/} del classpath.
+ */
+@PruebaDeIntegracion
+@Transactional
+class SemillaDeSistemasTest {
+
+  private static final Logger LOG = LoggerFactory.getLogger(SemillaDeSistemasTest.class);
+
+  private static final int PROGRAMAS = 1;
+  private static final int NORMAS = 3;
+  private static final int REGLAS = 276;
+  private static final int CONSOLIDADOS = 1;
+  private static final int VERSIONES = 3;
+  private static final int REGLAS_EN_VERSION = 323;
+  private static final List<Integer> REGLAS_POR_VERSION = List.of(20, 27, 276);
+  private static final Cifras ESPERADAS =
+      new Cifras(
+          PROGRAMAS,
+          NORMAS,
+          REGLAS,
+          CONSOLIDADOS,
+          VERSIONES,
+          REGLAS_EN_VERSION,
+          REGLAS_POR_VERSION);
+
+  private final ImportacionDeProgramasService programas;
+  private final ImportacionDeNormasService normas;
+  private final ProgramaJpaRepository programasGuardados;
+  private final NormaJpaRepository normasGuardadas;
+  private final ReglaJpaRepository reglas;
+  private final ConsolidadoJpaRepository consolidados;
+  private final VersionJpaRepository versiones;
+  private final ReglaEnVersionJpaRepository reglasEnVersion;
+
+  /** Recibe los servicios y repositorios que Spring inyecta. */
+  @Autowired
+  SemillaDeSistemasTest(
+      ImportacionDeProgramasService programas,
+      ImportacionDeNormasService normas,
+      ProgramaJpaRepository programasGuardados,
+      NormaJpaRepository normasGuardadas,
+      ReglaJpaRepository reglas,
+      ConsolidadoJpaRepository consolidados,
+      VersionJpaRepository versiones,
+      ReglaEnVersionJpaRepository reglasEnVersion) {
+    this.programas = programas;
+    this.normas = normas;
+    this.programasGuardados = programasGuardados;
+    this.normasGuardadas = normasGuardadas;
+    this.reglas = reglas;
+    this.consolidados = consolidados;
+    this.versiones = versiones;
+    this.reglasEnVersion = reglasEnVersion;
+  }
+
+  @Test
+  void tt04_laSemillaCompletaDejaTresNormasYUnaVersionVigenteConTodasSusReglas() {
+    cargarLaSemilla();
+
+    Cifras cifras = cifras();
+    registrar(cifras);
+    assertThat(cifras)
+        .as("la semilla cambió (actualiza las constantes) o existe src/test/resources/semilla/")
+        .isEqualTo(ESPERADAS);
+
+    VersionEntidad vigente = versionVigente();
+    assertThat(vigente.getNumero()).isEqualTo(3);
+    assertThat(reglasEnVersion.findByVersionId(vigente.getId())).hasSize(REGLAS);
+    assertThat(normasDeLasReglasDe(vigente)).hasSize(NORMAS);
+  }
+
+  @Test
+  void tt04_cargarDosVecesLaSemillaNoDuplica() {
+    cargarLaSemilla();
+    Cifras primera = cifras();
+
+    cargarLaSemilla();
+
+    Cifras segunda = cifras();
+    registrar(segunda);
+    assertThat(segunda).isEqualTo(primera).isEqualTo(ESPERADAS);
+  }
+
+  private void cargarLaSemilla() {
+    new SemillaDeDesarrolloRunner(programas, normas).run(new DefaultApplicationArguments());
+  }
+
+  private Cifras cifras() {
+    List<VersionEntidad> ordenadas =
+        versiones.findAll().stream()
+            .sorted(Comparator.comparingInt(VersionEntidad::getNumero))
+            .toList();
+    return new Cifras(
+        programasGuardados.count(),
+        normasGuardadas.count(),
+        reglas.count(),
+        consolidados.count(),
+        ordenadas.size(),
+        reglasEnVersion.count(),
+        ordenadas.stream()
+            .map(version -> reglasEnVersion.findByVersionId(version.getId()).size())
+            .toList());
+  }
+
+  private VersionEntidad versionVigente() {
+    UUID programaId = programasGuardados.findByCodigoSia("2879").orElseThrow().getId();
+    return versiones.findTopByProgramaIdOrderByNumeroDesc(programaId).orElseThrow();
+  }
+
+  private Set<UUID> normasDeLasReglasDe(VersionEntidad version) {
+    Set<UUID> reglaIds =
+        reglasEnVersion.findByVersionId(version.getId()).stream()
+            .map(ReglaEnVersionEntidad::getReglaId)
+            .collect(Collectors.toSet());
+    return reglas.findAllById(reglaIds).stream()
+        .map(ReglaEntidad::getNormaId)
+        .collect(Collectors.toSet());
+  }
+
+  private static void registrar(Cifras cifras) {
+    LOG.info(
+        "Semilla cargada: {} programa, {} normas, {} reglas, {} versiones; vigente: {}",
+        cifras.programas(),
+        cifras.normas(),
+        cifras.reglas(),
+        cifras.versiones(),
+        cifras.reglasPorVersion().get(cifras.reglasPorVersion().size() - 1));
+  }
+
+  private record Cifras(
+      long programas,
+      long normas,
+      long reglas,
+      long consolidados,
+      long versiones,
+      long reglasEnVersion,
+      List<Integer> reglasPorVersion) {}
+}
