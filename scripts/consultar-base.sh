@@ -90,13 +90,11 @@ salida=$(java -cp "$h2" org.h2.tools.Shell \
   -user sa -sql "$sql" 2>&1)
 codigo=$?
 
-case "$salida" in
-  *90020*)
-    echo "consultar-base: la base está abierta por otro proceso." >&2
-    echo "  Detén la aplicación: H2 en archivo admite un solo proceso." >&2
-    exit 1
-    ;;
-esac
+if printf '%s\n' "$salida" | grep -Eq '\[90020-|Database may be already in use'; then
+  echo "consultar-base: la base está abierta por otro proceso." >&2
+  echo "  Detén la aplicación: H2 en archivo admite un solo proceso." >&2
+  exit 1
+fi
 
 printf '%s\n' "$salida"
 
