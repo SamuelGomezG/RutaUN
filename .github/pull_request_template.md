@@ -17,23 +17,38 @@ Closes #
 
 ## Cómo ejecutarlo
 
-<!-- Para quien revisa. Los pasos para recrear el flujo y el resultado que se espera ver: la aplicación,
-     una prueba de aceptación, un comando o un script. Si es solo documentación, qué abrir y qué comprobar. -->
+<!-- Para quien revisa. Un conteo de pruebas o una mutación no son «Qué se ve»: el flujo se
+     demuestra con el código real (docs/proceso/definicion-de-hecho.md, «Cómo se demuestra un
+     cambio»). Si es solo documentación, qué abrir y qué comprobar. -->
+
+**Flujo que resuelve:**
+
+<!-- Una frase. Si el cambio no tiene flujo de usuario, di cuál es el flujo. -->
+
+**Pasos:**
+
+<!-- Lista numerada, con ./mvnw y, si difiere, el comando de Windows. -->
 
 1.
 2.
 
-**Resultado esperado:**
+**Qué se ve cuando funciona:**
+
+<!-- Lo que se observa, con las cifras o las líneas exactas. Si es un defecto, también lo que se veía antes. -->
+
+**Pruebas:**
+
+<!-- ./mvnw verify y las pruebas nuevas, con su conteo. Es evidencia del tercer criterio, no del segundo. -->
 
 ## Definición de Hecho
 
 <!-- Copia de docs/proceso/definicion-de-hecho.md. Si cambia una, cambia la otra. -->
 
-- [ ] Está integrado en `develop` y lo revisó otra persona del equipo.
-- [ ] Si incluye código, se puede ejecutar —por quien lo escribió y por quien lo revisa— con los pasos de arriba, y el resultado muestra que hace lo que debe.
-- [ ] Tiene pruebas unitarias en verde, y las pruebas de arquitectura pasan en la integración continua.
-- [ ] Cumple Google Java Style (el build lo verifica).
-- [ ] Si es una historia, sus criterios de aceptación se demostraron funcionando y su issue quedó cerrado en el tablero.
+1. [ ] Está integrado en `develop` y lo revisó otra persona del equipo.
+2. [ ] Si incluye código, se puede ejecutar —por quien lo escribió y por quien lo revisa— para recrear el flujo que resuelve y obtener un resultado observable que muestre que hace lo que debe: la aplicación, una prueba de aceptación, un comando o un script, con los pasos en el PR.
+3. [ ] Tiene pruebas unitarias en verde, y las pruebas de arquitectura pasan en la integración continua.
+4. [ ] Cumple Google Java Style (el build lo verifica).
+5. [ ] Si es una historia, sus criterios de aceptación se demostraron funcionando y su issue quedó cerrado en el tablero.
 
 ## Antes de pedir revisión
 

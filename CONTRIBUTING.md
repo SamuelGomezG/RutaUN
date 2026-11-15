@@ -34,7 +34,7 @@ Un issue, una rama, una solicitud de integración.
 2. Haz commits atómicos.
 3. Antes de abrir el PR, si cambiaste código, corre `./mvnw verify` (debe quedar en verde); si el cambio es solo de documentación, comprueba que los enlaces estén vivos. En ambos casos, ejecuta tu cambio siguiendo los pasos que vas a poner en el PR.
 4. Abre el PR contra `develop` y pasa el issue a *In Review*.
-5. Otra persona lo revisa: ejecuta el cambio, comprueba el resultado y lee el código. Respondes a sus comentarios con commits nuevos.
+5. Otra persona lo revisa: recrea el flujo, comprueba que ve lo que dice «Qué se ve cuando funciona», deja escrito qué vio y lee el código. Respondes a sus comentarios con commits nuevos.
 6. Con la aprobación y la integración continua en verde, quien abrió el PR lo fusiona en `develop` con **Rebase and merge**, para conservar los commits atómicos; no uses *Squash*. Nadie fusiona un PR sin la aprobación de otra persona.
 7. El issue se cierra con el PR (`Closes #n`), porque `develop` es la rama predeterminada del repositorio. Pasa a *Done* cuando los criterios de aceptación se demostraron funcionando.
 
@@ -138,7 +138,7 @@ Los hooks de [`.githooks/`](.githooks) revisan tu trabajo en tu máquina antes d
   - qué cambia y por qué;
   - `Closes #n` si el PR termina el issue, o `Refs #n` si lo deja abierto;
   - los pasos, extensiones o criterios del SRS que cubre;
-  - cómo ejecutarlo: los pasos para recrear el flujo y el resultado que se espera ver (la aplicación, una prueba de aceptación, un comando o un script);
+  - cómo ejecutarlo: «Flujo que resuelve», «Pasos» y «Qué se ve cuando funciona», con el código real (la aplicación, una prueba de aceptación, un comando o un script; ver [«Cómo se demuestra un cambio»](docs/proceso/definicion-de-hecho.md#cómo-se-demuestra-un-cambio));
   - la lista de la [Definición de Hecho](docs/proceso/definicion-de-hecho.md);
   - si cambió un comportamiento, qué documento actualizó.
 - Verifica antes de pedir revisión: si cambiaste código, `./mvnw verify` en verde; si es solo documentación, los enlaces vivos. En ambos casos, el diff sin credenciales, datos personales ni archivos locales.
@@ -147,12 +147,15 @@ Los hooks de [`.githooks/`](.githooks) revisan tu trabajo en tu máquina antes d
 
 La revisa una persona distinta de quien escribió el cambio. Revisa:
 
-- que el cambio **se ejecuta**: sigue los pasos del PR, recrea el flujo y comprueba que el resultado es el esperado; si no puedes reproducirlo, el PR no está listo;
-- los **criterios de aceptación** del issue, probándolos en la aplicación si es una historia;
+- que el cambio **se ejecuta**: sigue los pasos del PR y comprueba que ve lo mismo que dice «Qué se ve cuando funciona»; si no puedes reproducirlo, el PR no está listo. Un conteo de pruebas o una mutación no son «Qué se ve» ([«Cómo se demuestra un cambio»](docs/proceso/definicion-de-hecho.md#cómo-se-demuestra-un-cambio));
+- que «Qué se ve cuando funciona» no sea un conteo de pruebas, no esté vacío ni haya quedado con el texto de ejemplo de la plantilla;
+- los **criterios de aceptación** del issue, probándolos en la aplicación si es una historia, y marca en el issue cada criterio que comprobó;
 - que cada prueba lleve en su nombre el ID del SRS que verifica;
 - que se respeten las **reglas de oro** de [`AGENTS.md`](AGENTS.md): normas como datos, el «Aviso de lo que RutaUN no verifica», el vocabulario del glosario y la privacidad;
 - que las pruebas de arquitectura sigan en verde y el estilo esté aplicado;
 - que la documentación afectada esté actualizada.
+
+La aprobación dice qué comparó (el issue, el SRS, el diseño), qué pasos siguió y qué vio: «pruebas en verde» no es una revisión. No se cierra un issue con una casilla sin marcar; como `Closes #n` lo cierra al fusionar, si un criterio no se cumple la PR pasa a `Refs #n`, o el criterio se cambia en el issue con su razón escrita.
 
 Quien revisa aprueba, pide cambios o comenta. Quien escribió el cambio responde a cada comentario antes de fusionar.
 
