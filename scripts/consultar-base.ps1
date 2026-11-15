@@ -38,6 +38,12 @@ function Mostrar-Uso {
   [Console]::Error.WriteLine('directorio actual.')
 }
 
+function ConvertTo-Argumento([string] $valor) {
+  $cuerpo = $valor -replace '(\\*)"', '$1$1\"'
+  $cuerpo = $cuerpo -replace '(\\+)$', '$1$1'
+  return '"' + $cuerpo + '"'
+}
+
 $raiz = Split-Path -Parent $PSScriptRoot
 
 if ([string]::IsNullOrWhiteSpace($Consulta)) {
@@ -85,12 +91,28 @@ try {
     exit 1
   }
 
-  $salida = & java -cp $h2 org.h2.tools.Shell `
-    -url "jdbc:h2:file:$base;IFEXISTS=TRUE;ACCESS_MODE_DATA=r" `
-    -user sa -sql $Consulta 2>&1 |
-    ForEach-Object { $_.ToString() } |
-    Out-String
-  $codigo = $LASTEXITCODE
+  $argumentos = @(
+    '-cp', (ConvertTo-Argumento $h2),
+    'org.h2.tools.Shell',
+    '-url', (ConvertTo-Argumento "jdbc:h2:file:$base;IFEXISTS=TRUE;ACCESS_MODE_DATA=r"),
+    '-user', 'sa',
+    '-sql', (ConvertTo-Argumento $Consulta)
+  ) -join ' '
+
+  $psi = [System.Diagnostics.ProcessStartInfo]::new()
+  $psi.FileName = 'java'
+  $psi.Arguments = $argumentos
+  $psi.UseShellExecute = $false
+  $psi.RedirectStandardOutput = $true
+  $psi.RedirectStandardError = $true
+  $psi.CreateNoWindow = $true
+  $proceso = [System.Diagnostics.Process]::Start($psi)
+  $stdout = $proceso.StandardOutput.ReadToEndAsync()
+  $stderr = $proceso.StandardError.ReadToEndAsync()
+  $proceso.WaitForExit()
+  $salida = $stdout.Result + $stderr.Result
+  $codigo = $proceso.ExitCode
+  $proceso.Dispose()
 } finally {
   Remove-Item -LiteralPath $temporal -ErrorAction SilentlyContinue
 }
