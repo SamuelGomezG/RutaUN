@@ -24,4 +24,12 @@ class InicioControllerTest {
         .andExpect(status().isOk())
         .andExpect(content().string(containsString("RutaUN")));
   }
+
+  @Test
+  void uc06_paso1_inicioEnlazaALaConsultaDeNormativa() throws Exception {
+    mockMvc
+        .perform(get("/"))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("href=\"/programas\"")));
+  }
 }

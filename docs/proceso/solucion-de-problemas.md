@@ -50,7 +50,7 @@ Si resuelves un fallo que no está aquí y le puede pasar a otra persona, agrég
 
 | Síntoma | Causa | Qué hacer |
 | --- | --- | --- |
-| `/programas` responde 503, «Consulta no disponible» ✔ | La aplicación todavía no tiene la implementación de `ConsultaNormativaFacade` | Es lo esperado hasta que entre [#132](https://github.com/SamuelGomezG/RutaUN/issues/132). La semilla sí está cargada: compruébalo con una consulta sobre la base |
+| `/programas` muestra «Cualquier programa» pero sin ningún programa ✔ | La base no tiene programas cargados | Arranca con el perfil `dev` para que cargue la semilla (ver «Abrir y ejecutar el proyecto» del README), o compruébalo con una consulta sobre la base |
 | `/programas/{id}/reglas` responde 400 ✔ | `{id}` no es un UUID | Usa el `id` del programa, no su código SIA |
 | Esperabas un incidente y no aparece | No hay pantalla de incidentes; o el registro falló | Consulta la tabla `incidente` ([`esquema-de-la-base.md`](../datos/esquema-de-la-base.md)). Si el registro falló, el log dice «No se pudo registrar un incidente: …» con la clase del error y sin el contenido del incidente |
 | Dos incidentes distintos quedaron en una sola fila, o uno igual quedó en dos | La agrupación tiene defectos abiertos | [#167](https://github.com/SamuelGomezG/RutaUN/issues/167), [#168](https://github.com/SamuelGomezG/RutaUN/issues/168) y [#169](https://github.com/SamuelGomezG/RutaUN/issues/169) |
