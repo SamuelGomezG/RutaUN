@@ -33,7 +33,7 @@ Con eso, una PR queda en uno de tres niveles:
 | **Parcial** (es no cumplir) | Corren las pruebas del cambio, o una mutación que las rompe | Lo que esas pruebas comprueban; el flujo no se ve funcionando |
 | **No cumple** | Solo corren `./mvnw verify` o las pruebas | Un conteo, o nada |
 
-Sirven cuatro medios:
+Sirven cinco medios:
 
 | | Medio | Cuándo | Cómo se corre |
 | --- | --- | --- | --- |
@@ -41,6 +41,7 @@ Sirven cuatro medios:
 | **B** | La base | Cuando lo que se ve son filas | Con la aplicación detenida, `scripts/consultar-base.sh "<SQL>"` (o con la ruta de A como segundo argumento). En Windows, `scripts\consultar-base.ps1` |
 | **C** | Una demostración del dominio | Cambios de dominio, que no tienen pantalla | Una clase con `main` en `src/test/java/co/edu/unal/rutaun/soporte/demostraciones/`, sin Spring ni base: `./mvnw -q test-compile` y `java -cp target/classes:target/test-classes co.edu.unal.rutaun.soporte.demostraciones.<Clase>`. En Windows, el classpath va entre comillas: `java -cp "target/classes;target/test-classes" co.edu.unal.rutaun.soporte.demostraciones.<Clase>`; el `;` separa comandos en PowerShell |
 | **D** | Una prueba de aceptación | Cuando el resultado se observe en el log de la prueba (por ejemplo, la concurrencia) | Una prueba con los componentes reales, sin dobles, que la PR pide correr sola y que escribe en el log lo que se observa: `./mvnw test -Dtest=<Prueba>` |
+| **E** | Un comando o un script | Cambios de proceso o de herramientas, sin pantalla ni filas (por ejemplo, los hooks) | El comando o el script del cambio, con lo que imprime: `.githooks/probar.sh`, `herramientas/indice_ids.py <ID> --contexto` |
 
 La base de `data/` no se borra para demostrar. Si guarda normas incorporadas por fuera de `semilla/`, incidentes, avances o planes, no la elimines: respáldala y migra esos datos, como dicen [`cambios-de-boot-4.md`](cambios-de-boot-4.md) y [`solucion-de-problemas.md`](solucion-de-problemas.md) («Antes de borrar `data/`»). Si el comando A usó otra ruta, pásala al comando B como segundo argumento: `scripts/consultar-base.sh "<SQL>" "$base"`.
 
