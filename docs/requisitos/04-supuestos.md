@@ -29,7 +29,7 @@ depends_on:
 
 > **Cuándo cargar:** antes de cualquier cálculo o validación. La lista abajo es la fuente de los «supuesto del equipo» citados sin número en glosario y casos (S1 → (1), … S17 → (17); S18 es la decisión del 25 de octubre, ver S18 abajo; S19, la del 15 de noviembre de 2026).
 
-Decisiones que el equipo tomó donde las normas o la entrevista no dicen nada. En el documento original se numeran (1) a (17) y se señalan como «supuesto del equipo» donde se aplican. **S1 sigue por confirmar (las normas revisadas no tratan el tema). S3 se mantiene en 30 s con el respaldo de TT-05; quedan pendientes 6 casos sin calcular y el estrés de malla duplicada. El S18 es una decisión ya aplicada (25 de octubre de 2026). El S19 es una decisión del 15 de noviembre de 2026; el código la aplica con #153.**
+Decisiones que el equipo tomó donde las normas o la entrevista no dicen nada. En el documento original se numeran (1) a (17) y se señalan como «supuesto del equipo» donde se aplican. **S1 sigue por confirmar (las normas revisadas no tratan el tema). S3 se mantiene en 30 s con el respaldo de TT-05; quedan pendientes 6 casos sin calcular y el estrés de malla duplicada. El S18 es una decisión ya aplicada (25 de octubre de 2026). El S19 es una decisión del 15 de noviembre de 2026; #153 la implementará en el código.**
 
 | ID | Supuesto |
 |---|---|
