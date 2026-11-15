@@ -60,6 +60,7 @@ project/                          raíz del repositorio
 │  └─ uso/                        guia-de-uso.md (al final)
 ├─ config/checkstyle/             checkstyle.xml · suppressions.xml
 ├─ herramientas/ ▸                indice_ids.py (índice de IDs derivado; Python 3, sin dependencias)
+├─ scripts/                       consultar-base.sh · consultar-base.ps1 (consulta la base de desarrollo)
 ├─ pom.xml · mvnw · mvnw.cmd · .mvn/wrapper/
 ├─ data/                          archivo H2; lo crea la app y git lo ignora
 └─ src/
@@ -131,6 +132,7 @@ project/                          raíz del repositorio
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev   # arranca y carga la semilla de Sistemas
 .githooks/probar.sh                                  # prueba los hooks de git (commit-msg, pre-commit y pre-push) sin tocar tu repositorio
 herramientas/indice_ids.py UC06-HU01 --contexto      # texto del SRS que una historia necesita (ver docs/requisitos/README.md)
+scripts/consultar-base.sh "<consulta SQL>"           # consulta la base de desarrollo; detén la aplicación antes
 ```
 
 ## Definición de terminado
