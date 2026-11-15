@@ -1,10 +1,11 @@
-package co.edu.unal.rutaun.soporte;
+package co.edu.unal.rutaun.soporte.demostraciones;
 
 import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.ReglaId;
 import co.edu.unal.rutaun.normativa.ClasificacionRegla;
 import co.edu.unal.rutaun.normativa.ConsolidadoVista;
 import co.edu.unal.rutaun.normativa.ReglaVista;
+import co.edu.unal.rutaun.soporte.ConsultaNormativaFalsa;
 import java.util.Optional;
 
 /**
@@ -13,7 +14,7 @@ import java.util.Optional;
  * cada regla, más el caso de una regla sin fuente registrada (UC06 ext. 6e) y el de un consolidado
  * sin reglas (UC06 ext. 4a). No necesita Spring ni base de datos; se ejecuta con {@code ./mvnw -q
  * test-compile && java -cp target/classes:target/test-classes
- * co.edu.unal.rutaun.soporte.DemostracionDeContratos}.
+ * co.edu.unal.rutaun.soporte.demostraciones.DemostracionDeContratos}.
  */
 public final class DemostracionDeContratos {
 

@@ -89,3 +89,6 @@ ASCII. Las reglas sobre paquetes que aún no tienen clases no fallan
   (#174) y su oráculo, PRU-02 (#61).
 - **Datos de prueba:** mallas sintéticas en `soporte/` y archivos JSON en
   `src/test/resources/json/`; nunca datos personales reales (regla de oro 7).
+  Las demostraciones del dominio viven en `soporte/demostraciones/` y no son
+  pruebas: muestran el flujo con el código real (segundo criterio de la
+  Definición de Hecho, `definicion-de-hecho.md`).

@@ -85,6 +85,7 @@ project/                          raíz del repositorio
       │  ├─ arquitectura/         ModulosTest · CapasTest · NombresTest
       │  ├─ normativa/…           espejo de los paquetes
       │  └─ soporte/              mallas sintéticas, Clock fijo
+      │     └─ demostraciones/    demostraciones del dominio (comando C de la Definición de Hecho)
       └─ resources/               application-test.yml · db/humo/ · json/validos/ · json/invalidos/
 ```
 
