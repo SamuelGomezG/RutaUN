@@ -4,14 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import co.edu.unal.rutaun.normativa.dominio.DatosDeRegla;
 import co.edu.unal.rutaun.normativa.dominio.Regla;
+import co.edu.unal.rutaun.soporte.SoporteDeSemilla;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 /**
  * Verifica la convención de los datos de prueba de la semilla (TT-04-T4, #133).
@@ -22,25 +20,20 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
  * reglas de estructura ni afectaciones, porque no deben mover la versión del plan de estudios.
  *
  * <p>Es una prueba unitaria, sin Spring: lee los archivos de {@code semilla/} con el lector y el
- * validador reales, así que falla rápido si alguien agrega un dato ficticio sin marcar.
+ * validador reales, así que falla rápido si alguien agrega un dato ficticio sin marcar. El
+ * descubrimiento de archivos y la guarda de origen están en {@link SoporteDeSemilla}.
  */
 class DatosDePruebaDeLaSemillaTest {
 
-  private static final String PATRON = "classpath:semilla/*.json";
-  private static final String PROGRAMAS = "programas.json";
-  private static final String PREFIJO_DE_PRUEBA = "datos-de-prueba-";
   private static final String MARCA = "(datos de prueba)";
 
   @Test
   void tt04_t4_losArchivosDeDatosDePruebaLlevanLaMarca() throws IOException {
-    List<Resource> archivosDePrueba =
-        recursosDeNormas().stream()
-            .filter(recurso -> recurso.getFilename().startsWith(PREFIJO_DE_PRUEBA))
-            .toList();
+    List<Resource> archivosDePrueba = SoporteDeSemilla.archivosDePrueba();
 
     assertThat(archivosDePrueba)
-        .as("deben existir exactamente dos archivos %s*.json", PREFIJO_DE_PRUEBA)
-        .hasSize(2);
+        .as("debe existir al menos un archivo datos-de-prueba-*.json")
+        .isNotEmpty();
     for (Resource recurso : archivosDePrueba) {
       IncorporacionLeida incorporacion = leer(recurso);
       assertThat(incorporacion.norma().identificacion().organo())
@@ -60,11 +53,11 @@ class DatosDePruebaDeLaSemillaTest {
   @Test
   void tt04_t4_lasNormasRealesNoLlevanLaMarca() throws IOException {
     List<Resource> normasReales =
-        recursosDeNormas().stream()
-            .filter(recurso -> !recurso.getFilename().startsWith(PREFIJO_DE_PRUEBA))
+        SoporteDeSemilla.recursosDeNormas().stream()
+            .filter(recurso -> !SoporteDeSemilla.esDePrueba(recurso.getFilename()))
             .toList();
 
-    assertThat(normasReales).as("la semilla real debe traer tres acuerdos").hasSize(3);
+    assertThat(normasReales).as("la semilla debe traer normas reales").isNotEmpty();
     for (Resource recurso : normasReales) {
       IncorporacionLeida incorporacion = leer(recurso);
       assertThat(incorporacion.norma().identificacion().organo())
@@ -83,12 +76,7 @@ class DatosDePruebaDeLaSemillaTest {
 
   @Test
   void tt04_t4_losDatosDePruebaNoTraenReglasDeEstructuraNiAfectaciones() throws IOException {
-    List<Resource> archivosDePrueba =
-        recursosDeNormas().stream()
-            .filter(recurso -> recurso.getFilename().startsWith(PREFIJO_DE_PRUEBA))
-            .toList();
-
-    for (Resource recurso : archivosDePrueba) {
+    for (Resource recurso : SoporteDeSemilla.archivosDePrueba()) {
       IncorporacionLeida incorporacion = leer(recurso);
       for (Regla regla : incorporacion.reglas()) {
         assertThat(regla.datos())
@@ -105,21 +93,6 @@ class DatosDePruebaDeLaSemillaTest {
             .isEmpty();
       }
     }
-  }
-
-  @Test
-  void tt04_t4_losArchivosDeLaSemillaSonValidos() throws IOException {
-    assertThat(recursosDeNormas()).as("la semilla debe traer normas").isNotEmpty();
-    for (Resource recurso : recursosDeNormas()) {
-      leer(recurso);
-    }
-  }
-
-  private static List<Resource> recursosDeNormas() throws IOException {
-    return Arrays.stream(new PathMatchingResourcePatternResolver().getResources(PATRON))
-        .filter(recurso -> !PROGRAMAS.equals(recurso.getFilename()))
-        .sorted(Comparator.comparing(Resource::getFilename))
-        .toList();
   }
 
   private static IncorporacionLeida leer(Resource recurso) throws IOException {

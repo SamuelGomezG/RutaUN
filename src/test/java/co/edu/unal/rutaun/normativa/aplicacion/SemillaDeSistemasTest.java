@@ -20,9 +20,8 @@ import co.edu.unal.rutaun.normativa.persistencia.ReglaJpaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.VersionEntidad;
 import co.edu.unal.rutaun.normativa.persistencia.VersionJpaRepository;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
+import co.edu.unal.rutaun.soporte.SoporteDeSemilla;
 import java.io.IOException;
-import java.net.URL;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -116,17 +115,7 @@ class SemillaDeSistemasTest {
 
   @BeforeEach
   void comprobarOrigenDeLaSemilla() throws IOException {
-    URL produccion =
-        SemillaDeDesarrolloRunner.class.getProtectionDomain().getCodeSource().getLocation();
-    List<URL> raices =
-        Collections.list(Thread.currentThread().getContextClassLoader().getResources("semilla/"));
-
-    assertThat(raices)
-        .as(
-            "semilla/ debe resolverse solo desde la salida de producción; "
-                + "borra src/test/resources/semilla/ y corre ./mvnw clean")
-        .isNotEmpty()
-        .allSatisfy(raiz -> assertThat(raiz.getPath()).startsWith(produccion.getPath()));
+    SoporteDeSemilla.comprobarOrigen();
   }
 
   @Test
@@ -170,6 +159,9 @@ class SemillaDeSistemasTest {
 
     List<Regla> reglasVigentes = reglasDeLaVersion(versionVigente());
 
+    assertThat(reglasVigentes)
+        .as("una malla con materias")
+        .anyMatch(regla -> regla.datos() instanceof DatosDeRegla.DeMateria);
     assertThat(reglasVigentes)
         .as("una carga mínima por periodo")
         .anyMatch(
@@ -216,14 +208,15 @@ class SemillaDeSistemasTest {
   }
 
   @Test
-  void tt04_t4_losDatosDePruebaNoCambianLaVersionDelPlanDeEstudios() {
+  void tt04_t4_losDatosDePruebaNoCambianLaVersionDelPlanDeEstudios() throws IOException {
     cargarLaSemilla();
 
     List<VersionEntidad> ordenadas = versionesDeSistemas();
     assertThat(ordenadas).hasSize(VERSIONES);
-    int versionDelPlan = ordenadas.get(2).getNumeroPlanDeEstudios();
-    assertThat(ordenadas.subList(2, VERSIONES))
-        .as("las versiones 3, 4 y 5 no cambian la versión del plan de estudios")
+    int primeraVersionDePrueba = VERSIONES - SoporteDeSemilla.archivosDePrueba().size();
+    int versionDelPlan = ordenadas.get(primeraVersionDePrueba - 1).getNumeroPlanDeEstudios();
+    assertThat(ordenadas.subList(primeraVersionDePrueba - 1, VERSIONES))
+        .as("las versiones con datos de prueba no cambian la versión del plan de estudios")
         .extracting(VersionEntidad::getNumeroPlanDeEstudios)
         .containsOnly(versionDelPlan);
   }
