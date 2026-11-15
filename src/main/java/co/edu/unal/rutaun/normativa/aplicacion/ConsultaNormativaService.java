@@ -46,7 +46,7 @@ import org.springframework.transaction.annotation.Transactional;
  * <p>El consolidado vigente es la versión de mayor número del programa. Muestra las reglas
  * vigentes, programadas y en revisión, y deja fuera las que ya no rigen. Las agrupa por categoría
  * según el glosario («Regla») y, dentro de cada una, las ordena por fecha de expedición de su
- * norma, artículo e identificador.
+ * norma, artículo, enunciado e identificador.
  *
  * <p>Es solo de lectura: no publica eventos ni guarda nada. El incidente de un consolidado sin
  * reglas lo publica el orquestador de UC06.
