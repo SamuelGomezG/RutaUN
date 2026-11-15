@@ -30,7 +30,7 @@ Con eso, una PR queda en uno de tres niveles:
 | Nivel | Qué traen los pasos | Qué describe el resultado |
 | --- | --- | --- |
 | **Cumple** | Ejecutan el flujo concreto con el código real | Lo que se ve: una página, una salida, un log, filas en la base |
-| **Parcial** (es no cumplir) | Corren las pruebas del cambio, o una mutación que las rompe | Lo que esas pruebas comprueban; el flujo no se ve funcionando |
+| **Parcial** (es no cumplir) | Corren las pruebas del cambio, o una mutación que las rompe, salvo cuando el cambio son las pruebas mismas | Lo que esas pruebas comprueban; el flujo no se ve funcionando |
 | **No cumple** | Solo corren `./mvnw verify` o las pruebas | Un conteo, o nada |
 
 Sirven cinco medios:
@@ -45,7 +45,7 @@ Sirven cinco medios:
 
 La base de `data/` no se borra para demostrar. Si guarda normas incorporadas por fuera de `semilla/`, incidentes, avances o planes, no la elimines: respáldala y migra esos datos, como dicen [`cambios-de-boot-4.md`](cambios-de-boot-4.md) y [`solucion-de-problemas.md`](solucion-de-problemas.md) («Antes de borrar `data/`»). Si el comando A usó otra ruta, pásala al comando B como segundo argumento: `scripts/consultar-base.sh "<SQL>" "$base"`.
 
-Un conteo de pruebas o una mutación no bastan: son evidencia del tercer criterio, no del segundo. La excepción es el cambio que trata de las pruebas mismas: ahí la mutación es el flujo.
+Un conteo de pruebas o una mutación no bastan: son evidencia del tercer criterio, no del segundo. La excepción es el cambio que trata de las pruebas mismas: ahí la mutación es el flujo y cuenta como **Cumple**.
 
 Cuando el cambio no tiene flujo de usuario, el flujo es otro y la PR dice cuál:
 

@@ -17,9 +17,10 @@ Closes #
 
 ## Cómo ejecutarlo
 
-<!-- Para quien revisa. Un conteo de pruebas o una mutación no son «Qué se ve»: el flujo se
-     demuestra con el código real (docs/proceso/definicion-de-hecho.md, «Cómo se demuestra un
-     cambio»). Si es solo documentación, qué abrir y qué comprobar. -->
+<!-- Para quien revisa. Un conteo de pruebas o una mutación no son «Qué se ve», salvo cuando el
+     cambio son las pruebas mismas: ahí la mutación que las rompe es el flujo. En los demás casos
+     el flujo se demuestra con el código real (docs/proceso/definicion-de-hecho.md, «Cómo se
+     demuestra un cambio»). Si es solo documentación, qué abrir y qué comprobar. -->
 
 **Flujo que resuelve:**
 
