@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <!--/* Aviso de lo que RutaUN no verifica (SOP-06, #58). Texto fijo del glosario. Se incluye con
+           th:replace="~{layout/aviso-no-verifica :: aviso}" en todo plan, comparación o explicación.
+           Va UNA vez por página, no una por plan: el id "aviso-no-verifica" no se puede repetir.
+           En UC02 (plan nuevo junto al vigente) y UC04 (varias alternativas) se incluye una sola
+           vez, al final de la vista. */-->
+    <section th:fragment="aviso" class="aviso-no-verifica" aria-labelledby="aviso-no-verifica">
+      <h2 id="aviso-no-verifica">Aviso de lo que RutaUN no verifica</h2>
+      <p>Todo plan, comparación o explicación de RutaUN es una guía: no es una inscripción ni una autorización.</p>
+      <p>RutaUN no verifica:</p>
+      <ul>
+        <li>la oferta de materias;</li>
+        <li>los cupos y sobrecupos;</li>
+        <li>los horarios y cruces de clases;</li>
+        <li>el cupo de créditos (Acuerdo 008 de 2008, art. 11);</li>
+        <li>los reconocimientos (validaciones, homologaciones y convalidaciones);</li>
+        <li>las autorizaciones del Consejo de Facultad;</li>
+        <li>si el estudiante debe cursar materias de nivelación;</li>
+        <li>el cumplimiento de los requisitos de grado.</li>
+      </ul>
+      <p>Tampoco describe de qué trata cada materia.</p>
+      <p>El plan estima cuándo el estudiante culminaría su plan de estudios, no cuándo se graduaría.</p>
+      <p>La fuente oficial de las normas es Régimen Legal.</p>
+    </section>
+  </body>
+</html>
