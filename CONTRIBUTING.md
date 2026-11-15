@@ -147,8 +147,8 @@ Los hooks de [`.githooks/`](.githooks) revisan tu trabajo en tu máquina antes d
 
 La revisa una persona distinta de quien escribió el cambio. Revisa:
 
-- que el cambio **se ejecuta**: sigue los pasos del PR y comprueba que ve lo mismo que dice «Qué se ve cuando funciona»; si no puedes reproducirlo, el PR no está listo. Un conteo de pruebas o una mutación no son «Qué se ve» ([«Cómo se demuestra un cambio»](docs/proceso/definicion-de-hecho.md#cómo-se-demuestra-un-cambio));
-- que «Qué se ve cuando funciona» no sea un conteo de pruebas, no esté vacío ni haya quedado con el texto de ejemplo de la plantilla;
+- que el cambio **se ejecuta**: sigue los pasos del PR y comprueba que ve lo mismo que dice «Qué se ve cuando funciona»; si no puedes reproducirlo, el PR no está listo. Un conteo de pruebas o una mutación no son «Qué se ve», salvo cuando el cambio son las pruebas mismas: ahí la mutación que las rompe es el flujo ([«Cómo se demuestra un cambio»](docs/proceso/definicion-de-hecho.md#cómo-se-demuestra-un-cambio));
+- que «Qué se ve cuando funciona» no sea un conteo de pruebas, no esté vacío ni haya quedado con el texto de ejemplo de la plantilla (salvo la mutación cuando el cambio son las pruebas mismas);
 - los **criterios de aceptación** del issue, probándolos en la aplicación si es una historia, y marca en el issue cada criterio que comprobó;
 - que cada prueba lleve en su nombre el ID del SRS que verifica;
 - que se respeten las **reglas de oro** de [`AGENTS.md`](AGENTS.md): normas como datos, el «Aviso de lo que RutaUN no verifica», el vocabulario del glosario y la privacidad;
