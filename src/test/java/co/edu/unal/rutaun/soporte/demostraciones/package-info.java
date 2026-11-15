@@ -4,8 +4,9 @@
  * <p>Una demostración muestra el comportamiento de un cambio de dominio que no tiene pantalla, de
  * modo que quien revisa lo vea sin leer las pruebas. Se ejecuta con el JDK y las clases del
  * proyecto: {@code ./mvnw -q test-compile} y {@code java -cp target/classes:target/test-classes
- * co.edu.unal.rutaun.soporte.demostraciones.<Clase>}. En Windows, el separador del classpath es
- * {@code ;}. El comando no cambia de directorio, así que se corre desde la raíz del repositorio.
+ * co.edu.unal.rutaun.soporte.demostraciones.<Clase>}. En Windows, el classpath va entre comillas:
+ * {@code java -cp "target/classes;target/test-classes" …}; el {@code ;} separa comandos en
+ * PowerShell. El comando no cambia de directorio, así que se corre desde la raíz del repositorio.
  *
  * <p>Forma: una clase {@code DemostracionDe<Tema>}, {@code final}, con constructor privado y un
  * {@code main} que imprime en la salida estándar. Su javadoc dice qué imprime y qué IDs del SRS
