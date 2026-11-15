@@ -19,7 +19,7 @@
 |---|---|---|---|
 | [`00-contexto.md`](00-contexto.md) | Resumen, alcance, actores y reglas de trabajo | siempre, primero | ~4299 |
 | [`01-invariantes.md`](01-invariantes.md) | Las cosas que nunca puede violar la implementación | siempre | ~2091 |
-| [`03-marco-normativo.md`](03-marco-normativo.md) | Normas de ejemplo (datos, no constantes) | con UC07 o al revisar vigencias | ~1365 |
+| [`03-marco-normativo.md`](03-marco-normativo.md) | Normas citadas: fundamento y datos de ejemplo (no constantes) | con UC07 o al revisar vigencias | ~1365 |
 | [`04-supuestos.md`](04-supuestos.md) | S1–S18: decisiones del equipo y cotas de tiempo | antes de cálculo o validación | ~1797 |
 | [`05-trazabilidad.md`](05-trazabilidad.md) | Backlog GitHub y dueños de IDs | issues/PRs y mapeo de IDs | ~905 |
 | [`06-evidencia-y-ux.md`](06-evidencia-y-ux.md) | Acta ZEUS-02 (evidencia, no requisito) | contexto y decisiones de producto | ~2152 |
