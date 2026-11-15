@@ -13,7 +13,8 @@
 # conexión o el SQL, 2 si faltó la consulta.
 #
 # Convención y comandos: docs/proceso/definicion-de-hecho.md, «Cómo se
-# demuestra un cambio» (comando B).
+# demuestra un cambio» (comando B). La contraseña es la vacía por defecto de
+# org.h2.tools.Shell; no se pasa -password.
 
 set -u
 
@@ -86,7 +87,7 @@ fi
 
 salida=$(java -cp "$h2" org.h2.tools.Shell \
   -url "jdbc:h2:file:$base;IFEXISTS=TRUE;ACCESS_MODE_DATA=r" \
-  -user sa -password "" -sql "$sql" 2>&1)
+  -user sa -sql "$sql" 2>&1)
 codigo=$?
 
 case "$salida" in
