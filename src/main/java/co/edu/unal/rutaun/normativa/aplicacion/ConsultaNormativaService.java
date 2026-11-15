@@ -24,12 +24,14 @@ import co.edu.unal.rutaun.normativa.persistencia.ReglaJpaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.VersionEntidad;
 import co.edu.unal.rutaun.normativa.persistencia.VersionJpaRepository;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
+import java.text.Collator;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -77,12 +79,20 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
           OTRA);
 
   /** Una regla lista para mostrar, con lo que hace falta para ordenarla. */
-  private record Entrada(
+  record Entrada(
       String categoria, LocalDate expedicion, String articulo, UUID id, ReglaVista vista) {}
 
-  private static final Comparator<Entrada> ORDEN_DE_REGLAS =
+  /** Orden del español, que no separa las letras con tilde. */
+  private static final Collator ORDEN_DE_TEXTO = Collator.getInstance(Locale.forLanguageTag("es"));
+
+  /**
+   * Orden de las reglas de una categoría: fecha de expedición de la norma (la más antigua primero;
+   * sin norma, al final), artículo (por su número), enunciado e identificador.
+   */
+  static final Comparator<Entrada> ORDEN_DE_REGLAS =
       Comparator.comparing(Entrada::expedicion, Comparator.nullsLast(Comparator.naturalOrder()))
           .thenComparing(Entrada::articulo, OrdenDeArticulos.INSTANCIA)
+          .thenComparing(entrada -> entrada.vista().enunciado(), ORDEN_DE_TEXTO)
           .thenComparing(Entrada::id);
 
   private final ProgramaJpaRepository programas;
@@ -108,8 +118,9 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
   @Override
   public List<ProgramaVista> programas() {
     return programas.findAll().stream()
+        .filter(programa -> versiones.existsByProgramaId(programa.getId()))
         .map(ConsultaNormativaService::aVista)
-        .sorted(Comparator.comparing(ProgramaVista::nombre))
+        .sorted(Comparator.comparing(ProgramaVista::nombre, ORDEN_DE_TEXTO))
         .toList();
   }
 
@@ -131,7 +142,7 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
     Map<UUID, EstadoRegla> estados = new HashMap<>();
     for (ReglaEnVersionEntidad fila : reglasEnVersion.findByVersionId(version.getId())) {
       EstadoRegla estado = EstadoRegla.valueOf(fila.getEstado());
-      if (estado != EstadoRegla.YA_NO_RIGE) {
+      if (seMuestra(estado)) {
         estados.put(fila.getReglaId(), estado);
       }
     }
@@ -165,8 +176,7 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
   private static Entrada aEntrada(ReglaEntidad fila, EstadoRegla estado, NormaEntidad norma) {
     Regla regla = ReglaMapper.aDominio(fila, estado);
     boolean temporal =
-        regla.vigenciaPropia().map(Vigencia::esTemporal).orElse(false)
-            || (norma != null && norma.getVigenteHasta() != null);
+        esTemporal(regla.vigenciaPropia(), norma == null ? null : norma.getVigenteHasta());
     ReglaVista vista =
         new ReglaVista(
             regla.enunciado(),
@@ -180,6 +190,29 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
         regla.fuente().articulo(),
         fila.getId(),
         vista);
+  }
+
+  /**
+   * Si la consulta muestra una regla en este estado. El {@code switch} es exhaustivo: si se agrega
+   * un estado, no compila hasta decidir si se muestra.
+   */
+  static boolean seMuestra(EstadoRegla estado) {
+    return switch (estado) {
+      case VIGENTE, PROGRAMADA, EN_REVISION -> true;
+      case YA_NO_RIGE -> false;
+    };
+  }
+
+  /**
+   * Si la regla es temporal: su vigencia propia tiene un «vigente hasta», o lo tiene su norma
+   * (glosario, «Vigencia»).
+   *
+   * @param vigenciaPropia vigencia de la regla, si tiene una propia
+   * @param vigenteHastaDeLaNorma fecha hasta la que rige la norma; {@code null} si no la tiene o la
+   *     regla no tiene norma
+   */
+  static boolean esTemporal(Optional<Vigencia> vigenciaPropia, LocalDate vigenteHastaDeLaNorma) {
+    return vigenciaPropia.map(Vigencia::esTemporal).orElse(false) || vigenteHastaDeLaNorma != null;
   }
 
   private static FuenteVista aFuente(NormaEntidad norma, String articulo) {

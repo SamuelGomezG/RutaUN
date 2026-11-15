@@ -16,10 +16,12 @@ import java.util.Map;
  * @param version número de la versión vigente; la primera es la 1 (supuesto: el SRS no fija desde
  *     qué número se cuentan)
  * @param fecha fecha de la versión
- * @param reglasPorCategoria reglas vigentes y programadas, por nombre de categoría (con el
- *     vocabulario del glosario, «Regla»: «Prerrequisitos y habilitación», «Otra»…) y en el orden
- *     del consolidado: el mismo dato produce siempre la misma vista. Vacío si la versión no tiene
- *     reglas cargadas (UC06 ext. 4a); una categoría presente tiene al menos una regla
+ * @param reglasPorCategoria reglas vigentes, programadas y en revisión, por nombre de categoría
+ *     (con el vocabulario del glosario, «Regla»: «Prerrequisitos y habilitación», «Otra»…). Las
+ *     categorías van en el orden del glosario y, dentro de cada una, las reglas por fecha de
+ *     expedición de su norma, artículo, enunciado e identificador: el mismo dato produce siempre la
+ *     misma vista. Vacío si la versión no tiene reglas que mostrar (UC06 ext. 4a); una categoría
+ *     presente tiene al menos una regla
  */
 public record ConsolidadoVista(
     ProgramaId programa,
