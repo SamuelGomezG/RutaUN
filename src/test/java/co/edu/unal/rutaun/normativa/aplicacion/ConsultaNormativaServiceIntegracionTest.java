@@ -10,7 +10,9 @@ import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.ProgramaId;
 import co.edu.unal.rutaun.normativa.ConsolidadoVista;
 import co.edu.unal.rutaun.normativa.ConsultaNormativaFacade;
+import co.edu.unal.rutaun.normativa.ProgramaVista;
 import co.edu.unal.rutaun.normativa.ReglaVista;
+import co.edu.unal.rutaun.normativa.persistencia.ProgramaEntidad;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaJpaRepository;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
 import jakarta.persistence.EntityManager;
@@ -20,6 +22,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,8 +46,9 @@ import org.springframework.transaction.annotation.Transactional;
 class ConsultaNormativaServiceIntegracionTest {
 
   /**
-   * Los tres acuerdos de la semilla, por nombre: un patrón {@code semilla/*.json} también recogería
-   * los archivos de prueba que hay en la misma carpeta.
+   * Los tres acuerdos de la semilla, por nombre y no con un patrón {@code semilla/*.json}: así la
+   * prueba no cambia cuando se agregan normas a la semilla (por ejemplo, las de datos de prueba de
+   * #196).
    */
   private static final List<String> ACUERDOS =
       List.of(
@@ -223,5 +227,111 @@ class ConsultaNormativaServiceIntegracionTest {
     assertThat(reglas)
         .filteredOn(r -> !r.fuente().orElseThrow().norma().numero().equals("008"))
         .noneMatch(ReglaVista::temporal);
+  }
+
+  /** Crea un programa con una versión del consolidado, sin reglas, solo para listarlo. */
+  private void programaConVersion(String nombre, String codigoSia) {
+    UUID programaId = UUID.randomUUID();
+    programas.save(new ProgramaEntidad(programaId, nombre, codigoSia, "Ingeniería"));
+    entityManager.flush();
+    UUID consolidadoId = UUID.randomUUID();
+    jdbc.update(
+        "INSERT INTO consolidado (id, programa_id, version_bloqueo) VALUES (?, ?, 0)",
+        consolidadoId,
+        programaId);
+    jdbc.update(
+        "INSERT INTO version_consolidado (id, consolidado_id, programa_id, numero, fecha, "
+            + "motivo, numero_plan_de_estudios) "
+            + "VALUES (?, ?, ?, 1, DATE '2026-01-01', 'PRUEBA', 1)",
+        UUID.randomUUID(),
+        consolidadoId,
+        programaId);
+  }
+
+  @Test
+  void uc06_paso2_unProgramaSinVersionVigenteNoSeOfrece() {
+    programas.save(
+        new ProgramaEntidad(UUID.randomUUID(), "Programa sin norma", "9900", "Ingeniería"));
+
+    assertThat(consulta.programas())
+        .extracting(ProgramaVista::nombre)
+        .contains("Ingeniería de Sistemas y Computación")
+        .doesNotContain("Programa sin norma");
+  }
+
+  @Test
+  void uc06_paso2_losProgramasSeOfrecenPorNombre() {
+    programaConVersion("Zootecnia de prueba", "9901");
+    programaConVersion("Química de prueba", "9902");
+    programaConVersion("Biología de prueba", "9903");
+    programaConVersion("Arquitectura de prueba", "9904");
+
+    assertThat(consulta.programas())
+        .extracting(ProgramaVista::nombre)
+        .containsSubsequence(
+            "Arquitectura de prueba",
+            "Biología de prueba",
+            "Ingeniería de Sistemas y Computación",
+            "Química de prueba",
+            "Zootecnia de prueba");
+  }
+
+  @Test
+  void uc06_paso4_conReglasDeVariasNormasVanPorFechaDeExpedicionYPorArticulo() {
+    Map<String, Integer> antiguedad = Map.of("008", 0, "003-A", 1, "11", 2);
+    boolean algunaCategoriaMezclaNormas = false;
+
+    for (Map.Entry<String, List<ReglaVista>> categoria :
+        consolidado().reglasPorCategoria().entrySet()) {
+      List<ReglaVista> reglas = categoria.getValue();
+      List<Integer> normas =
+          reglas.stream()
+              .map(regla -> antiguedad.get(regla.fuente().orElseThrow().norma().numero()))
+              .toList();
+      assertThat(normas)
+          .as("la categoría «%s» va de la norma más antigua a la más reciente", categoria.getKey())
+          .isSortedAccordingTo(Comparator.naturalOrder());
+      algunaCategoriaMezclaNormas |= normas.stream().distinct().count() > 1;
+      for (int i = 1; i < reglas.size(); i++) {
+        String anterior = reglas.get(i - 1).fuente().orElseThrow().articulo();
+        String actual = reglas.get(i).fuente().orElseThrow().articulo();
+        if (normas.get(i - 1).equals(normas.get(i))) {
+          assertThat(OrdenDeArticulos.INSTANCIA.compare(anterior, actual))
+              .as("en «%s», «%s» antes de «%s»", categoria.getKey(), anterior, actual)
+              .isLessThanOrEqualTo(0);
+        }
+      }
+    }
+
+    assertThat(algunaCategoriaMezclaNormas)
+        .as("la prueba necesita una categoría con reglas de dos normas para ordenar por fecha")
+        .isTrue();
+  }
+
+  @Test
+  void uc06_paso4_elComponenteDeLibreEleccionVaEnSuCategoria() {
+    Map<String, List<ReglaVista>> porCategoria = consolidado().reglasPorCategoria();
+
+    assertThat(porCategoria.get("Libre elección"))
+        .extracting(ReglaVista::enunciado)
+        .anyMatch(enunciado -> enunciado.startsWith("Componente de Libre Elección:"));
+    assertThat(porCategoria.get("Componentes y créditos"))
+        .extracting(ReglaVista::enunciado)
+        .noneMatch(enunciado -> enunciado.startsWith("Componente de Libre Elección:"));
+  }
+
+  @Test
+  void uc06_ext4a_siTodasLasReglasYaNoRigenElConsolidadoNoTieneReglasQueMostrar() {
+    entityManager.flush();
+    jdbc.update(
+        "UPDATE regla_en_version SET estado = 'YA_NO_RIGE' WHERE version_id = "
+            + "(SELECT id FROM version_consolidado WHERE programa_id = ? AND numero = 3)",
+        sistemas().valor());
+    entityManager.clear();
+
+    ConsolidadoVista consolidado = consolidado();
+
+    assertThat(consolidado.version()).isEqualTo(3);
+    assertThat(consolidado.sinReglas()).isTrue();
   }
 }

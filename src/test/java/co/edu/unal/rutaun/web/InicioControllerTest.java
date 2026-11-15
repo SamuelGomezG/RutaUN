@@ -30,6 +30,7 @@ class InicioControllerTest {
     mockMvc
         .perform(get("/"))
         .andExpect(status().isOk())
-        .andExpect(content().string(containsString("href=\"/programas\"")));
+        .andExpect(content().string(containsString("href=\"/programas\"")))
+        .andExpect(content().string(containsString("Consultar regla del programa y su acuerdo")));
   }
 }
