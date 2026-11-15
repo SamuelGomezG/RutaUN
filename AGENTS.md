@@ -111,7 +111,7 @@ project/                          raíz del repositorio
 
 ## Normativa y datos
 
-- La normativa se carga desde JSON y nunca se escribe como constante. La semilla de Sistemas (los acuerdos 003-A de 2022, 11 de 2023 y 008 de 2008, más el archivo de programas) vive en `src/main/resources/semilla/`.
+- La normativa se carga desde JSON y nunca se escribe como constante. La semilla de Sistemas (los acuerdos 003-A de 2022, 11 de 2023 y 008 de 2008, más el archivo de programas) vive en `src/main/resources/semilla/`. Trae además dos normas ficticias marcadas «(datos de prueba)», en archivos `datos-de-prueba-*.json`, para los casos que ENT-04 pide y la normativa real todavía no puede cubrir; su convención está en `docs/datos/formato-normativa.md`.
 - Con el perfil `dev`, el arranque carga primero los programas (SOP-03) y luego las normas, con el mismo servicio de importación de UC07-HU03. Repetir el arranque no duplica lo ya cargado. No hay pantalla de carga ni autenticación en el sprint 1.
 - El formato del JSON es un contrato con los administradores de normativa: se documenta en `docs/datos/formato-normativa.md`, y los cambios de formato se prueban con los archivos de `src/test/resources/json/`.
 

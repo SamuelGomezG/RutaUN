@@ -342,6 +342,35 @@ La importación omite una norma ya registrada (por tipo, número, año y órgano
 de desarrollo tome un dato corregido de la semilla hay que borrar `data/` y volver a arrancar con
 el perfil `dev`.
 
+## Datos de prueba de la semilla
+
+La semilla trae dos normas ficticias para cubrir los casos que pide ENT-04 y que la normativa real
+todavía no puede aportar:
+
+| Archivo | Norma | Casos que cubre |
+|---|---|---|
+| `datos-de-prueba-vigentes.json` | Acuerdo 901 de 2026, Consejo de Facultad de Ingeniería (datos de prueba) | Un máximo de créditos por periodo, un correquisito entre dos materias de la malla y una regla informativa con «vigencia hasta» |
+| `datos-de-prueba-programados.json` | Acuerdo 902 de 2026, Consejo de Facultad de Ingeniería (datos de prueba) | Una norma que aplica desde una fecha futura, para que sus reglas queden `PROGRAMADA`; es toda informativa y provoca el aviso de UC07 ext. 5a |
+
+**Convención de marcado.** Un archivo es de datos de prueba si su nombre empieza por
+`datos-de-prueba-`. En esos archivos, el órgano de la norma y el enunciado y el objeto de cada regla
+contienen el texto exacto «(datos de prueba)»; en los demás archivos de normas ese texto no aparece
+en ningún campo. `DatosDePruebaDeLaSemillaTest` vigila la convención.
+
+**Por qué no se usan las normas reales.** La Circular 11 de 2026 (máximo de 23 créditos) y la
+Resolución 057 de 2026 rigen por periodo académico, y las tablas `norma` y `regla` solo guardan
+fechas; los periodos llegan con R-05 ([#141](https://github.com/SamuelGomezG/RutaUN/issues/141)).
+Además, el importador todavía no aplica afectaciones
+([#175](https://github.com/SamuelGomezG/RutaUN/issues/175)). Las fechas futuras (2099) son
+deliberadas: no se vencen durante la vida del proyecto y delatan que los datos son ficticios.
+
+**Cuándo se borran.** Cuando el caso que cubren llegue con una norma real, se borran los dos
+archivos y se actualizan las cifras de `SemillaDeSistemasTest` y de «Qué deja la semilla» en
+[`esquema-de-la-base.md`](esquema-de-la-base.md).
+
+Los datos de prueba no traen reglas de estructura (`MATERIA`, `AGRUPACION`, `COMPONENTE` ni
+`PROGRAMA`) ni afectaciones: no deben mover la versión del plan de estudios ni depender de #175.
+
 ## Errores que los archivos inválidos deben provocar
 
 | Archivo | Caso | Resultado esperado |

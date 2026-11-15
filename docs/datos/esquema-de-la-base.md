@@ -151,11 +151,11 @@ Con una base nueva y el perfil `dev`:
 | Tabla | Filas |
 | --- | --- |
 | `programa` | 1 |
-| `norma` | 3 |
-| `regla` | 276 |
+| `norma` | 5 |
+| `regla` | 280 |
 | `consolidado` | 1 |
-| `version_consolidado` | 3 |
-| `regla_en_version` | 323 |
+| `version_consolidado` | 5 |
+| `regla_en_version` | 880 |
 | `materia` | 0 |
 | `incidente` | 0 |
 
@@ -166,10 +166,14 @@ Las tres versiones salen del orden en que se cargan los archivos ([`entorno-y-co
 | 1 | Acuerdo 003-A de 2022, Consejo Académico | 20 | 20 | 1 |
 | 2 | Acuerdo 008 de 2008, Consejo Superior Universitario | 7 | 27 | 1 |
 | 3 | Acuerdo 11 de 2023, Consejo de Facultad de Ingeniería | 249 | 276 | 2 |
+| 4 | Acuerdo 902 de 2026, Consejo de Facultad de Ingeniería (datos de prueba) | 1 | 277 | 2 |
+| 5 | Acuerdo 901 de 2026, Consejo de Facultad de Ingeniería (datos de prueba) | 3 | 280 | 2 |
 
-Las 323 filas de `regla_en_version` son la suma de las reglas de cada versión (20 + 27 + 276), todas `VIGENTE`. La fecha de cada versión es el día de la carga, no la de la norma.
+Las 880 filas de `regla_en_version` son la suma de las reglas de cada versión (20 + 27 + 276 + 277 + 280). En la versión vigente (la 5), 279 quedan `VIGENTE` y 1 `PROGRAMADA`; una de las vigentes tiene `vigente_hasta`. La fecha de cada versión es el día de la carga, no la de la norma.
 
-Estas cifras cambian cuando cambie la semilla: [#178](https://github.com/SamuelGomezG/RutaUN/issues/178) (doce agrupaciones registradas dos veces) y [#133](https://github.com/SamuelGomezG/RutaUN/issues/133) (casos que faltan). [#146](https://github.com/SamuelGomezG/RutaUN/issues/146) reordena la carga por fecha de expedición: las 276 filas de `regla` no cambian, pero las de `regla_en_version` pasan de 323 (20 + 27 + 276) a 310 (7 + 27 + 276), porque son la suma de las reglas de cada versión. `normativa/aplicacion/SemillaDeSistemasTest` fija las cifras en sus constantes: quien cambie la semilla las actualiza ahí, en la prueba de #130 de `ImportacionDeNormasServiceTest` y en el conteo de `regla_en_version` de esta tabla. Si no coinciden con lo que ves, corre las consultas de abajo y corrige esta sección.
+Los dos archivos `datos-de-prueba-*.json` son ficticios y llevan la marca «(datos de prueba)»; su convención está en [`formato-normativa.md`](formato-normativa.md), «Datos de prueba de la semilla».
+
+Estas cifras cambian cuando cambie la semilla: [#178](https://github.com/SamuelGomezG/RutaUN/issues/178) (doce agrupaciones registradas dos veces) y [#146](https://github.com/SamuelGomezG/RutaUN/issues/146) (orden de carga). [#146](https://github.com/SamuelGomezG/RutaUN/issues/146) reordena la carga por fecha de expedición: las 280 filas de `regla` no cambian, pero las de `regla_en_version` pasan de 880 (20 + 27 + 276 + 277 + 280) a 867 (7 + 27 + 276 + 277 + 280), porque son la suma de las reglas de cada versión. `normativa/aplicacion/SemillaDeSistemasTest` fija las cifras en sus constantes: quien cambie la semilla las actualiza ahí; si el cambio toca uno de los tres acuerdos, también la prueba de #130 de `ImportacionDeNormasServiceTest`; y actualiza el conteo de `regla_en_version` de esta tabla. Si no coinciden con lo que ves, corre las consultas de abajo y corrige esta sección.
 
 ## Consultas de inspección
 
