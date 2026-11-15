@@ -1,5 +1,5 @@
 ---
-title: "Supuestos del equipo (S1–S18)"
+title: "Supuestos del equipo (S1–S19)"
 doc_type: "supuestos"
 srs_ids:
   - S1
@@ -20,15 +20,16 @@ srs_ids:
   - S16
   - S17
   - S18
+  - S19
 depends_on:
   - 00-contexto.md
   - 01-invariantes.md
 ---
-# 8. Supuestos del equipo (S1–S18)
+# 8. Supuestos del equipo (S1–S19)
 
-> **Cuándo cargar:** antes de cualquier cálculo o validación. La lista abajo es la fuente de los «supuesto del equipo» citados sin número en glosario y casos (S1 → (1), … S17 → (17); S18 es la decisión del 25 de octubre, ver S18 abajo).
+> **Cuándo cargar:** antes de cualquier cálculo o validación. La lista abajo es la fuente de los «supuesto del equipo» citados sin número en glosario y casos (S1 → (1), … S17 → (17); S18 es la decisión del 25 de octubre, ver S18 abajo; S19, la del 15 de noviembre de 2026).
 
-Decisiones que el equipo tomó donde las normas o la entrevista no dicen nada. En el documento original se numeran (1) a (17) y se señalan como «supuesto del equipo» donde se aplican. **S1 sigue por confirmar (las normas revisadas no tratan el tema). S3 se mantiene en 30 s con el respaldo de TT-05; quedan pendientes 6 casos sin calcular y el estrés de malla duplicada. El S18 es una decisión ya aplicada (25 de octubre de 2026).**
+Decisiones que el equipo tomó donde las normas o la entrevista no dicen nada. En el documento original se numeran (1) a (17) y se señalan como «supuesto del equipo» donde se aplican. **S1 sigue por confirmar (las normas revisadas no tratan el tema). S3 se mantiene en 30 s con el respaldo de TT-05; quedan pendientes 6 casos sin calcular y el estrés de malla duplicada. El S18 es una decisión ya aplicada (25 de octubre de 2026). El S19 es una decisión del 15 de noviembre de 2026; el código la aplica con #153.**
 
 | ID | Supuesto |
 |---|---|
@@ -50,5 +51,6 @@ Decisiones que el equipo tomó donde las normas o la entrevista no dicen nada. E
 | **S16** | Cuando una norma cuenta la vigencia de una regla desde un hecho que su texto no fecha (como su implementación en el SIA), **el administrador registra el periodo que conste en la información oficial con que cuente** («Vigencia»). |
 | **S17** | Las **materias externas no se muestran**: las de nivelación se dan por cumplidas, porque solo las cursa quien las debe por su puntaje de admisión, y las de otro programa, por no cumplibles, porque el SIA no deja inscribirlas a los estudiantes del programa («Materia externa»). |
 | **S18** | Los estados de una restricción se combinan **por certeza**, en este orden: cumplida > en curso > incierta > pendiente. Una «y» toma el peor de sus términos y una «o», el mejor; una **restricción incierta** se trata como cumplida, con aviso, y una materia obligatoria cuyo reemplazo es incierto se sigue incluyendo, con el aviso de que podría estar cubierta o no (ver «Correquisito», «Restricción (de una materia)» y «Materia que ya no rige»). *(Cambio n.º 8 del diseño, aplicado el 25 de octubre de 2026.)* |
+| **S19** | La **versión del plan de estudios** de un programa sube **una sola vez por cada norma incorporada que toca reglas de estructura** (de materia, de agrupación, de componente y libre elección, o de programa; ver «Datos de una regla»), al incorporarla con UC07, aunque esas reglas queden programadas. La norma base deja la versión 1. No la suben una versión automática, que solo cambia el estado de las reglas, ni una corrección (S13) («Programa», «Versión del consolidado»). *(Decisión del equipo del 15 de noviembre de 2026, #138.)* |
 
-*Nota:* los identificadores S1–S17 corresponden a los números (1)–(17) del glosario original. En el cuerpo de los casos de uso, los supuestos aparecen como «(supuesto del equipo)» sin número; por ejemplo, la regla de que las marcas «en curso» por actualizar cuentan como aprobadas mientras tanto (UC01 ext. 2c, UC02 ext. 2b, UC03 ext. 2c, UC04 ext. 2f) es S10, y que una incorporación se hace en una sola sesión (UC07, precondición 4) es S8. **S18 no viene del glosario:** es la decisión del equipo del 25 de octubre de 2026 que aplica el cambio n.º 8 del diseño (estados por certeza).
+*Nota:* los identificadores S1–S17 corresponden a los números (1)–(17) del glosario original. En el cuerpo de los casos de uso, los supuestos aparecen como «(supuesto del equipo)» sin número; por ejemplo, la regla de que las marcas «en curso» por actualizar cuentan como aprobadas mientras tanto (UC01 ext. 2c, UC02 ext. 2b, UC03 ext. 2c, UC04 ext. 2f) es S10, y que una incorporación se hace en una sola sesión (UC07, precondición 4) es S8. **S18 no viene del glosario:** es la decisión del equipo del 25 de octubre de 2026 que aplica el cambio n.º 8 del diseño (estados por certeza). **S19 tampoco viene del glosario:** es la decisión del equipo del 15 de noviembre de 2026 sobre cuándo sube la versión del plan de estudios (#138).

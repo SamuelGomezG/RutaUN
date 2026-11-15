@@ -2,7 +2,7 @@
 title: "Trazabilidad y backlog"
 doc_type: "trazabilidad"
 srs_ids:
-  - S1..S18
+  - S1..S19
   - UC01..UC07
   - §12
 depends_on:
@@ -22,7 +22,7 @@ depends_on:
 
 ## Regla de dueño único por ID
 
-Cada ID (`UC01 ext. 4b`, `UC03-HU05`, `S7`… `S18`, `#17`, `[I-n]`) aparece como texto normativo **exactamente una vez** en este árbol. Los índices y enlaces no cuentan como aparición normativa. Excepción declarada: la leyenda de lectura de los casos (§9 del origen) se replica verbatim en `casos/README.md` y en los 7 archivos de caso (8 copias, hash-iguales).
+Cada ID (`UC01 ext. 4b`, `UC03-HU05`, `S7`… `S19`, `#17`, `[I-n]`) aparece como texto normativo **exactamente una vez** en este árbol. Los índices y enlaces no cuentan como aparición normativa. Excepción declarada: la leyenda de lectura de los casos (§9 del origen) se replica verbatim en `casos/README.md` y en los 7 archivos de caso (8 copias, hash-iguales).
 
 El backlog contiene las **47 historias de usuario** de §11.
 

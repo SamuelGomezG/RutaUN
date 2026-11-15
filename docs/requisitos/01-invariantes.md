@@ -22,7 +22,7 @@ Resumen de lo que **nunca** debe violar una implementación. Cada punto remite a
 - RutaUN **no es fuente oficial**; la fuente es el documento publicado en Régimen Legal. Cada regla se muestra con su fuente.
 
 ## 4.2 Normativa, consolidado y reglas
-- **Programa** = unidad que tiene un consolidado. Cada estudiante tiene **un solo programa** a la vez. Un programa con más de un plan de estudios vigente (p. ej. régimen de transición) se carga como programas distintos.
+- **Programa** = unidad que tiene un consolidado. Cada estudiante tiene **un solo programa** a la vez. Una reforma del plan de estudios crea una versión nueva del mismo programa, y la más reciente rige para todos sus estudiantes; la convivencia de versiones por cohorte queda fuera de alcance («Programa»). La versión del plan de estudios sube solo al incorporar una norma con reglas de estructura (S19).
 - **Consolidado normativo versionado, con historial inmutable.** Se crea una **versión nueva** (a) por cada incorporación confirmada en UC07, (b) por cada corrección del administrador (motivo «corrección») y (c) automáticamente cuando una regla empieza o deja de regir (al avanzar el periodo en curso, o al llegar su fecha, hora de Colombia; una sola por programa y día — S15). Las versiones anteriores se conservan; una incorporación nunca borra historia.
 - **Toda regla tiene fuente** (norma + artículo o numeral). UC07 no acepta reglas sin fuente. Si una regla aparece sin fuente, se muestra como «sin fuente registrada», nunca como respaldada por una norma, y se registra un incidente.
 - **Una regla fija un solo tipo de dato sobre un solo objeto.** Un mismo artículo suele contener muchas reglas.
