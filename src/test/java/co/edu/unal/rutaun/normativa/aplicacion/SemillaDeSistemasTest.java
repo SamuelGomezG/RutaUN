@@ -12,9 +12,11 @@ import co.edu.unal.rutaun.normativa.persistencia.ReglaJpaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.VersionEntidad;
 import co.edu.unal.rutaun.normativa.persistencia.VersionJpaRepository;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
+import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Path;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -38,6 +40,10 @@ import org.springframework.transaction.annotation.Transactional;
  * esta clase, el número de llamadas de {@code SemillaDeDesarrolloRunnerTest} y la prueba de #130 en
  * {@code ImportacionDeNormasServiceTest}.
  *
+ * <p>Con {@code @Transactional}, las dos corridas comparten transacción: la prueba demuestra que la
+ * segunda omite lo ya cargado dentro de ella. Que tampoco duplica entre dos arranques con la base
+ * en archivo se demuestra a mano en el paso 3 de «Cómo ejecutarlo» del PR.
+ *
  * <p>{@code src/test/resources/semilla/} no debe existir: cualquier archivo ahí oculta la semilla
  * real en las pruebas, porque {@code classpath:semilla/*.json} resuelve solo la primera carpeta
  * {@code semilla/} del classpath.
@@ -52,9 +58,12 @@ class SemillaDeSistemasTest {
   private static final int NORMAS = 3;
   private static final int REGLAS = 276;
   private static final int CONSOLIDADOS = 1;
-  private static final int VERSIONES = 3;
-  private static final int REGLAS_EN_VERSION = 323;
   private static final List<Integer> REGLAS_POR_VERSION = List.of(20, 27, 276);
+  private static final int VERSIONES = REGLAS_POR_VERSION.size();
+  private static final int REGLAS_EN_VERSION =
+      REGLAS_POR_VERSION.stream().mapToInt(Integer::intValue).sum();
+  private static final int REGLAS_DE_LA_VIGENTE =
+      REGLAS_POR_VERSION.get(REGLAS_POR_VERSION.size() - 1);
   private static final Cifras ESPERADAS =
       new Cifras(
           PROGRAMAS,
@@ -96,19 +105,18 @@ class SemillaDeSistemasTest {
   }
 
   @BeforeEach
-  void comprobarOrigenDeLaSemilla() {
-    assertThat(Path.of("src", "test", "resources", "semilla"))
-        .as("src/test/resources/semilla/ oculta la semilla real en las pruebas")
-        .doesNotExist();
+  void comprobarOrigenDeLaSemilla() throws IOException {
+    URL produccion =
+        SemillaDeDesarrolloRunner.class.getProtectionDomain().getCodeSource().getLocation();
+    List<URL> raices =
+        Collections.list(Thread.currentThread().getContextClassLoader().getResources("semilla/"));
 
-    ClassLoader cargador = Thread.currentThread().getContextClassLoader();
-    URL raiz = cargador.getResource("semilla/");
-    assertThat(raiz)
-        .as("debe existir semilla/ en target/classes (corre ./mvnw clean si no)")
-        .isNotNull();
-    assertThat(raiz.getPath())
-        .as("el runner debe resolver semilla/ desde target/classes, no desde test-classes")
-        .doesNotContain("test-classes");
+    assertThat(raices)
+        .as(
+            "semilla/ debe resolverse solo desde la salida de producción; "
+                + "borra src/test/resources/semilla/ y corre ./mvnw clean")
+        .isNotEmpty()
+        .allSatisfy(raiz -> assertThat(raiz.getPath()).startsWith(produccion.getPath()));
   }
 
   @Test
@@ -118,12 +126,12 @@ class SemillaDeSistemasTest {
     Cifras cifras = cifras();
     registrar(cifras);
     assertThat(cifras)
-        .as("la semilla cambió (actualiza las constantes) o existe src/test/resources/semilla/")
+        .as("la semilla cambió (actualiza las constantes) o una prueba dejó filas sin revertir")
         .isEqualTo(ESPERADAS);
 
     VersionEntidad vigente = versionVigente();
-    assertThat(vigente.getNumero()).isEqualTo(3);
-    assertThat(reglasEnVersion.findByVersionId(vigente.getId())).hasSize(REGLAS);
+    assertThat(vigente.getNumero()).isEqualTo(VERSIONES);
+    assertThat(reglasEnVersion.findByVersionId(vigente.getId())).hasSize(REGLAS_DE_LA_VIGENTE);
     assertThat(normasDeLasReglasDe(vigente)).hasSize(NORMAS);
   }
 
@@ -131,12 +139,19 @@ class SemillaDeSistemasTest {
   void tt04_cargarDosVecesLaSemillaNoDuplica() {
     cargarLaSemilla();
     Cifras primera = cifras();
+    final Set<UUID> antes = identificadores();
 
     cargarLaSemilla();
 
     Cifras segunda = cifras();
     registrar(segunda);
-    assertThat(segunda).isEqualTo(primera).isEqualTo(ESPERADAS);
+    assertThat(segunda)
+        .as("la segunda corrida debe dejar las mismas cifras")
+        .isEqualTo(primera)
+        .isEqualTo(ESPERADAS);
+    assertThat(identificadores())
+        .as("la segunda corrida no debe borrar y recrear filas")
+        .isEqualTo(antes);
   }
 
   private void cargarLaSemilla() {
@@ -144,8 +159,10 @@ class SemillaDeSistemasTest {
   }
 
   private Cifras cifras() {
+    UUID programaId = programaDeSistemas();
     List<VersionEntidad> ordenadas =
         versiones.findAll().stream()
+            .filter(version -> programaId.equals(version.getProgramaId()))
             .sorted(Comparator.comparingInt(VersionEntidad::getNumero))
             .toList();
     return new Cifras(
@@ -160,9 +177,21 @@ class SemillaDeSistemasTest {
             .toList());
   }
 
+  private UUID programaDeSistemas() {
+    return programasGuardados.findByCodigoSia("2879").orElseThrow().getId();
+  }
+
   private VersionEntidad versionVigente() {
-    UUID programaId = programasGuardados.findByCodigoSia("2879").orElseThrow().getId();
-    return versiones.findTopByProgramaIdOrderByNumeroDesc(programaId).orElseThrow();
+    return versiones.findTopByProgramaIdOrderByNumeroDesc(programaDeSistemas()).orElseThrow();
+  }
+
+  private Set<UUID> identificadores() {
+    Set<UUID> ids = new HashSet<>();
+    programasGuardados.findAll().forEach(programa -> ids.add(programa.getId()));
+    normasGuardadas.findAll().forEach(norma -> ids.add(norma.getId()));
+    reglas.findAll().forEach(regla -> ids.add(regla.getId()));
+    versiones.findAll().forEach(version -> ids.add(version.getId()));
+    return ids;
   }
 
   private Set<UUID> normasDeLasReglasDe(VersionEntidad version) {
