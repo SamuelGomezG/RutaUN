@@ -95,7 +95,7 @@ try {
   Remove-Item -LiteralPath $temporal -ErrorAction SilentlyContinue
 }
 
-if ($salida -match '90020') {
+if ($salida -match '\[90020-\d+|Database may be already in use') {
   [Console]::Error.WriteLine('consultar-base: la base está abierta por otro proceso.')
   [Console]::Error.WriteLine('  Detén la aplicación: H2 en archivo admite un solo proceso.')
   exit 1
