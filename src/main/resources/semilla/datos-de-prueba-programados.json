@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "1.0",
+  "programa": {
+    "codigoSia": "2879",
+    "nombre": "Ingeniería de Sistemas y Computación",
+    "facultad": "Ingeniería"
+  },
+  "norma": {
+    "tipo": "ACUERDO",
+    "numero": "902",
+    "anio": 2026,
+    "organo": "Consejo de Facultad de Ingeniería (datos de prueba)",
+    "tipoDeEfecto": "BASE",
+    "fechaExpedicion": "2026-01-15",
+    "vigencia": {
+      "aplicaDesde": {
+        "tipo": "FECHA",
+        "fecha": "2099-01-01"
+      },
+      "vigenteHasta": null
+    },
+    "enlaceRegimenLegal": null,
+    "alcance": {
+      "tipo": "PROGRAMAS",
+      "facultades": [],
+      "programas": ["2879"],
+      "exclusiones": [],
+      "texto": "Norma ficticia programada de datos de prueba: aplicará solo al programa de Ingeniería de Sistemas y Computación (datos de prueba)."
+    }
+  },
+  "reglas": [
+    {
+      "categoria": "OTRA",
+      "objeto": "Radicación virtual de trámites de grado (datos de prueba)",
+      "enunciado": "A partir de su vigencia, los trámites de grado se radican por medios virtuales (datos de prueba).",
+      "articulo": "art. 1",
+      "vigenciaPropia": null,
+      "clasificacion": "INFORMATIVA",
+      "afectacion": null,
+      "datos": {
+        "tipo": "OTRA"
+      }
+    }
+  ]
+}

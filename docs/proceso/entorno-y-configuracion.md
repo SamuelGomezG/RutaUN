@@ -62,10 +62,13 @@ Con una base nueva, el log termina así:
 
 ```text
 Programas cargados: 1 creados, 0 ya existían.
-Normas cargadas: 3 creadas, 0 ya existían; 3 versiones nuevas.
+La norma ACUERDO 902 de 2026, Consejo de Facultad de Ingeniería (datos de prueba) no deja ningún plan desactualizado: todas sus reglas son informativas.
+Normas cargadas: 5 creadas, 0 ya existían; 5 versiones nuevas.
 ```
 
-Repetir el arranque no duplica nada: un programa se reconoce por su código SIA y una norma por su tipo, número, año y órgano, y lo que ya está se omite (`0 creadas, 3 ya existían; 0 versiones nuevas`). Por eso un dato corregido en la semilla no llega a una base que ya la cargó. Si un archivo de la semilla es inválido, el arranque falla y no se guarda nada de ese archivo.
+La línea de la ext. 5a aparece porque el Acuerdo 902 (datos de prueba) solo trae reglas informativas; el Acuerdo 901 no la provoca porque tiene reglas del plan.
+
+Repetir el arranque no duplica nada: un programa se reconoce por su código SIA y una norma por su tipo, número, año y órgano, y lo que ya está se omite (`0 creadas, 5 ya existían; 0 versiones nuevas`). Por eso un dato corregido en la semilla no llega a una base que ya la cargó. Si un archivo de la semilla es inválido, el arranque falla y no se guarda nada de ese archivo.
 
 ## Qué responde la aplicación hoy
 

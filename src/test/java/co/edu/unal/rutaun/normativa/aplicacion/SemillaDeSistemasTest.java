@@ -2,6 +2,14 @@ package co.edu.unal.rutaun.normativa.aplicacion;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import co.edu.unal.rutaun.compartido.CodigoMateria;
+import co.edu.unal.rutaun.compartido.EstadoRegla;
+import co.edu.unal.rutaun.normativa.ClasificacionRegla;
+import co.edu.unal.rutaun.normativa.dominio.DatosDeRegla;
+import co.edu.unal.rutaun.normativa.dominio.ExpresionDeMaterias;
+import co.edu.unal.rutaun.normativa.dominio.Regla;
+import co.edu.unal.rutaun.normativa.dominio.TipoDeCargaPorPeriodo;
+import co.edu.unal.rutaun.normativa.dominio.Vigencia;
 import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoJpaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.NormaJpaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaJpaRepository;
@@ -18,6 +26,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -35,10 +44,11 @@ import org.springframework.transaction.annotation.Transactional;
  * <p>TT-04-T5 (#131, #100): corre {@link SemillaDeDesarrolloRunner} sobre H2 en memoria y comprueba
  * programas, normas, reglas, consolidados, versiones y reglas por versión, una y dos veces.
  *
- * <p>Las cifras son las de la semilla del 2026-11-14. Cambian con #133 (casos que faltan), #178
- * (agrupaciones repetidas) y #146 (orden de carga): quien las cambie actualiza las constantes de
- * esta clase, el número de llamadas de {@code SemillaDeDesarrolloRunnerTest} y la prueba de #130 en
- * {@code ImportacionDeNormasServiceTest}.
+ * <p>Las cifras son las de la semilla del 2026-11-14, con los dos archivos de datos de prueba de
+ * TT-04-T4 (#133). Cambian con #178 (agrupaciones repetidas) y #146 (orden de carga): quien las
+ * cambie actualiza estas constantes; si el cambio toca uno de los tres acuerdos, también la prueba
+ * de #130 de {@code ImportacionDeNormasServiceTest}. El número de llamadas de {@code
+ * SemillaDeDesarrolloRunnerTest} se calcula a partir de los archivos.
  *
  * <p>Con {@code @Transactional}, las dos corridas comparten transacción: la prueba demuestra que la
  * segunda omite lo ya cargado dentro de ella. Que tampoco duplica entre dos arranques con la base
@@ -55,10 +65,10 @@ class SemillaDeSistemasTest {
   private static final Logger LOG = LoggerFactory.getLogger(SemillaDeSistemasTest.class);
 
   private static final int PROGRAMAS = 1;
-  private static final int NORMAS = 3;
-  private static final int REGLAS = 276;
+  private static final int NORMAS = 5;
+  private static final int REGLAS = 280;
   private static final int CONSOLIDADOS = 1;
-  private static final List<Integer> REGLAS_POR_VERSION = List.of(20, 27, 276);
+  private static final List<Integer> REGLAS_POR_VERSION = List.of(20, 27, 276, 277, 280);
   private static final int VERSIONES = REGLAS_POR_VERSION.size();
   private static final int REGLAS_EN_VERSION =
       REGLAS_POR_VERSION.stream().mapToInt(Integer::intValue).sum();
@@ -120,7 +130,7 @@ class SemillaDeSistemasTest {
   }
 
   @Test
-  void tt04_laSemillaCompletaDejaTresNormasYUnaVersionVigenteConTodasSusReglas() {
+  void tt04_laSemillaCompletaDejaCincoNormasYUnaVersionVigenteConTodasSusReglas() {
     cargarLaSemilla();
 
     Cifras cifras = cifras();
@@ -154,17 +164,76 @@ class SemillaDeSistemasTest {
         .isEqualTo(antes);
   }
 
+  @Test
+  void tt04_t4_laSemillaTraeLosCasosDeEnt04() {
+    cargarLaSemilla();
+
+    List<Regla> reglasVigentes = reglasDeLaVersion(versionVigente());
+
+    assertThat(reglasVigentes)
+        .as("una carga mínima por periodo")
+        .anyMatch(
+            regla ->
+                regla.datos() instanceof DatosDeRegla.DeCargaPorPeriodo carga
+                    && carga.tipo() == TipoDeCargaPorPeriodo.MINIMA);
+    assertThat(reglasVigentes)
+        .as("una carga máxima por periodo")
+        .anyMatch(
+            regla ->
+                regla.datos() instanceof DatosDeRegla.DeCargaPorPeriodo carga
+                    && carga.tipo() == TipoDeCargaPorPeriodo.MAXIMA);
+    assertThat(reglasVigentes)
+        .as("un prerrequisito")
+        .anyMatch(regla -> regla.datos() instanceof DatosDeRegla.DePrerrequisito);
+    assertThat(reglasVigentes)
+        .as("un correquisito")
+        .anyMatch(regla -> regla.datos() instanceof DatosDeRegla.DeCorrequisito);
+    assertThat(reglasVigentes)
+        .as("una regla informativa")
+        .anyMatch(regla -> regla.clasificacion() == ClasificacionRegla.INFORMATIVA);
+    assertThat(reglasVigentes)
+        .as("una regla programada")
+        .anyMatch(regla -> regla.estado() == EstadoRegla.PROGRAMADA);
+    assertThat(reglasVigentes)
+        .as("una regla vigente con vigencia hasta")
+        .anyMatch(
+            regla ->
+                regla.estado() == EstadoRegla.VIGENTE
+                    && regla.vigenciaPropia().flatMap(Vigencia::vigenteHasta).isPresent());
+
+    Set<CodigoMateria> materiasDeLaVersion = materiasDeLaVersion(reglasVigentes);
+    for (Regla regla : reglasVigentes) {
+      if (regla.datos() instanceof DatosDeRegla.DeCorrequisito correquisito) {
+        assertThat(materiasDeLaVersion)
+            .as("el correquisito exige una materia de la malla")
+            .contains(correquisito.correquisito().materia());
+        assertThat(codigosDe(correquisito.correquisito().expresion()))
+            .as("las materias que satisfacen el correquisito")
+            .isNotEmpty()
+            .allSatisfy(codigo -> assertThat(materiasDeLaVersion).contains(codigo));
+      }
+    }
+  }
+
+  @Test
+  void tt04_t4_losDatosDePruebaNoCambianLaVersionDelPlanDeEstudios() {
+    cargarLaSemilla();
+
+    List<VersionEntidad> ordenadas = versionesDeSistemas();
+    assertThat(ordenadas).hasSize(VERSIONES);
+    int versionDelPlan = ordenadas.get(2).getNumeroPlanDeEstudios();
+    assertThat(ordenadas.subList(2, VERSIONES))
+        .as("las versiones 3, 4 y 5 no cambian la versión del plan de estudios")
+        .extracting(VersionEntidad::getNumeroPlanDeEstudios)
+        .containsOnly(versionDelPlan);
+  }
+
   private void cargarLaSemilla() {
     new SemillaDeDesarrolloRunner(programas, normas).run(new DefaultApplicationArguments());
   }
 
   private Cifras cifras() {
-    UUID programaId = programaDeSistemas();
-    List<VersionEntidad> ordenadas =
-        versiones.findAll().stream()
-            .filter(version -> programaId.equals(version.getProgramaId()))
-            .sorted(Comparator.comparingInt(VersionEntidad::getNumero))
-            .toList();
+    List<VersionEntidad> ordenadas = versionesDeSistemas();
     return new Cifras(
         programasGuardados.count(),
         normasGuardadas.count(),
@@ -179,6 +248,14 @@ class SemillaDeSistemasTest {
 
   private UUID programaDeSistemas() {
     return programasGuardados.findByCodigoSia("2879").orElseThrow().getId();
+  }
+
+  private List<VersionEntidad> versionesDeSistemas() {
+    UUID programaId = programaDeSistemas();
+    return versiones.findAll().stream()
+        .filter(version -> programaId.equals(version.getProgramaId()))
+        .sorted(Comparator.comparingInt(VersionEntidad::getNumero))
+        .toList();
   }
 
   private VersionEntidad versionVigente() {
@@ -202,6 +279,41 @@ class SemillaDeSistemasTest {
     return reglas.findAllById(reglaIds).stream()
         .map(ReglaEntidad::getNormaId)
         .collect(Collectors.toSet());
+  }
+
+  private List<Regla> reglasDeLaVersion(VersionEntidad version) {
+    Map<UUID, EstadoRegla> estados =
+        reglasEnVersion.findByVersionId(version.getId()).stream()
+            .collect(
+                Collectors.toMap(
+                    ReglaEnVersionEntidad::getReglaId,
+                    fila -> EstadoRegla.valueOf(fila.getEstado())));
+    return reglas.findAllById(estados.keySet()).stream()
+        .map(entidad -> ReglaMapper.aDominio(entidad, estados.get(entidad.getId())))
+        .toList();
+  }
+
+  private static Set<CodigoMateria> materiasDeLaVersion(List<Regla> reglas) {
+    return reglas.stream()
+        .filter(regla -> regla.datos() instanceof DatosDeRegla.DeMateria)
+        .map(regla -> ((DatosDeRegla.DeMateria) regla.datos()).materia().codigo())
+        .collect(Collectors.toSet());
+  }
+
+  private static Set<CodigoMateria> codigosDe(ExpresionDeMaterias expresion) {
+    return switch (expresion) {
+      case ExpresionDeMaterias.MateriaDelPrograma materia -> Set.of(materia.codigo());
+      case ExpresionDeMaterias.MateriaExterna ignored -> Set.of();
+      case ExpresionDeMaterias.Y y -> union(codigosDe(y.izquierda()), codigosDe(y.derecha()));
+      case ExpresionDeMaterias.O o -> union(codigosDe(o.izquierda()), codigosDe(o.derecha()));
+    };
+  }
+
+  private static Set<CodigoMateria> union(
+      Set<CodigoMateria> izquierda, Set<CodigoMateria> derecha) {
+    Set<CodigoMateria> todos = new HashSet<>(izquierda);
+    todos.addAll(derecha);
+    return todos;
   }
 
   private static void registrar(Cifras cifras) {

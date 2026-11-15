@@ -1,0 +1,85 @@
+{
+  "schemaVersion": "1.0",
+  "programa": {
+    "codigoSia": "2879",
+    "nombre": "Ingeniería de Sistemas y Computación",
+    "facultad": "Ingeniería"
+  },
+  "norma": {
+    "tipo": "ACUERDO",
+    "numero": "901",
+    "anio": 2026,
+    "organo": "Consejo de Facultad de Ingeniería (datos de prueba)",
+    "tipoDeEfecto": "BASE",
+    "fechaExpedicion": "2026-01-15",
+    "vigencia": {
+      "aplicaDesde": {
+        "tipo": "FECHA",
+        "fecha": "2026-01-15"
+      },
+      "vigenteHasta": null
+    },
+    "enlaceRegimenLegal": null,
+    "alcance": {
+      "tipo": "PROGRAMAS",
+      "facultades": [],
+      "programas": ["2879"],
+      "exclusiones": [],
+      "texto": "Norma ficticia de datos de prueba: aplica solo al programa de Ingeniería de Sistemas y Computación (datos de prueba)."
+    }
+  },
+  "reglas": [
+    {
+      "categoria": "CARGA_POR_PERIODO",
+      "objeto": "Máximo de créditos por periodo (datos de prueba)",
+      "enunciado": "En cada periodo académico, un estudiante de Ingeniería de Sistemas y Computación inscribe como máximo veinticinco (25) créditos (datos de prueba).",
+      "articulo": "art. 1",
+      "vigenciaPropia": null,
+      "clasificacion": "DEL_PLAN",
+      "afectacion": null,
+      "datos": {
+        "tipo": "CARGA_POR_PERIODO",
+        "creditos": 25,
+        "tipoCarga": "MAXIMA"
+      }
+    },
+    {
+      "categoria": "CORREQUISITO",
+      "objeto": "Correquisito de Programación de Computadores (datos de prueba)",
+      "enunciado": "Programación de Computadores (2015734) exige cursar en el mismo semestre o antes Cálculo Diferencial (1000004) (datos de prueba).",
+      "articulo": "art. 2",
+      "vigenciaPropia": null,
+      "clasificacion": "DEL_PLAN",
+      "afectacion": null,
+      "datos": {
+        "tipo": "CORREQUISITO",
+        "materia": "2015734",
+        "expresion": {
+          "tipo": "MATERIA_DEL_PROGRAMA",
+          "codigo": "1000004"
+        }
+      }
+    },
+    {
+      "categoria": "OTRA",
+      "objeto": "Calendario de ajustes de matrícula (datos de prueba)",
+      "enunciado": "Durante el periodo, los ajustes de matrícula se tramitan hasta la segunda semana (datos de prueba).",
+      "articulo": "art. 3",
+      "vigenciaPropia": {
+        "aplicaDesde": {
+          "tipo": "FECHA",
+          "fecha": "2026-01-15"
+        },
+        "vigenteHasta": {
+          "tipo": "FECHA",
+          "fecha": "2099-12-31"
+        }
+      },
+      "clasificacion": "INFORMATIVA",
+      "afectacion": null,
+      "datos": {
+        "tipo": "OTRA"
+      }
+    }
+  ]
+}
