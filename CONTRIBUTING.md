@@ -184,7 +184,7 @@ Las estimaciones usan la escala de Fibonacci y se acuerdan con *planning poker*.
 
 - **Los requisitos se cambian aquí**, por PR, en `docs/requisitos/`: ese árbol es la fuente de verdad. Cada ID aparece exactamente una vez como texto normativo (los dueños están en su `05-trazabilidad.md`).
 - Si el SRS calla, no decidas en silencio: revisa `04-supuestos.md` y `07-lagunas.md`; si tampoco está, pregunta en el issue o registra un supuesto nuevo marcado como tal.
-- La documentación va en español, con el vocabulario del glosario tal cual.
+- La documentación va en español, con el vocabulario del glosario tal cual. Dónde va cada cosa y cómo se escribe un documento está en [`docs/README.md`](docs/README.md).
 - El PR que cambia un comportamiento actualiza el documento que lo describe.
 
 ## Qué no subir

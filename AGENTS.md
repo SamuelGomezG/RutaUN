@@ -13,6 +13,11 @@
 | Formato del JSON de normativa | `docs/datos/formato-normativa.md` (DOC-05) |
 | Definición de Hecho | `docs/proceso/definicion-de-hecho.md` |
 | Convención de pruebas | `docs/proceso/pruebas.md` (PRU-01) |
+| Tablas de la base y consultas de inspección | `docs/datos/esquema-de-la-base.md` |
+| Perfiles, propiedades, pasos de `verify` y CI | `docs/proceso/entorno-y-configuracion.md` |
+| Un fallo del build, del arranque o de la CI | `docs/proceso/solucion-de-problemas.md` |
+| Pasos para un módulo, una migración, una norma de la semilla o un incidente | `docs/proceso/recetas.md` |
+| Mapa de `docs/` y cómo se escribe un documento | `docs/README.md` |
 | Flujo de ramas, commits y solicitudes de integración | `CONTRIBUTING.md` |
 | Índice de IDs (derivado): dueño de un ID, qué cita y quién lo menciona | `herramientas/indice_ids.py`; uso en `docs/requisitos/README.md` |
 | Backlog | Tablero «RutaUN» (GitHub Projects) e issues de `SamuelGomezG/RutaUN` |
@@ -47,11 +52,11 @@ project/                          raíz del repositorio
 ├─ .gitmessage ▸                  plantilla de commits (git config commit.template .gitmessage)
 ├─ .githooks/ ▸                   commit-msg · pre-commit · pre-push · probar.sh (git config core.hooksPath .githooks)
 ├─ .github/                       workflows/ci.yml · ISSUE_TEMPLATE/ ▸ · pull_request_template.md ▸ · PULL_REQUEST_TEMPLATE/ ▸
-├─ docs/
+├─ docs/                          README.md: mapa de la documentación
 │  ├─ requisitos/ ▸               SRS (fuente de los requisitos)
 │  ├─ diseno/                     arquitectura.md · decisiones/
-│  ├─ datos/                      formato-normativa.md
-│  ├─ proceso/                    definicion-de-hecho.md · pruebas.md
+│  ├─ datos/                      formato-normativa.md · esquema-de-la-base.md
+│  ├─ proceso/                    definicion-de-hecho.md · pruebas.md · cambios-de-boot-4.md · entorno-y-configuracion.md · solucion-de-problemas.md · recetas.md
 │  └─ uso/                        guia-de-uso.md (al final)
 ├─ config/checkstyle/             checkstyle.xml · suppressions.xml
 ├─ herramientas/ ▸                indice_ids.py (índice de IDs derivado; Python 3, sin dependencias)
