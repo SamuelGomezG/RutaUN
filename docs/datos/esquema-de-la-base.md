@@ -169,7 +169,7 @@ Las tres versiones salen del orden en que se cargan los archivos ([`entorno-y-co
 
 Las 323 filas de `regla_en_version` son 20 + 27 + 276, todas `VIGENTE`. La fecha de cada versión es el día de la carga, no la de la norma.
 
-Estas cifras cambian cuando cambie la semilla: [#178](https://github.com/SamuelGomezG/RutaUN/issues/178) (doce agrupaciones registradas dos veces) y [#133](https://github.com/SamuelGomezG/RutaUN/issues/133) (casos que faltan). Si no coinciden con lo que ves, corre las consultas de abajo y corrige esta sección.
+Estas cifras cambian cuando cambie la semilla: [#178](https://github.com/SamuelGomezG/RutaUN/issues/178) (doce agrupaciones registradas dos veces) y [#133](https://github.com/SamuelGomezG/RutaUN/issues/133) (casos que faltan); [#146](https://github.com/SamuelGomezG/RutaUN/issues/146) cambia qué norma va en cada versión sin alterar los totales. `normativa/aplicacion/SemillaDeSistemasTest` las fija en sus constantes: quien cambie la semilla las actualiza ahí y en la prueba de #130 de `ImportacionDeNormasServiceTest`. Si no coinciden con lo que ves, corre las consultas de abajo y corrige esta sección.
 
 ## Consultas de inspección
 

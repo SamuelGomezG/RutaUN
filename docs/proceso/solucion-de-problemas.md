@@ -27,6 +27,7 @@ Si resuelves un fallo que no está aquí y le puede pasar a otra persona, agrég
 | `NombresTest` falla | Una clase termina en `Impl`, o un identificador lleva tilde o eñe | Nómbrala por lo que la distingue, en ASCII (`ParteDelAnio`) |
 | Una regla de ArchUnit nueva pasa aunque no debería | `archRule.failOnEmptyShould=false`: una regla sobre un paquete sin clases no falla | Comprueba el selector del paquete con una clase que la viole a propósito |
 | `.jqwik-database` aparece modificado tras correr las pruebas | jqwik guarda ahí las propiedades que fallaron | No lo incluyas en el commit: `git restore .jqwik-database` |
+| Las pruebas de la semilla fallan con «semilla/ debe resolverse solo desde la salida de producción», o el runner intenta importar un archivo que ya no existe | Quedó una carpeta `semilla/` copiada en `target/test-classes` de una compilación anterior: Maven no retira de `target/` los recursos eliminados | `./mvnw clean` una vez. `SemillaDeSistemasTest` es la guarda |
 
 ## Arrancar
 

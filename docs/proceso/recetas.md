@@ -65,10 +65,11 @@ Ejemplo: `src/main/resources/semilla/acuerdo-11-2023.json`.
 3. **Elige el nombre pensando en el orden.** Los archivos se cargan en orden alfabético y cada uno crea una versión del consolidado, así que el nombre decide qué versión queda con qué reglas ([#146](https://github.com/SamuelGomezG/RutaUN/issues/146)).
 4. **Anota lo provisional.** Si un dato no puede quedar como lo dice la norma porque el esquema todavía no lo admite, regístralo en «Datos provisionales de la semilla» de `formato-normativa.md`, con el issue que lo corrige.
 5. **Actualiza** «Qué deja la semilla» en [`esquema-de-la-base.md`](../datos/esquema-de-la-base.md).
+6. **Actualiza las pruebas que fijan las cifras.** Las constantes de `normativa/aplicacion/SemillaDeSistemasTest` y la prueba de #130 en `ImportacionDeNormasServiceTest` (20, 27 y 276 reglas por versión). El conteo de `SemillaDeDesarrolloRunnerTest` se calcula a partir de los archivos, así que no se toca. Si #146 reordena la carga, `REGLAS_POR_VERSION` pasa a `[7, 27, 276]`.
 
-La semilla es normativa pública: nunca lleva datos personales (regla de oro 7). Los archivos para probar el formato, válidos e inválidos, no van aquí: van en `src/test/resources/json/`.
+La semilla es normativa pública: nunca lleva datos personales (regla de oro 7). Los archivos para probar el formato, válidos e inválidos, no van aquí: van en `src/test/resources/json/`. `src/test/resources/semilla/` no debe existir: ocultaría esta semilla en las pruebas (`SemillaDeSistemasTest` lo detecta).
 
-**Comprobación:** borra `data/` (si es desechable), arranca con el perfil `dev` y lee «Normas cargadas: N creadas…» en el log. Detén la aplicación y corre la consulta de versiones de `esquema-de-la-base.md`: debe haber una versión más, con las reglas de la anterior más las de la norma nueva.
+**Comprobación:** borra `data/` (si es desechable), arranca con el perfil `dev` y lee «Normas cargadas: N creadas…» en el log. Detén la aplicación y corre la consulta de versiones de `esquema-de-la-base.md`: debe haber una versión más, con las reglas de la anterior más las de la norma nueva. `./mvnw test -Dtest='SemillaDeSistemasTest,SemillaDeDesarrolloRunnerTest'` comprueba las cifras y que el conteo de normas se calcula solo.
 
 ## Publicar un incidente desde un caso de uso
 
