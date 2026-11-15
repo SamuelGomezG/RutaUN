@@ -159,7 +159,7 @@ Con una base nueva y el perfil `dev`:
 | `materia` | 0 |
 | `incidente` | 0 |
 
-Las tres versiones salen del orden en que se cargan los archivos ([`entorno-y-configuracion.md`](../proceso/entorno-y-configuracion.md), «Qué hace el arranque»):
+Las cinco versiones salen del orden en que se cargan los archivos ([`entorno-y-configuracion.md`](../proceso/entorno-y-configuracion.md), «Qué hace el arranque»):
 
 | Versión | Norma incorporada | Reglas de la norma | Reglas de la versión | Versión del plan de estudios |
 | --- | --- | --- | --- | --- |
@@ -172,7 +172,7 @@ Las tres versiones salen del orden en que se cargan los archivos ([`entorno-y-co
 Las 880 filas de `regla_en_version` son la suma de las reglas de cada versión (20 + 27 + 276 + 277 + 280). En la versión vigente (la 5), 279 quedan `VIGENTE` y 1 `PROGRAMADA`; una de las vigentes tiene `vigente_hasta`. La fecha de cada versión es el día de la carga, no la de la norma.
 
 Los dos archivos `datos-de-prueba-*.json` son ficticios y llevan la marca «(datos de prueba)»; su convención está en [`formato-normativa.md`](formato-normativa.md), «Datos de prueba de la semilla».
-Cada dato se retira solo cuando su caso pase a estar cubierto por una norma real: los demás se conservan, y las cifras de esta tabla y de `SemillaDeSistemasTest` se recalculan con los datos que queden.
+Cada dato se retira solo cuando su caso pase a estar cubierto por una norma real: los demás se conservan, y las cifras de esta tabla y de `SemillaDeSistemasTest` se recalculan con los datos que queden; `DatosDePruebaDeLaSemillaTest` y `SoporteDeSemilla` descubren los archivos por su nombre y no fijan cifras. Retirar un archivo no limpia una base ya cargada: hay que borrar `data/` y volver a arrancar con `dev`.
 
 Estas cifras cambian cuando cambie la semilla: [#178](https://github.com/SamuelGomezG/RutaUN/issues/178) (doce agrupaciones registradas dos veces) y [#146](https://github.com/SamuelGomezG/RutaUN/issues/146) (orden de carga). [#146](https://github.com/SamuelGomezG/RutaUN/issues/146) reordena la carga por fecha de expedición: las 280 filas de `regla` no cambian, pero las de `regla_en_version` pasan de 880 (20 + 27 + 276 + 277 + 280) a 867 (7 + 27 + 276 + 277 + 280), porque son la suma de las reglas de cada versión. `normativa/aplicacion/SemillaDeSistemasTest` fija las cifras en sus constantes: quien cambie la semilla las actualiza ahí; si el cambio toca uno de los tres acuerdos, también la prueba de #130 de `ImportacionDeNormasServiceTest`; y actualiza el conteo de `regla_en_version` de esta tabla. Si no coinciden con lo que ves, corre las consultas de abajo y corrige esta sección.
 
