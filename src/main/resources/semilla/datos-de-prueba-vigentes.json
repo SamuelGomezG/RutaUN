@@ -46,7 +46,7 @@
     {
       "categoria": "CORREQUISITO",
       "objeto": "Correquisito de Programación de Computadores (datos de prueba)",
-      "enunciado": "Programación de Computadores (2015734) exige cursar en el mismo semestre o antes Cálculo Diferencial (1000004) (datos de prueba).",
+      "enunciado": "Programación de Computadores (2015734) exige cursar en el mismo semestre o antes Cálculo Diferencial (1000004) o Cálculo Diferencial en una Variable (2016377) (datos de prueba).",
       "articulo": "art. 2",
       "vigenciaPropia": null,
       "clasificacion": "DEL_PLAN",
@@ -55,8 +55,15 @@
         "tipo": "CORREQUISITO",
         "materia": "2015734",
         "expresion": {
-          "tipo": "MATERIA_DEL_PROGRAMA",
-          "codigo": "1000004"
+          "tipo": "O",
+          "izquierda": {
+            "tipo": "MATERIA_DEL_PROGRAMA",
+            "codigo": "1000004"
+          },
+          "derecha": {
+            "tipo": "MATERIA_DEL_PROGRAMA",
+            "codigo": "2016377"
+          }
         }
       }
     },
