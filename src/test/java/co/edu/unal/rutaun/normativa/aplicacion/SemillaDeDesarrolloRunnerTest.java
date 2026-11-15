@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -25,6 +26,9 @@ import org.springframework.context.annotation.Profile;
 
 /**
  * Verifica el runner que carga la semilla en desarrollo, sin arrancar Spring.
+ *
+ * <p>Lee los archivos reales de {@code semilla/}: el número de llamadas a la importación de normas
+ * es el de normas de la semilla (TT-04-T5, #131).
  *
  * <p>SOP-03 (#55) y UC07 ext. 5a (#135): el runner informa cuando una norma no deja ningún plan
  * desactualizado.
@@ -67,7 +71,7 @@ class SemillaDeDesarrolloRunnerTest {
     assertThat(json.getValue()).contains("2879");
     InOrder orden = inOrder(programas, normas);
     orden.verify(programas).importar(anyString());
-    orden.verify(normas).importar(any(InputStream.class));
+    orden.verify(normas, times(3)).importar(any(InputStream.class));
   }
 
   @Test
