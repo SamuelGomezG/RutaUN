@@ -178,14 +178,20 @@ Estas cifras cambian cuando cambie la semilla: [#178](https://github.com/SamuelG
 
 ## Consultas de inspección
 
-H2 en archivo admite un solo proceso: **detén la aplicación** antes de consultar. El script `scripts/consultar-base.sh` envuelve la consola de H2 y usa el jar que resuelve el wrapper de Maven:
+H2 en archivo admite un solo proceso: **detén la aplicación** antes de consultar. El script `scripts/consultar-base.sh` envuelve la consola de H2 y usa el jar que resuelve el wrapper de Maven. Las invocaciones relativas de abajo se corren desde la raíz del repositorio:
 
 ```sh
 scripts/consultar-base.sh "SELECT COUNT(*) FROM norma"
 scripts/consultar-base.sh "SELECT COUNT(*) FROM norma" ruta/a/otra/base
 ```
 
-Funciona desde cualquier directorio, abre la base en solo lectura y termina con código distinto de 0 si la consulta falla. La ruta es opcional y va sin `.mv.db`; si la aplicación está corriendo, avisa que hay que detenerla. En Windows, el equivalente es `scripts\consultar-base.ps1`.
+Desde otro directorio, usa la ruta absoluta del script (y una ruta absoluta para la base, si la pasas):
+
+```sh
+/ruta/al/repositorio/project/scripts/consultar-base.sh "SELECT COUNT(*) FROM norma"
+```
+
+El script encuentra la raíz del repositorio desde su propia ubicación, abre la base en solo lectura y termina con código distinto de 0 si la consulta falla. La ruta es opcional y va sin `.mv.db`; si es relativa, se resuelve desde el directorio actual. Si la aplicación está corriendo, avisa que hay que detenerla. En Windows, el equivalente es `scripts\consultar-base.ps1`.
 
 Para una sesión interactiva, la consola directa:
 
