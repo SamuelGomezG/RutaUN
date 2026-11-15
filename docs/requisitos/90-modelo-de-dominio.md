@@ -26,7 +26,7 @@ depends_on:
 | **Regla** | categoría, objeto, enunciado, artículo o numeral, datos según categoría, vigencia propia (opcional), clasificación (plan / informativa), temporal (sí/no), estado (vigente / programada / ya no rige / en revisión), relación con otra regla (modifica / deroga / exceptúa) |
 | **Consolidado (versión)** | número, fecha de creación/actualización, motivo (norma incorporada, «corrección» o automático por periodo/fecha), administrador (si lo creó uno), reglas con su estado, malla estándar |
 | **Versión del plan de estudios** | por programa; solo cambia cuando una norma modifica reglas de estructura; la más reciente rige para todos los estudiantes |
-| **Componente** | tres por programa (Acuerdo 033 de 2007 del CSU, art. 9): fundamentación, formación disciplinar o profesional y libre elección; créditos exigidos; materias obligatorias y optativas; agrupaciones |
+| **Componente** | tres por programa (ver «Componente»), según el Acuerdo 033 de 2007 del CSU, art. 9: fundamentación, formación disciplinar o profesional y libre elección; créditos exigidos; materias obligatorias y optativas; agrupaciones |
 | **Agrupación / subagrupación** | créditos exigidos (y desglose obligatorios/optativos si la norma lo fija); materias obligatorias, optativas y subagrupaciones; pertenece a un solo componente o agrupación |
 | **Materia** | catálogo global: código (identidad) y créditos fijos; el nombre vive en cada versión; componente/agrupación(es), obligatoria u optativa; semestre sugerido (malla estándar) |
 | **Materia reconocida** | fuera de la malla (S7): nombre, código, créditos, agrupación; suma créditos y no cumple prerrequisitos |

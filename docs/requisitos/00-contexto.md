@@ -114,6 +114,7 @@ Todos los casos de uso son de **nivel «Objetivo de usuario»**, **sistema: Ruta
 ## 2.2 Qué sigue fuera de alcance (igual que en la Entrega 1)
 
 - Otras sedes (RutaUN es para estudiantes de **pregrado de la Sede Bogotá**).
+- **Programas de formación tecnológica** (los que el art. 9, parágrafo 3, del Acuerdo 033 de 2007 del CSU estructura con fundamentación y un componente de formación tecnológica): RutaUN solo cubre programas de pregrado con los tres componentes del art. 9.
 - Integración con el **SIA** (Sistema de Información Académica); no se lee la historia académica: el avance es lo que el estudiante declara.
 - **Oferta de materias, cupos y sobrecupos, horarios**, cruces de clases.
 - **Doble titulación** (planear con dos programas simultáneos; cada estudiante tiene un solo programa a la vez).
