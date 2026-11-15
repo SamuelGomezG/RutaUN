@@ -137,7 +137,7 @@ scripts/consultar-base.sh "<consulta SQL>"           # consulta la base de desar
 
 ## Definición de terminado
 
-Un elemento cuenta como terminado solo si: está integrado en `develop` y revisado por otra persona; si incluye código, quien lo escribió y quien lo revisó pueden ejecutarlo para recrear el flujo y obtener un resultado observable que muestre que hace lo que debe; sus unitarias y las pruebas de arquitectura están en verde en la integración continua; cumple Google Java Style; y, si es historia, sus criterios de aceptación se demostraron y su issue quedó cerrado.
+Un elemento cuenta como terminado solo si: está integrado en `develop` y revisado por otra persona; si incluye código, quien lo escribió y quien lo revisó pueden ejecutarlo para recrear el flujo y obtener un resultado observable que muestre que hace lo que debe; sus unitarias y las pruebas de arquitectura están en verde en la integración continua; cumple Google Java Style; y, si es historia, sus criterios de aceptación se demostraron y su issue quedó cerrado. Un conteo de pruebas no es el resultado observable: el flujo se demuestra con el código real (ver [`docs/proceso/definicion-de-hecho.md`](docs/proceso/definicion-de-hecho.md), «Cómo se demuestra un cambio»).
 
 ## Trazabilidad GitHub
 
