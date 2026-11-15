@@ -79,7 +79,8 @@ if (-not (Test-Path -LiteralPath "$base.mv.db")) {
 
 $temporal = [System.IO.Path]::GetTempFileName()
 try {
-  & (Join-Path $raiz 'mvnw.cmd') -q '-DincludeArtifactIds=h2' "-Dmdep.outputFile=$temporal" dependency:build-classpath *> $null
+  $pom = Join-Path $raiz 'pom.xml'
+  & (Join-Path $raiz 'mvnw.cmd') -q -f $pom '-DincludeArtifactIds=h2' "-Dmdep.outputFile=$temporal" dependency:build-classpath *> $null
   if ($LASTEXITCODE -ne 0) {
     [Console]::Error.WriteLine('consultar-base: no pude resolver el jar de H2 con el wrapper de Maven (mvnw.cmd).')
     exit 1
