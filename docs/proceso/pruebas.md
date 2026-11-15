@@ -51,7 +51,7 @@ Las pruebas de integración corren con el perfil `test`
 | Oráculo de optimalidad | El plan mínimo y los seis criterios del cálculo, contra fuerza bruta | JUnit 6 con mallas sintéticas | *(pendiente, PRU-02 #61)*; el prototipo de `spikes/tt-05-motor/` no demuestra optimalidad de c4–c6 |
 | Orquestadores | Flujos y extensiones de cada caso con fachadas falsas | Mockito con `Clock` fijo | *(sprint 2)* |
 | Arquitectura | Reglas de capas, módulos y nombres | Modulith `verify()` y ArchUnit | `arquitectura/ModulosTest`, `CapasTest`, `NombresTest` |
-| Integración | Repositorios, restricción única, eventos, sesión, reserva de UC07 | `@PruebaDeIntegracion` (contexto completo, H2 en memoria) | `PersistenciaHumoTest` |
+| Integración | Repositorios, restricción única, eventos, sesión, reserva de UC07 | `@PruebaDeIntegracion` (contexto completo, H2 en memoria) | `PersistenciaHumoTest`, `normativa/aplicacion/SemillaDeSistemasTest` |
 | Web | Controladores, rutas, Post/Redirect/Get, errores de formulario | MockMvc (`@SpringBootTest` + `@AutoConfigureMockMvc`) | `web/InicioControllerTest` |
 | Contrato | Formato JSON de importación, válido e inválido | JUnit 6 con archivos de `src/test/resources/json/` | `normativa/aplicacion/FormatoNormativaTest` |
 | Aceptación | Criterios de las 47 historias de usuario | Escenarios con datos de la semilla | *(sprint 2)* |
@@ -86,3 +86,5 @@ ASCII. Las reglas sobre paquetes que aún no tienen clases no fallan
   (#174) y su oráculo, PRU-02 (#61).
 - **Datos de prueba:** mallas sintéticas en `soporte/` y archivos JSON en
   `src/test/resources/json/`; nunca datos personales reales (regla de oro 7).
+  `src/test/resources/semilla/` no debe existir, porque oculta la semilla real
+  en las pruebas (`SemillaDeSistemasTest` lo detecta).
