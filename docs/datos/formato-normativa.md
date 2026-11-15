@@ -364,9 +364,12 @@ Además, el importador todavía no aplica afectaciones
 ([#175](https://github.com/SamuelGomezG/RutaUN/issues/175)). Las fechas futuras (2099) son
 deliberadas: no se vencen durante la vida del proyecto y delatan que los datos son ficticios.
 
-**Cuándo se borran.** Cuando el caso que cubren llegue con una norma real, se borran los dos
-archivos y se actualizan las cifras de `SemillaDeSistemasTest` y de «Qué deja la semilla» en
-[`esquema-de-la-base.md`](esquema-de-la-base.md).
+**Cuándo se borran.** Cada dato ficticio cubre un caso distinto: se quita solo el que pase a estar
+cubierto por una norma real y se conservan los demás, aunque otro caso ya lo esté. Si al quitar
+reglas una norma ficticia se queda sin ninguna, se borra su archivo, porque el validador rechaza
+una incorporación sin reglas. Las cifras de `SemillaDeSistemasTest` y de «Qué deja la semilla» en
+[`esquema-de-la-base.md`](esquema-de-la-base.md) se recalculan con los datos que queden, no con la
+suposición de que desaparecen los dos archivos completos.
 
 Los datos de prueba no traen reglas de estructura (`MATERIA`, `AGRUPACION`, `COMPONENTE` ni
 `PROGRAMA`) ni afectaciones: no deben mover la versión del plan de estudios ni depender de #175.
