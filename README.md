@@ -138,6 +138,7 @@ Cada prueba lleva en su nombre el ID del requisito que verifica, por ejemplo `uc
 ├─ src/main/        código y recursos (Java, plantillas, migraciones, semilla de normativa)
 ├─ src/test/        pruebas
 ├─ config/          configuración de Checkstyle
+├─ scripts/         consultas sobre la base de desarrollo
 ├─ AGENTS.md        guía para quien programa, agentes incluidos
 └─ CONTRIBUTING.md  guía de contribución
 ```

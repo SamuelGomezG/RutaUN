@@ -178,15 +178,23 @@ Estas cifras cambian cuando cambie la semilla: [#178](https://github.com/SamuelG
 
 ## Consultas de inspección
 
-H2 en archivo admite un solo proceso: **detén la aplicación** antes de consultar. La consola de H2 viene en el jar que Maven ya descargó:
+H2 en archivo admite un solo proceso: **detén la aplicación** antes de consultar. El script `scripts/consultar-base.sh` envuelve la consola de H2 y usa el jar que resuelve el wrapper de Maven:
+
+```sh
+scripts/consultar-base.sh "SELECT COUNT(*) FROM norma"
+scripts/consultar-base.sh "SELECT COUNT(*) FROM norma" ruta/a/otra/base
+```
+
+Funciona desde cualquier directorio, abre la base en solo lectura y termina con código distinto de 0 si la consulta falla. La ruta es opcional y va sin `.mv.db`; si la aplicación está corriendo, avisa que hay que detenerla. En Windows, el equivalente es `scripts\consultar-base.ps1`.
+
+Para una sesión interactiva, la consola directa:
 
 ```sh
 java -cp ~/.m2/repository/com/h2database/h2/2.4.240/h2-2.4.240.jar org.h2.tools.Shell \
-  -url "jdbc:h2:file:./data/rutaun;IFEXISTS=TRUE" -user sa -password "" \
-  -sql "SELECT COUNT(*) FROM norma"
+  -url "jdbc:h2:file:./data/rutaun;IFEXISTS=TRUE" -user sa -password ""
 ```
 
-`IFEXISTS=TRUE` evita crear una base vacía si la ruta está mal. Sin `-sql`, la consola queda interactiva. [#136](https://github.com/SamuelGomezG/RutaUN/issues/136) agrega un script que envuelve este comando.
+`IFEXISTS=TRUE` evita crear una base vacía si la ruta está mal. Sin `-sql`, la consola queda interactiva.
 
 Versiones del consolidado y cuántas reglas tiene cada una:
 
