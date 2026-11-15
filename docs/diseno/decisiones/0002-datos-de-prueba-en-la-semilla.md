@@ -47,15 +47,15 @@ temporal no puede ser del plan (UC07 ext. 6f).
 
 ## Consecuencias
 
-- **Con el perfil `dev`, el cálculo del plan obedece reglas inventadas:** ningún semestre supera
-  25 créditos y Programación de Computadores (2015734) exige Cálculo Diferencial (1000004) o
-  Cálculo Diferencial en una Variable (2016377). Quien vea un plan calculado con `dev` debe saberlo.
-  El glosario dice que RutaUN no supone ningún máximo permanente: este tope es un dato cargado de
-  prueba, no un supuesto del código (regla de oro 2).
+- **Con el perfil `dev` se cargan, como reglas del plan, un máximo de 25 créditos y un correquisito
+  inventados.** UC01, UC03 y UC05 deberán aplicarlos cuando se implementen; hoy el código principal
+  todavía no lo hace. El correquisito exige Cálculo Diferencial (1000004) o Cálculo Diferencial en
+  una Variable (2016377). El glosario dice que RutaUN no supone ningún máximo permanente: este tope
+  es un dato cargado de prueba, no un supuesto del código (regla de oro 2).
 - El correquisito cita las dos materias alternativas de la malla para no marcar un incumplimiento
   falso a quien curse la otra.
-- **La demostración del sprint que use `dev` mostrará y aplicará normas que no existen.** Se
-  distinguen por la marca «(datos de prueba)» en el órgano y en cada regla.
+- **La demostración del sprint que use `dev` mostrará normas que no existen.** Se distinguen por la
+  marca «(datos de prueba)» en el órgano y en cada regla.
 - Los datos de prueba no traen reglas de estructura ni afectaciones: no mueven la versión del plan
   de estudios ni dependen de #175.
 - Se retiran caso por caso cuando una norma real cubra el caso; si una norma ficticia se queda sin

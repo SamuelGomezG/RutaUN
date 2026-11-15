@@ -352,11 +352,11 @@ todavía no puede aportar:
 | `datos-de-prueba-vigentes.json` | Acuerdo 901 de 2026, Consejo de Facultad de Ingeniería (datos de prueba) | Un máximo de créditos por periodo, un correquisito entre dos materias de la malla y una regla informativa con «vigencia hasta» |
 | `datos-de-prueba-programados.json` | Acuerdo 902 de 2026, Consejo de Facultad de Ingeniería (datos de prueba) | Una norma que aplica desde una fecha futura, para que sus reglas queden `PROGRAMADA`; es toda informativa y provoca el aviso de UC07 ext. 5a |
 
-**Efecto en el cálculo.** Con el perfil `dev`, el máximo de 25 créditos y el correquisito son
-reglas del plan: UC01, UC03 y UC05 los aplican. El glosario dice que RutaUN no supone ningún
-máximo permanente; este tope es un dato cargado de prueba (regla de oro 2), no un supuesto del
-código. Quien haga la demostración con `dev` verá y aplicará normas que no existen, distinguibles
-solo por la marca. La decisión está en
+**Efecto en el cálculo.** Con el perfil `dev`, el máximo de 25 créditos y el correquisito se cargan
+como reglas del plan que UC01, UC03 y UC05 deben aplicar; hoy el código principal todavía no las
+aplica. El glosario dice que RutaUN no supone ningún máximo permanente: este tope es un dato cargado
+de prueba (regla de oro 2), no un supuesto del código. Quien haga la demostración con `dev` verá
+normas que no existen, distinguibles solo por la marca. La decisión está en
 [`0002`](../diseno/decisiones/0002-datos-de-prueba-en-la-semilla.md).
 
 **Convención de marcado.** Un archivo es de datos de prueba si su nombre empieza por
