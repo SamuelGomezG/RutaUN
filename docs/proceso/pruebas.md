@@ -30,6 +30,9 @@ Las pruebas de integración corren con el perfil `test`
 (`application-test.yml`): H2 en memoria y las migraciones de
 `src/test/resources/db/humo/`.
 
+`src/test/resources/semilla/` no debe existir: cualquier archivo ahí oculta la
+semilla real en las pruebas (`SemillaDeSistemasTest` lo detecta).
+
 ## Nombres
 
 1. **Cada prueba lleva en su nombre el ID que verifica** (regla de oro 1):
@@ -86,5 +89,3 @@ ASCII. Las reglas sobre paquetes que aún no tienen clases no fallan
   (#174) y su oráculo, PRU-02 (#61).
 - **Datos de prueba:** mallas sintéticas en `soporte/` y archivos JSON en
   `src/test/resources/json/`; nunca datos personales reales (regla de oro 7).
-  `src/test/resources/semilla/` no debe existir, porque oculta la semilla real
-  en las pruebas (`SemillaDeSistemasTest` lo detecta).

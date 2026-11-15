@@ -14,7 +14,9 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,12 +25,14 @@ import org.mockito.InOrder;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.DefaultApplicationArguments;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 /**
  * Verifica el runner que carga la semilla en desarrollo, sin arrancar Spring.
  *
  * <p>Lee los archivos reales de {@code semilla/}: el número de llamadas a la importación de normas
- * es el de normas de la semilla (TT-04-T5, #131).
+ * se calcula a partir de los archivos de la semilla, no se escribe a mano (TT-04-T5, #131).
  *
  * <p>SOP-03 (#55) y UC07 ext. 5a (#135): el runner informa cuando una norma no deja ningún plan
  * desactualizado.
@@ -56,13 +60,16 @@ class SemillaDeDesarrolloRunnerTest {
   }
 
   @Test
-  void uc07_hu03_t4_elRunnerEnviaAlServicioElArchivoRealDeProgramasYDespuesLasNormas() {
+  void uc07_hu03_t4_elRunnerEnviaAlServicioElArchivoRealDeProgramasYDespuesLasNormas()
+      throws IOException {
     ImportacionDeProgramasService programas = mock(ImportacionDeProgramasService.class);
     ImportacionDeNormasService normas = mock(ImportacionDeNormasService.class);
     when(programas.importar(anyString())).thenReturn(new ResultadoDeCargaDeProgramas(1, 0));
     when(normas.importar(any(InputStream.class)))
         .thenReturn(new ResultadoDeImportacionDeNormas(true, "ACUERDO 003-A de 2022", 1, false));
     SemillaDeDesarrolloRunner runner = new SemillaDeDesarrolloRunner(programas, normas);
+    int esperadas = normasEnLaSemilla();
+    assertThat(esperadas).isGreaterThan(0);
 
     runner.run(new DefaultApplicationArguments());
 
@@ -71,7 +78,7 @@ class SemillaDeDesarrolloRunnerTest {
     assertThat(json.getValue()).contains("2879");
     InOrder orden = inOrder(programas, normas);
     orden.verify(programas).importar(anyString());
-    orden.verify(normas, times(3)).importar(any(InputStream.class));
+    orden.verify(normas, times(esperadas)).importar(any(InputStream.class));
   }
 
   @Test
@@ -128,5 +135,17 @@ class SemillaDeDesarrolloRunnerTest {
     Profile perfil = SemillaDeDesarrolloRunner.class.getAnnotation(Profile.class);
 
     assertThat(perfil.value()).containsExactly("dev");
+  }
+
+  private static int normasEnLaSemilla() throws IOException {
+    Resource[] recursos =
+        new PathMatchingResourcePatternResolver().getResources("classpath*:semilla/*.json");
+    return (int)
+        Arrays.stream(recursos)
+            .map(Resource::getFilename)
+            .filter(nombre -> nombre.endsWith(".json"))
+            .filter(nombre -> !"programas.json".equals(nombre))
+            .distinct()
+            .count();
   }
 }
