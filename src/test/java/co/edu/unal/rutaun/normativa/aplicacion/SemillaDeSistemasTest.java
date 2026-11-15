@@ -12,11 +12,14 @@ import co.edu.unal.rutaun.normativa.persistencia.ReglaJpaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.VersionEntidad;
 import co.edu.unal.rutaun.normativa.persistencia.VersionJpaRepository;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
+import java.net.URL;
+import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,6 +93,22 @@ class SemillaDeSistemasTest {
     this.consolidados = consolidados;
     this.versiones = versiones;
     this.reglasEnVersion = reglasEnVersion;
+  }
+
+  @BeforeEach
+  void comprobarOrigenDeLaSemilla() {
+    assertThat(Path.of("src", "test", "resources", "semilla"))
+        .as("src/test/resources/semilla/ oculta la semilla real en las pruebas")
+        .doesNotExist();
+
+    ClassLoader cargador = Thread.currentThread().getContextClassLoader();
+    URL raiz = cargador.getResource("semilla/");
+    assertThat(raiz)
+        .as("debe existir semilla/ en target/classes (corre ./mvnw clean si no)")
+        .isNotNull();
+    assertThat(raiz.getPath())
+        .as("el runner debe resolver semilla/ desde target/classes, no desde test-classes")
+        .doesNotContain("test-classes");
   }
 
   @Test
