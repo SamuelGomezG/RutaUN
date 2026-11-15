@@ -103,13 +103,13 @@ El diagrama muestra las columnas principales; la lista completa está en las mig
 
 ## Columnas que guardan JSON como texto
 
-No se usan columnas de tipo JSON: son `CLOB` con texto que escriben y leen los mappers de `normativa/aplicacion` ([`cambios-de-boot-4.md`](../proceso/cambios-de-boot-4.md), «Verificado en los carriles 2 y 3»).
+No se usan columnas de tipo JSON: son `CLOB` con texto que escriben y leen los mappers de `normativa/aplicacion` ([`cambios-de-boot-4.md`](../proceso/cambios-de-boot-4.md), «Verificado en los carriles 2 y 3»). La excepción es `version_consolidado.detalle_motivo` (`VARCHAR(300)`), detallada abajo.
 
 | Columna | Qué guarda | Ejemplo |
 | --- | --- | --- |
 | `regla.datos` | Los datos propios de la categoría de la regla. La categoría la dice la columna `categoria`, no el JSON | `{"creditos":{"valor":10},"tipo":"MINIMA"}` en una regla `CARGA_POR_PERIODO` |
 | `norma.alcance_detalle` | Facultades, programas, exclusiones y texto del alcance. Los programas van por su `id`, no por el código SIA del archivo | `{"facultades":[],"programas":["6c6d…"],"exclusiones":[],"texto":"…"}` |
-| `version_consolidado.detalle_motivo` | Los datos del motivo de la versión | `{"norma":{"valor":"205c…"},"administrador":"Semilla de desarrollo"}` |
+| `version_consolidado.detalle_motivo` | Los datos del motivo de la versión. Excepción a la convención: es `VARCHAR(300)`, no `CLOB`; el mapper limita el detalle a 300 caracteres | `{"norma":{"valor":"205c…"},"administrador":"Semilla de desarrollo"}` |
 | `version_consolidado.cambios` | Los cambios respecto a la versión anterior | Hoy `null` |
 | `incidente.elementos` | Los elementos involucrados. No es JSON: es una lista ordenada y separada por comas | — |
 
