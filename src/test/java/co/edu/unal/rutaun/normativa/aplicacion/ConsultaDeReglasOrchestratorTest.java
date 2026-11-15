@@ -1,7 +1,6 @@
 package co.edu.unal.rutaun.normativa.aplicacion;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import co.edu.unal.rutaun.compartido.EventoDeDominio;
 import co.edu.unal.rutaun.compartido.ProgramaId;
@@ -16,8 +15,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.support.StaticListableBeanFactory;
 
 /**
  * Orquestador de UC06 (UC06-HU01-T3, #103): publica el incidente de la ext. 4a cuando el
@@ -38,23 +35,13 @@ class ConsultaDeReglasOrchestratorTest {
 
   private final RegistroDeEventos eventos = new RegistroDeEventos();
 
-  private static ObjectProvider<ConsultaNormativaFacade> conFachada(ConsultaNormativaFacade f) {
-    StaticListableBeanFactory fabrica = new StaticListableBeanFactory();
-    fabrica.addBean("consulta", f);
-    return fabrica.getBeanProvider(ConsultaNormativaFacade.class);
-  }
-
-  private static ObjectProvider<ConsultaNormativaFacade> sinFachada() {
-    return new StaticListableBeanFactory().getBeanProvider(ConsultaNormativaFacade.class);
-  }
-
-  private ConsultaDeReglasOrchestrator orquestador(ObjectProvider<ConsultaNormativaFacade> f) {
+  private ConsultaDeReglasOrchestrator orquestador(ConsultaNormativaFacade f) {
     return new ConsultaDeReglasOrchestrator(f, eventos);
   }
 
   @Test
   void uc06_ext4a_sinReglasPublicaUnIncidenteConProgramaVersionYCausa() {
-    var orquestador = orquestador(conFachada(ConsultaNormativaFalsa.sinReglas()));
+    var orquestador = orquestador(ConsultaNormativaFalsa.sinReglas());
 
     orquestador.reglasDelPrograma(ConsultaNormativaFalsa.SISTEMAS);
 
@@ -71,7 +58,7 @@ class ConsultaDeReglasOrchestratorTest {
 
   @Test
   void uc06_ext4a_sinReglasDevuelveElConsolidadoParaQueLaPaginaLoDiga() {
-    var orquestador = orquestador(conFachada(ConsultaNormativaFalsa.sinReglas()));
+    var orquestador = orquestador(ConsultaNormativaFalsa.sinReglas());
 
     ReglasDelPrograma resultado = orquestador.reglasDelPrograma(ConsultaNormativaFalsa.SISTEMAS);
 
@@ -81,7 +68,7 @@ class ConsultaDeReglasOrchestratorTest {
 
   @Test
   void uc06_ext4a_conReglasNoPublicaNingunIncidente() {
-    var orquestador = orquestador(conFachada(ConsultaNormativaFalsa.conReglas()));
+    var orquestador = orquestador(ConsultaNormativaFalsa.conReglas());
 
     ReglasDelPrograma resultado = orquestador.reglasDelPrograma(ConsultaNormativaFalsa.SISTEMAS);
 
@@ -91,7 +78,7 @@ class ConsultaDeReglasOrchestratorTest {
 
   @Test
   void uc06_ext4a_unProgramaNoCargadoNoPublicaNingunIncidente() {
-    var orquestador = orquestador(conFachada(ConsultaNormativaFalsa.sinReglas()));
+    var orquestador = orquestador(ConsultaNormativaFalsa.sinReglas());
 
     ReglasDelPrograma resultado = orquestador.reglasDelPrograma(new ProgramaId(UUID.randomUUID()));
 
@@ -118,21 +105,11 @@ class ConsultaDeReglasOrchestratorTest {
             return Optional.empty();
           }
         };
-    var orquestador = orquestador(conFachada(sinVersion));
+    var orquestador = orquestador(sinVersion);
 
     ReglasDelPrograma resultado = orquestador.reglasDelPrograma(ConsultaNormativaFalsa.SISTEMAS);
 
     assertThat(resultado).isInstanceOf(ReglasDelPrograma.SinVersionVigente.class);
-    assertThat(eventos.publicados).isEmpty();
-  }
-
-  @Test
-  void uc06_hu01_sinFachadaLaConsultaNoEstaDisponibleYNoPublicaIncidentes() {
-    var orquestador = orquestador(sinFachada());
-
-    assertThatThrownBy(orquestador::programas).isInstanceOf(ConsultaNoDisponibleException.class);
-    assertThatThrownBy(() -> orquestador.reglasDelPrograma(ConsultaNormativaFalsa.SISTEMAS))
-        .isInstanceOf(ConsultaNoDisponibleException.class);
     assertThat(eventos.publicados).isEmpty();
   }
 }
