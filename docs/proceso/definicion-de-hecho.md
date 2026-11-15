@@ -37,10 +37,12 @@ Sirven cuatro medios:
 
 | | Medio | Cuándo | Cómo se corre |
 | --- | --- | --- | --- |
-| **A** | La aplicación | Siempre que el flujo llegue a una pantalla o al log del arranque | Borrar `data/` y `./mvnw spring-boot:run -Dspring-boot.run.profiles=dev`. En Windows: `Remove-Item -Recurse -Force data` y `.\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=dev"`. Se lee el log y se abre `http://localhost:8080/` |
-| **B** | La base | Cuando lo que se ve son filas | Con la aplicación detenida, `scripts/consultar-base.sh "<SQL>"`. En Windows, `scripts\consultar-base.ps1` |
+| **A** | La aplicación | Siempre que el flujo llegue a una pantalla o al log del arranque | Arranca sobre una base desechable, sin tocar `data/`: `./mvnw spring-boot:run -Dspring-boot.run.profiles=dev "-Dspring-boot.run.arguments=--spring.datasource.url=jdbc:h2:file:/tmp/rutaun-demostracion/rutaun --server.port=18080"`. En Windows, `.\mvnw.cmd` y una ruta bajo `$env:TEMP`. Se lee el log y se abre la URL con ese puerto |
+| **B** | La base | Cuando lo que se ve son filas | Con la aplicación detenida, `scripts/consultar-base.sh "<SQL>"` (o con la ruta de A como segundo argumento). En Windows, `scripts\consultar-base.ps1` |
 | **C** | Una demostración del dominio | Cambios de dominio, que no tienen pantalla | Una clase con `main` en `src/test/java/co/edu/unal/rutaun/soporte/demostraciones/`, sin Spring ni base: `./mvnw -q test-compile` y `java -cp target/classes:target/test-classes co.edu.unal.rutaun.soporte.demostraciones.<Clase>`. En Windows el separador es `;` |
 | **D** | Una prueba de aceptación | Solo cuando ningún flujo de usuario llega al cambio (por ejemplo, la concurrencia) | Una prueba con los componentes reales, sin dobles, que la PR pide correr sola y que escribe en el log lo que se observa: `./mvnw test -Dtest=<Prueba>` |
+
+La base de `data/` no se borra para demostrar. Si guarda normas incorporadas por fuera de `semilla/`, incidentes, avances o planes, no la elimines: respáldala y migra esos datos, como dicen [`cambios-de-boot-4.md`](cambios-de-boot-4.md) y [`solucion-de-problemas.md`](solucion-de-problemas.md) («Antes de borrar `data/`»). Si el comando A usó otra ruta, pásala al comando B como segundo argumento: `scripts/consultar-base.sh "<SQL>" /tmp/rutaun-demostracion/rutaun`.
 
 Un conteo de pruebas o una mutación no bastan: son evidencia del tercer criterio, no del segundo. La excepción es el cambio que trata de las pruebas mismas: ahí la mutación es el flujo.
 
