@@ -26,7 +26,7 @@ El diseño de clases completo vive fuera del repositorio. Lo vigente para progra
 
 ## Reglas de oro (obligatorias en cada tarea; letra completa en `docs/requisitos/00-contexto.md` §0)
 
-1. **Traza todo a IDs** — en código, tests, commits y PRs: `UCnn`, `UCnn-HUmm`, `UCnn paso n`, `UCnn ext. na`, `UCnn GM n`/`GE n`, `[I-n]`, `S1–S18`, `#n`.
+1. **Traza todo a IDs** — en código, tests, commits y PRs: `UCnn`, `UCnn-HUmm`, `UCnn paso n`, `UCnn ext. na`, `UCnn GM n`/`GE n`, `[I-n]`, `S1–S19`, `#n`.
 2. **Las normas académicas son datos, no constantes de código** (se digitan o se cargan por JSON vía UC07). Las cifras del SRS (topes de créditos, etc.) son ejemplos de datos de normas reales.
 3. **Si el SRS calla, no decidas en silencio**: revisa `docs/requisitos/04-supuestos.md` y `07-lagunas.md`; si tampoco está, pregunta o registra un supuesto nuevo marcado como tal.
 4. Respeta el **fuera de alcance** (§2.2 del SRS): sin integración con el SIA, sin oferta/cupos/horarios, sin doble titulación, sin trámites del reglamento estudiantil.

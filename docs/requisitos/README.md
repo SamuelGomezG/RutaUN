@@ -5,7 +5,7 @@
 
 ## Reglas de oro (síntesis; la letra completa está en `00-contexto.md` §0)
 
-1. Traza todo a IDs: `UCnn`, `UCnn-HUmm`, `UCnn ext. 4b`, `UCnn GM n` / `GE n`, `[I-n]`, `S1–S18`, `#n`.
+1. Traza todo a IDs: `UCnn`, `UCnn-HUmm`, `UCnn ext. 4b`, `UCnn GM n` / `GE n`, `[I-n]`, `S1–S19`, `#n`.
 2. Las normas académicas son **datos** del consolidado (UC07), no constantes de código; se digitan o se cargan por JSON.
 3. Cuando el SRS calla, no decidas en silencio: mira `04-supuestos.md` y `07-lagunas.md`; si tampoco está, pregunta.
 4. Respeta el fuera de alcance (§2.2 de `00-contexto.md`).
@@ -20,7 +20,7 @@
 | [`00-contexto.md`](00-contexto.md) | Resumen, alcance, actores y reglas de trabajo | siempre, primero | ~4299 |
 | [`01-invariantes.md`](01-invariantes.md) | Las cosas que nunca puede violar la implementación | siempre | ~2091 |
 | [`03-marco-normativo.md`](03-marco-normativo.md) | Normas citadas: fundamento y datos de ejemplo (no constantes) | con UC07 o al revisar vigencias | ~1365 |
-| [`04-supuestos.md`](04-supuestos.md) | S1–S18: decisiones del equipo y cotas de tiempo | antes de cálculo o validación | ~1797 |
+| [`04-supuestos.md`](04-supuestos.md) | S1–S19: decisiones del equipo y cotas de tiempo | antes de cálculo o validación | ~1797 |
 | [`05-trazabilidad.md`](05-trazabilidad.md) | Backlog GitHub y dueños de IDs | issues/PRs y mapeo de IDs | ~905 |
 | [`06-evidencia-y-ux.md`](06-evidencia-y-ux.md) | Acta ZEUS-02 (evidencia, no requisito) | contexto y decisiones de producto | ~2152 |
 | [`07-lagunas.md`](07-lagunas.md) | Lo que el SRS no define; incluye pautas de UI (§14.2) | ¿falta algo? mira aquí y pregunta | ~1152 |
@@ -63,13 +63,13 @@
 
 - `UCnn` caso de uso · `UCnn-HUmm` historia de usuario · `#n` issue GitHub
 - `UCnn paso n` · `UCnn ext. na` · `UCnn GM n` · `UCnn GE n` · `[I-n]` interesado (local al caso)
-- `S1–S18` supuestos del equipo (`04-supuestos.md`; S18 = decisión del 25-oct)
+- `S1–S19` supuestos del equipo (`04-supuestos.md`; S18 = decisión del 25-oct; S19 = decisión del 15-nov)
 
 ## Contenido
 
 - 23 archivos, incluido este README.
 - Glosario: **71 términos** (70 de la Entrega 2 + «Correquisito» de la conciliación) en 5 archivos por dominio + índice A-Z.
-- S1–S18 en `04-supuestos.md`; 47 historias (#1–#47) dentro de su UC; casos de uso verbatim.
+- S1–S19 en `04-supuestos.md`; 47 historias (#1–#47) dentro de su UC; casos de uso verbatim.
 - Sin datos personales del acta ZEUS-02.
 
 ## Versión

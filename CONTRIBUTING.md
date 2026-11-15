@@ -174,7 +174,7 @@ Al crear un issue, GitHub ofrece una plantilla por tipo (en [`.github/ISSUE_TEMP
 
 Los issues del sprint llevan además `sprint-1` (comprometido) o `sprint-1-adicional`; los puntos, el carril y la iteración viven en los campos `Puntos`, `Carril` y `Sprint` del tablero.
 
-Una historia se **parte en sub-issues** solo cuando entra a la iteración en curso o a la siguiente. El título es `UCnn-HUmm-Tk · Verbo + objeto` (la `T` evita confundirlo con los supuestos S1–S18). Cada sub-issue:
+Una historia se **parte en sub-issues** solo cuando entra a la iteración en curso o a la siguiente. El título es `UCnn-HUmm-Tk · Verbo + objeto` (la `T` evita confundirlo con los supuestos S1–S19). Cada sub-issue:
 
 - vale como máximo 3 puntos;
 - se parte por criterio, no por capa: cada extensión del SRS suele ser uno;
