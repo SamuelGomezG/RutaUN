@@ -186,11 +186,11 @@ java -cp ~/.m2/repository/com/h2database/h2/2.4.240/h2-2.4.240.jar org.h2.tools.
 Versiones del consolidado y cuántas reglas tiene cada una:
 
 ```sql
-SELECT v.numero, v.fecha, v.motivo, v.numero_plan_de_estudios, COUNT(r.id) AS reglas
+SELECT v.programa_id, v.numero, v.fecha, v.motivo, v.numero_plan_de_estudios, COUNT(r.id) AS reglas
 FROM version_consolidado v
 LEFT JOIN regla_en_version r ON r.version_id = v.id
-GROUP BY v.numero, v.fecha, v.motivo, v.numero_plan_de_estudios
-ORDER BY v.numero;
+GROUP BY v.id, v.programa_id, v.numero, v.fecha, v.motivo, v.numero_plan_de_estudios
+ORDER BY v.programa_id, v.numero;
 ```
 
 Normas incorporadas y cuántas reglas trajo cada una:
