@@ -74,9 +74,9 @@ Repetir el arranque no duplica nada: un programa se reconoce por su código SIA 
 
 | Ruta | Respuesta | Por qué |
 | --- | --- | --- |
-| `GET /` | 200, página de inicio del esqueleto | — |
-| `GET /programas` (UC06 paso 2) | 503, «Consulta no disponible» | La aplicación todavía no tiene una implementación de `ConsultaNormativaFacade`; la trae [#132](https://github.com/SamuelGomezG/RutaUN/issues/132). Las pruebas usan `ConsultaNormativaFalsa`. |
-| `GET /programas/{id}/reglas` (UC06 paso 4) | 503 por lo mismo; 400 si `{id}` no es un UUID | Con la fachada real: 200, o 404 si el programa no está cargado o no tiene una versión vigente del consolidado |
+| `GET /` | 200, página de inicio con el enlace a la consulta | — |
+| `GET /programas` (UC06 paso 2) | 200, los programas cargados | Los lee `ConsultaNormativaService` de la base; con el perfil `dev` está cargado Ingeniería de Sistemas y Computación. Las pruebas de la página usan `ConsultaNormativaFalsa`. |
+| `GET /programas/{id}/reglas` (UC06 paso 4) | 200 con las reglas del consolidado vigente por categoría; 404 si el programa no está cargado o no tiene una versión vigente; 400 si `{id}` no es un UUID | Muestra las reglas vigentes, programadas y en revisión, no las que ya no rigen |
 
 No hay consola de H2 ni Spring Boot Actuator: la base se consulta con la aplicación detenida ([`esquema-de-la-base.md`](../datos/esquema-de-la-base.md), «Consultas de inspección»). Tampoco hay autenticación; llega con SOP-01 ([#53](https://github.com/SamuelGomezG/RutaUN/issues/53)).
 

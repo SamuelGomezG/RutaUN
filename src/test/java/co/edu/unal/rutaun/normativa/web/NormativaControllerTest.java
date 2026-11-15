@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -27,11 +28,15 @@ class NormativaControllerTest {
   private static final String RUTA_DE_SISTEMAS =
       "/programas/" + ConsultaNormativaFalsa.SISTEMAS.valor() + "/reglas";
 
-  /** Pone la fachada falsa en lugar de la implementación real, que aún no existe. */
+  /**
+   * Pone la fachada falsa en lugar de la real: {@code @Primary}, porque Spring Boot no deja pisar
+   * un bean.
+   */
   @TestConfiguration
   static class FachadaFalsa {
 
     @Bean
+    @Primary
     ConsultaNormativaFacade consultaNormativa() {
       return ConsultaNormativaFalsa.conReglas();
     }
