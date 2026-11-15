@@ -86,7 +86,7 @@ try {
     exit 1
   }
 
-  $h2 = (Get-Content -LiteralPath $temporal -Raw).Trim()
+  $h2 = (Get-Content -LiteralPath $temporal -Raw -Encoding UTF8).Trim()
   if ([string]::IsNullOrWhiteSpace($h2)) {
     [Console]::Error.WriteLine('consultar-base: el wrapper no devolvió la ruta del jar de H2.')
     exit 1
