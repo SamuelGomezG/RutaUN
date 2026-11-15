@@ -52,7 +52,7 @@ Ejemplo: `V2__incidente.sql`.
 4. **Ajusta la entidad JPA** en `persistencia` del módulo. Hibernate valida al arrancar que la entidad y la tabla coincidan, y el arranque falla si no.
 5. **Actualiza** [`esquema-de-la-base.md`](../datos/esquema-de-la-base.md) en el mismo commit.
 
-Mientras la migración vive solo en tu rama, puedes editarla; después de cada cambio borra tu `data/`.
+Mientras la migración vive solo en tu rama, puedes editarla; después de cada cambio borra tu `data/` (si es desechable).
 
 **Comprobación:** `./mvnw verify`: las pruebas de integración aplican todas las migraciones sobre una base en memoria. Después arranca con una base nueva (borra `data/` si es desechable) y mira en el log «Successfully applied … migrations». Si dos ramas agregan el mismo número, la segunda en fusionarse renumera la suya.
 
