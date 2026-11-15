@@ -9,4 +9,7 @@ public interface VersionJpaRepository extends JpaRepository<VersionEntidad, UUID
 
   /** Devuelve la versión vigente del consolidado de un programa. */
   Optional<VersionEntidad> findTopByProgramaIdOrderByNumeroDesc(UUID programaId);
+
+  /** Dice si el programa tiene al menos una versión del consolidado. */
+  boolean existsByProgramaId(UUID programaId);
 }
