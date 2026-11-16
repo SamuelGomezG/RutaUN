@@ -37,6 +37,7 @@ Todo lo que no aparece en esta tabla usa el valor por defecto de Spring Boot; po
 | `spring.datasource.username` y `password` | `sa` y vacía | Son las de H2 embebido; la base es un archivo local que git ignora. No son credenciales de ningún servicio. |
 | `spring.jpa.hibernate.ddl-auto` | `validate` | Flyway es el dueño del esquema. Hibernate solo comprueba que las entidades coincidan con las tablas, y el arranque falla si no. |
 | `spring.jpa.open-in-view` | `false` | La vista no abre consultas: lo que una plantilla necesita lo trae el servicio dentro de su transacción. |
+| `rutaun.periodo-en-curso` | `"2026-2"` | Periodo académico en curso (SOP-04, [#56](https://github.com/SamuelGomezG/RutaUN/issues/56)): el último que empezó, con formato `AAAA-1` o `AAAA-2`. Es el único punto donde se cambia, y los demás módulos lo leen con `PeriodoEnCursoFacade`. Si falta o tiene otro formato, la aplicación no arranca y el error nombra la propiedad. Hoy se cambia editando este valor o pasándolo como argumento (`--rutaun.periodo-en-curso=2027-1`); «Avanzar periodo», que lo haría desde la aplicación, todavía no existe. |
 
 **No hay variables de entorno todavía.** Ningún `application*.yml` ni clase lee una. Las primeras llegan con el administrador de normativa inicial (SOP-02, [#54](https://github.com/SamuelGomezG/RutaUN/issues/54)); cuando existan, se listan aquí con su nombre, sin su valor.
 
