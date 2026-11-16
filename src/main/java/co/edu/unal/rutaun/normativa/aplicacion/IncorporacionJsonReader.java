@@ -6,7 +6,6 @@ import co.edu.unal.rutaun.compartido.Creditos;
 import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.Momento;
 import co.edu.unal.rutaun.compartido.NormaId;
-import co.edu.unal.rutaun.compartido.ParteDelAnio;
 import co.edu.unal.rutaun.compartido.PeriodoAcademico;
 import co.edu.unal.rutaun.compartido.ReglaId;
 import co.edu.unal.rutaun.normativa.ClasificacionRegla;
@@ -145,13 +144,7 @@ public final class IncorporacionJsonReader {
   }
 
   private static PeriodoAcademico periodo(JsonNode nodo) {
-    String valor = texto(nodo, "periodo");
-    String[] partes = valor.split("-");
-    if (partes.length != 2 || (!"1".equals(partes[1]) && !"2".equals(partes[1]))) {
-      throw new IllegalArgumentException("periodo debe tener el formato AAAA-1 o AAAA-2");
-    }
-    ParteDelAnio parte = "1".equals(partes[1]) ? ParteDelAnio.PRIMERO : ParteDelAnio.SEGUNDO;
-    return new PeriodoAcademico(Integer.parseInt(partes[0]), parte);
+    return PeriodoAcademico.desdeTexto(texto(nodo, "periodo"));
   }
 
   private static Regla regla(JsonNode nodo, NormaLeida norma) {
