@@ -77,4 +77,52 @@ class PeriodoAcademicoTest {
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("otro no puede ser null");
   }
+
+  @Test
+  void sop04_periodoAcademicoSeCreaDesdeElTextoDeLaPrimeraParte() {
+    assertThat(PeriodoAcademico.desdeTexto("2026-1"))
+        .isEqualTo(new PeriodoAcademico(2026, ParteDelAnio.PRIMERO));
+  }
+
+  @Test
+  void sop04_periodoAcademicoSeCreaDesdeElTextoDeLaSegundaParte() {
+    assertThat(PeriodoAcademico.desdeTexto("2027-2"))
+        .isEqualTo(new PeriodoAcademico(2027, ParteDelAnio.SEGUNDO));
+  }
+
+  @Test
+  void sop04_periodoAcademicoRechazaUnTextoConOtroFormato() {
+    List<String> invalidos =
+        List.of(
+            "",
+            "2026",
+            "2026-3",
+            "2026-0",
+            "26-1",
+            "20261",
+            "2026/1",
+            "abcd-1",
+            "2026-1-1",
+            " 2026-1",
+            "2026-1 ",
+            "2026-12");
+    for (String texto : invalidos) {
+      assertThatThrownBy(() -> PeriodoAcademico.desdeTexto(texto))
+          .isInstanceOf(IllegalArgumentException.class)
+          .hasMessageContaining("AAAA-1 o AAAA-2");
+    }
+  }
+
+  @Test
+  void sop04_periodoAcademicoRechazaUnTextoNulo() {
+    assertThatThrownBy(() -> PeriodoAcademico.desdeTexto(null))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("AAAA-1 o AAAA-2");
+  }
+
+  @Test
+  void sop04_periodoAcademicoRechazaUnAnioSinCuatroCifrasSignificativas() {
+    assertThatThrownBy(() -> PeriodoAcademico.desdeTexto("0999-1"))
+        .isInstanceOf(IllegalArgumentException.class);
+  }
 }
