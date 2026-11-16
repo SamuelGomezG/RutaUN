@@ -1,6 +1,8 @@
 package co.edu.unal.rutaun.compartido;
 
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Periodo académico: un semestre de la Universidad, identificado como «AAAA-1» o «AAAA-2»
@@ -15,6 +17,7 @@ public record PeriodoAcademico(int anio, ParteDelAnio parte)
 
   private static final int ANIO_MINIMO = 1000;
   private static final int ANIO_MAXIMO = 9999;
+  private static final Pattern FORMATO = Pattern.compile("([0-9]{4})-([12])");
 
   /** Exige un año de cuatro cifras y una parte del año. */
   public PeriodoAcademico {
@@ -22,6 +25,26 @@ public record PeriodoAcademico(int anio, ParteDelAnio parte)
       throw new IllegalArgumentException("anio debe tener cuatro cifras");
     }
     ArgumentChecks.obligatorio(parte, "parte");
+  }
+
+  /**
+   * Crea el periodo desde su texto: «AAAA-1» o «AAAA-2», por ejemplo «2026-2». Cualquier otro
+   * formato se rechaza.
+   *
+   * @param texto el periodo escrito como año de cuatro cifras, guion y 1 o 2
+   * @throws IllegalArgumentException si el texto es nulo o no tiene ese formato
+   */
+  public static PeriodoAcademico desdeTexto(String texto) {
+    if (texto == null) {
+      throw new IllegalArgumentException("periodo debe tener el formato AAAA-1 o AAAA-2");
+    }
+    Matcher coincidencia = FORMATO.matcher(texto);
+    if (!coincidencia.matches()) {
+      throw new IllegalArgumentException("periodo debe tener el formato AAAA-1 o AAAA-2");
+    }
+    ParteDelAnio parte =
+        "1".equals(coincidencia.group(2)) ? ParteDelAnio.PRIMERO : ParteDelAnio.SEGUNDO;
+    return new PeriodoAcademico(Integer.parseInt(coincidencia.group(1)), parte);
   }
 
   /** Devuelve el periodo que sigue a este: después de 2026-2 viene 2027-1. */
