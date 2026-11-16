@@ -16,4 +16,7 @@ spring:
       ddl-auto: validate
     open-in-view: false
 
-
+# Periodo académico en curso (SOP-04): el último que empezó, con formato AAAA-1 o AAAA-2.
+# Es el único punto donde se cambia; lo lee el módulo periodoencurso.
+rutaun:
+  periodo-en-curso: "2026-2"
