@@ -1,4 +1,4 @@
-package co.edu.unal.rutaun.normativa.dominio;
+package co.edu.unal.rutaun.compartido;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

@@ -1,4 +1,4 @@
-package co.edu.unal.rutaun.normativa.dominio;
+package co.edu.unal.rutaun.compartido;
 
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
 import java.util.List;

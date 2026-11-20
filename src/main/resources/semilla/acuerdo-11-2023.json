@@ -4295,7 +4295,7 @@
         "materia": "2024045",
         "medida": {
           "tipo": "COMPONENTE",
-          "componente": "Componente de Formación Disciplinar o Profesional"
+          "componente": "DISCIPLINAR"
         },
         "umbral": 40
       }
@@ -4360,7 +4360,7 @@
         "materia": "2016615",
         "medida": {
           "tipo": "COMPONENTE",
-          "componente": "Componente de Formación Disciplinar o Profesional"
+          "componente": "DISCIPLINAR"
         },
         "umbral": 40
       }
@@ -4425,7 +4425,7 @@
         "materia": "2017275",
         "medida": {
           "tipo": "COMPONENTE",
-          "componente": "Componente de Formación Disciplinar o Profesional"
+          "componente": "DISCIPLINAR"
         },
         "umbral": 40
       }
@@ -4490,7 +4490,7 @@
         "materia": "2016093",
         "medida": {
           "tipo": "COMPONENTE",
-          "componente": "Componente de Formación Disciplinar o Profesional"
+          "componente": "DISCIPLINAR"
         },
         "umbral": 40
       }
@@ -4555,7 +4555,7 @@
         "materia": "2016091",
         "medida": {
           "tipo": "COMPONENTE",
-          "componente": "Componente de Formación Disciplinar o Profesional"
+          "componente": "DISCIPLINAR"
         },
         "umbral": 40
       }
@@ -4620,7 +4620,7 @@
         "materia": "2026551",
         "medida": {
           "tipo": "COMPONENTE",
-          "componente": "Componente de Formación Disciplinar o Profesional"
+          "componente": "DISCIPLINAR"
         },
         "umbral": 40
       }
@@ -4685,7 +4685,7 @@
         "materia": "2016007",
         "medida": {
           "tipo": "COMPONENTE",
-          "componente": "Componente de Formación Disciplinar o Profesional"
+          "componente": "DISCIPLINAR"
         },
         "umbral": 40
       }
@@ -4750,7 +4750,7 @@
         "materia": "2016600",
         "medida": {
           "tipo": "COMPONENTE",
-          "componente": "Componente de Formación Disciplinar o Profesional"
+          "componente": "DISCIPLINAR"
         },
         "umbral": 40
       }
@@ -4815,7 +4815,7 @@
         "materia": "2016599",
         "medida": {
           "tipo": "COMPONENTE",
-          "componente": "Componente de Formación Disciplinar o Profesional"
+          "componente": "DISCIPLINAR"
         },
         "umbral": 40
       }
@@ -4880,7 +4880,7 @@
         "materia": "2016741",
         "medida": {
           "tipo": "COMPONENTE",
-          "componente": "Componente de Formación Disciplinar o Profesional"
+          "componente": "DISCIPLINAR"
         },
         "umbral": 40
       }
@@ -4945,7 +4945,7 @@
         "materia": "2016037",
         "medida": {
           "tipo": "COMPONENTE",
-          "componente": "Componente de Formación Disciplinar o Profesional"
+          "componente": "DISCIPLINAR"
         },
         "umbral": 40
       }
@@ -5031,7 +5031,7 @@
         "materia": "2025974",
         "medida": {
           "tipo": "COMPONENTE",
-          "componente": "Componente de Formación Disciplinar o Profesional"
+          "componente": "DISCIPLINAR"
         },
         "umbral": 60
       }
@@ -5072,7 +5072,7 @@
         "materia": "2025973",
         "medida": {
           "tipo": "COMPONENTE",
-          "componente": "Componente de Formación Disciplinar o Profesional"
+          "componente": "DISCIPLINAR"
         },
         "umbral": 60
       }
@@ -5113,7 +5113,7 @@
         "materia": "2016843",
         "medida": {
           "tipo": "COMPONENTE",
-          "componente": "Componente de Formación Disciplinar o Profesional"
+          "componente": "DISCIPLINAR"
         },
         "umbral": 60
       }
@@ -5175,7 +5175,7 @@
         "materia": "2016762",
         "medida": {
           "tipo": "COMPONENTE",
-          "componente": "Componente de Formación Disciplinar o Profesional"
+          "componente": "DISCIPLINAR"
         },
         "umbral": 40
       }
@@ -5216,7 +5216,7 @@
         "materia": "2016763",
         "medida": {
           "tipo": "COMPONENTE",
-          "componente": "Componente de Formación Disciplinar o Profesional"
+          "componente": "DISCIPLINAR"
         },
         "umbral": 40
       }
@@ -5257,7 +5257,7 @@
         "materia": "2016764",
         "medida": {
           "tipo": "COMPONENTE",
-          "componente": "Componente de Formación Disciplinar o Profesional"
+          "componente": "DISCIPLINAR"
         },
         "umbral": 40
       }
@@ -5298,7 +5298,7 @@
         "materia": "1000070",
         "medida": {
           "tipo": "COMPONENTE",
-          "componente": "Componente de Formación Disciplinar o Profesional"
+          "componente": "DISCIPLINAR"
         },
         "umbral": 40
       }
@@ -5339,7 +5339,7 @@
         "materia": "1000071",
         "medida": {
           "tipo": "COMPONENTE",
-          "componente": "Componente de Formación Disciplinar o Profesional"
+          "componente": "DISCIPLINAR"
         },
         "umbral": 40
       }
@@ -5380,7 +5380,7 @@
         "materia": "1000072",
         "medida": {
           "tipo": "COMPONENTE",
-          "componente": "Componente de Formación Disciplinar o Profesional"
+          "componente": "DISCIPLINAR"
         },
         "umbral": 40
       }

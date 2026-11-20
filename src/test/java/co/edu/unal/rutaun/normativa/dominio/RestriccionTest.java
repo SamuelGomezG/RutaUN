@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import co.edu.unal.rutaun.compartido.CodigoMateria;
 import co.edu.unal.rutaun.compartido.Creditos;
+import co.edu.unal.rutaun.normativa.TipoComponente;
 import org.junit.jupiter.api.Test;
 
 class RestriccionTest {
@@ -40,10 +41,11 @@ class RestriccionTest {
   @Test
   void tt03_seConstruyeUnaReglaDeHabilitacionDeUnComponente() {
     ReglaDeHabilitacion regla =
-        new ReglaDeHabilitacion(A, MedidaDeCreditos.deComponente("Disciplinar"), new Creditos(40));
+        new ReglaDeHabilitacion(
+            A, MedidaDeCreditos.deComponente(TipoComponente.DISCIPLINAR), new Creditos(40));
 
     assertThat(regla.materia()).isEqualTo(A);
-    assertThat(regla.medida()).isEqualTo(MedidaDeCreditos.deComponente("Disciplinar"));
+    assertThat(regla.medida()).isEqualTo(MedidaDeCreditos.deComponente(TipoComponente.DISCIPLINAR));
     assertThat(regla.umbral()).isEqualTo(new Creditos(40));
     assertThat(regla).isInstanceOf(Restriccion.class);
   }
@@ -84,9 +86,9 @@ class RestriccionTest {
   }
 
   @Test
-  void tt03_laMedidaDeCreditosRechazaUnComponenteVacio() {
-    assertThatThrownBy(() -> MedidaDeCreditos.deComponente(" "))
+  void tt03_laMedidaDeCreditosRechazaUnComponenteNulo() {
+    assertThatThrownBy(() -> MedidaDeCreditos.deComponente(null))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("componente no puede ser vacío");
+        .hasMessage("componente no puede ser null");
   }
 }
