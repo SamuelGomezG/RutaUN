@@ -10,7 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.ProgramaId;
 import co.edu.unal.rutaun.incidentes.persistencia.IncidenteEntity;
-import co.edu.unal.rutaun.incidentes.persistencia.IncidenteJpaRepository;
+import co.edu.unal.rutaun.incidentes.persistencia.IncidenteRepository;
 import co.edu.unal.rutaun.normativa.ClasificacionRegla;
 import co.edu.unal.rutaun.normativa.ConsolidadoVista;
 import co.edu.unal.rutaun.normativa.ConsultaNormativaFacade;
@@ -125,7 +125,7 @@ class ReglasDelProgramaEstadosTest {
 
   @Autowired private MockMvc mockMvc;
 
-  @Autowired private IncidenteJpaRepository incidentes;
+  @Autowired private IncidenteRepository incidentes;
 
   @Test
   void uc06_paso4_cadaReglaMuestraSuEstado() throws Exception {

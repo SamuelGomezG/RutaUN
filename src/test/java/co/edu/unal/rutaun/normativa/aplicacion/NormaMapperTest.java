@@ -15,7 +15,7 @@ import co.edu.unal.rutaun.normativa.dominio.IdentificacionNorma;
 import co.edu.unal.rutaun.normativa.dominio.Norma;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
 import co.edu.unal.rutaun.normativa.persistencia.NormaEntity;
-import co.edu.unal.rutaun.normativa.persistencia.NormaJpaRepository;
+import co.edu.unal.rutaun.normativa.persistencia.NormaRepository;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
 import java.time.LocalDate;
 import java.util.Optional;
@@ -37,7 +37,7 @@ class NormaMapperTest {
   private static final String ALCANCE_TODOS =
       "{\"facultades\":[],\"programas\":[],\"exclusiones\":[],\"texto\":\"Todos\"}";
 
-  @Autowired private NormaJpaRepository normas;
+  @Autowired private NormaRepository normas;
 
   private UUID normaId;
 

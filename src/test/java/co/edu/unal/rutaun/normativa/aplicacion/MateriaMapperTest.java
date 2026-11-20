@@ -7,7 +7,7 @@ import co.edu.unal.rutaun.compartido.CodigoMateria;
 import co.edu.unal.rutaun.compartido.Creditos;
 import co.edu.unal.rutaun.normativa.dominio.Materia;
 import co.edu.unal.rutaun.normativa.persistencia.MateriaEntity;
-import co.edu.unal.rutaun.normativa.persistencia.MateriaJpaRepository;
+import co.edu.unal.rutaun.normativa.persistencia.MateriaRepository;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
@@ -23,7 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @PruebaDeIntegracion
 class MateriaMapperTest {
 
-  @Autowired private MateriaJpaRepository materias;
+  @Autowired private MateriaRepository materias;
 
   private String codigoGuardado;
 

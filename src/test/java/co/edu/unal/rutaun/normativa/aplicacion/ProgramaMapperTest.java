@@ -6,7 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import co.edu.unal.rutaun.normativa.dominio.Facultad;
 import co.edu.unal.rutaun.normativa.dominio.Programa;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaEntity;
-import co.edu.unal.rutaun.normativa.persistencia.ProgramaJpaRepository;
+import co.edu.unal.rutaun.normativa.persistencia.ProgramaRepository;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
@@ -22,7 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @PruebaDeIntegracion
 class ProgramaMapperTest {
 
-  @Autowired private ProgramaJpaRepository programas;
+  @Autowired private ProgramaRepository programas;
 
   private UUID programaId;
 

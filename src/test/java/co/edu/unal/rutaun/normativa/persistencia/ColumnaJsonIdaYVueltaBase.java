@@ -24,8 +24,8 @@ abstract class ColumnaJsonIdaYVueltaBase {
 
   private static final JsonMapper JSON = JsonMapper.builder().build();
 
-  @Autowired private NormaJpaRepository normas;
-  @Autowired private ReglaJpaRepository reglas;
+  @Autowired private NormaRepository normas;
+  @Autowired private ReglaRepository reglas;
   @Autowired private JdbcTemplate jdbc;
 
   @Value("${spring.datasource.url}")

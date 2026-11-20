@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class PersistenciaIncidentesTest {
 
-  @Autowired private IncidenteJpaRepository incidentes;
+  @Autowired private IncidenteRepository incidentes;
   @Autowired private EntityManager em;
 
   @Test

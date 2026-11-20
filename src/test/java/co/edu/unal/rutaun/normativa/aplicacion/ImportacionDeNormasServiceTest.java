@@ -3,15 +3,15 @@ package co.edu.unal.rutaun.normativa.aplicacion;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import co.edu.unal.rutaun.compartido.EstadoRegla;
-import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoJpaRepository;
-import co.edu.unal.rutaun.normativa.persistencia.NormaJpaRepository;
-import co.edu.unal.rutaun.normativa.persistencia.ProgramaJpaRepository;
+import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoRepository;
+import co.edu.unal.rutaun.normativa.persistencia.NormaRepository;
+import co.edu.unal.rutaun.normativa.persistencia.ProgramaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntity;
-import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionJpaRepository;
+import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEntity;
-import co.edu.unal.rutaun.normativa.persistencia.ReglaJpaRepository;
+import co.edu.unal.rutaun.normativa.persistencia.ReglaRepository;
+import co.edu.unal.rutaun.normativa.persistencia.VersionDelConsolidadoRepository;
 import co.edu.unal.rutaun.normativa.persistencia.VersionEntity;
-import co.edu.unal.rutaun.normativa.persistencia.VersionJpaRepository;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,23 +37,23 @@ class ImportacionDeNormasServiceTest {
 
   private final ImportacionDeProgramasService programas;
   private final ImportacionDeNormasService normas;
-  private final NormaJpaRepository normasGuardadas;
-  private final ReglaJpaRepository reglas;
-  private final ConsolidadoJpaRepository consolidados;
-  private final VersionJpaRepository versiones;
-  private final ReglaEnVersionJpaRepository reglasEnVersion;
-  private final ProgramaJpaRepository programasGuardados;
+  private final NormaRepository normasGuardadas;
+  private final ReglaRepository reglas;
+  private final ConsolidadoRepository consolidados;
+  private final VersionDelConsolidadoRepository versiones;
+  private final ReglaEnVersionRepository reglasEnVersion;
+  private final ProgramaRepository programasGuardados;
 
   @Autowired
   ImportacionDeNormasServiceTest(
       ImportacionDeProgramasService programas,
       ImportacionDeNormasService normas,
-      NormaJpaRepository normasGuardadas,
-      ReglaJpaRepository reglas,
-      ConsolidadoJpaRepository consolidados,
-      VersionJpaRepository versiones,
-      ReglaEnVersionJpaRepository reglasEnVersion,
-      ProgramaJpaRepository programasGuardados) {
+      NormaRepository normasGuardadas,
+      ReglaRepository reglas,
+      ConsolidadoRepository consolidados,
+      VersionDelConsolidadoRepository versiones,
+      ReglaEnVersionRepository reglasEnVersion,
+      ProgramaRepository programasGuardados) {
     this.programas = programas;
     this.normas = normas;
     this.normasGuardadas = normasGuardadas;

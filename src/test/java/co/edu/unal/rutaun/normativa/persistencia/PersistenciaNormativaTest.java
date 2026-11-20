@@ -16,13 +16,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class PersistenciaNormativaTest {
 
-  @Autowired private ProgramaJpaRepository programas;
-  @Autowired private MateriaJpaRepository materias;
-  @Autowired private NormaJpaRepository normas;
-  @Autowired private ReglaJpaRepository reglas;
-  @Autowired private ConsolidadoJpaRepository consolidados;
-  @Autowired private VersionJpaRepository versiones;
-  @Autowired private ReglaEnVersionJpaRepository reglasEnVersion;
+  @Autowired private ProgramaRepository programas;
+  @Autowired private MateriaRepository materias;
+  @Autowired private NormaRepository normas;
+  @Autowired private ReglaRepository reglas;
+  @Autowired private ConsolidadoRepository consolidados;
+  @Autowired private VersionDelConsolidadoRepository versiones;
+  @Autowired private ReglaEnVersionRepository reglasEnVersion;
   @Autowired private EntityManager em;
 
   private void vaciarMemoria() {

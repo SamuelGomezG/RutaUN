@@ -17,11 +17,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class ProgramaPorCodigoSiaTest {
 
-  private final ProgramaJpaRepository programas;
+  private final ProgramaRepository programas;
 
   /** Recibe el repositorio que Spring inyecta. */
   @Autowired
-  ProgramaPorCodigoSiaTest(ProgramaJpaRepository programas) {
+  ProgramaPorCodigoSiaTest(ProgramaRepository programas) {
     this.programas = programas;
   }
 
