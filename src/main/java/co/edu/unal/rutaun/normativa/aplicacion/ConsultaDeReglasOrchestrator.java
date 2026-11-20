@@ -1,6 +1,7 @@
 package co.edu.unal.rutaun.normativa.aplicacion;
 
 import co.edu.unal.rutaun.compartido.ProgramaId;
+import co.edu.unal.rutaun.compartido.ReglaId;
 import co.edu.unal.rutaun.incidentes.IncidenteDePrograma;
 import co.edu.unal.rutaun.normativa.ConsolidadoVista;
 import co.edu.unal.rutaun.normativa.ConsultaNormativaFacade;
@@ -72,5 +73,23 @@ public class ConsultaDeReglasOrchestrator {
               CASO_DE_USO, PASO, id, consolidado.get().version(), CAUSA, List.of()));
     }
     return new ReglasDelPrograma.Consultadas(programa.get(), consolidado.get());
+  }
+
+  /**
+   * Una regla del programa, completa (UC06 paso 8).
+   *
+   * @param programa identificador del programa
+   * @param regla identificador de la regla
+   * @return la regla y su programa; vacío si el programa no está cargado o la regla no está en el
+   *     consolidado vigente
+   */
+  public Optional<ReglaDelPrograma> reglaDelPrograma(ProgramaId programa, ReglaId regla) {
+    return consulta
+        .programa(programa)
+        .flatMap(
+            vista ->
+                consulta
+                    .regla(programa, regla)
+                    .map(completa -> new ReglaDelPrograma(vista, completa)));
   }
 }

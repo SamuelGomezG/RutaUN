@@ -3,6 +3,7 @@ package co.edu.unal.rutaun.normativa.aplicacion;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import co.edu.unal.rutaun.compartido.EstadoRegla;
+import co.edu.unal.rutaun.compartido.ReglaId;
 import co.edu.unal.rutaun.normativa.ClasificacionRegla;
 import co.edu.unal.rutaun.normativa.ReglaVista;
 import co.edu.unal.rutaun.normativa.aplicacion.ConsultaNormativaService.Entrada;
@@ -26,7 +27,12 @@ class OrdenDeReglasTest {
   private static Entrada entrada(LocalDate expedicion, String articulo, String enunciado, UUID id) {
     ReglaVista vista =
         new ReglaVista(
-            enunciado, Optional.empty(), EstadoRegla.VIGENTE, false, ClasificacionRegla.DEL_PLAN);
+            ReglaId.nuevo(),
+            enunciado,
+            Optional.empty(),
+            EstadoRegla.VIGENTE,
+            false,
+            ClasificacionRegla.DEL_PLAN);
     return new Entrada("Otra", expedicion, articulo, id, vista);
   }
 
