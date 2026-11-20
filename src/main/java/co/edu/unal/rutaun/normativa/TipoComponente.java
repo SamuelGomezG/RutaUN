@@ -1,4 +1,4 @@
-package co.edu.unal.rutaun.normativa.dominio;
+package co.edu.unal.rutaun.normativa;
 
 /**
  * Tipo de un componente con materias. El de libre elección no está aquí: se cubre con créditos y

@@ -3,6 +3,7 @@ package co.edu.unal.rutaun.soporte;
 import co.edu.unal.rutaun.compartido.AgrupacionId;
 import co.edu.unal.rutaun.compartido.CodigoMateria;
 import co.edu.unal.rutaun.compartido.Creditos;
+import co.edu.unal.rutaun.normativa.TipoComponente;
 import co.edu.unal.rutaun.normativa.dominio.Agrupacion;
 import co.edu.unal.rutaun.normativa.dominio.Componente;
 import co.edu.unal.rutaun.normativa.dominio.ComponenteDeLibreEleccion;
@@ -11,7 +12,6 @@ import co.edu.unal.rutaun.normativa.dominio.Malla;
 import co.edu.unal.rutaun.normativa.dominio.MateriaEnMalla;
 import co.edu.unal.rutaun.normativa.dominio.NodoDeMalla;
 import co.edu.unal.rutaun.normativa.dominio.Obligatoriedad;
-import co.edu.unal.rutaun.normativa.dominio.TipoComponente;
 import java.util.List;
 
 /**
