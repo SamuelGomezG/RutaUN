@@ -53,7 +53,7 @@ semilla real en las pruebas (`SemillaDeSistemasTest` lo detecta).
 | Propiedades | Determinismo del cálculo, cumplimiento del tope y de restricciones | jqwik | `utilidades/ArgumentChecksPropiedadesTest` |
 | Oráculo de optimalidad | El plan mínimo y los seis criterios del cálculo, contra fuerza bruta | JUnit 6 con mallas sintéticas | *(pendiente, PRU-02 #61)*; el prototipo de `spikes/tt-05-motor/` no demuestra optimalidad de c4–c6 |
 | Orquestadores | Flujos y extensiones de cada caso con fachadas falsas | Mockito con `Clock` fijo | *(sprint 2)* |
-| Arquitectura | Reglas de capas, módulos y nombres | Modulith `verify()` y ArchUnit | `arquitectura/ModulosTest`, `CapasTest`, `NombresTest` |
+| Arquitectura | Reglas de capas, módulos y nombres | Modulith `verify()` y ArchUnit | `arquitectura/ModulosTest`, `CapasTest`, `NombresTest`, `EntidadesTest` |
 | Integración | Repositorios, restricción única, eventos, sesión, reserva de UC07 | `@PruebaDeIntegracion` (contexto completo, H2 en memoria) | `PersistenciaHumoTest`, `normativa/aplicacion/SemillaDeSistemasTest` |
 | Web | Controladores, rutas, Post/Redirect/Get, errores de formulario | MockMvc (`@SpringBootTest` + `@AutoConfigureMockMvc`) | `web/InicioControllerTest` |
 | Contrato | Formato JSON de importación, válido e inválido | JUnit 6 con archivos de `src/test/resources/json/` | `normativa/aplicacion/FormatoNormativaTest` |
@@ -80,6 +80,10 @@ falla si un módulo usa las clases internas de otro.
 `NombresTest`: ninguna clase termina en `Impl` y los identificadores son
 ASCII. Las reglas sobre paquetes que aún no tienen clases no fallan
 (`archRule.failOnEmptyShould=false` en `archunit.properties`).
+
+`EntidadesTest`: toda entidad JPA implementa `Persistable` o tiene un campo
+`@Version`, para que guardar una entidad nueva con una llave existente falle
+en vez de sobrescribir la fila (#140).
 
 ## Pendientes (se completan al llegar)
 

@@ -83,7 +83,7 @@ project/                          raíz del repositorio
    │     └─ static/               css/ · js/ · img/
    └─ test/
       ├─ java/co/edu/unal/rutaun/
-      │  ├─ arquitectura/         ModulosTest · CapasTest · NombresTest
+      │  ├─ arquitectura/         ModulosTest · CapasTest · NombresTest · EntidadesTest
       │  ├─ normativa/…           espejo de los paquetes
       │  └─ soporte/              mallas sintéticas, Clock fijo
       │     └─ demostraciones/    demostraciones del dominio (comando C de la Definición de Hecho)
