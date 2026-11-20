@@ -3,7 +3,6 @@ package co.edu.unal.rutaun.normativa.aplicacion;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.Momento;
 import co.edu.unal.rutaun.compartido.ParteDelAnio;
 import co.edu.unal.rutaun.compartido.PeriodoAcademico;
@@ -64,9 +63,9 @@ class ReglaMapperTest {
     List<DatosDeRegla> todos = ReglasDePrueba.datosDeTodasLasCategorias();
 
     for (DatosDeRegla datos : todos) {
-      Regla original = ReglasDePrueba.regla(norma, datos, EstadoRegla.VIGENTE);
+      Regla original = ReglasDePrueba.regla(norma, datos);
 
-      Regla reconstruida = guardarYLeer(original, EstadoRegla.VIGENTE);
+      Regla reconstruida = guardarYLeer(original);
 
       // Regla.equals solo compara el id; la comparación recursiva revisa todos los campos.
       assertThat(reconstruida)
@@ -78,9 +77,8 @@ class ReglaMapperTest {
 
   @Test
   void tt04_reglaConVigenciaPropiaYAfectacionIdaYVuelta() {
-    Regla afectada =
-        ReglasDePrueba.regla(norma, new DatosDeRegla.DeOtraCategoria(), EstadoRegla.VIGENTE);
-    guardarYLeer(afectada, EstadoRegla.VIGENTE);
+    Regla afectada = ReglasDePrueba.regla(norma, new DatosDeRegla.DeOtraCategoria());
+    guardarYLeer(afectada);
     Regla conVigenciaHasta =
         Regla.registrar(
             "Carga temporal",
@@ -91,7 +89,6 @@ class ReglaMapperTest {
                     new Momento.EnFecha(LocalDate.of(2026, 1, 1)),
                     Optional.of(new Momento.EnFecha(LocalDate.of(2026, 12, 31))))),
             ClasificacionRegla.INFORMATIVA,
-            EstadoRegla.PROGRAMADA,
             Optional.of(
                 new Afectacion(
                     TipoAfectacion.EXCEPTUA,
@@ -107,14 +104,13 @@ class ReglaMapperTest {
             Optional.of(
                 new Vigencia(new Momento.EnFecha(LocalDate.of(2027, 1, 1)), Optional.empty())),
             ClasificacionRegla.DEL_PLAN,
-            EstadoRegla.PROGRAMADA,
             Optional.empty(),
             new DatosDeRegla.DeRequisitoDeGrado());
 
-    assertThat(guardarYLeer(conVigenciaHasta, EstadoRegla.PROGRAMADA))
+    assertThat(guardarYLeer(conVigenciaHasta))
         .usingRecursiveComparison()
         .isEqualTo(conVigenciaHasta);
-    assertThat(guardarYLeer(conVigenciaAbierta, EstadoRegla.PROGRAMADA))
+    assertThat(guardarYLeer(conVigenciaAbierta))
         .usingRecursiveComparison()
         .isEqualTo(conVigenciaAbierta);
   }
@@ -168,7 +164,7 @@ class ReglaMapperTest {
   void tt04_reglaConCategoriaDesconocidaNoSeReconstituye() {
     ReglaEntity invalida = entidadAMano("DECRETO", "{}");
 
-    assertThatThrownBy(() -> ReglaMapper.aDominio(invalida, EstadoRegla.VIGENTE))
+    assertThatThrownBy(() -> ReglaMapper.aDominio(invalida))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("DECRETO");
   }
@@ -178,17 +174,17 @@ class ReglaMapperTest {
     // «PROGRAMA» exige creditosExigidos; el JSON vacío no lo trae.
     ReglaEntity invalida = entidadAMano("PROGRAMA", "{}");
 
-    assertThatThrownBy(() -> ReglaMapper.aDominio(invalida, EstadoRegla.VIGENTE))
+    assertThatThrownBy(() -> ReglaMapper.aDominio(invalida))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("PROGRAMA");
   }
 
-  /** Guarda la regla, la lee de la base y la reconstruye con el estado que tiene en su versión. */
-  private Regla guardarYLeer(Regla regla, EstadoRegla estadoEnLaVersion) {
+  /** Guarda la regla, la lee de la base y la reconstruye. */
+  private Regla guardarYLeer(Regla regla) {
     reglasGuardadas.add(regla.id().valor());
     reglas.save(ReglaMapper.aEntidad(regla));
     ReglaEntity leida = reglas.findById(regla.id().valor()).orElseThrow();
-    return ReglaMapper.aDominio(leida, estadoEnLaVersion);
+    return ReglaMapper.aDominio(leida);
   }
 
   private Regla conVigencia(Vigencia vigencia) {
@@ -198,7 +194,6 @@ class ReglaMapperTest {
         new Fuente(norma.id(), "art. 1"),
         Optional.of(vigencia),
         ClasificacionRegla.INFORMATIVA,
-        EstadoRegla.VIGENTE,
         Optional.empty(),
         new DatosDeRegla.DeOtraCategoria());
   }
@@ -210,7 +205,6 @@ class ReglaMapperTest {
         new Fuente(norma.id(), "art. 1"),
         Optional.empty(),
         ClasificacionRegla.DEL_PLAN,
-        EstadoRegla.VIGENTE,
         Optional.of(afectacion),
         new DatosDeRegla.DeOtraCategoria());
   }

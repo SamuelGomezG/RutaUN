@@ -9,6 +9,7 @@ import co.edu.unal.rutaun.normativa.ClasificacionRegla;
 import co.edu.unal.rutaun.normativa.dominio.DatosDeRegla;
 import co.edu.unal.rutaun.normativa.dominio.Fuente;
 import co.edu.unal.rutaun.normativa.dominio.Regla;
+import co.edu.unal.rutaun.normativa.dominio.ReglaEnVersion;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -22,8 +23,17 @@ class ImportacionDeNormasServiceReglasAcumuladasTest {
 
   @Test
   void uc07_hu03_t4_laUnionConservaElOrdenDeLaVersionAnteriorYLasNuevas() {
-    Regla anterior = regla("Créditos del programa");
-    Regla nueva = regla("Componentes del programa");
+    ReglaEnVersion anterior = enVersion("Créditos del programa", EstadoRegla.VIGENTE);
+    ReglaEnVersion nueva = enVersion("Componentes del programa", EstadoRegla.VIGENTE);
+
+    assertThat(ImportacionDeNormasService.reglasAcumuladas(List.of(anterior), List.of(nueva)))
+        .containsExactly(anterior, nueva);
+  }
+
+  @Test
+  void uc07_hu03_t4_laUnionConservaElEstadoDeLasReglasDeLaVersionAnterior() {
+    ReglaEnVersion anterior = enVersion("Créditos del programa", EstadoRegla.YA_NO_RIGE);
+    ReglaEnVersion nueva = enVersion("Componentes del programa", EstadoRegla.VIGENTE);
 
     assertThat(ImportacionDeNormasService.reglasAcumuladas(List.of(anterior), List.of(nueva)))
         .containsExactly(anterior, nueva);
@@ -31,7 +41,7 @@ class ImportacionDeNormasServiceReglasAcumuladasTest {
 
   @Test
   void uc07_hu03_t4_sinVersionAnteriorLaUnionSoloTieneLasNuevas() {
-    Regla nueva = regla("Componentes del programa");
+    ReglaEnVersion nueva = enVersion("Componentes del programa", EstadoRegla.VIGENTE);
 
     assertThat(ImportacionDeNormasService.reglasAcumuladas(List.of(), List.of(nueva)))
         .containsExactly(nueva);
@@ -39,10 +49,12 @@ class ImportacionDeNormasServiceReglasAcumuladasTest {
 
   @Test
   void uc07_hu03_t4_unReglaIdDeLaVersionAnteriorSeRechaza() {
-    Regla anterior = regla("Créditos del programa");
+    Regla regla = regla("Créditos del programa");
+    ReglaEnVersion anterior = new ReglaEnVersion(regla, EstadoRegla.PROGRAMADA);
+    ReglaEnVersion nueva = new ReglaEnVersion(regla, EstadoRegla.VIGENTE);
 
     assertThatThrownBy(
-            () -> ImportacionDeNormasService.reglasAcumuladas(List.of(anterior), List.of(anterior)))
+            () -> ImportacionDeNormasService.reglasAcumuladas(List.of(anterior), List.of(nueva)))
         .isInstanceOf(ArchivoDeNormativaInvalidoException.class)
         .hasMessageContaining("Créditos del programa")
         .hasMessageContaining("art. 1");
@@ -50,13 +62,17 @@ class ImportacionDeNormasServiceReglasAcumuladasTest {
 
   @Test
   void uc07_hu03_t4_unReglaIdRepetidoEntreLasNuevasSeRechaza() {
-    Regla nueva = regla("Componentes del programa");
+    ReglaEnVersion nueva = enVersion("Componentes del programa", EstadoRegla.VIGENTE);
 
     assertThatThrownBy(
             () -> ImportacionDeNormasService.reglasAcumuladas(List.of(), List.of(nueva, nueva)))
         .isInstanceOf(ArchivoDeNormativaInvalidoException.class)
         .hasMessageContaining("Componentes del programa")
         .hasMessageContaining("está repetida en la norma que se importa");
+  }
+
+  private static ReglaEnVersion enVersion(String objeto, EstadoRegla estado) {
+    return new ReglaEnVersion(regla(objeto), estado);
   }
 
   private static Regla regla(String objeto) {
@@ -66,7 +82,6 @@ class ImportacionDeNormasServiceReglasAcumuladasTest {
         new Fuente(NormaId.nuevo(), "art. 1"),
         Optional.empty(),
         ClasificacionRegla.INFORMATIVA,
-        EstadoRegla.VIGENTE,
         Optional.empty(),
         new DatosDeRegla.DeOtraCategoria());
   }

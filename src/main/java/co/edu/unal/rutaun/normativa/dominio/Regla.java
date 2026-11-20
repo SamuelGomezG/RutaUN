@@ -1,6 +1,5 @@
 package co.edu.unal.rutaun.normativa.dominio;
 
-import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.ReglaId;
 import co.edu.unal.rutaun.normativa.ClasificacionRegla;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
@@ -8,9 +7,9 @@ import java.util.Optional;
 
 /**
  * Regla del consolidado (glosario, «Regla»): un enunciado sobre un objeto, con su fuente, su
- * vigencia propia si la tiene, su clasificación, su estado y, si afecta a otra regla, su
- * afectación. Su categoría es el tipo de sus {@link DatosDeRegla}. Es inmutable y su identidad es
- * su {@link ReglaId}.
+ * vigencia propia si la tiene, su clasificación y, si afecta a otra regla, su afectación. Su
+ * categoría es el tipo de sus {@link DatosDeRegla}. Es inmutable y su identidad es su {@link
+ * ReglaId}.
  */
 public final class Regla {
 
@@ -20,7 +19,6 @@ public final class Regla {
   private final Fuente fuente;
   private final Optional<Vigencia> vigenciaPropia;
   private final ClasificacionRegla clasificacion;
-  private final EstadoRegla estado;
   private final Optional<Afectacion> afectacion;
   private final DatosDeRegla datos;
 
@@ -31,7 +29,6 @@ public final class Regla {
       Fuente fuente,
       Optional<Vigencia> vigenciaPropia,
       ClasificacionRegla clasificacion,
-      EstadoRegla estado,
       Optional<Afectacion> afectacion,
       DatosDeRegla datos) {
     this.id = ArgumentChecks.obligatorio(id, "id");
@@ -40,7 +37,6 @@ public final class Regla {
     this.fuente = ArgumentChecks.obligatorio(fuente, "fuente");
     this.vigenciaPropia = ArgumentChecks.obligatorio(vigenciaPropia, "vigenciaPropia");
     this.clasificacion = ArgumentChecks.obligatorio(clasificacion, "clasificacion");
-    this.estado = ArgumentChecks.obligatorio(estado, "estado");
     this.afectacion = ArgumentChecks.obligatorio(afectacion, "afectacion");
     this.datos = ArgumentChecks.obligatorio(datos, "datos");
     if (clasificacion == ClasificacionRegla.DEL_PLAN
@@ -57,7 +53,6 @@ public final class Regla {
       Fuente fuente,
       Optional<Vigencia> vigenciaPropia,
       ClasificacionRegla clasificacion,
-      EstadoRegla estado,
       Optional<Afectacion> afectacion,
       DatosDeRegla datos) {
     return new Regla(
@@ -67,7 +62,6 @@ public final class Regla {
         fuente,
         vigenciaPropia,
         clasificacion,
-        estado,
         afectacion,
         datos);
   }
@@ -80,11 +74,10 @@ public final class Regla {
       Fuente fuente,
       Optional<Vigencia> vigenciaPropia,
       ClasificacionRegla clasificacion,
-      EstadoRegla estado,
       Optional<Afectacion> afectacion,
       DatosDeRegla datos) {
     return new Regla(
-        id, objeto, enunciado, fuente, vigenciaPropia, clasificacion, estado, afectacion, datos);
+        id, objeto, enunciado, fuente, vigenciaPropia, clasificacion, afectacion, datos);
   }
 
   /** Identificador de la regla. */
@@ -115,11 +108,6 @@ public final class Regla {
   /** Si el plan aplica la regla o solo la informa. */
   public ClasificacionRegla clasificacion() {
     return clasificacion;
-  }
-
-  /** Estado de la regla en la versión del consolidado. */
-  public EstadoRegla estado() {
-    return estado;
   }
 
   /** Regla o artículo que esta regla modifica, deroga o exceptúa; vacío si no afecta a otra. */

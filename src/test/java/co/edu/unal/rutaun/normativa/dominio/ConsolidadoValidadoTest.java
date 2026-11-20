@@ -14,22 +14,23 @@ import org.junit.jupiter.api.Test;
 
 class ConsolidadoValidadoTest {
 
-  private static Regla regla() {
-    return Regla.registrar(
-        "Objeto",
-        "Enunciado",
-        new Fuente(NormaId.nuevo(), "art. 1"),
-        Optional.empty(),
-        ClasificacionRegla.DEL_PLAN,
-        EstadoRegla.VIGENTE,
-        Optional.empty(),
-        new DatosDeRegla.DeOtraCategoria());
+  private static ReglaEnVersion regla() {
+    return new ReglaEnVersion(
+        Regla.registrar(
+            "Objeto",
+            "Enunciado",
+            new Fuente(NormaId.nuevo(), "art. 1"),
+            Optional.empty(),
+            ClasificacionRegla.DEL_PLAN,
+            Optional.empty(),
+            new DatosDeRegla.DeOtraCategoria()),
+        EstadoRegla.VIGENTE);
   }
 
   @Test
   void tt02_consolidadoValidadoGuardaElProgramaYSusReglas() {
     ProgramaId programa = ProgramaId.nuevo();
-    Regla regla = regla();
+    ReglaEnVersion regla = regla();
 
     ConsolidadoValidado validado = new ConsolidadoValidado(programa, List.of(regla));
 
@@ -39,8 +40,8 @@ class ConsolidadoValidadoTest {
 
   @Test
   void tt02_consolidadoValidadoNoSeAfectaPorCambiosEnLaListaQueRecibio() {
-    Regla regla = regla();
-    List<Regla> reglas = new ArrayList<>(List.of(regla));
+    ReglaEnVersion regla = regla();
+    List<ReglaEnVersion> reglas = new ArrayList<>(List.of(regla));
     ConsolidadoValidado validado = new ConsolidadoValidado(ProgramaId.nuevo(), reglas);
 
     reglas.clear();

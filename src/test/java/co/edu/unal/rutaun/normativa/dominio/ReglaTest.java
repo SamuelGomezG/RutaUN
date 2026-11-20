@@ -11,6 +11,7 @@ import co.edu.unal.rutaun.compartido.ParteDelAnio;
 import co.edu.unal.rutaun.compartido.PeriodoAcademico;
 import co.edu.unal.rutaun.compartido.ReglaId;
 import co.edu.unal.rutaun.normativa.ClasificacionRegla;
+import java.lang.reflect.Field;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
@@ -36,7 +37,6 @@ class ReglaTest {
             FUENTE,
             Optional.of(VIGENCIA),
             ClasificacionRegla.DEL_PLAN,
-            EstadoRegla.VIGENTE,
             Optional.empty(),
             DATOS);
 
@@ -45,7 +45,6 @@ class ReglaTest {
     assertThat(regla.fuente()).isEqualTo(FUENTE);
     assertThat(regla.vigenciaPropia()).contains(VIGENCIA);
     assertThat(regla.clasificacion()).isEqualTo(ClasificacionRegla.DEL_PLAN);
-    assertThat(regla.estado()).isEqualTo(EstadoRegla.VIGENTE);
     assertThat(regla.afectacion()).isEmpty();
     assertThat(regla.datos()).isEqualTo(DATOS);
   }
@@ -59,7 +58,6 @@ class ReglaTest {
             FUENTE,
             Optional.empty(),
             ClasificacionRegla.INFORMATIVA,
-            EstadoRegla.VIGENTE,
             Optional.of(AFECTACION),
             DATOS);
 
@@ -76,7 +74,6 @@ class ReglaTest {
                     null,
                     Optional.empty(),
                     ClasificacionRegla.INFORMATIVA,
-                    EstadoRegla.VIGENTE,
                     Optional.empty(),
                     DATOS))
         .isInstanceOf(IllegalArgumentException.class)
@@ -93,7 +90,6 @@ class ReglaTest {
                     FUENTE,
                     Optional.empty(),
                     ClasificacionRegla.INFORMATIVA,
-                    EstadoRegla.VIGENTE,
                     Optional.empty(),
                     DATOS))
         .isInstanceOf(IllegalArgumentException.class)
@@ -106,7 +102,6 @@ class ReglaTest {
                     FUENTE,
                     Optional.empty(),
                     ClasificacionRegla.INFORMATIVA,
-                    EstadoRegla.VIGENTE,
                     Optional.empty(),
                     DATOS))
         .isInstanceOf(IllegalArgumentException.class)
@@ -119,7 +114,6 @@ class ReglaTest {
                     FUENTE,
                     null,
                     ClasificacionRegla.INFORMATIVA,
-                    EstadoRegla.VIGENTE,
                     Optional.empty(),
                     DATOS))
         .isInstanceOf(IllegalArgumentException.class)
@@ -127,14 +121,7 @@ class ReglaTest {
     assertThatThrownBy(
             () ->
                 Regla.registrar(
-                    "Objeto",
-                    "Enunciado",
-                    FUENTE,
-                    Optional.empty(),
-                    null,
-                    EstadoRegla.VIGENTE,
-                    Optional.empty(),
-                    DATOS))
+                    "Objeto", "Enunciado", FUENTE, Optional.empty(), null, Optional.empty(), DATOS))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("clasificacion no puede ser null");
     assertThatThrownBy(
@@ -145,20 +132,6 @@ class ReglaTest {
                     FUENTE,
                     Optional.empty(),
                     ClasificacionRegla.INFORMATIVA,
-                    null,
-                    Optional.empty(),
-                    DATOS))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("estado no puede ser null");
-    assertThatThrownBy(
-            () ->
-                Regla.registrar(
-                    "Objeto",
-                    "Enunciado",
-                    FUENTE,
-                    Optional.empty(),
-                    ClasificacionRegla.INFORMATIVA,
-                    EstadoRegla.VIGENTE,
                     null,
                     DATOS))
         .isInstanceOf(IllegalArgumentException.class)
@@ -171,7 +144,6 @@ class ReglaTest {
                     FUENTE,
                     Optional.empty(),
                     ClasificacionRegla.INFORMATIVA,
-                    EstadoRegla.VIGENTE,
                     Optional.empty(),
                     null))
         .isInstanceOf(IllegalArgumentException.class)
@@ -193,7 +165,6 @@ class ReglaTest {
                     FUENTE,
                     Optional.of(temporal),
                     ClasificacionRegla.DEL_PLAN,
-                    EstadoRegla.VIGENTE,
                     Optional.empty(),
                     DATOS))
         .isInstanceOf(IllegalArgumentException.class)
@@ -210,6 +181,13 @@ class ReglaTest {
     assertThat(una).isNotEqualTo(reconstituir(ReglaId.nuevo()));
   }
 
+  @Test
+  void tt02_reglaNoGuardaSuEstado() {
+    assertThat(Regla.class.getDeclaredFields())
+        .extracting(Field::getType)
+        .doesNotContain(EstadoRegla.class);
+  }
+
   private static Regla reconstituir(ReglaId id) {
     return Regla.reconstituir(
         id,
@@ -218,7 +196,6 @@ class ReglaTest {
         FUENTE,
         Optional.empty(),
         ClasificacionRegla.INFORMATIVA,
-        EstadoRegla.VIGENTE,
         Optional.empty(),
         DATOS);
   }

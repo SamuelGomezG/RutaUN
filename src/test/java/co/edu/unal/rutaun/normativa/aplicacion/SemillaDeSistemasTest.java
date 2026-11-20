@@ -7,7 +7,7 @@ import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.normativa.ClasificacionRegla;
 import co.edu.unal.rutaun.normativa.dominio.DatosDeRegla;
 import co.edu.unal.rutaun.normativa.dominio.ExpresionDeMaterias;
-import co.edu.unal.rutaun.normativa.dominio.Regla;
+import co.edu.unal.rutaun.normativa.dominio.ReglaEnVersion;
 import co.edu.unal.rutaun.normativa.dominio.TipoCargaPorPeriodo;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
 import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoRepository;
@@ -157,32 +157,32 @@ class SemillaDeSistemasTest {
   void tt04_t4_laSemillaTraeLosCasosDeEnt04() {
     cargarLaSemilla();
 
-    List<Regla> reglasVigentes = reglasDeLaVersion(versionVigente());
+    List<ReglaEnVersion> reglasVigentes = reglasDeLaVersion(versionVigente());
 
     assertThat(reglasVigentes)
         .as("una malla con materias")
-        .anyMatch(regla -> regla.datos() instanceof DatosDeRegla.DeMateria);
+        .anyMatch(regla -> regla.regla().datos() instanceof DatosDeRegla.DeMateria);
     assertThat(reglasVigentes)
         .as("una carga mínima por periodo")
         .anyMatch(
             regla ->
-                regla.datos() instanceof DatosDeRegla.DeCargaPorPeriodo carga
+                regla.regla().datos() instanceof DatosDeRegla.DeCargaPorPeriodo carga
                     && carga.tipo() == TipoCargaPorPeriodo.MINIMO);
     assertThat(reglasVigentes)
         .as("una carga máxima por periodo")
         .anyMatch(
             regla ->
-                regla.datos() instanceof DatosDeRegla.DeCargaPorPeriodo carga
+                regla.regla().datos() instanceof DatosDeRegla.DeCargaPorPeriodo carga
                     && carga.tipo() == TipoCargaPorPeriodo.MAXIMO);
     assertThat(reglasVigentes)
         .as("un prerrequisito")
-        .anyMatch(regla -> regla.datos() instanceof DatosDeRegla.DePrerrequisito);
+        .anyMatch(regla -> regla.regla().datos() instanceof DatosDeRegla.DePrerrequisito);
     assertThat(reglasVigentes)
         .as("un correquisito")
-        .anyMatch(regla -> regla.datos() instanceof DatosDeRegla.DeCorrequisito);
+        .anyMatch(regla -> regla.regla().datos() instanceof DatosDeRegla.DeCorrequisito);
     assertThat(reglasVigentes)
         .as("una regla informativa")
-        .anyMatch(regla -> regla.clasificacion() == ClasificacionRegla.INFORMATIVA);
+        .anyMatch(regla -> regla.regla().clasificacion() == ClasificacionRegla.INFORMATIVA);
     assertThat(reglasVigentes)
         .as("una regla programada")
         .anyMatch(regla -> regla.estado() == EstadoRegla.PROGRAMADA);
@@ -191,11 +191,11 @@ class SemillaDeSistemasTest {
         .anyMatch(
             regla ->
                 regla.estado() == EstadoRegla.VIGENTE
-                    && regla.vigenciaPropia().flatMap(Vigencia::vigenteHasta).isPresent());
+                    && regla.regla().vigenciaPropia().flatMap(Vigencia::vigenteHasta).isPresent());
 
     Set<CodigoMateria> materiasDeLaVersion = materiasDeLaVersion(reglasVigentes);
-    for (Regla regla : reglasVigentes) {
-      if (regla.datos() instanceof DatosDeRegla.DeCorrequisito correquisito) {
+    for (ReglaEnVersion enVersion : reglasVigentes) {
+      if (enVersion.regla().datos() instanceof DatosDeRegla.DeCorrequisito correquisito) {
         assertThat(materiasDeLaVersion)
             .as("el correquisito exige una materia de la malla")
             .contains(correquisito.correquisito().materia());
@@ -274,7 +274,7 @@ class SemillaDeSistemasTest {
         .collect(Collectors.toSet());
   }
 
-  private List<Regla> reglasDeLaVersion(VersionEntity version) {
+  private List<ReglaEnVersion> reglasDeLaVersion(VersionEntity version) {
     Map<UUID, EstadoRegla> estados =
         reglasEnVersion.findByVersionId(version.getId()).stream()
             .collect(
@@ -282,14 +282,16 @@ class SemillaDeSistemasTest {
                     ReglaEnVersionEntity::getReglaId,
                     fila -> EstadoRegla.valueOf(fila.getEstado())));
     return reglas.findAllById(estados.keySet()).stream()
-        .map(entidad -> ReglaMapper.aDominio(entidad, estados.get(entidad.getId())))
+        .map(
+            entidad ->
+                new ReglaEnVersion(ReglaMapper.aDominio(entidad), estados.get(entidad.getId())))
         .toList();
   }
 
-  private static Set<CodigoMateria> materiasDeLaVersion(List<Regla> reglas) {
+  private static Set<CodigoMateria> materiasDeLaVersion(List<ReglaEnVersion> reglas) {
     return reglas.stream()
-        .filter(regla -> regla.datos() instanceof DatosDeRegla.DeMateria)
-        .map(regla -> ((DatosDeRegla.DeMateria) regla.datos()).materia().codigo())
+        .filter(enVersion -> enVersion.regla().datos() instanceof DatosDeRegla.DeMateria)
+        .map(enVersion -> ((DatosDeRegla.DeMateria) enVersion.regla().datos()).materia().codigo())
         .collect(Collectors.toSet());
   }
 
