@@ -13,7 +13,7 @@ import co.edu.unal.rutaun.normativa.ConsultaNormativaFacade;
 import co.edu.unal.rutaun.normativa.ProgramaVista;
 import co.edu.unal.rutaun.normativa.ReglaVista;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaEntity;
-import co.edu.unal.rutaun.normativa.persistencia.ProgramaJpaRepository;
+import co.edu.unal.rutaun.normativa.persistencia.ProgramaRepository;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -58,7 +58,7 @@ class ConsultaNormativaServiceIntegracionTest {
 
   @Autowired private ImportacionDeProgramasService importacionDeProgramas;
   @Autowired private ImportacionDeNormasService importacionDeNormas;
-  @Autowired private ProgramaJpaRepository programas;
+  @Autowired private ProgramaRepository programas;
   @Autowired private ConsultaNormativaFacade consulta;
   @Autowired private MockMvc mockMvc;
   @Autowired private JdbcTemplate jdbc;

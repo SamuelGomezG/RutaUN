@@ -16,9 +16,9 @@ import co.edu.unal.rutaun.normativa.dominio.Norma;
 import co.edu.unal.rutaun.normativa.dominio.Regla;
 import co.edu.unal.rutaun.normativa.dominio.TipoDeAfectacion;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
-import co.edu.unal.rutaun.normativa.persistencia.NormaJpaRepository;
+import co.edu.unal.rutaun.normativa.persistencia.NormaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEntity;
-import co.edu.unal.rutaun.normativa.persistencia.ReglaJpaRepository;
+import co.edu.unal.rutaun.normativa.persistencia.ReglaRepository;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -39,8 +39,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 @PruebaDeIntegracion
 class ReglaMapperTest {
 
-  @Autowired private NormaJpaRepository normas;
-  @Autowired private ReglaJpaRepository reglas;
+  @Autowired private NormaRepository normas;
+  @Autowired private ReglaRepository reglas;
 
   private Norma norma;
   private final List<UUID> reglasGuardadas = new ArrayList<>();

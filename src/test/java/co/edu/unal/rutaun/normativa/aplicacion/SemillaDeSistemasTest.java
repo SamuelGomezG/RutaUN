@@ -10,15 +10,15 @@ import co.edu.unal.rutaun.normativa.dominio.ExpresionDeMaterias;
 import co.edu.unal.rutaun.normativa.dominio.Regla;
 import co.edu.unal.rutaun.normativa.dominio.TipoDeCargaPorPeriodo;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
-import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoJpaRepository;
-import co.edu.unal.rutaun.normativa.persistencia.NormaJpaRepository;
-import co.edu.unal.rutaun.normativa.persistencia.ProgramaJpaRepository;
+import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoRepository;
+import co.edu.unal.rutaun.normativa.persistencia.NormaRepository;
+import co.edu.unal.rutaun.normativa.persistencia.ProgramaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntity;
-import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionJpaRepository;
+import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEntity;
-import co.edu.unal.rutaun.normativa.persistencia.ReglaJpaRepository;
+import co.edu.unal.rutaun.normativa.persistencia.ReglaRepository;
+import co.edu.unal.rutaun.normativa.persistencia.VersionDelConsolidadoRepository;
 import co.edu.unal.rutaun.normativa.persistencia.VersionEntity;
-import co.edu.unal.rutaun.normativa.persistencia.VersionJpaRepository;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
 import co.edu.unal.rutaun.soporte.SoporteDeSemilla;
 import java.io.IOException;
@@ -85,24 +85,24 @@ class SemillaDeSistemasTest {
 
   private final ImportacionDeProgramasService programas;
   private final ImportacionDeNormasService normas;
-  private final ProgramaJpaRepository programasGuardados;
-  private final NormaJpaRepository normasGuardadas;
-  private final ReglaJpaRepository reglas;
-  private final ConsolidadoJpaRepository consolidados;
-  private final VersionJpaRepository versiones;
-  private final ReglaEnVersionJpaRepository reglasEnVersion;
+  private final ProgramaRepository programasGuardados;
+  private final NormaRepository normasGuardadas;
+  private final ReglaRepository reglas;
+  private final ConsolidadoRepository consolidados;
+  private final VersionDelConsolidadoRepository versiones;
+  private final ReglaEnVersionRepository reglasEnVersion;
 
   /** Recibe los servicios y repositorios que Spring inyecta. */
   @Autowired
   SemillaDeSistemasTest(
       ImportacionDeProgramasService programas,
       ImportacionDeNormasService normas,
-      ProgramaJpaRepository programasGuardados,
-      NormaJpaRepository normasGuardadas,
-      ReglaJpaRepository reglas,
-      ConsolidadoJpaRepository consolidados,
-      VersionJpaRepository versiones,
-      ReglaEnVersionJpaRepository reglasEnVersion) {
+      ProgramaRepository programasGuardados,
+      NormaRepository normasGuardadas,
+      ReglaRepository reglas,
+      ConsolidadoRepository consolidados,
+      VersionDelConsolidadoRepository versiones,
+      ReglaEnVersionRepository reglasEnVersion) {
     this.programas = programas;
     this.normas = normas;
     this.programasGuardados = programasGuardados;

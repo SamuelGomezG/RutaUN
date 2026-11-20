@@ -5,7 +5,7 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /** Repositorio de Spring Data de {@link IncidenteEntity}. */
-public interface IncidenteJpaRepository extends JpaRepository<IncidenteEntity, UUID> {
+public interface IncidenteRepository extends JpaRepository<IncidenteEntity, UUID> {
 
   /**
    * Busca los incidentes sin atender con el mismo caso de uso, paso y causa. Quien llama termina de

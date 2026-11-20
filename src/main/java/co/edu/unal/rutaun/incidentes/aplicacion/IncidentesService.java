@@ -4,7 +4,7 @@ import co.edu.unal.rutaun.incidentes.IncidenteDePrograma;
 import co.edu.unal.rutaun.incidentes.IncidenteDetectado;
 import co.edu.unal.rutaun.incidentes.IncidenteInterno;
 import co.edu.unal.rutaun.incidentes.persistencia.IncidenteEntity;
-import co.edu.unal.rutaun.incidentes.persistencia.IncidenteJpaRepository;
+import co.edu.unal.rutaun.incidentes.persistencia.IncidenteRepository;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -22,7 +22,7 @@ public class IncidentesService {
   private static final int LIMITE_CORTO = 40;
   private static final int LIMITE_CAUSA = 500;
 
-  private final IncidenteJpaRepository repositorio;
+  private final IncidenteRepository repositorio;
   private final Clock reloj;
 
   /**
@@ -31,7 +31,7 @@ public class IncidentesService {
    * @param repositorio repositorio de incidentes
    * @param reloj reloj con el que se fechan los incidentes
    */
-  public IncidentesService(IncidenteJpaRepository repositorio, Clock reloj) {
+  public IncidentesService(IncidenteRepository repositorio, Clock reloj) {
     this.repositorio = repositorio;
     this.reloj = reloj;
   }

@@ -5,7 +5,7 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /** Repositorio de {@link ProgramaEntity}. */
-public interface ProgramaJpaRepository extends JpaRepository<ProgramaEntity, UUID> {
+public interface ProgramaRepository extends JpaRepository<ProgramaEntity, UUID> {
 
   /**
    * Busca un programa por su código SIA.

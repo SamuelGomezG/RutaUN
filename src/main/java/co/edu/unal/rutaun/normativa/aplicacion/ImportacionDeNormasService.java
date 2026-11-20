@@ -12,14 +12,14 @@ import co.edu.unal.rutaun.normativa.dominio.Regla;
 import co.edu.unal.rutaun.normativa.dominio.VersionDelConsolidado;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
 import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoEntity;
-import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoJpaRepository;
-import co.edu.unal.rutaun.normativa.persistencia.NormaJpaRepository;
+import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoRepository;
+import co.edu.unal.rutaun.normativa.persistencia.NormaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaEntity;
-import co.edu.unal.rutaun.normativa.persistencia.ProgramaJpaRepository;
-import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionJpaRepository;
-import co.edu.unal.rutaun.normativa.persistencia.ReglaJpaRepository;
+import co.edu.unal.rutaun.normativa.persistencia.ProgramaRepository;
+import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionRepository;
+import co.edu.unal.rutaun.normativa.persistencia.ReglaRepository;
+import co.edu.unal.rutaun.normativa.persistencia.VersionDelConsolidadoRepository;
 import co.edu.unal.rutaun.normativa.persistencia.VersionEntity;
-import co.edu.unal.rutaun.normativa.persistencia.VersionJpaRepository;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
 import java.io.InputStream;
 import java.time.Clock;
@@ -51,22 +51,22 @@ public class ImportacionDeNormasService {
 
   private static final String ADMINISTRADOR_DE_SEMILLA = "Semilla de desarrollo";
 
-  private final ProgramaJpaRepository programas;
-  private final NormaJpaRepository normas;
-  private final ReglaJpaRepository reglas;
-  private final ConsolidadoJpaRepository consolidados;
-  private final VersionJpaRepository versiones;
-  private final ReglaEnVersionJpaRepository reglasEnVersion;
+  private final ProgramaRepository programas;
+  private final NormaRepository normas;
+  private final ReglaRepository reglas;
+  private final ConsolidadoRepository consolidados;
+  private final VersionDelConsolidadoRepository versiones;
+  private final ReglaEnVersionRepository reglasEnVersion;
   private final Clock reloj;
 
   /** Crea el servicio con los repositorios y el reloj de la aplicación. */
   public ImportacionDeNormasService(
-      ProgramaJpaRepository programas,
-      NormaJpaRepository normas,
-      ReglaJpaRepository reglas,
-      ConsolidadoJpaRepository consolidados,
-      VersionJpaRepository versiones,
-      ReglaEnVersionJpaRepository reglasEnVersion,
+      ProgramaRepository programas,
+      NormaRepository normas,
+      ReglaRepository reglas,
+      ConsolidadoRepository consolidados,
+      VersionDelConsolidadoRepository versiones,
+      ReglaEnVersionRepository reglasEnVersion,
       Clock reloj) {
     this.programas = ArgumentChecks.obligatorio(programas, "programas");
     this.normas = ArgumentChecks.obligatorio(normas, "normas");

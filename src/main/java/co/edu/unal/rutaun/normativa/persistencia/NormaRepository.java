@@ -5,7 +5,7 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /** Repositorio de Spring Data de {@link NormaEntity}. */
-public interface NormaJpaRepository extends JpaRepository<NormaEntity, UUID> {
+public interface NormaRepository extends JpaRepository<NormaEntity, UUID> {
 
   /** Busca una norma por su identificación única. */
   Optional<NormaEntity> findByTipoAndNumeroAndAnioAndOrgano(

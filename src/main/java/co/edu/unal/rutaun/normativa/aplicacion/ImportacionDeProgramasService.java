@@ -2,7 +2,7 @@ package co.edu.unal.rutaun.normativa.aplicacion;
 
 import co.edu.unal.rutaun.normativa.dominio.Facultad;
 import co.edu.unal.rutaun.normativa.dominio.Programa;
-import co.edu.unal.rutaun.normativa.persistencia.ProgramaJpaRepository;
+import co.edu.unal.rutaun.normativa.persistencia.ProgramaRepository;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
 import co.edu.unal.rutaun.utilidades.ConfiguracionJson;
 import java.util.ArrayList;
@@ -24,10 +24,10 @@ import tools.jackson.core.JacksonException;
 @Service
 public class ImportacionDeProgramasService {
 
-  private final ProgramaJpaRepository programas;
+  private final ProgramaRepository programas;
 
   /** Crea el servicio con el repositorio de programas. */
-  public ImportacionDeProgramasService(ProgramaJpaRepository programas) {
+  public ImportacionDeProgramasService(ProgramaRepository programas) {
     this.programas = ArgumentChecks.obligatorio(programas, "programas");
   }
 

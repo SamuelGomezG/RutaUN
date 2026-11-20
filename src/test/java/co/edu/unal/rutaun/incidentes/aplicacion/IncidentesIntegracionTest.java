@@ -8,7 +8,7 @@ import co.edu.unal.rutaun.incidentes.IncidenteDePrograma;
 import co.edu.unal.rutaun.incidentes.IncidenteDetectado;
 import co.edu.unal.rutaun.incidentes.IncidenteInterno;
 import co.edu.unal.rutaun.incidentes.persistencia.IncidenteEntity;
-import co.edu.unal.rutaun.incidentes.persistencia.IncidenteJpaRepository;
+import co.edu.unal.rutaun.incidentes.persistencia.IncidenteRepository;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,7 +28,7 @@ class IncidentesIntegracionTest {
 
   private final IncidentesService servicio;
   private final ApplicationEventPublisher publicador;
-  private final IncidenteJpaRepository repositorio;
+  private final IncidenteRepository repositorio;
   private final TransactionTemplate transaccion;
 
   /**
@@ -43,7 +43,7 @@ class IncidentesIntegracionTest {
   IncidentesIntegracionTest(
       IncidentesService servicio,
       ApplicationEventPublisher publicador,
-      IncidenteJpaRepository repositorio,
+      IncidenteRepository repositorio,
       PlatformTransactionManager gestor) {
     this.servicio = servicio;
     this.publicador = publicador;

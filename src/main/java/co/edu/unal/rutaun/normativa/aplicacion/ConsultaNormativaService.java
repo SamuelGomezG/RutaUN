@@ -14,15 +14,15 @@ import co.edu.unal.rutaun.normativa.dominio.DatosDeRegla;
 import co.edu.unal.rutaun.normativa.dominio.Regla;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
 import co.edu.unal.rutaun.normativa.persistencia.NormaEntity;
-import co.edu.unal.rutaun.normativa.persistencia.NormaJpaRepository;
+import co.edu.unal.rutaun.normativa.persistencia.NormaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaEntity;
-import co.edu.unal.rutaun.normativa.persistencia.ProgramaJpaRepository;
+import co.edu.unal.rutaun.normativa.persistencia.ProgramaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntity;
-import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionJpaRepository;
+import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEntity;
-import co.edu.unal.rutaun.normativa.persistencia.ReglaJpaRepository;
+import co.edu.unal.rutaun.normativa.persistencia.ReglaRepository;
+import co.edu.unal.rutaun.normativa.persistencia.VersionDelConsolidadoRepository;
 import co.edu.unal.rutaun.normativa.persistencia.VersionEntity;
-import co.edu.unal.rutaun.normativa.persistencia.VersionJpaRepository;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
 import java.text.Collator;
 import java.time.LocalDate;
@@ -95,19 +95,19 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
           .thenComparing(entrada -> entrada.vista().enunciado(), ORDEN_DE_TEXTO)
           .thenComparing(Entrada::id);
 
-  private final ProgramaJpaRepository programas;
-  private final VersionJpaRepository versiones;
-  private final ReglaEnVersionJpaRepository reglasEnVersion;
-  private final ReglaJpaRepository reglas;
-  private final NormaJpaRepository normas;
+  private final ProgramaRepository programas;
+  private final VersionDelConsolidadoRepository versiones;
+  private final ReglaEnVersionRepository reglasEnVersion;
+  private final ReglaRepository reglas;
+  private final NormaRepository normas;
 
   /** Crea el servicio con los repositorios de los que lee. */
   public ConsultaNormativaService(
-      ProgramaJpaRepository programas,
-      VersionJpaRepository versiones,
-      ReglaEnVersionJpaRepository reglasEnVersion,
-      ReglaJpaRepository reglas,
-      NormaJpaRepository normas) {
+      ProgramaRepository programas,
+      VersionDelConsolidadoRepository versiones,
+      ReglaEnVersionRepository reglasEnVersion,
+      ReglaRepository reglas,
+      NormaRepository normas) {
     this.programas = ArgumentChecks.obligatorio(programas, "programas");
     this.versiones = ArgumentChecks.obligatorio(versiones, "versiones");
     this.reglasEnVersion = ArgumentChecks.obligatorio(reglasEnVersion, "reglasEnVersion");
