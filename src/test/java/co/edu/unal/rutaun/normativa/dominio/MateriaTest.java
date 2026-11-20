@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 class MateriaTest {
 
   private static final CodigoMateria CODIGO = new CodigoMateria("2015867");
+  private static final CodigoMateria OTRO_CODIGO = new CodigoMateria("2015868");
 
   @Test
   void tt02_materiaRegistrarGuardaCodigoYCreditos() {
@@ -31,37 +32,25 @@ class MateriaTest {
 
   @Test
   void tt02_materiaReconstituirDevuelveLaMismaMateriaQueRegistrar() {
-    assertThat(Materia.reconstituir(CODIGO, new Creditos(3)))
-        .isEqualTo(Materia.registrar(CODIGO, new Creditos(3)));
+    Materia reconstituida = Materia.reconstituir(CODIGO, new Creditos(4));
+
+    assertThat(reconstituida).isEqualTo(Materia.registrar(CODIGO, new Creditos(4)));
+    assertThat(reconstituida.creditos()).isEqualTo(new Creditos(4));
   }
 
   @Test
-  void tt02_materiaCambiarLosCreditosCreaOtraMateria() {
-    Materia original = Materia.registrar(CODIGO, new Creditos(3));
+  void tt02_dosMateriasConElMismoCodigoSonLaMisma() {
+    Materia a = Materia.reconstituir(CODIGO, new Creditos(3));
+    Materia b = Materia.reconstituir(CODIGO, new Creditos(4));
 
-    Materia otra = original.conCreditos(new Creditos(4));
-
-    assertThat(otra).isNotEqualTo(original);
-    assertThat(otra.codigo()).isEqualTo(CODIGO);
-    assertThat(otra.creditos()).isEqualTo(new Creditos(4));
-    assertThat(original.creditos()).isEqualTo(new Creditos(3));
+    assertThat(a).isEqualTo(b).hasSameHashCodeAs(b);
   }
 
   @Test
-  void tt02_materiaConLosMismosCreditosEsLaMismaMateria() {
-    Materia original = Materia.registrar(CODIGO, new Creditos(3));
+  void tt02_dosMateriasConCodigoDistintoSonMateriasDistintas() {
+    Materia a = Materia.reconstituir(CODIGO, new Creditos(3));
+    Materia b = Materia.reconstituir(OTRO_CODIGO, new Creditos(3));
 
-    assertThat(original.conCreditos(new Creditos(3)))
-        .isEqualTo(original)
-        .hasSameHashCodeAs(original);
-  }
-
-  @Test
-  void tt02_materiaConCreditosRechazaNull() {
-    Materia original = Materia.registrar(CODIGO, new Creditos(3));
-
-    assertThatThrownBy(() -> original.conCreditos(null))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("creditos no puede ser null");
+    assertThat(a).isNotEqualTo(b);
   }
 }
