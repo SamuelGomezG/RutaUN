@@ -1,5 +1,6 @@
 package co.edu.unal.rutaun.normativa.dominio;
 
+import co.edu.unal.rutaun.normativa.TipoComponente;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
 import java.util.List;
 

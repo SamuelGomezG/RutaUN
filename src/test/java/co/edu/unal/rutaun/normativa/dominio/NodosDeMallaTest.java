@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import co.edu.unal.rutaun.compartido.AgrupacionId;
 import co.edu.unal.rutaun.compartido.CodigoMateria;
 import co.edu.unal.rutaun.compartido.Creditos;
+import co.edu.unal.rutaun.normativa.TipoComponente;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
