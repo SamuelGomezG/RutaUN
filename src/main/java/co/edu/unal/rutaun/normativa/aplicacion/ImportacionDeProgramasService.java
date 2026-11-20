@@ -4,7 +4,7 @@ import co.edu.unal.rutaun.normativa.dominio.Facultad;
 import co.edu.unal.rutaun.normativa.dominio.Programa;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaRepository;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
-import co.edu.unal.rutaun.utilidades.ConfiguracionJson;
+import co.edu.unal.rutaun.utilidades.JsonConfig;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -55,7 +55,7 @@ public class ImportacionDeProgramasService {
 
   private static ArchivoDeProgramasJson leer(String json) {
     try {
-      return ConfiguracionJson.mapper().readValue(json, ArchivoDeProgramasJson.class);
+      return JsonConfig.mapper().readValue(json, ArchivoDeProgramasJson.class);
     } catch (JacksonException e) {
       throw new ArchivoDeProgramasInvalidoException(
           "El JSON de programas no se pudo leer: " + e.getOriginalMessage(), e);

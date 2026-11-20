@@ -2,7 +2,7 @@ package co.edu.unal.rutaun.normativa.aplicacion;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import co.edu.unal.rutaun.utilidades.ConfiguracionJson;
+import co.edu.unal.rutaun.utilidades.JsonConfig;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -75,7 +75,7 @@ class FormatoNormativaTest {
   private static JsonNode leer(String ruta) throws Exception {
     try (InputStream entrada = FormatoNormativaTest.class.getResourceAsStream(ruta)) {
       assertThat(entrada).as("archivo de prueba %s", ruta).isNotNull();
-      return ConfiguracionJson.mapper().readTree(entrada);
+      return JsonConfig.mapper().readTree(entrada);
     }
   }
 }

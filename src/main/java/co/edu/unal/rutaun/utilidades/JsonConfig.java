@@ -7,11 +7,11 @@ import tools.jackson.databind.json.JsonMapper;
  * persistencia guarda en columnas de texto. El {@link JsonMapper} es inmutable y seguro entre
  * hilos, así que se crea una sola vez.
  */
-public final class ConfiguracionJson {
+public final class JsonConfig {
 
   private static final JsonMapper MAPPER = JsonMapper.builder().build();
 
-  private ConfiguracionJson() {}
+  private JsonConfig() {}
 
   /** Devuelve el mapper compartido. */
   public static JsonMapper mapper() {

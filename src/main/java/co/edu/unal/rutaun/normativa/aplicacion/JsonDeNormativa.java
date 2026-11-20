@@ -5,15 +5,15 @@ import co.edu.unal.rutaun.normativa.dominio.Componente;
 import co.edu.unal.rutaun.normativa.dominio.ComponenteDeLibreEleccion;
 import co.edu.unal.rutaun.normativa.dominio.ExpresionDeMaterias;
 import co.edu.unal.rutaun.normativa.dominio.NodoDeMalla;
-import co.edu.unal.rutaun.utilidades.ConfiguracionJson;
+import co.edu.unal.rutaun.utilidades.JsonConfig;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
  * {@link JsonMapper} con el que los mappers de Normativa guardan y leen los datos de una regla y el
- * detalle del motivo de una versión. Es el de {@link ConfiguracionJson} más dos <em>mix-ins</em>
- * para los tipos con subtipos, de modo que el dominio no lleva anotaciones de Jackson.
+ * detalle del motivo de una versión. Es el de {@link JsonConfig} más dos <em>mix-ins</em> para los
+ * tipos con subtipos, de modo que el dominio no lleva anotaciones de Jackson.
  *
  * <p>TT-04-T3 (#91). Es provisional: el diseño pide records propios de persistencia y un campo
  * {@code esquema} en cada JSON guardado (#145), y cuando eso exista este mapper desaparece.
@@ -50,7 +50,7 @@ final class JsonDeNormativa {
   private interface ExpresionDeMateriasMixIn {}
 
   private static final JsonMapper MAPPER =
-      ConfiguracionJson.mapper()
+      JsonConfig.mapper()
           .rebuild()
           .addMixIn(NodoDeMalla.class, NodoDeMallaMixIn.class)
           .addMixIn(ExpresionDeMaterias.class, ExpresionDeMateriasMixIn.class)

@@ -37,7 +37,7 @@ import co.edu.unal.rutaun.normativa.dominio.TipoDeCargaPorPeriodo;
 import co.edu.unal.rutaun.normativa.dominio.TipoDeMateriaExterna;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
-import co.edu.unal.rutaun.utilidades.ConfiguracionJson;
+import co.edu.unal.rutaun.utilidades.JsonConfig;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -70,7 +70,7 @@ public final class IncorporacionJsonReader {
   public static ResultadoDeLectura leer(InputStream entrada) {
     ArgumentChecks.obligatorio(entrada, "entrada");
     try {
-      JsonNode raiz = ConfiguracionJson.mapper().readTree(entrada);
+      JsonNode raiz = JsonConfig.mapper().readTree(entrada);
       exigirObjeto(raiz, "raíz");
       if (!VERSION.equals(texto(raiz, "schemaVersion"))) {
         throw new IllegalArgumentException("schemaVersion debe ser " + VERSION);
