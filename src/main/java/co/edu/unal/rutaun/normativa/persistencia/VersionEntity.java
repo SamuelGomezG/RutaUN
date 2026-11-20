@@ -11,7 +11,7 @@ import java.util.UUID;
 /** Fila de la tabla {@code version_consolidado}: una versión inmutable del consolidado. */
 @Entity
 @Table(name = "version_consolidado")
-public class VersionEntidad {
+public class VersionEntity {
 
   @Id private UUID id;
 
@@ -43,10 +43,10 @@ public class VersionEntidad {
   @Lob private String cambios;
 
   /** Constructor sin argumentos que exige JPA. */
-  protected VersionEntidad() {}
+  protected VersionEntity() {}
 
   /** Crea una versión del consolidado. */
-  public VersionEntidad(
+  public VersionEntity(
       UUID id,
       UUID consolidadoId,
       UUID programaId,

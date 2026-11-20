@@ -11,7 +11,7 @@ import java.util.UUID;
 /** Fila de la tabla {@code incidente}: un grupo de incidentes iguales con su conteo. */
 @Entity
 @Table(name = "incidente")
-public class IncidenteEntidad {
+public class IncidenteEntity {
 
   @Id private UUID id;
 
@@ -46,10 +46,10 @@ public class IncidenteEntidad {
   private boolean atendido;
 
   /** Constructor sin argumentos que exige JPA. */
-  protected IncidenteEntidad() {}
+  protected IncidenteEntity() {}
 
   /** Crea un grupo de incidentes. */
-  public IncidenteEntidad(
+  public IncidenteEntity(
       UUID id,
       String casoDeUso,
       String paso,

@@ -9,7 +9,7 @@ import java.util.UUID;
 /** Fila de la tabla {@code regla_en_version}: una regla con su estado en una versión. */
 @Entity
 @Table(name = "regla_en_version")
-public class ReglaEnVersionEntidad {
+public class ReglaEnVersionEntity {
 
   @Id private UUID id;
 
@@ -23,10 +23,10 @@ public class ReglaEnVersionEntidad {
   private String estado;
 
   /** Constructor sin argumentos que exige JPA. */
-  protected ReglaEnVersionEntidad() {}
+  protected ReglaEnVersionEntity() {}
 
   /** Crea la relación entre una regla y una versión. */
-  public ReglaEnVersionEntidad(UUID id, UUID versionId, UUID reglaId, String estado) {
+  public ReglaEnVersionEntity(UUID id, UUID versionId, UUID reglaId, String estado) {
     this.id = id;
     this.versionId = versionId;
     this.reglaId = reglaId;

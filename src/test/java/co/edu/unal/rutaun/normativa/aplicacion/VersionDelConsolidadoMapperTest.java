@@ -17,15 +17,15 @@ import co.edu.unal.rutaun.normativa.dominio.Prerrequisito;
 import co.edu.unal.rutaun.normativa.dominio.Programa;
 import co.edu.unal.rutaun.normativa.dominio.Regla;
 import co.edu.unal.rutaun.normativa.dominio.VersionDelConsolidado;
-import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoEntidad;
+import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoEntity;
 import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoJpaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.NormaJpaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaJpaRepository;
-import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntidad;
+import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntity;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionJpaRepository;
-import co.edu.unal.rutaun.normativa.persistencia.ReglaEntidad;
+import co.edu.unal.rutaun.normativa.persistencia.ReglaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaJpaRepository;
-import co.edu.unal.rutaun.normativa.persistencia.VersionEntidad;
+import co.edu.unal.rutaun.normativa.persistencia.VersionEntity;
 import co.edu.unal.rutaun.normativa.persistencia.VersionJpaRepository;
 import co.edu.unal.rutaun.soporte.MallaDePrueba;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
@@ -78,7 +78,7 @@ class VersionDelConsolidadoMapperTest {
             new Facultad("Ingeniería"));
     programas.save(ProgramaMapper.aEntidad(programa));
     consolidadoId = UUID.randomUUID();
-    consolidados.save(new ConsolidadoEntidad(consolidadoId, programa.id().valor()));
+    consolidados.save(new ConsolidadoEntity(consolidadoId, programa.id().valor()));
     norma = ReglasDePrueba.normaNueva();
     normas.save(NormaMapper.aEntidad(norma));
   }
@@ -168,10 +168,10 @@ class VersionDelConsolidadoMapperTest {
 
     // Una sola fila de regla; el estado vive en regla_en_version, una fila por versión.
     assertThat(reglasEnVersion.findByVersionId(primeraId))
-        .extracting(ReglaEnVersionEntidad::getEstado)
+        .extracting(ReglaEnVersionEntity::getEstado)
         .containsExactly("PROGRAMADA");
     assertThat(reglasEnVersion.findByVersionId(segundaId))
-        .extracting(ReglaEnVersionEntidad::getEstado)
+        .extracting(ReglaEnVersionEntity::getEstado)
         .containsExactly("VIGENTE");
     assertThat(leer(primeraId).reglas())
         .extracting(Regla::estado)
@@ -185,7 +185,7 @@ class VersionDelConsolidadoMapperTest {
 
   @Test
   void tt04_versionConMotivoDesconocidoNoSeReconstituye() {
-    VersionEntidad invalida = versionAMano(UUID.randomUUID(), "POR_DECRETO", "{}");
+    VersionEntity invalida = versionAMano(UUID.randomUUID(), "POR_DECRETO", "{}");
 
     assertThatThrownBy(() -> VersionDelConsolidadoMapper.aDominio(invalida, List.of(), Map.of()))
         .isInstanceOf(IllegalArgumentException.class)
@@ -194,11 +194,11 @@ class VersionDelConsolidadoMapperTest {
 
   @Test
   void tt04_versionConUnaReglaQueFaltaNoSeReconstituye() {
-    VersionEntidad version =
+    VersionEntity version =
         versionAMano(UUID.randomUUID(), "POR_CORRECCION", "{\"administrador\":\"a\"}");
     UUID reglaQueFalta = UUID.randomUUID();
-    ReglaEnVersionEntidad fila =
-        new ReglaEnVersionEntidad(UUID.randomUUID(), version.getId(), reglaQueFalta, "VIGENTE");
+    ReglaEnVersionEntity fila =
+        new ReglaEnVersionEntity(UUID.randomUUID(), version.getId(), reglaQueFalta, "VIGENTE");
 
     assertThatThrownBy(() -> VersionDelConsolidadoMapper.aDominio(version, List.of(fila), Map.of()))
         .isInstanceOf(IllegalArgumentException.class)
@@ -207,10 +207,10 @@ class VersionDelConsolidadoMapperTest {
 
   @Test
   void tt04_versionConUnaFilaDeOtraVersionNoSeReconstituye() {
-    VersionEntidad version =
+    VersionEntity version =
         versionAMano(UUID.randomUUID(), "POR_CORRECCION", "{\"administrador\":\"a\"}");
-    ReglaEnVersionEntidad deOtra =
-        new ReglaEnVersionEntidad(
+    ReglaEnVersionEntity deOtra =
+        new ReglaEnVersionEntity(
             UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "VIGENTE");
 
     assertThatThrownBy(
@@ -285,17 +285,17 @@ class VersionDelConsolidadoMapperTest {
 
   /** Lee las filas de la base, como lo haría quien consulta una versión, y la reconstruye. */
   private VersionDelConsolidado leer(UUID versionId) {
-    VersionEntidad fila = versiones.findById(versionId).orElseThrow();
-    List<ReglaEnVersionEntidad> delasReglas = reglasEnVersion.findByVersionId(versionId);
-    Map<UUID, ReglaEntidad> porId = new HashMap<>();
+    VersionEntity fila = versiones.findById(versionId).orElseThrow();
+    List<ReglaEnVersionEntity> delasReglas = reglasEnVersion.findByVersionId(versionId);
+    Map<UUID, ReglaEntity> porId = new HashMap<>();
     reglas
-        .findAllById(delasReglas.stream().map(ReglaEnVersionEntidad::getReglaId).toList())
+        .findAllById(delasReglas.stream().map(ReglaEnVersionEntity::getReglaId).toList())
         .forEach(regla -> porId.put(regla.getId(), regla));
     return VersionDelConsolidadoMapper.aDominio(fila, delasReglas, porId);
   }
 
-  private VersionEntidad versionAMano(UUID id, String motivo, String detalle) {
-    return new VersionEntidad(
+  private VersionEntity versionAMano(UUID id, String motivo, String detalle) {
+    return new VersionEntity(
         id, consolidadoId, programa.id().valor(), 1, FECHA, motivo, detalle, null, 1, null);
   }
 }

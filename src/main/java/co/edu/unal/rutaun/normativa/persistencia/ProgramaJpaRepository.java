@@ -4,8 +4,8 @@ import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-/** Repositorio de {@link ProgramaEntidad}. */
-public interface ProgramaJpaRepository extends JpaRepository<ProgramaEntidad, UUID> {
+/** Repositorio de {@link ProgramaEntity}. */
+public interface ProgramaJpaRepository extends JpaRepository<ProgramaEntity, UUID> {
 
   /**
    * Busca un programa por su código SIA.
@@ -13,5 +13,5 @@ public interface ProgramaJpaRepository extends JpaRepository<ProgramaEntidad, UU
    * <p>SOP-03 (#55). La tabla no garantiza que el código sea único, así que quien guarda programas
    * debe buscar primero. Si hubiera dos filas con el mismo código, falla con una excepción.
    */
-  Optional<ProgramaEntidad> findByCodigoSia(String codigoSia);
+  Optional<ProgramaEntity> findByCodigoSia(String codigoSia);
 }

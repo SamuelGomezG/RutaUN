@@ -12,7 +12,7 @@ import co.edu.unal.rutaun.normativa.dominio.IdentificacionNorma;
 import co.edu.unal.rutaun.normativa.dominio.Norma;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
 import co.edu.unal.rutaun.normativa.persistencia.AlcanceJson;
-import co.edu.unal.rutaun.normativa.persistencia.NormaEntidad;
+import co.edu.unal.rutaun.normativa.persistencia.NormaEntity;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
 import co.edu.unal.rutaun.utilidades.ConfiguracionJson;
 import java.time.LocalDate;
@@ -23,7 +23,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * Convierte entre la raíz {@link Norma} y su fila {@link NormaEntidad}. No guarda estado.
+ * Convierte entre la raíz {@link Norma} y su fila {@link NormaEntity}. No guarda estado.
  *
  * <p>TT-04-T3 (#91). Reconstruye con {@link Norma#reconstituir}, así que no genera un identificador
  * nuevo y pasa por las mismas validaciones que una norma creada. Si la base trae un dato inválido,
@@ -39,7 +39,7 @@ public final class NormaMapper {
   private NormaMapper() {}
 
   /** Reconstruye la norma que guarda esta fila. */
-  public static Norma aDominio(NormaEntidad entidad) {
+  public static Norma aDominio(NormaEntity entidad) {
     ArgumentChecks.obligatorio(entidad, "entidad");
     return Norma.reconstituir(
         new NormaId(entidad.getId()),
@@ -63,9 +63,9 @@ public final class NormaMapper {
    * <p>Falla con {@link IllegalArgumentException} si la vigencia de la norma está dada por un
    * periodo académico, porque la tabla solo guarda fechas.
    */
-  public static NormaEntidad aEntidad(Norma norma) {
+  public static NormaEntity aEntidad(Norma norma) {
     ArgumentChecks.obligatorio(norma, "norma");
-    return new NormaEntidad(
+    return new NormaEntity(
         norma.id().valor(),
         norma.identificacion().tipo().name(),
         norma.identificacion().numero(),
@@ -80,7 +80,7 @@ public final class NormaMapper {
         alcanceAJson(norma.alcance()));
   }
 
-  private static Alcance alcanceADominio(NormaEntidad entidad) {
+  private static Alcance alcanceADominio(NormaEntity entidad) {
     AlcanceJson json =
         ConfiguracionJson.mapper()
             .readValue(

@@ -3,7 +3,7 @@ package co.edu.unal.rutaun.incidentes.aplicacion;
 import co.edu.unal.rutaun.incidentes.IncidenteDePrograma;
 import co.edu.unal.rutaun.incidentes.IncidenteDetectado;
 import co.edu.unal.rutaun.incidentes.IncidenteInterno;
-import co.edu.unal.rutaun.incidentes.persistencia.IncidenteEntidad;
+import co.edu.unal.rutaun.incidentes.persistencia.IncidenteEntity;
 import co.edu.unal.rutaun.incidentes.persistencia.IncidenteJpaRepository;
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -45,7 +45,7 @@ public class IncidentesService {
    */
   @Transactional
   public void registrar(IncidenteDetectado evento) {
-    IncidenteEntidad candidato = nuevo(evento);
+    IncidenteEntity candidato = nuevo(evento);
     repositorio
         .findByCasoDeUsoAndPasoAndCausaAndAtendidoFalse(
             candidato.getCasoDeUso(), candidato.getPaso(), candidato.getCausa())
@@ -57,9 +57,9 @@ public class IncidentesService {
             () -> repositorio.save(candidato));
   }
 
-  private IncidenteEntidad nuevo(IncidenteDetectado evento) {
+  private IncidenteEntity nuevo(IncidenteDetectado evento) {
     LocalDateTime ahora = LocalDateTime.now(reloj);
-    return new IncidenteEntidad(
+    return new IncidenteEntity(
         UUID.randomUUID(),
         recortar(evento.casoDeUso(), LIMITE_CORTO),
         recortar(evento.paso(), LIMITE_CORTO),
@@ -73,7 +73,7 @@ public class IncidentesService {
         false);
   }
 
-  private static boolean esIgual(IncidenteEntidad existente, IncidenteEntidad candidato) {
+  private static boolean esIgual(IncidenteEntity existente, IncidenteEntity candidato) {
     return Objects.equals(existente.getProgramaId(), candidato.getProgramaId())
         && Objects.equals(existente.getVersionConsolidado(), candidato.getVersionConsolidado())
         && Objects.equals(existente.getElementos(), candidato.getElementos());

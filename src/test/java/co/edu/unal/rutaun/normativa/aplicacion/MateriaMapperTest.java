@@ -6,7 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import co.edu.unal.rutaun.compartido.CodigoMateria;
 import co.edu.unal.rutaun.compartido.Creditos;
 import co.edu.unal.rutaun.normativa.dominio.Materia;
-import co.edu.unal.rutaun.normativa.persistencia.MateriaEntidad;
+import co.edu.unal.rutaun.normativa.persistencia.MateriaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.MateriaJpaRepository;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
 import java.util.UUID;
@@ -41,7 +41,7 @@ class MateriaMapperTest {
     Materia original = Materia.registrar(new CodigoMateria(codigoGuardado), new Creditos(4));
 
     materias.save(MateriaMapper.aEntidad(original));
-    MateriaEntidad leida = materias.findById(codigoGuardado).orElseThrow();
+    MateriaEntity leida = materias.findById(codigoGuardado).orElseThrow();
     Materia reconstruida = MateriaMapper.aDominio(leida);
 
     assertThat(reconstruida).isEqualTo(original);
@@ -49,7 +49,7 @@ class MateriaMapperTest {
 
   @Test
   void tt04_materiaConCreditosNegativosNoSeReconstituye() {
-    MateriaEntidad invalida = new MateriaEntidad("T3-NEG", -1);
+    MateriaEntity invalida = new MateriaEntity("T3-NEG", -1);
 
     assertThatThrownBy(() -> MateriaMapper.aDominio(invalida))
         .isInstanceOf(IllegalArgumentException.class)

@@ -30,14 +30,14 @@ class PersistenciaNormativaTest {
     em.clear(); // obliga a que la lectura venga de la base de datos
   }
 
-  private ProgramaEntidad nuevoPrograma() {
+  private ProgramaEntity nuevoPrograma() {
     return programas.save(
-        new ProgramaEntidad(UUID.randomUUID(), "Ingenieria de Sistemas", "2879", "Ingenieria"));
+        new ProgramaEntity(UUID.randomUUID(), "Ingenieria de Sistemas", "2879", "Ingenieria"));
   }
 
-  private NormaEntidad nuevaNorma() {
+  private NormaEntity nuevaNorma() {
     return normas.save(
-        new NormaEntidad(
+        new NormaEntity(
             UUID.randomUUID(),
             "ACUERDO",
             "003-A",
@@ -52,8 +52,8 @@ class PersistenciaNormativaTest {
             "{}"));
   }
 
-  private VersionEntidad nuevaVersion(ConsolidadoEntidad consolidado, int numero) {
-    return new VersionEntidad(
+  private VersionEntity nuevaVersion(ConsolidadoEntity consolidado, int numero) {
+    return new VersionEntity(
         UUID.randomUUID(),
         consolidado.getId(),
         consolidado.getProgramaId(),
@@ -68,44 +68,44 @@ class PersistenciaNormativaTest {
 
   @Test
   void tt04_guardaYLeeUnPrograma() {
-    ProgramaEntidad programa = nuevoPrograma();
+    ProgramaEntity programa = nuevoPrograma();
     vaciarMemoria();
 
     assertThat(programas.findById(programa.getId()))
         .get()
-        .extracting(ProgramaEntidad::getCodigoSia)
+        .extracting(ProgramaEntity::getCodigoSia)
         .isEqualTo("2879");
   }
 
   @Test
   void tt04_guardaYLeeUnaMateria() {
-    materias.save(new MateriaEntidad("2015714", 3));
+    materias.save(new MateriaEntity("2015714", 3));
     vaciarMemoria();
 
     assertThat(materias.findById("2015714"))
         .get()
-        .extracting(MateriaEntidad::getCreditos)
+        .extracting(MateriaEntity::getCreditos)
         .isEqualTo(3);
   }
 
   @Test
   void tt04_guardaYLeeUnaNorma() {
-    NormaEntidad norma = nuevaNorma();
+    NormaEntity norma = nuevaNorma();
     vaciarMemoria();
 
     assertThat(normas.findById(norma.getId()))
         .get()
-        .extracting(NormaEntidad::getNumero)
+        .extracting(NormaEntity::getNumero)
         .isEqualTo("003-A");
   }
 
   @Test
   void tt04_guardaYLeeUnaReglaConSusDatosJson() {
-    NormaEntidad norma = nuevaNorma();
+    NormaEntity norma = nuevaNorma();
     String json = "{\"materia\":\"2015714\",\"creditos\":3}";
-    ReglaEntidad regla =
+    ReglaEntity regla =
         reglas.save(
-            new ReglaEntidad(
+            new ReglaEntity(
                 UUID.randomUUID(),
                 norma.getId(),
                 "MATERIA",
@@ -123,17 +123,17 @@ class PersistenciaNormativaTest {
 
     assertThat(reglas.findById(regla.getId()))
         .get()
-        .extracting(ReglaEntidad::getDatos)
+        .extracting(ReglaEntity::getDatos)
         .isEqualTo(json);
   }
 
   @Test
   void tt04_guardaYLeeUnConsolidadoConSuVersionYSusReglas() {
-    ProgramaEntidad programa = nuevoPrograma();
-    NormaEntidad norma = nuevaNorma();
-    ReglaEntidad regla =
+    ProgramaEntity programa = nuevoPrograma();
+    NormaEntity norma = nuevaNorma();
+    ReglaEntity regla =
         reglas.save(
-            new ReglaEntidad(
+            new ReglaEntity(
                 UUID.randomUUID(),
                 norma.getId(),
                 "OTRA",
@@ -147,31 +147,30 @@ class PersistenciaNormativaTest {
                 null,
                 null,
                 null));
-    ConsolidadoEntidad consolidado =
-        consolidados.save(new ConsolidadoEntidad(UUID.randomUUID(), programa.getId()));
-    VersionEntidad version = versiones.save(nuevaVersion(consolidado, 1));
-    ReglaEnVersionEntidad enVersion =
+    ConsolidadoEntity consolidado =
+        consolidados.save(new ConsolidadoEntity(UUID.randomUUID(), programa.getId()));
+    VersionEntity version = versiones.save(nuevaVersion(consolidado, 1));
+    ReglaEnVersionEntity enVersion =
         reglasEnVersion.save(
-            new ReglaEnVersionEntidad(
-                UUID.randomUUID(), version.getId(), regla.getId(), "VIGENTE"));
+            new ReglaEnVersionEntity(UUID.randomUUID(), version.getId(), regla.getId(), "VIGENTE"));
     vaciarMemoria();
 
     assertThat(reglasEnVersion.findById(enVersion.getId()))
         .get()
-        .extracting(ReglaEnVersionEntidad::getEstado)
+        .extracting(ReglaEnVersionEntity::getEstado)
         .isEqualTo("VIGENTE");
     assertThat(consolidados.findById(consolidado.getId())).isPresent();
     assertThat(versiones.findById(version.getId()))
         .get()
-        .extracting(VersionEntidad::getNumero)
+        .extracting(VersionEntity::getNumero)
         .isEqualTo(1);
   }
 
   @Test
   void tt04_dosVersionesDelMismoProgramaConElMismoNumeroFallan() {
-    ProgramaEntidad programa = nuevoPrograma();
-    ConsolidadoEntidad consolidado =
-        consolidados.save(new ConsolidadoEntidad(UUID.randomUUID(), programa.getId()));
+    ProgramaEntity programa = nuevoPrograma();
+    ConsolidadoEntity consolidado =
+        consolidados.save(new ConsolidadoEntity(UUID.randomUUID(), programa.getId()));
     versiones.saveAndFlush(nuevaVersion(consolidado, 1));
 
     assertThatThrownBy(() -> versiones.saveAndFlush(nuevaVersion(consolidado, 1)))

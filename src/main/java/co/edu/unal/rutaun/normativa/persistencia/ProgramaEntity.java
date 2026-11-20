@@ -9,7 +9,7 @@ import java.util.UUID;
 /** Fila de la tabla {@code programa}: un programa académico. */
 @Entity
 @Table(name = "programa")
-public class ProgramaEntidad {
+public class ProgramaEntity {
 
   @Id private UUID id;
 
@@ -23,10 +23,10 @@ public class ProgramaEntidad {
   private String facultad;
 
   /** Constructor sin argumentos que exige JPA. */
-  protected ProgramaEntidad() {}
+  protected ProgramaEntity() {}
 
   /** Crea un programa. */
-  public ProgramaEntidad(UUID id, String nombre, String codigoSia, String facultad) {
+  public ProgramaEntity(UUID id, String nombre, String codigoSia, String facultad) {
     this.id = id;
     this.nombre = nombre;
     this.codigoSia = codigoSia;

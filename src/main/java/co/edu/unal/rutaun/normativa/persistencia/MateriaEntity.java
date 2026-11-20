@@ -8,7 +8,7 @@ import jakarta.persistence.Table;
 /** Fila de la tabla {@code materia}: el catálogo global de materias. */
 @Entity
 @Table(name = "materia")
-public class MateriaEntidad {
+public class MateriaEntity {
 
   @Id private String codigo;
 
@@ -16,10 +16,10 @@ public class MateriaEntidad {
   private int creditos;
 
   /** Constructor sin argumentos que exige JPA. */
-  protected MateriaEntidad() {}
+  protected MateriaEntity() {}
 
   /** Crea una materia. */
-  public MateriaEntidad(String codigo, int creditos) {
+  public MateriaEntity(String codigo, int creditos) {
     this.codigo = codigo;
     this.creditos = creditos;
   }
