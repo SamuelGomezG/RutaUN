@@ -88,7 +88,7 @@ erDiagram
     }
 ```
 
-El diagrama muestra las columnas principales; la lista completa está en las migraciones. `materia` e `incidente` no tienen llaves foráneas.
+El diagrama muestra las columnas principales; la lista completa está en las migraciones. `materia` e `incidente` no tienen llaves foráneas. Guardar no sobrescribe: guardar como nueva una fila cuyo `id` (o `codigo`, en `materia`) ya existe falla por la llave primaria, y la fila queda como estaba. Para cambiar una fila, se lee y se modifica la entidad leída ([#140](https://github.com/SamuelGomezG/RutaUN/issues/140)).
 
 | Tabla | Una fila es | Lo que la base garantiza | Notas |
 | --- | --- | --- | --- |
@@ -135,7 +135,6 @@ Antes de apoyarte en un detalle de una tabla, revisa si uno de estos issues lo c
 
 | Issue | Qué cambia |
 | --- | --- |
-| [#140](https://github.com/SamuelGomezG/RutaUN/issues/140) | Guardar con un `id` repetido sobrescribe la fila en vez de fallar |
 | [#141](https://github.com/SamuelGomezG/RutaUN/issues/141) | El esquema no guarda vigencias por periodo ni el inicio de una afectación: `aplica_desde` y `vigente_hasta` son fechas |
 | [#142](https://github.com/SamuelGomezG/RutaUN/issues/142) | El esquema se aparta del diseño y acepta datos incoherentes |
 | [#143](https://github.com/SamuelGomezG/RutaUN/issues/143) | Un repositorio por raíz, sin borrado del historial |

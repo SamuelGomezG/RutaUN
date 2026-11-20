@@ -2,12 +2,15 @@ package co.edu.unal.rutaun.normativa.persistencia;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
 import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 @PruebaDeIntegracion
 @Transactional
 class PersistenciaNormativaTest {
+
+  private static final Logger LOG = LoggerFactory.getLogger(PersistenciaNormativaTest.class);
 
   @Autowired private ProgramaRepository programas;
   @Autowired private MateriaRepository materias;
@@ -164,6 +169,109 @@ class PersistenciaNormativaTest {
         .get()
         .extracting(VersionEntity::getNumero)
         .isEqualTo(1);
+  }
+
+  @Test
+  void tt04_unaEntidadLeidaYaNoEsNueva() {
+    ProgramaEntity programa = nuevoPrograma();
+    vaciarMemoria();
+
+    ProgramaEntity leida = programas.findById(programa.getId()).orElseThrow();
+
+    assertThat(leida.isNew()).isFalse();
+  }
+
+  @Test
+  void tt04_unaEntidadRecienCreadaEsNuevaYAlGuardarseDejaDeSerlo() {
+    ProgramaEntity programa =
+        new ProgramaEntity(UUID.randomUUID(), "Ingenieria Civil", "2501", "Ingenieria");
+
+    assertThat(programa.isNew()).isTrue();
+    programas.saveAndFlush(programa);
+    assertThat(programa.isNew()).isFalse();
+  }
+
+  @Test
+  void tt04_guardarComoNuevaUnaMateriaConUnCodigoExistenteFalla() {
+    materias.saveAndFlush(new MateriaEntity("2015714", 3));
+    em.clear();
+
+    assertThatThrownBy(() -> materias.saveAndFlush(new MateriaEntity("2015714", 4)))
+        .isInstanceOf(DataIntegrityViolationException.class);
+
+    em.clear();
+    assertThat(materias.findById("2015714"))
+        .get()
+        .extracting(MateriaEntity::getCreditos)
+        .isEqualTo(3);
+  }
+
+  @Test
+  void tt04_guardarComoNuevaUnaVersionConUnIdExistenteFalla() {
+    ProgramaEntity programa = nuevoPrograma();
+    ConsolidadoEntity consolidado =
+        consolidados.save(new ConsolidadoEntity(UUID.randomUUID(), programa.getId()));
+    VersionEntity original = nuevaVersion(consolidado, 1);
+    versiones.saveAndFlush(original);
+    vaciarMemoria();
+
+    VersionEntity repetida =
+        new VersionEntity(
+            original.getId(),
+            original.getConsolidadoId(),
+            original.getProgramaId(),
+            7,
+            original.getFecha(),
+            "OTRO",
+            null,
+            null,
+            1,
+            "[]");
+
+    Throwable error = catchThrowable(() -> versiones.saveAndFlush(repetida));
+
+    assertThat(error).isInstanceOf(DataIntegrityViolationException.class);
+    em.clear();
+    VersionEntity quedo = versiones.findById(original.getId()).orElseThrow();
+    LOG.info(
+        "Guardar una versión nueva con un id repetido falló con {}; la fila quedó con número {} y"
+            + " motivo {}",
+        error.getClass().getSimpleName(),
+        quedo.getNumero(),
+        quedo.getMotivo());
+    assertThat(quedo.getNumero()).isEqualTo(1);
+    assertThat(quedo.getMotivo()).isEqualTo("INCORPORACION");
+    assertThat(versiones.count()).isEqualTo(1);
+  }
+
+  @Test
+  void tt04_guardarComoNuevaUnaNormaConUnIdExistenteFalla() {
+    NormaEntity original = nuevaNorma();
+    vaciarMemoria();
+
+    NormaEntity repetida =
+        new NormaEntity(
+            original.getId(),
+            "ACUERDO",
+            "007-B",
+            2023,
+            "Consejo Superior",
+            "BASE",
+            LocalDate.of(2023, 1, 1),
+            LocalDate.of(2023, 2, 1),
+            null,
+            null,
+            "PROGRAMAS",
+            "{}");
+
+    assertThatThrownBy(() -> normas.saveAndFlush(repetida))
+        .isInstanceOf(DataIntegrityViolationException.class);
+
+    em.clear();
+    assertThat(normas.findById(original.getId()))
+        .get()
+        .extracting(NormaEntity::getNumero)
+        .isEqualTo("003-A");
   }
 
   @Test
