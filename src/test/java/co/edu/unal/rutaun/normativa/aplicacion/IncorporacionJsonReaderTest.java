@@ -4,10 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import co.edu.unal.rutaun.compartido.Momento;
+import co.edu.unal.rutaun.normativa.TipoComponente;
 import co.edu.unal.rutaun.normativa.dominio.Agrupacion;
 import co.edu.unal.rutaun.normativa.dominio.ComponenteDeLibreEleccion;
 import co.edu.unal.rutaun.normativa.dominio.DatosDeRegla;
 import co.edu.unal.rutaun.normativa.dominio.ExpresionDeMaterias;
+import co.edu.unal.rutaun.normativa.dominio.MedidaDeCreditos;
 import co.edu.unal.rutaun.normativa.dominio.Regla;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -17,6 +19,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 
 class IncorporacionJsonReaderTest {
 
@@ -28,7 +31,7 @@ class IncorporacionJsonReaderTest {
           "/json/invalidos/datos-incompletos.json",
           "/json/invalidos/temporal-del-plan.json");
 
-  private static final String COMPONENTE_LIBRE =
+  private static final String CABECERA =
       """
       {
         "schemaVersion": "1.0",
@@ -58,27 +61,58 @@ class IncorporacionJsonReaderTest {
           }
         },
         "reglas": [
-          {
-            "categoria": "COMPONENTE",
-            "objeto": "Libre elección",
-            "enunciado": "La libre elección exige 6 créditos.",
-            "articulo": "art. 3",
-            "vigenciaPropia": null,
-            "clasificacion": "DEL_PLAN",
-            "afectacion": null,
-            "datos": {
-              "tipo": "COMPONENTE",
-              "componente": {
-                "nombre": "Libre elección",
-                "tipo": "LIBRE_ELECCION",
-                "creditosExigidos": 6,
-                "desglose": %s
-              }
+      """;
+
+  private static final String REGLA_COMPONENTE_LIBRE =
+      """
+        {
+          "categoria": "COMPONENTE",
+          "objeto": "Libre elección",
+          "enunciado": "La libre elección exige 6 créditos.",
+          "articulo": "art. 3",
+          "vigenciaPropia": null,
+          "clasificacion": "DEL_PLAN",
+          "afectacion": null,
+          "datos": {
+            "tipo": "COMPONENTE",
+            "componente": {
+              "nombre": "Libre elección",
+              "tipo": "LIBRE_ELECCION",
+              "creditosExigidos": 6,
+              "desglose": %s
             }
           }
+        }
+      """;
+
+  private static final String REGLA_HABILITACION =
+      """
+        {
+          "categoria": "HABILITACION",
+          "objeto": "2024045 Ingeniería de Software I",
+          "enunciado": "Ingeniería de Software I exige créditos aprobados.",
+          "articulo": "art. 2",
+          "vigenciaPropia": null,
+          "clasificacion": "DEL_PLAN",
+          "afectacion": null,
+          "datos": {
+            "tipo": "HABILITACION",
+            "materia": "2024045",
+            "medida": %s,
+            "umbral": 40
+          }
+        }
+      """;
+
+  private static final String CIERRE =
+      """
         ]
       }
       """;
+
+  private static final String COMPONENTE_LIBRE = CABECERA + REGLA_COMPONENTE_LIBRE + CIERRE;
+
+  private static final String HABILITACION = CABECERA + REGLA_HABILITACION + CIERRE;
 
   @Test
   void uc07_hu03_t2_elArchivoValidoSeLeeCompleto() {
@@ -160,6 +194,36 @@ class IncorporacionJsonReaderTest {
         .contains("LIBRE_ELECCION no lleva desglose");
   }
 
+  @ParameterizedTest
+  @EnumSource(TipoComponente.class)
+  void tt03_t9_leeLaMedidaDeUnComponenteConSuTipo(TipoComponente tipo) {
+    var resultado =
+        leerTexto(
+            HABILITACION.formatted(
+                "{\"tipo\": \"COMPONENTE\", \"componente\": \"%s\"}".formatted(tipo.name())));
+
+    assertThat(medidaLeida(resultado)).isEqualTo(MedidaDeCreditos.deComponente(tipo));
+  }
+
+  @Test
+  void tt03_t9_leeLaMedidaDelPrograma() {
+    var resultado = leerTexto(HABILITACION.formatted("{\"tipo\": \"PROGRAMA\"}"));
+
+    assertThat(medidaLeida(resultado)).isEqualTo(MedidaDeCreditos.delPrograma());
+  }
+
+  @Test
+  void tt03_t9_rechazaElNombreDelComponenteEnLugarDeSuTipo() {
+    var resultado =
+        leerTexto(
+            HABILITACION.formatted(
+                "{\"tipo\": \"COMPONENTE\", \"componente\": \"Componente de Fundamentación\"}"));
+
+    assertThat(resultado).isInstanceOf(IncorporacionJsonReader.ResultadoDeLectura.Invalida.class);
+    assertThat(((IncorporacionJsonReader.ResultadoDeLectura.Invalida) resultado).motivo())
+        .contains("Componente de Fundamentación");
+  }
+
   @Test
   void uc07_hu03_t2_losArchivosInvalidosDevuelvenElMotivo() {
     for (String ruta : INVALIDOS) {
@@ -216,6 +280,16 @@ class IncorporacionJsonReaderTest {
     assertThat(norma.vigencia().aplicaDesde())
         .as("%s: aplicaDesde", archivo)
         .isEqualTo(new Momento.EnFecha(LocalDate.parse(aplicaDesde)));
+  }
+
+  private static MedidaDeCreditos medidaLeida(
+      IncorporacionJsonReader.ResultadoDeLectura resultado) {
+    assertThat(resultado).isInstanceOf(IncorporacionJsonReader.ResultadoDeLectura.Leida.class);
+    IncorporacionLeida incorporacion =
+        ((IncorporacionJsonReader.ResultadoDeLectura.Leida) resultado).incorporacion();
+    DatosDeRegla.DeHabilitacion habilitacion =
+        (DatosDeRegla.DeHabilitacion) incorporacion.reglas().get(0).datos();
+    return habilitacion.regla().medida();
   }
 
   private static IncorporacionLeida incorporacionValida() {
