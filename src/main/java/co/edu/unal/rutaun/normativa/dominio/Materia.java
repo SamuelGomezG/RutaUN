@@ -6,9 +6,10 @@ import co.edu.unal.rutaun.utilidades.ArgumentChecks;
 import java.util.Objects;
 
 /**
- * Materia del catálogo único y global de RutaUN (glosario, «Materia»): su identidad es su {@link
- * CodigoMateria} y sus créditos son fijos. Cambiar los créditos no modifica la materia: crea otra
- * ({@link #conCreditos}). El nombre no vive aquí, sino en la regla de materia de cada versión del
+ * Materia del catálogo único y global: su identidad es su código y sus créditos son fijos (Acuerdo
+ * 033 de 2007 del CSU, art. 5, parágrafo 2). Una materia con otros créditos es otra materia, con
+ * otro código. Dos materias con el mismo código y créditos distintos son un catálogo incoherente,
+ * que rechaza UC07 ext. 6d. El nombre no vive aquí, sino en la regla de materia de cada versión del
  * consolidado.
  */
 public final class Materia {
@@ -41,25 +42,15 @@ public final class Materia {
     return creditos;
   }
 
-  /**
-   * Devuelve otra materia con el mismo código y esos créditos. Esta materia no cambia: los créditos
-   * son fijos, así que cambiarlos crea otra materia.
-   */
-  public Materia conCreditos(Creditos nuevos) {
-    return new Materia(codigo, nuevos);
-  }
-
-  /** Dos materias son la misma si tienen el mismo código y los mismos créditos. */
+  /** Dos materias son la misma si tienen el mismo código: el código es su identidad. */
   @Override
   public boolean equals(Object otra) {
-    return otra instanceof Materia materia
-        && codigo.equals(materia.codigo)
-        && creditos.equals(materia.creditos);
+    return otra instanceof Materia materia && codigo.equals(materia.codigo);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(codigo, creditos);
+    return Objects.hash(codigo);
   }
 
   @Override
