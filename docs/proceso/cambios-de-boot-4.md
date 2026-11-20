@@ -47,7 +47,7 @@ en `AGENTS.md`; el diseño, en `docs/diseno/`.
 
 ## Verificado en los carriles 2 y 3
 
-- **Jackson 3 (R1) ya se usa.** `ConfiguracionJson` crea el `JsonMapper`
+- **Jackson 3 (R1) ya se usa.** `JsonConfig` crea el `JsonMapper`
   (`tools.jackson.databind`), y el lector de UC07-HU03 usa la misma API. Ya no
   queda nada «por verificar».
 - **Hibernate 7.4 y JSON (R2): no se usan columnas JSON.** Los datos variables
@@ -84,7 +84,7 @@ Riesgos de versión y cómo se cerraron:
 
 | # | Riesgo | Resultado |
 | --- | --- | --- |
-| R1 | Jackson 3 cambia de paquetes (`tools.jackson`) | Verificado: `ConfiguracionJson` y el lector usan `tools.jackson`. |
+| R1 | Jackson 3 cambia de paquetes (`tools.jackson`) | Verificado: `JsonConfig` y el lector usan `tools.jackson`. |
 | R2 | Hibernate 7.4 con columnas JSON | No se usan columnas JSON: `@Lob String` + `JsonDeNormativa`. |
 | R3 | JUnit 6 con jqwik y ArchUnit | Verificado en el PR 2: ambos corren. |
 | R4 | Paquetes de prueba de Boot 4 | `@AutoConfigureMockMvc` vive en `org.springframework.boot.webmvc.test.autoconfigure`; `pruebas.md` deja los ejemplos. |

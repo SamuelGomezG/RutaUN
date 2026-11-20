@@ -14,7 +14,7 @@ import co.edu.unal.rutaun.normativa.dominio.Vigencia;
 import co.edu.unal.rutaun.normativa.persistencia.AlcanceJson;
 import co.edu.unal.rutaun.normativa.persistencia.NormaEntity;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
-import co.edu.unal.rutaun.utilidades.ConfiguracionJson;
+import co.edu.unal.rutaun.utilidades.JsonConfig;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -82,7 +82,7 @@ public final class NormaMapper {
 
   private static Alcance alcanceADominio(NormaEntity entidad) {
     AlcanceJson json =
-        ConfiguracionJson.mapper()
+        JsonConfig.mapper()
             .readValue(
                 ArgumentChecks.obligatorioNoVacio(entidad.getAlcanceDetalle(), "alcanceDetalle"),
                 AlcanceJson.class);
@@ -95,7 +95,7 @@ public final class NormaMapper {
   }
 
   private static String alcanceAJson(Alcance alcance) {
-    return ConfiguracionJson.mapper()
+    return JsonConfig.mapper()
         .writeValueAsString(
             new AlcanceJson(
                 alcance.facultades().stream().map(Facultad::nombre).sorted().toList(),
