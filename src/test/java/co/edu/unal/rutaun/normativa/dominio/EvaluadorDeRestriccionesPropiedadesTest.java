@@ -2,7 +2,8 @@ package co.edu.unal.rutaun.normativa.dominio;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import co.edu.unal.rutaun.normativa.dominio.EstadoRestriccion.Certeza;
+import co.edu.unal.rutaun.compartido.EstadoRestriccion;
+import co.edu.unal.rutaun.compartido.EstadoRestriccion.Certeza;
 import java.util.List;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.GenerationMode;

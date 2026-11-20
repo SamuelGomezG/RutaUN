@@ -2,6 +2,8 @@ package co.edu.unal.rutaun.normativa.dominio;
 
 import co.edu.unal.rutaun.compartido.CodigoMateria;
 import co.edu.unal.rutaun.compartido.Creditos;
+import co.edu.unal.rutaun.compartido.EstadoRestriccion;
+import co.edu.unal.rutaun.normativa.ContextoDeEvaluacion;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
 import java.util.ArrayList;
 import java.util.List;
@@ -79,19 +81,14 @@ public final class EvaluadorDeRestricciones {
 
   private static EstadoRestriccion evaluarMateria(
       CodigoMateria materia, ContextoDeEvaluacion contexto, boolean esCorrequisito) {
-    EstadoDeMateria estado = contexto.estadoDe(materia);
-    return switch (estado) {
-      case APROBADA -> EstadoRestriccion.cumplida(materia.valor() + " está aprobada");
-      case EN_CURSO -> EstadoRestriccion.enCurso(materia.valor() + " está en curso");
-      case YA_NO_RIGE -> EstadoRestriccion.incierta(materia.valor() + " ya no rige");
-      case PENDIENTE -> {
-        if (esCorrequisito && contexto.vaEnElMismoSemestre(materia)) {
-          yield EstadoRestriccion.cumplida(
-              "el plan ubica " + materia.valor() + " en el mismo semestre o antes");
-        }
-        yield EstadoRestriccion.pendiente(materia.valor() + " está pendiente");
-      }
-    };
+    EstadoRestriccion estado = contexto.estadoDe(materia);
+    if (esCorrequisito
+        && estado.certeza() == EstadoRestriccion.Certeza.PENDIENTE
+        && contexto.enElMismoSemestre(materia)) {
+      return EstadoRestriccion.cumplida(
+          "el plan ubica " + materia.valor() + " en el mismo semestre o antes");
+    }
+    return estado;
   }
 
   private static EstadoRestriccion evaluarMateriaExterna(
@@ -110,14 +107,18 @@ public final class EvaluadorDeRestricciones {
 
   private static EstadoRestriccion evaluarHabilitacion(
       ReglaDeHabilitacion habilitacion, ContextoDeEvaluacion contexto) {
-    Creditos aprobados = contexto.creditosAprobadosPara(habilitacion.medida());
-    String medida =
-        habilitacion.medida().esDelPrograma()
+    MedidaDeCreditos medida = habilitacion.medida();
+    Creditos aprobados =
+        medida.esDelPrograma()
+            ? contexto.creditosAprobadosDelPrograma()
+            : contexto.creditosAprobadosDelComponente(medida.componente().orElseThrow());
+    String deQue =
+        medida.esDelPrograma()
             ? "del programa"
-            : "del componente " + habilitacion.medida().componente().orElseThrow();
+            : "del componente " + medida.componente().orElseThrow();
     String detalle =
         "créditos aprobados "
-            + medida
+            + deQue
             + ": "
             + aprobados.valor()
             + "; umbral: "

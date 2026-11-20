@@ -5,14 +5,17 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import co.edu.unal.rutaun.compartido.CodigoMateria;
 import co.edu.unal.rutaun.compartido.Creditos;
-import co.edu.unal.rutaun.normativa.dominio.EstadoRestriccion.Certeza;
+import co.edu.unal.rutaun.compartido.EstadoRestriccion;
+import co.edu.unal.rutaun.compartido.EstadoRestriccion.Certeza;
+import co.edu.unal.rutaun.normativa.ContextoDeEvaluacion;
+import co.edu.unal.rutaun.normativa.TipoComponente;
 import co.edu.unal.rutaun.normativa.dominio.ExpresionDeMaterias.MateriaDelPrograma;
 import co.edu.unal.rutaun.normativa.dominio.ExpresionDeMaterias.MateriaExterna;
 import co.edu.unal.rutaun.normativa.dominio.ExpresionDeMaterias.O;
 import co.edu.unal.rutaun.normativa.dominio.ExpresionDeMaterias.Y;
-import java.util.Map;
+import co.edu.unal.rutaun.soporte.ContextoDeEvaluacionFijo;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 class EvaluadorDeRestriccionesTest {
@@ -21,31 +24,41 @@ class EvaluadorDeRestriccionesTest {
   private static final CodigoMateria B = new CodigoMateria("B");
   private static final CodigoMateria C = new CodigoMateria("C");
   private static final MedidaDeCreditos PROGRAMA = MedidaDeCreditos.delPrograma();
-  private static final MedidaDeCreditos DISCIPLINAR = MedidaDeCreditos.deComponente("Disciplinar");
+  private static final MedidaDeCreditos DISCIPLINAR =
+      MedidaDeCreditos.deComponente(TipoComponente.DISCIPLINAR);
 
   @Test
-  void tt03_unPrerrequisitoSeEvaluaSegunElEstadoDeLaMateria() {
-    Map<EstadoDeMateria, Certeza> esperados =
-        Map.of(
-            EstadoDeMateria.APROBADA, Certeza.CUMPLIDA,
-            EstadoDeMateria.EN_CURSO, Certeza.EN_CURSO,
-            EstadoDeMateria.PENDIENTE, Certeza.PENDIENTE,
-            EstadoDeMateria.YA_NO_RIGE, Certeza.INCIERTA);
+  void tt03_unPrerrequisitoTomaLaCertezaYLasRazonesQueDaElContexto() {
+    for (Certeza certeza : Certeza.values()) {
+      ContextoDeEvaluacion contexto =
+          ContextoDeEvaluacionFijo.nuevo()
+              .estado(A, new EstadoRestriccion(certeza, List.of("razón de " + certeza)))
+              .construir();
 
-    for (Map.Entry<EstadoDeMateria, Certeza> esperado : esperados.entrySet()) {
-      ContextoDeEvaluacion contexto = contexto(Map.of(A, esperado.getKey()));
       EstadoRestriccion estado =
           EvaluadorDeRestricciones.evaluar(
               new Prerrequisito(B, new MateriaDelPrograma(A)), contexto);
 
-      assertThat(estado.certeza()).isEqualTo(esperado.getValue());
+      assertThat(estado.certeza()).isEqualTo(certeza);
+      assertThat(estado.razones()).containsExactly("razón de " + certeza);
     }
+  }
+
+  @Test
+  void tt03_unaMateriaQueYaNoRigeSinEquivalenciaDejaElPrerrequisitoIncierto() {
+    ContextoDeEvaluacion contexto = ContextoDeEvaluacionFijo.nuevo().yaNoRige(A).construir();
+
+    EstadoRestriccion estado =
+        EvaluadorDeRestricciones.evaluar(new Prerrequisito(B, new MateriaDelPrograma(A)), contexto);
+
+    assertThat(estado.certeza()).isEqualTo(Certeza.INCIERTA);
+    assertThat(estado.razones()).containsExactly("A ya no rige");
   }
 
   @Test
   void tt03_unaYDePrerrequisitosTomaElPeorEstadoYLasRazonesNoCumplidas() {
     ContextoDeEvaluacion contexto =
-        contexto(Map.of(A, EstadoDeMateria.APROBADA, B, EstadoDeMateria.EN_CURSO));
+        ContextoDeEvaluacionFijo.nuevo().aprobada(A).enCurso(B).construir();
 
     EstadoRestriccion estado =
         EvaluadorDeRestricciones.evaluar(
@@ -59,7 +72,7 @@ class EvaluadorDeRestriccionesTest {
   @Test
   void tt03_unaODePrerrequisitosTomaElMejorEstadoYLasRazonesDeLaMejorRama() {
     ContextoDeEvaluacion contexto =
-        contexto(Map.of(A, EstadoDeMateria.PENDIENTE, B, EstadoDeMateria.APROBADA));
+        ContextoDeEvaluacionFijo.nuevo().pendiente(A).aprobada(B).construir();
 
     EstadoRestriccion estado =
         EvaluadorDeRestricciones.evaluar(
@@ -73,11 +86,7 @@ class EvaluadorDeRestriccionesTest {
   @Test
   void tt03_unaExpresionAnidadaCombinaYConO() {
     ContextoDeEvaluacion contexto =
-        contexto(
-            Map.of(
-                A, EstadoDeMateria.APROBADA,
-                B, EstadoDeMateria.PENDIENTE,
-                C, EstadoDeMateria.EN_CURSO));
+        ContextoDeEvaluacionFijo.nuevo().aprobada(A).pendiente(B).enCurso(C).construir();
 
     EstadoRestriccion estado =
         EvaluadorDeRestricciones.evaluar(
@@ -122,9 +131,9 @@ class EvaluadorDeRestriccionesTest {
   @Test
   void tt03_unCorrequisitoPendienteSeCumpleSiElPlanLoUbica() {
     Restriccion correquisito = new Correquisito(B, new MateriaDelPrograma(A));
-    ContextoDeEvaluacion sinUbicacion = contexto(Map.of(A, EstadoDeMateria.PENDIENTE));
+    ContextoDeEvaluacion sinUbicacion = ContextoDeEvaluacionFijo.nuevo().pendiente(A).construir();
     ContextoDeEvaluacion ubicado =
-        new ContextoDeEvaluacion(Map.of(A, EstadoDeMateria.PENDIENTE), Map.of(), Set.of(A));
+        ContextoDeEvaluacionFijo.nuevo().pendiente(A).enElMismoSemestre(A).construir();
 
     assertThat(EvaluadorDeRestricciones.evaluar(correquisito, sinUbicacion).certeza())
         .isEqualTo(Certeza.PENDIENTE);
@@ -136,7 +145,7 @@ class EvaluadorDeRestriccionesTest {
   void tt03_unPrerrequisitoNoSeCumpleSoloPorqueElPlanLoUbique() {
     Restriccion prerrequisito = new Prerrequisito(B, new MateriaDelPrograma(A));
     ContextoDeEvaluacion ubicado =
-        new ContextoDeEvaluacion(Map.of(A, EstadoDeMateria.PENDIENTE), Map.of(), Set.of(A));
+        ContextoDeEvaluacionFijo.nuevo().pendiente(A).enElMismoSemestre(A).construir();
 
     assertThat(EvaluadorDeRestricciones.evaluar(prerrequisito, ubicado).certeza())
         .isEqualTo(Certeza.PENDIENTE);
@@ -146,9 +155,9 @@ class EvaluadorDeRestriccionesTest {
   void tt03_unaReglaDeHabilitacionComparaCreditosConElUmbral() {
     Restriccion habilitacion = new ReglaDeHabilitacion(A, PROGRAMA, new Creditos(40));
     ContextoDeEvaluacion insuficiente =
-        new ContextoDeEvaluacion(Map.of(), Map.of(PROGRAMA, new Creditos(39)), Set.of());
+        ContextoDeEvaluacionFijo.nuevo().creditosDelPrograma(39).construir();
     ContextoDeEvaluacion suficiente =
-        new ContextoDeEvaluacion(Map.of(), Map.of(PROGRAMA, new Creditos(40)), Set.of());
+        ContextoDeEvaluacionFijo.nuevo().creditosDelPrograma(40).construir();
 
     assertThat(EvaluadorDeRestricciones.evaluar(habilitacion, insuficiente).certeza())
         .isEqualTo(Certeza.PENDIENTE);
@@ -160,12 +169,15 @@ class EvaluadorDeRestriccionesTest {
   void tt03_unaReglaDeHabilitacionDeComponenteUsaSusCreditos() {
     Restriccion habilitacion = new ReglaDeHabilitacion(A, DISCIPLINAR, new Creditos(20));
     ContextoDeEvaluacion contexto =
-        new ContextoDeEvaluacion(Map.of(), Map.of(DISCIPLINAR, new Creditos(20)), Set.of());
+        ContextoDeEvaluacionFijo.nuevo()
+            .creditosDelComponente(TipoComponente.DISCIPLINAR, 20)
+            .creditosDelPrograma(5)
+            .construir();
 
     EstadoRestriccion estado = EvaluadorDeRestricciones.evaluar(habilitacion, contexto);
 
     assertThat(estado.certeza()).isEqualTo(Certeza.CUMPLIDA);
-    assertThat(estado.razones().get(0)).contains("del componente Disciplinar");
+    assertThat(estado.razones().get(0)).contains("del componente DISCIPLINAR");
   }
 
   @Test
@@ -196,7 +208,7 @@ class EvaluadorDeRestriccionesTest {
 
   @Test
   void tt03_elEvaluadorRechazaRestriccionOContextoNulos() {
-    ContextoDeEvaluacion contexto = contexto(Map.of());
+    ContextoDeEvaluacion contexto = ContextoDeEvaluacionFijo.vacio();
 
     assertThatThrownBy(() -> EvaluadorDeRestricciones.evaluar(null, contexto))
         .isInstanceOf(IllegalArgumentException.class)
@@ -210,15 +222,10 @@ class EvaluadorDeRestriccionesTest {
   }
 
   private static EstadoRestriccion estado(Certeza certeza) {
-    return new EstadoRestriccion(certeza, java.util.List.of(certeza.name()));
+    return new EstadoRestriccion(certeza, List.of(certeza.name()));
   }
 
   private static EstadoRestriccion evaluarConContextoVacio(Restriccion restriccion) {
-    return EvaluadorDeRestricciones.evaluar(restriccion, contexto(Map.of()));
-  }
-
-  private static ContextoDeEvaluacion contexto(
-      Map<CodigoMateria, EstadoDeMateria> estadosDeMaterias) {
-    return new ContextoDeEvaluacion(estadosDeMaterias, Map.of(), Set.of());
+    return EvaluadorDeRestricciones.evaluar(restriccion, ContextoDeEvaluacionFijo.vacio());
   }
 }

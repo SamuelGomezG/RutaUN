@@ -6,6 +6,7 @@ import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.Momento;
 import co.edu.unal.rutaun.normativa.ClasificacionRegla;
 import co.edu.unal.rutaun.normativa.TipoAlcance;
+import co.edu.unal.rutaun.normativa.TipoComponente;
 import co.edu.unal.rutaun.normativa.TipoDeEfecto;
 import co.edu.unal.rutaun.normativa.TipoNorma;
 import co.edu.unal.rutaun.normativa.dominio.Agrupacion;
@@ -113,7 +114,7 @@ final class ReglasDePrueba {
                     TipoMateriaExterna.NIVELACION))),
         new DatosDeRegla.DeHabilitacion(
             new ReglaDeHabilitacion(
-                B, MedidaDeCreditos.deComponente("Fundamentación"), new Creditos(40))),
+                B, MedidaDeCreditos.deComponente(TipoComponente.FUNDAMENTACION), new Creditos(40))),
         new DatosDeRegla.DeAgrupacion((Agrupacion) cienciasBasicas, fundamentacion),
         new DatosDeRegla.DeComponente(fundamentacion),
         new DatosDeRegla.DePrograma(new Creditos(160)),

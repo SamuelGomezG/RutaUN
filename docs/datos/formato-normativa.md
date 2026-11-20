@@ -249,13 +249,14 @@ Una expresión es:
 {
   "tipo": "HABILITACION",
   "materia": "2024045",
-  "medida": { "tipo": "COMPONENTE", "componente": "Componente de Fundamentación" },
+  "medida": { "tipo": "COMPONENTE", "componente": "FUNDAMENTACION" },
   "umbral": 40
 }
 ```
 
-`medida` es `{ "tipo": "PROGRAMA" }` o
-`{ "tipo": "COMPONENTE", "componente": "..." }`.
+`medida` es `{ "tipo": "PROGRAMA" }` o `{ "tipo": "COMPONENTE", "componente": "..." }`, donde
+`componente` es el tipo del componente: `FUNDAMENTACION` o `DISCIPLINAR`. Es el mismo tipo con el que
+el contexto de evaluación informa los créditos aprobados de un componente.
 
 #### `AGRUPACION`
 

@@ -370,7 +370,8 @@ public final class IncorporacionJsonReader {
   private static MedidaDeCreditos medida(JsonNode nodo) {
     return switch (texto(nodo, "tipo")) {
       case "PROGRAMA" -> MedidaDeCreditos.delPrograma();
-      case "COMPONENTE" -> MedidaDeCreditos.deComponente(texto(nodo, "componente"));
+      case "COMPONENTE" ->
+          MedidaDeCreditos.deComponente(TipoComponente.valueOf(texto(nodo, "componente")));
       default -> throw new IllegalArgumentException("medida.tipo no es válido");
     };
   }
