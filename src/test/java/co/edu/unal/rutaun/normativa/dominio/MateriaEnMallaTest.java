@@ -48,20 +48,50 @@ class MateriaEnMallaTest {
     Creditos tres = new Creditos(3);
     Optional<Integer> sin = Optional.empty();
 
-    assertThatThrownBy(() -> new MateriaEnMalla(null, "M", tres, Obligatoriedad.OPTATIVA, sin))
+    assertThatThrownBy(
+            () -> new MateriaEnMalla(null, "M", tres, Obligatoriedad.OPTATIVA, sin, true))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("codigo no puede ser null");
-    assertThatThrownBy(() -> new MateriaEnMalla(CODIGO, " ", tres, Obligatoriedad.OPTATIVA, sin))
+    assertThatThrownBy(
+            () -> new MateriaEnMalla(CODIGO, " ", tres, Obligatoriedad.OPTATIVA, sin, true))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("nombre no puede ser vacío");
-    assertThatThrownBy(() -> new MateriaEnMalla(CODIGO, "M", null, Obligatoriedad.OPTATIVA, sin))
+    assertThatThrownBy(
+            () -> new MateriaEnMalla(CODIGO, "M", null, Obligatoriedad.OPTATIVA, sin, true))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("creditos no puede ser null");
-    assertThatThrownBy(() -> new MateriaEnMalla(CODIGO, "M", tres, null, sin))
+    assertThatThrownBy(() -> new MateriaEnMalla(CODIGO, "M", tres, null, sin, true))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("obligatoriedad no puede ser null");
-    assertThatThrownBy(() -> new MateriaEnMalla(CODIGO, "M", tres, Obligatoriedad.OPTATIVA, null))
+    assertThatThrownBy(
+            () -> new MateriaEnMalla(CODIGO, "M", tres, Obligatoriedad.OPTATIVA, null, true))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("semestreSugerido no puede ser null");
+  }
+
+  @Test
+  void tt02_lasFabricasDejanLaMateriaCursableDesdeElPrograma() {
+    MateriaEnMalla sinSemestre =
+        MateriaEnMalla.sinSemestre(CODIGO, "Electiva", new Creditos(2), Obligatoriedad.OPTATIVA);
+    MateriaEnMalla enSemestre =
+        MateriaEnMalla.enSemestre(
+            CODIGO, "Cálculo", new Creditos(4), Obligatoriedad.OBLIGATORIA, 1);
+
+    assertThat(sinSemestre.cursableDesdeElPrograma()).isTrue();
+    assertThat(enSemestre.cursableDesdeElPrograma()).isTrue();
+  }
+
+  @Test
+  void tt02_unaMateriaPuedeNoSerCursableDesdeElPrograma() {
+    MateriaEnMalla materia =
+        new MateriaEnMalla(
+            CODIGO,
+            "Física II",
+            new Creditos(3),
+            Obligatoriedad.OBLIGATORIA,
+            Optional.of(2),
+            false);
+
+    assertThat(materia.cursableDesdeElPrograma()).isFalse();
   }
 }

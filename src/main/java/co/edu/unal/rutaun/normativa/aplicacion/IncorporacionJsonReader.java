@@ -285,7 +285,8 @@ public final class IncorporacionJsonReader {
         texto(nodo, "nombre"),
         new Creditos(entero(nodo, "creditos")),
         Obligatoriedad.valueOf(texto(nodo, "obligatoriedad")),
-        enteroOpcional(nodo, "semestreSugerido"));
+        enteroOpcional(nodo, "semestreSugerido"),
+        true);
   }
 
   private static NodoDeMalla contenedor(JsonNode nodo) {
