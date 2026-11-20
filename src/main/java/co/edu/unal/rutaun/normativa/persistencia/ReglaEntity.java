@@ -11,7 +11,7 @@ import java.util.UUID;
 /** Fila de la tabla {@code regla}: una regla de una norma. */
 @Entity
 @Table(name = "regla")
-public class ReglaEntidad {
+public class ReglaEntity {
 
   @Id private UUID id;
 
@@ -52,10 +52,10 @@ public class ReglaEntidad {
   @Lob private String datos;
 
   /** Constructor sin argumentos que exige JPA. */
-  protected ReglaEntidad() {}
+  protected ReglaEntity() {}
 
   /** Crea una regla. */
-  public ReglaEntidad(
+  public ReglaEntity(
       UUID id,
       UUID normaId,
       String categoria,

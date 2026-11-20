@@ -7,7 +7,7 @@ import co.edu.unal.rutaun.compartido.ProgramaId;
 import co.edu.unal.rutaun.incidentes.IncidenteDePrograma;
 import co.edu.unal.rutaun.incidentes.IncidenteDetectado;
 import co.edu.unal.rutaun.incidentes.IncidenteInterno;
-import co.edu.unal.rutaun.incidentes.persistencia.IncidenteEntidad;
+import co.edu.unal.rutaun.incidentes.persistencia.IncidenteEntity;
 import co.edu.unal.rutaun.incidentes.persistencia.IncidenteJpaRepository;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
 import java.time.LocalDateTime;
@@ -60,7 +60,7 @@ class IncidentesIntegracionTest {
   void sop05_registraUnIncidenteConCausaYContexto() {
     publicador.publishEvent(eventoDePrograma("Programa sin reglas cargadas"));
 
-    List<IncidenteEntidad> guardados = repositorio.findAll();
+    List<IncidenteEntity> guardados = repositorio.findAll();
     assertThat(guardados).hasSize(1);
     assertThat(guardados.get(0).getCausa()).isEqualTo("Programa sin reglas cargadas");
     assertThat(guardados.get(0).getCasoDeUso()).isEqualTo("UC06-HU01");
@@ -72,7 +72,7 @@ class IncidentesIntegracionTest {
   void sop05_registraUnIncidenteInternoSinPrograma() {
     publicador.publishEvent(eventoInterno("Falta el periodo en curso"));
 
-    List<IncidenteEntidad> guardados = repositorio.findAll();
+    List<IncidenteEntity> guardados = repositorio.findAll();
     assertThat(guardados).hasSize(1);
     assertThat(guardados.get(0).getProgramaId()).isNull();
     assertThat(guardados.get(0).getVersionConsolidado()).isNull();
@@ -97,7 +97,7 @@ class IncidentesIntegracionTest {
     servicio.registrar(eventoDePrograma("Misma causa"));
     servicio.registrar(eventoDePrograma("Misma causa"));
 
-    List<IncidenteEntidad> guardados = repositorio.findAll();
+    List<IncidenteEntity> guardados = repositorio.findAll();
     assertThat(guardados).hasSize(1);
     assertThat(guardados.get(0).getConteo()).isEqualTo(2);
     assertThat(guardados.get(0).getUltimaFecha())
@@ -116,7 +116,7 @@ class IncidentesIntegracionTest {
   void sop05_incidenteAtendidoNoSeAgrupaYSeRegistraDeNuevo() {
     LocalDateTime fecha = LocalDateTime.of(2026, 11, 1, 10, 0);
     repositorio.save(
-        new IncidenteEntidad(
+        new IncidenteEntity(
             UUID.randomUUID(),
             "UC06-HU01",
             "ext. 4a",

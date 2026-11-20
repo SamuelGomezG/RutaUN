@@ -64,7 +64,7 @@ abstract class ColumnaJsonIdaYVueltaBase {
 
   @Test
   void tt04_columnaJsonIdaYVuelta() {
-    NormaEntidad norma = normas.save(nuevaNorma());
+    NormaEntity norma = normas.save(nuevaNorma());
     normaId = norma.getId();
     DatosDeReglaPrueba original =
         new DatosDeReglaPrueba(
@@ -75,7 +75,7 @@ abstract class ColumnaJsonIdaYVueltaBase {
             List.of("2015710", "1000001"),
             LocalDate.of(2022, 2, 1));
     String json = JSON.writeValueAsString(original);
-    ReglaEntidad regla = reglas.save(nuevaRegla(normaId, json));
+    ReglaEntity regla = reglas.save(nuevaRegla(normaId, json));
     reglaId = regla.getId();
 
     String leidoPorHibernate = reglas.findById(reglaId).orElseThrow().getDatos();
@@ -90,8 +90,8 @@ abstract class ColumnaJsonIdaYVueltaBase {
     assertThat(JSON.readValue(leidoPorHibernate, DatosDeReglaPrueba.class)).isEqualTo(original);
   }
 
-  private static NormaEntidad nuevaNorma() {
-    return new NormaEntidad(
+  private static NormaEntity nuevaNorma() {
+    return new NormaEntity(
         UUID.randomUUID(),
         "ACUERDO",
         "T2-" + UUID.randomUUID().toString().substring(0, 8),
@@ -106,8 +106,8 @@ abstract class ColumnaJsonIdaYVueltaBase {
         "{}");
   }
 
-  private static ReglaEntidad nuevaRegla(UUID normaId, String datos) {
-    return new ReglaEntidad(
+  private static ReglaEntity nuevaRegla(UUID normaId, String datos) {
+    return new ReglaEntity(
         UUID.randomUUID(),
         normaId,
         "MATERIA",

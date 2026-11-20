@@ -9,7 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.ProgramaId;
-import co.edu.unal.rutaun.incidentes.persistencia.IncidenteEntidad;
+import co.edu.unal.rutaun.incidentes.persistencia.IncidenteEntity;
 import co.edu.unal.rutaun.incidentes.persistencia.IncidenteJpaRepository;
 import co.edu.unal.rutaun.normativa.ClasificacionRegla;
 import co.edu.unal.rutaun.normativa.ConsolidadoVista;
@@ -207,7 +207,7 @@ class ReglasDelProgramaEstadosTest {
       throws Exception {
     mockMvc.perform(get(ruta(SIN_REGLAS))).andExpect(status().isOk());
 
-    List<IncidenteEntidad> delPrograma =
+    List<IncidenteEntity> delPrograma =
         incidentes.findAll().stream()
             .filter(incidente -> SIN_REGLAS.valor().equals(incidente.getProgramaId()))
             .toList();

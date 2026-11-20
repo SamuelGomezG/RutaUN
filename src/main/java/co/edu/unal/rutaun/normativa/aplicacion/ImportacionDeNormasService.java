@@ -11,14 +11,14 @@ import co.edu.unal.rutaun.normativa.dominio.Norma;
 import co.edu.unal.rutaun.normativa.dominio.Regla;
 import co.edu.unal.rutaun.normativa.dominio.VersionDelConsolidado;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
-import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoEntidad;
+import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoEntity;
 import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoJpaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.NormaJpaRepository;
-import co.edu.unal.rutaun.normativa.persistencia.ProgramaEntidad;
+import co.edu.unal.rutaun.normativa.persistencia.ProgramaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaJpaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionJpaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaJpaRepository;
-import co.edu.unal.rutaun.normativa.persistencia.VersionEntidad;
+import co.edu.unal.rutaun.normativa.persistencia.VersionEntity;
 import co.edu.unal.rutaun.normativa.persistencia.VersionJpaRepository;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
 import java.io.InputStream;
@@ -115,7 +115,7 @@ public class ImportacionDeNormasService {
             normaLeida.vigencia(),
             normaLeida.enlaceRegimenLegal(),
             alcance);
-    List<ProgramaEntidad> programasDelAlcance = programasDelAlcance(normaLeida.alcance());
+    List<ProgramaEntity> programasDelAlcance = programasDelAlcance(normaLeida.alcance());
     if (programasDelAlcance.isEmpty()) {
       throw new ArchivoDeNormativaInvalidoException(
           "La norma no comprende ningún programa cargado.");
@@ -129,7 +129,7 @@ public class ImportacionDeNormasService {
     MotivoDeVersion motivo =
         new MotivoDeVersion.PorIncorporacion(norma.id(), ADMINISTRADOR_DE_SEMILLA);
     int creadas = 0;
-    for (ProgramaEntidad programa : programasDelAlcance) {
+    for (ProgramaEntity programa : programasDelAlcance) {
       crearVersion(programa, reglasConEstado, motivo, fecha);
       creadas++;
     }
@@ -178,14 +178,14 @@ public class ImportacionDeNormasService {
   private Set<ProgramaId> idsDeProgramas(Set<String> codigos) {
     return codigos.stream()
         .map(this::programaPorCodigo)
-        .map(ProgramaEntidad::getId)
+        .map(ProgramaEntity::getId)
         .map(ProgramaId::new)
         .collect(Collectors.toSet());
   }
 
-  private List<ProgramaEntidad> programasDelAlcance(AlcanceLeida alcance) {
+  private List<ProgramaEntity> programasDelAlcance(AlcanceLeida alcance) {
     Set<String> exclusiones = new HashSet<>(alcance.exclusiones());
-    List<ProgramaEntidad> candidatos =
+    List<ProgramaEntity> candidatos =
         switch (alcance.tipo()) {
           case TODOS -> programas.findAll();
           case FACULTADES ->
@@ -204,7 +204,7 @@ public class ImportacionDeNormasService {
         .toList();
   }
 
-  private ProgramaEntidad programaPorCodigo(String codigo) {
+  private ProgramaEntity programaPorCodigo(String codigo) {
     return programas
         .findByCodigoSia(codigo)
         .orElseThrow(
@@ -214,13 +214,13 @@ public class ImportacionDeNormasService {
   }
 
   private void crearVersion(
-      ProgramaEntidad programa, List<Regla> reglas, MotivoDeVersion motivo, LocalDate fecha) {
-    ConsolidadoEntidad consolidado =
+      ProgramaEntity programa, List<Regla> reglas, MotivoDeVersion motivo, LocalDate fecha) {
+    ConsolidadoEntity consolidado =
         consolidados
             .findByProgramaId(programa.getId())
             .orElseGet(
                 () ->
-                    consolidados.save(new ConsolidadoEntidad(UUID.randomUUID(), programa.getId())));
+                    consolidados.save(new ConsolidadoEntity(UUID.randomUUID(), programa.getId())));
     Optional<VersionDelConsolidado> anterior =
         versiones.findTopByProgramaIdOrderByNumeroDesc(programa.getId()).map(this::cargarVersion);
     List<Regla> resultantes =
@@ -274,11 +274,11 @@ public class ImportacionDeNormasService {
     return resultantes;
   }
 
-  private VersionDelConsolidado cargarVersion(VersionEntidad entidad) {
-    List<co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntidad> filas =
+  private VersionDelConsolidado cargarVersion(VersionEntity entidad) {
+    List<co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntity> filas =
         reglasEnVersion.findByVersionId(entidad.getId());
     List<UUID> ids = filas.stream().map(fila -> fila.getReglaId()).toList();
-    Map<UUID, co.edu.unal.rutaun.normativa.persistencia.ReglaEntidad> reglasPorId =
+    Map<UUID, co.edu.unal.rutaun.normativa.persistencia.ReglaEntity> reglasPorId =
         reglas.findAllById(ids).stream()
             .collect(Collectors.toMap(regla -> regla.getId(), regla -> regla));
     return VersionDelConsolidadoMapper.aDominio(entidad, filas, reglasPorId);

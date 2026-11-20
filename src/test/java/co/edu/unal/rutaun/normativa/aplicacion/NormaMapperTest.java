@@ -14,7 +14,7 @@ import co.edu.unal.rutaun.normativa.dominio.Alcance;
 import co.edu.unal.rutaun.normativa.dominio.IdentificacionNorma;
 import co.edu.unal.rutaun.normativa.dominio.Norma;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
-import co.edu.unal.rutaun.normativa.persistencia.NormaEntidad;
+import co.edu.unal.rutaun.normativa.persistencia.NormaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.NormaJpaRepository;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
 import java.time.LocalDate;
@@ -73,7 +73,7 @@ class NormaMapperTest {
     normaId = original.id().valor();
 
     normas.save(NormaMapper.aEntidad(original));
-    NormaEntidad leida = normas.findById(normaId).orElseThrow();
+    NormaEntity leida = normas.findById(normaId).orElseThrow();
     Norma reconstruida = NormaMapper.aDominio(leida);
 
     // Norma.equals solo compara el id; la comparación recursiva revisa todos los campos.
@@ -94,7 +94,7 @@ class NormaMapperTest {
     normaId = original.id().valor();
 
     normas.save(NormaMapper.aEntidad(original));
-    NormaEntidad leida = normas.findById(normaId).orElseThrow();
+    NormaEntity leida = normas.findById(normaId).orElseThrow();
     Norma reconstruida = NormaMapper.aDominio(leida);
 
     assertThat(reconstruida).usingRecursiveComparison().isEqualTo(original);
@@ -102,7 +102,7 @@ class NormaMapperTest {
 
   @Test
   void tt04_normaConTipoDesconocidoNoSeReconstituye() {
-    NormaEntidad invalida = entidadAMano("DECRETO", "TODOS", ALCANCE_TODOS);
+    NormaEntity invalida = entidadAMano("DECRETO", "TODOS", ALCANCE_TODOS);
 
     assertThatThrownBy(() -> NormaMapper.aDominio(invalida))
         .isInstanceOf(IllegalArgumentException.class)
@@ -114,7 +114,7 @@ class NormaMapperTest {
     String conFacultades =
         "{\"facultades\":[\"Ingeniería\"],\"programas\":[],"
             + "\"exclusiones\":[],\"texto\":\"Todos\"}";
-    NormaEntidad invalida = entidadAMano("ACUERDO", "TODOS", conFacultades);
+    NormaEntity invalida = entidadAMano("ACUERDO", "TODOS", conFacultades);
 
     assertThatThrownBy(() -> NormaMapper.aDominio(invalida))
         .isInstanceOf(IllegalArgumentException.class)
@@ -144,8 +144,8 @@ class NormaMapperTest {
     return "T3-" + UUID.randomUUID().toString().substring(0, 8);
   }
 
-  private static NormaEntidad entidadAMano(String tipo, String tipoAlcance, String alcanceJson) {
-    return new NormaEntidad(
+  private static NormaEntity entidadAMano(String tipo, String tipoAlcance, String alcanceJson) {
+    return new NormaEntity(
         UUID.randomUUID(),
         tipo,
         "1",

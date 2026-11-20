@@ -11,7 +11,7 @@ import java.util.UUID;
 /** Fila de la tabla {@code norma}: una norma con su vigencia y su alcance. */
 @Entity
 @Table(name = "norma")
-public class NormaEntidad {
+public class NormaEntity {
 
   @Id private UUID id;
 
@@ -50,10 +50,10 @@ public class NormaEntidad {
   private String alcanceDetalle;
 
   /** Constructor sin argumentos que exige JPA. */
-  protected NormaEntidad() {}
+  protected NormaEntity() {}
 
   /** Crea una norma. */
-  public NormaEntidad(
+  public NormaEntity(
       UUID id,
       String tipo,
       String numero,

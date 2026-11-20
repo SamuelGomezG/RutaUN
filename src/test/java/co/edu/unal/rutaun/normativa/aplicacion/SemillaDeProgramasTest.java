@@ -2,7 +2,7 @@ package co.edu.unal.rutaun.normativa.aplicacion;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import co.edu.unal.rutaun.normativa.persistencia.ProgramaEntidad;
+import co.edu.unal.rutaun.normativa.persistencia.ProgramaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaJpaRepository;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
 import java.io.IOException;
@@ -39,7 +39,7 @@ class SemillaDeProgramasTest {
     ResultadoDeCargaDeProgramas resultado = servicio.importar(json);
 
     assertThat(resultado.creados() + resultado.yaExistentes()).isEqualTo(1);
-    ProgramaEntidad sistemas = programas.findByCodigoSia("2879").orElseThrow();
+    ProgramaEntity sistemas = programas.findByCodigoSia("2879").orElseThrow();
     assertThat(sistemas.getNombre()).isEqualTo("Ingeniería de Sistemas y Computación");
     assertThat(sistemas.getFacultad()).isEqualTo("Ingeniería");
   }

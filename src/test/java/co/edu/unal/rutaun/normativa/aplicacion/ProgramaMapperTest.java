@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import co.edu.unal.rutaun.normativa.dominio.Facultad;
 import co.edu.unal.rutaun.normativa.dominio.Programa;
-import co.edu.unal.rutaun.normativa.persistencia.ProgramaEntidad;
+import co.edu.unal.rutaun.normativa.persistencia.ProgramaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaJpaRepository;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
 import java.util.UUID;
@@ -42,7 +42,7 @@ class ProgramaMapperTest {
     programaId = original.id().valor();
 
     programas.save(ProgramaMapper.aEntidad(original));
-    ProgramaEntidad leida = programas.findById(programaId).orElseThrow();
+    ProgramaEntity leida = programas.findById(programaId).orElseThrow();
     Programa reconstruido = ProgramaMapper.aDominio(leida);
 
     // Programa.equals solo compara el id; la comparación recursiva revisa todos los campos.
@@ -51,7 +51,7 @@ class ProgramaMapperTest {
 
   @Test
   void tt04_programaConNombreEnBlancoNoSeReconstituye() {
-    ProgramaEntidad invalida = new ProgramaEntidad(UUID.randomUUID(), "   ", "2879", "Ingeniería");
+    ProgramaEntity invalida = new ProgramaEntity(UUID.randomUUID(), "   ", "2879", "Ingeniería");
 
     assertThatThrownBy(() -> ProgramaMapper.aDominio(invalida))
         .isInstanceOf(IllegalArgumentException.class)

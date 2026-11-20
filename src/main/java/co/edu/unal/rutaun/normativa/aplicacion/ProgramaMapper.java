@@ -3,11 +3,11 @@ package co.edu.unal.rutaun.normativa.aplicacion;
 import co.edu.unal.rutaun.compartido.ProgramaId;
 import co.edu.unal.rutaun.normativa.dominio.Facultad;
 import co.edu.unal.rutaun.normativa.dominio.Programa;
-import co.edu.unal.rutaun.normativa.persistencia.ProgramaEntidad;
+import co.edu.unal.rutaun.normativa.persistencia.ProgramaEntity;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
 
 /**
- * Convierte entre la raíz {@link Programa} y su fila {@link ProgramaEntidad}. No guarda estado.
+ * Convierte entre la raíz {@link Programa} y su fila {@link ProgramaEntity}. No guarda estado.
  *
  * <p>TT-04-T3 (#91). Reconstruye con {@link Programa#reconstituir}, así que no genera un
  * identificador nuevo, no emite eventos y pasa por las mismas validaciones que un programa creado.
@@ -18,7 +18,7 @@ public final class ProgramaMapper {
   private ProgramaMapper() {}
 
   /** Reconstruye el programa que guarda esta fila. */
-  public static Programa aDominio(ProgramaEntidad entidad) {
+  public static Programa aDominio(ProgramaEntity entidad) {
     ArgumentChecks.obligatorio(entidad, "entidad");
     return Programa.reconstituir(
         new ProgramaId(entidad.getId()),
@@ -28,9 +28,9 @@ public final class ProgramaMapper {
   }
 
   /** Convierte el programa en la fila que se guarda en la base. */
-  public static ProgramaEntidad aEntidad(Programa programa) {
+  public static ProgramaEntity aEntidad(Programa programa) {
     ArgumentChecks.obligatorio(programa, "programa");
-    return new ProgramaEntidad(
+    return new ProgramaEntity(
         programa.id().valor(),
         programa.nombre(),
         programa.codigoSia(),

@@ -20,9 +20,9 @@ class PersistenciaIncidentesTest {
   @Test
   void sop05_guardaYLeeUnIncidente() {
     LocalDateTime fecha = LocalDateTime.of(2026, 11, 1, 10, 0);
-    IncidenteEntidad incidente =
+    IncidenteEntity incidente =
         incidentes.save(
-            new IncidenteEntidad(
+            new IncidenteEntity(
                 UUID.randomUUID(),
                 "UC01",
                 "paso 5",
@@ -39,7 +39,7 @@ class PersistenciaIncidentesTest {
 
     assertThat(incidentes.findById(incidente.getId()))
         .get()
-        .extracting(IncidenteEntidad::getConteo)
+        .extracting(IncidenteEntity::getConteo)
         .isEqualTo(1);
   }
 }

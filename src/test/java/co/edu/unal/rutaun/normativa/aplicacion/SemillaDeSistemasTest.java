@@ -13,11 +13,11 @@ import co.edu.unal.rutaun.normativa.dominio.Vigencia;
 import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoJpaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.NormaJpaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaJpaRepository;
-import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntidad;
+import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntity;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionJpaRepository;
-import co.edu.unal.rutaun.normativa.persistencia.ReglaEntidad;
+import co.edu.unal.rutaun.normativa.persistencia.ReglaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaJpaRepository;
-import co.edu.unal.rutaun.normativa.persistencia.VersionEntidad;
+import co.edu.unal.rutaun.normativa.persistencia.VersionEntity;
 import co.edu.unal.rutaun.normativa.persistencia.VersionJpaRepository;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
 import co.edu.unal.rutaun.soporte.SoporteDeSemilla;
@@ -128,7 +128,7 @@ class SemillaDeSistemasTest {
         .as("la semilla cambió (actualiza las constantes) o una prueba dejó filas sin revertir")
         .isEqualTo(ESPERADAS);
 
-    VersionEntidad vigente = versionVigente();
+    VersionEntity vigente = versionVigente();
     assertThat(vigente.getNumero()).isEqualTo(VERSIONES);
     assertThat(reglasEnVersion.findByVersionId(vigente.getId())).hasSize(REGLAS_DE_LA_VIGENTE);
     assertThat(normasDeLasReglasDe(vigente)).hasSize(NORMAS);
@@ -211,13 +211,13 @@ class SemillaDeSistemasTest {
   void tt04_t4_losDatosDePruebaNoCambianLaVersionDelPlanDeEstudios() throws IOException {
     cargarLaSemilla();
 
-    List<VersionEntidad> ordenadas = versionesDeSistemas();
+    List<VersionEntity> ordenadas = versionesDeSistemas();
     assertThat(ordenadas).hasSize(VERSIONES);
     int primeraVersionDePrueba = VERSIONES - SoporteDeSemilla.archivosDePrueba().size();
     int versionDelPlan = ordenadas.get(primeraVersionDePrueba - 1).getNumeroPlanDeEstudios();
     assertThat(ordenadas.subList(primeraVersionDePrueba - 1, VERSIONES))
         .as("las versiones con datos de prueba no cambian la versión del plan de estudios")
-        .extracting(VersionEntidad::getNumeroPlanDeEstudios)
+        .extracting(VersionEntity::getNumeroPlanDeEstudios)
         .containsOnly(versionDelPlan);
   }
 
@@ -226,7 +226,7 @@ class SemillaDeSistemasTest {
   }
 
   private Cifras cifras() {
-    List<VersionEntidad> ordenadas = versionesDeSistemas();
+    List<VersionEntity> ordenadas = versionesDeSistemas();
     return new Cifras(
         programasGuardados.count(),
         normasGuardadas.count(),
@@ -243,15 +243,15 @@ class SemillaDeSistemasTest {
     return programasGuardados.findByCodigoSia("2879").orElseThrow().getId();
   }
 
-  private List<VersionEntidad> versionesDeSistemas() {
+  private List<VersionEntity> versionesDeSistemas() {
     UUID programaId = programaDeSistemas();
     return versiones.findAll().stream()
         .filter(version -> programaId.equals(version.getProgramaId()))
-        .sorted(Comparator.comparingInt(VersionEntidad::getNumero))
+        .sorted(Comparator.comparingInt(VersionEntity::getNumero))
         .toList();
   }
 
-  private VersionEntidad versionVigente() {
+  private VersionEntity versionVigente() {
     return versiones.findTopByProgramaIdOrderByNumeroDesc(programaDeSistemas()).orElseThrow();
   }
 
@@ -264,22 +264,22 @@ class SemillaDeSistemasTest {
     return ids;
   }
 
-  private Set<UUID> normasDeLasReglasDe(VersionEntidad version) {
+  private Set<UUID> normasDeLasReglasDe(VersionEntity version) {
     Set<UUID> reglaIds =
         reglasEnVersion.findByVersionId(version.getId()).stream()
-            .map(ReglaEnVersionEntidad::getReglaId)
+            .map(ReglaEnVersionEntity::getReglaId)
             .collect(Collectors.toSet());
     return reglas.findAllById(reglaIds).stream()
-        .map(ReglaEntidad::getNormaId)
+        .map(ReglaEntity::getNormaId)
         .collect(Collectors.toSet());
   }
 
-  private List<Regla> reglasDeLaVersion(VersionEntidad version) {
+  private List<Regla> reglasDeLaVersion(VersionEntity version) {
     Map<UUID, EstadoRegla> estados =
         reglasEnVersion.findByVersionId(version.getId()).stream()
             .collect(
                 Collectors.toMap(
-                    ReglaEnVersionEntidad::getReglaId,
+                    ReglaEnVersionEntity::getReglaId,
                     fila -> EstadoRegla.valueOf(fila.getEstado())));
     return reglas.findAllById(estados.keySet()).stream()
         .map(entidad -> ReglaMapper.aDominio(entidad, estados.get(entidad.getId())))

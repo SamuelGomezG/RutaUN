@@ -6,11 +6,11 @@ import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoJpaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.NormaJpaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaJpaRepository;
-import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntidad;
+import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntity;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionJpaRepository;
-import co.edu.unal.rutaun.normativa.persistencia.ReglaEntidad;
+import co.edu.unal.rutaun.normativa.persistencia.ReglaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaJpaRepository;
-import co.edu.unal.rutaun.normativa.persistencia.VersionEntidad;
+import co.edu.unal.rutaun.normativa.persistencia.VersionEntity;
 import co.edu.unal.rutaun.normativa.persistencia.VersionJpaRepository;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
 import java.io.IOException;
@@ -102,10 +102,10 @@ class ImportacionDeNormasServiceTest {
     cargarProgramas();
     importarNorma("semilla/acuerdo-003a-2022.json");
 
-    VersionEntidad primera = versionesOrdenadas().get(0);
-    ReglaEnVersionEntidad heredada = reglasEnVersion.findByVersionId(primera.getId()).get(0);
+    VersionEntity primera = versionesOrdenadas().get(0);
+    ReglaEnVersionEntity heredada = reglasEnVersion.findByVersionId(primera.getId()).get(0);
     reglasEnVersion.saveAndFlush(
-        new ReglaEnVersionEntidad(
+        new ReglaEnVersionEntity(
             heredada.getId(),
             heredada.getVersionId(),
             heredada.getReglaId(),
@@ -113,9 +113,9 @@ class ImportacionDeNormasServiceTest {
 
     importarNorma("semilla/acuerdo-008-2008.json");
 
-    List<VersionEntidad> ordenadas = versionesOrdenadas();
+    List<VersionEntity> ordenadas = versionesOrdenadas();
 
-    assertThat(ordenadas).extracting(VersionEntidad::getNumero).containsExactly(1, 2);
+    assertThat(ordenadas).extracting(VersionEntity::getNumero).containsExactly(1, 2);
     assertThat(reglasPorVersion()).containsEntry(1, 20).containsEntry(2, 27);
     assertThat(idsDeReglas(ordenadas.get(1))).containsAll(idsDeReglas(ordenadas.get(0)));
     Map<UUID, String> estadosDeLaPrimera = estadosPorRegla(ordenadas.get(0));
@@ -125,7 +125,7 @@ class ImportacionDeNormasServiceTest {
     assertThat(estadosDeLaSegunda)
         .as("el estado heredado se copia, no se recalcula")
         .containsEntry(heredada.getReglaId(), EstadoRegla.YA_NO_RIGE.name());
-    assertThat(ordenadas).extracting(VersionEntidad::getNumeroPlanDeEstudios).containsExactly(1, 1);
+    assertThat(ordenadas).extracting(VersionEntity::getNumeroPlanDeEstudios).containsExactly(1, 1);
   }
 
   @Test
@@ -176,14 +176,14 @@ class ImportacionDeNormasServiceTest {
     importarNorma("semilla/acuerdo-008-2008.json");
     importarNorma("semilla/acuerdo-11-2023.json");
 
-    List<VersionEntidad> ordenadas = versionesOrdenadas();
+    List<VersionEntity> ordenadas = versionesOrdenadas();
 
     assertThat(normasGuardadas.count()).isEqualTo(3);
     assertThat(reglas.count()).isEqualTo(276);
     assertThat(ordenadas).hasSize(3);
     assertThat(reglasPorVersion()).containsEntry(1, 20).containsEntry(2, 27).containsEntry(3, 276);
     assertThat(ordenadas)
-        .extracting(VersionEntidad::getNumeroPlanDeEstudios)
+        .extracting(VersionEntity::getNumeroPlanDeEstudios)
         .containsExactly(1, 1, 2);
     assertThat(
             versiones.findTopByProgramaIdOrderByNumeroDesc(
@@ -192,7 +192,7 @@ class ImportacionDeNormasServiceTest {
 
     Set<UUID> normasDeLaVigente =
         reglas.findAllById(idsDeReglas(ordenadas.get(2))).stream()
-            .map(ReglaEntidad::getNormaId)
+            .map(ReglaEntity::getNormaId)
             .collect(Collectors.toSet());
     assertThat(normasDeLaVigente).hasSize(3);
   }
@@ -214,29 +214,29 @@ class ImportacionDeNormasServiceTest {
     }
   }
 
-  private List<VersionEntidad> versionesOrdenadas() {
+  private List<VersionEntity> versionesOrdenadas() {
     return versiones.findAll().stream()
-        .sorted(Comparator.comparingInt(VersionEntidad::getNumero))
+        .sorted(Comparator.comparingInt(VersionEntity::getNumero))
         .toList();
   }
 
   private Map<Integer, Integer> reglasPorVersion() {
     Map<Integer, Integer> porNumero = new HashMap<>();
-    for (VersionEntidad version : versiones.findAll()) {
+    for (VersionEntity version : versiones.findAll()) {
       porNumero.put(version.getNumero(), reglasEnVersion.findByVersionId(version.getId()).size());
     }
     return porNumero;
   }
 
-  private Set<UUID> idsDeReglas(VersionEntidad version) {
+  private Set<UUID> idsDeReglas(VersionEntity version) {
     return reglasEnVersion.findByVersionId(version.getId()).stream()
-        .map(ReglaEnVersionEntidad::getReglaId)
+        .map(ReglaEnVersionEntity::getReglaId)
         .collect(Collectors.toSet());
   }
 
-  private Map<UUID, String> estadosPorRegla(VersionEntidad version) {
+  private Map<UUID, String> estadosPorRegla(VersionEntity version) {
     return reglasEnVersion.findByVersionId(version.getId()).stream()
         .collect(
-            Collectors.toMap(ReglaEnVersionEntidad::getReglaId, ReglaEnVersionEntidad::getEstado));
+            Collectors.toMap(ReglaEnVersionEntity::getReglaId, ReglaEnVersionEntity::getEstado));
   }
 }

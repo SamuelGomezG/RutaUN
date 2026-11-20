@@ -10,7 +10,7 @@ import java.util.UUID;
 /** Fila de la tabla {@code consolidado}: el consolidado de un programa, uno por programa. */
 @Entity
 @Table(name = "consolidado")
-public class ConsolidadoEntidad {
+public class ConsolidadoEntity {
 
   @Id private UUID id;
 
@@ -23,10 +23,10 @@ public class ConsolidadoEntidad {
   private Long version;
 
   /** Constructor sin argumentos que exige JPA. */
-  protected ConsolidadoEntidad() {}
+  protected ConsolidadoEntity() {}
 
   /** Crea el consolidado de un programa. */
-  public ConsolidadoEntidad(UUID id, UUID programaId) {
+  public ConsolidadoEntity(UUID id, UUID programaId) {
     this.id = id;
     this.programaId = programaId;
   }

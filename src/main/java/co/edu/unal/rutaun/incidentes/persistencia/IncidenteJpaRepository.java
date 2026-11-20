@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-/** Repositorio de Spring Data de {@link IncidenteEntidad}. */
-public interface IncidenteJpaRepository extends JpaRepository<IncidenteEntidad, UUID> {
+/** Repositorio de Spring Data de {@link IncidenteEntity}. */
+public interface IncidenteJpaRepository extends JpaRepository<IncidenteEntity, UUID> {
 
   /**
    * Busca los incidentes sin atender con el mismo caso de uso, paso y causa. Quien llama termina de
@@ -16,6 +16,6 @@ public interface IncidenteJpaRepository extends JpaRepository<IncidenteEntidad, 
    * @param causa causa del incidente
    * @return los candidatos a ser el mismo incidente
    */
-  List<IncidenteEntidad> findByCasoDeUsoAndPasoAndCausaAndAtendidoFalse(
+  List<IncidenteEntity> findByCasoDeUsoAndPasoAndCausaAndAtendidoFalse(
       String casoDeUso, String paso, String causa);
 }

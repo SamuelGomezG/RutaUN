@@ -5,9 +5,9 @@ import co.edu.unal.rutaun.compartido.ProgramaId;
 import co.edu.unal.rutaun.normativa.dominio.MotivoDeVersion;
 import co.edu.unal.rutaun.normativa.dominio.Regla;
 import co.edu.unal.rutaun.normativa.dominio.VersionDelConsolidado;
-import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntidad;
-import co.edu.unal.rutaun.normativa.persistencia.ReglaEntidad;
-import co.edu.unal.rutaun.normativa.persistencia.VersionEntidad;
+import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntity;
+import co.edu.unal.rutaun.normativa.persistencia.ReglaEntity;
+import co.edu.unal.rutaun.normativa.persistencia.VersionEntity;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
 import java.util.Comparator;
 import java.util.List;
@@ -53,7 +53,7 @@ public final class VersionDelConsolidadoMapper {
    * @param version fila de {@code version_consolidado}
    * @param reglasEnVersion filas de {@code regla_en_version}, una por regla de la versión
    */
-  public record Filas(VersionEntidad version, List<ReglaEnVersionEntidad> reglasEnVersion) {
+  public record Filas(VersionEntity version, List<ReglaEnVersionEntity> reglasEnVersion) {
 
     /** Exige la fila de la versión y deja la lista inmutable. */
     public Filas {
@@ -108,15 +108,15 @@ public final class VersionDelConsolidadoMapper {
    *     motivo o un estado son desconocidos o si algún dato es inválido para el dominio
    */
   public static VersionDelConsolidado aDominio(
-      VersionEntidad version,
-      List<ReglaEnVersionEntidad> reglasEnVersion,
-      Map<UUID, ReglaEntidad> reglasPorId) {
+      VersionEntity version,
+      List<ReglaEnVersionEntity> reglasEnVersion,
+      Map<UUID, ReglaEntity> reglasPorId) {
     ArgumentChecks.obligatorio(version, "version");
     ArgumentChecks.obligatorio(reglasEnVersion, "reglasEnVersion");
     ArgumentChecks.obligatorio(reglasPorId, "reglasPorId");
     List<Regla> reglas =
         reglasEnVersion.stream()
-            .sorted(Comparator.comparing(ReglaEnVersionEntidad::getReglaId))
+            .sorted(Comparator.comparing(ReglaEnVersionEntity::getReglaId))
             .map(fila -> reglaDeLaVersion(version, fila, reglasPorId))
             .toList();
     return VersionDelConsolidado.reconstituir(
@@ -139,8 +139,8 @@ public final class VersionDelConsolidadoMapper {
     ArgumentChecks.obligatorio(version, "version");
     ArgumentChecks.obligatorio(consolidadoId, "consolidadoId");
     UUID versionId = UUID.randomUUID();
-    VersionEntidad fila =
-        new VersionEntidad(
+    VersionEntity fila =
+        new VersionEntity(
             versionId,
             consolidadoId,
             version.programa().valor(),
@@ -151,23 +151,23 @@ public final class VersionDelConsolidadoMapper {
             null,
             version.versionDelPlan(),
             null);
-    List<ReglaEnVersionEntidad> reglasEnVersion =
+    List<ReglaEnVersionEntity> reglasEnVersion =
         version.reglas().stream()
             .map(
                 regla ->
-                    new ReglaEnVersionEntidad(
+                    new ReglaEnVersionEntity(
                         UUID.randomUUID(), versionId, regla.id().valor(), regla.estado().name()))
             .toList();
     return new Filas(fila, reglasEnVersion);
   }
 
   private static Regla reglaDeLaVersion(
-      VersionEntidad version, ReglaEnVersionEntidad fila, Map<UUID, ReglaEntidad> reglasPorId) {
+      VersionEntity version, ReglaEnVersionEntity fila, Map<UUID, ReglaEntity> reglasPorId) {
     if (!version.getId().equals(fila.getVersionId())) {
       throw new IllegalArgumentException(
           "la regla " + fila.getReglaId() + " no es de la versión " + version.getId());
     }
-    ReglaEntidad regla = reglasPorId.get(fila.getReglaId());
+    ReglaEntity regla = reglasPorId.get(fila.getReglaId());
     if (regla == null) {
       throw new IllegalArgumentException(
           "falta la regla "
@@ -180,7 +180,7 @@ public final class VersionDelConsolidadoMapper {
     return ReglaMapper.aDominio(regla, EstadoRegla.valueOf(fila.getEstado()));
   }
 
-  private static MotivoDeVersion motivoADominio(VersionEntidad version) {
+  private static MotivoDeVersion motivoADominio(VersionEntity version) {
     TipoDeMotivo tipo = TipoDeMotivo.desde(version.getMotivo());
     String detalle = ArgumentChecks.obligatorioNoVacio(version.getDetalleMotivo(), "detalleMotivo");
     try {

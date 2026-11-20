@@ -17,7 +17,7 @@ import co.edu.unal.rutaun.normativa.dominio.Regla;
 import co.edu.unal.rutaun.normativa.dominio.TipoDeAfectacion;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
 import co.edu.unal.rutaun.normativa.persistencia.NormaJpaRepository;
-import co.edu.unal.rutaun.normativa.persistencia.ReglaEntidad;
+import co.edu.unal.rutaun.normativa.persistencia.ReglaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaJpaRepository;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
 import java.time.LocalDate;
@@ -166,7 +166,7 @@ class ReglaMapperTest {
 
   @Test
   void tt04_reglaConCategoriaDesconocidaNoSeReconstituye() {
-    ReglaEntidad invalida = entidadAMano("DECRETO", "{}");
+    ReglaEntity invalida = entidadAMano("DECRETO", "{}");
 
     assertThatThrownBy(() -> ReglaMapper.aDominio(invalida, EstadoRegla.VIGENTE))
         .isInstanceOf(IllegalArgumentException.class)
@@ -176,7 +176,7 @@ class ReglaMapperTest {
   @Test
   void tt04_reglaConDatosIncompletosNoSeReconstituye() {
     // «PROGRAMA» exige creditosExigidos; el JSON vacío no lo trae.
-    ReglaEntidad invalida = entidadAMano("PROGRAMA", "{}");
+    ReglaEntity invalida = entidadAMano("PROGRAMA", "{}");
 
     assertThatThrownBy(() -> ReglaMapper.aDominio(invalida, EstadoRegla.VIGENTE))
         .isInstanceOf(IllegalArgumentException.class)
@@ -187,7 +187,7 @@ class ReglaMapperTest {
   private Regla guardarYLeer(Regla regla, EstadoRegla estadoEnLaVersion) {
     reglasGuardadas.add(regla.id().valor());
     reglas.save(ReglaMapper.aEntidad(regla));
-    ReglaEntidad leida = reglas.findById(regla.id().valor()).orElseThrow();
+    ReglaEntity leida = reglas.findById(regla.id().valor()).orElseThrow();
     return ReglaMapper.aDominio(leida, estadoEnLaVersion);
   }
 
@@ -215,8 +215,8 @@ class ReglaMapperTest {
         new DatosDeRegla.DeOtraCategoria());
   }
 
-  private ReglaEntidad entidadAMano(String categoria, String datos) {
-    return new ReglaEntidad(
+  private ReglaEntity entidadAMano(String categoria, String datos) {
+    return new ReglaEntity(
         UUID.randomUUID(),
         norma.id().valor(),
         categoria,

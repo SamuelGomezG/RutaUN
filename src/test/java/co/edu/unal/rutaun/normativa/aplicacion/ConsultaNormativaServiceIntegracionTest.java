@@ -12,7 +12,7 @@ import co.edu.unal.rutaun.normativa.ConsolidadoVista;
 import co.edu.unal.rutaun.normativa.ConsultaNormativaFacade;
 import co.edu.unal.rutaun.normativa.ProgramaVista;
 import co.edu.unal.rutaun.normativa.ReglaVista;
-import co.edu.unal.rutaun.normativa.persistencia.ProgramaEntidad;
+import co.edu.unal.rutaun.normativa.persistencia.ProgramaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaJpaRepository;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
 import jakarta.persistence.EntityManager;
@@ -232,7 +232,7 @@ class ConsultaNormativaServiceIntegracionTest {
   /** Crea un programa con una versión del consolidado, sin reglas, solo para listarlo. */
   private void programaConVersion(String nombre, String codigoSia) {
     UUID programaId = UUID.randomUUID();
-    programas.save(new ProgramaEntidad(programaId, nombre, codigoSia, "Ingeniería"));
+    programas.save(new ProgramaEntity(programaId, nombre, codigoSia, "Ingeniería"));
     entityManager.flush();
     UUID consolidadoId = UUID.randomUUID();
     jdbc.update(
@@ -251,7 +251,7 @@ class ConsultaNormativaServiceIntegracionTest {
   @Test
   void uc06_paso2_unProgramaSinVersionVigenteNoSeOfrece() {
     programas.save(
-        new ProgramaEntidad(UUID.randomUUID(), "Programa sin norma", "9900", "Ingeniería"));
+        new ProgramaEntity(UUID.randomUUID(), "Programa sin norma", "9900", "Ingeniería"));
 
     assertThat(consulta.programas())
         .extracting(ProgramaVista::nombre)

@@ -11,14 +11,14 @@ import co.edu.unal.rutaun.normativa.dominio.Fuente;
 import co.edu.unal.rutaun.normativa.dominio.Regla;
 import co.edu.unal.rutaun.normativa.dominio.TipoDeAfectacion;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
-import co.edu.unal.rutaun.normativa.persistencia.ReglaEntidad;
+import co.edu.unal.rutaun.normativa.persistencia.ReglaEntity;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
 import java.time.LocalDate;
 import java.util.Optional;
 import tools.jackson.core.JacksonException;
 
 /**
- * Convierte entre la {@link Regla} del dominio y su fila {@link ReglaEntidad}. No guarda estado.
+ * Convierte entre la {@link Regla} del dominio y su fila {@link ReglaEntity}. No guarda estado.
  *
  * <p>TT-04-T3 (#91). Reconstruye con {@link Regla#reconstituir}, así que conserva el identificador
  * y pasa por las mismas validaciones que una regla creada. Si la base trae un dato inválido, sube
@@ -91,7 +91,7 @@ public final class ReglaMapper {
    *
    * @throws IllegalArgumentException si la fila trae un dato inválido o una categoría desconocida
    */
-  public static Regla aDominio(ReglaEntidad entidad, EstadoRegla estado) {
+  public static Regla aDominio(ReglaEntity entidad, EstadoRegla estado) {
     ArgumentChecks.obligatorio(entidad, "entidad");
     ArgumentChecks.obligatorio(estado, "estado");
     return Regla.reconstituir(
@@ -113,12 +113,12 @@ public final class ReglaMapper {
    * @throws IllegalArgumentException si la regla tiene algo que la tabla no puede guardar: una
    *     vigencia propia por periodo, una afectación a un artículo o una afectación con «desde»
    */
-  public static ReglaEntidad aEntidad(Regla regla) {
+  public static ReglaEntity aEntidad(Regla regla) {
     ArgumentChecks.obligatorio(regla, "regla");
     Optional<Vigencia> vigencia = regla.vigenciaPropia();
     Optional<Afectacion> afectacion = regla.afectacion();
     afectacion.ifPresent(ReglaMapper::exigirQueSePuedaGuardar);
-    return new ReglaEntidad(
+    return new ReglaEntity(
         regla.id().valor(),
         regla.fuente().norma().valor(),
         Categoria.de(regla.datos()).name(),
@@ -139,7 +139,7 @@ public final class ReglaMapper {
         JsonDeNormativa.mapper().writeValueAsString(regla.datos()));
   }
 
-  private static Optional<Vigencia> vigenciaADominio(ReglaEntidad entidad) {
+  private static Optional<Vigencia> vigenciaADominio(ReglaEntity entidad) {
     LocalDate desde = entidad.getVigenteDesde();
     LocalDate hasta = entidad.getVigenteHasta();
     if (desde == null && hasta == null) {
@@ -154,7 +154,7 @@ public final class ReglaMapper {
             Optional.ofNullable(hasta).<Momento>map(Momento.EnFecha::new)));
   }
 
-  private static Optional<Afectacion> afectacionADominio(ReglaEntidad entidad) {
+  private static Optional<Afectacion> afectacionADominio(ReglaEntity entidad) {
     String tipo = entidad.getTipoAfectacion();
     if (entidad.getArticuloAfectado() != null) {
       throw new IllegalArgumentException(
@@ -176,7 +176,7 @@ public final class ReglaMapper {
             Optional.empty()));
   }
 
-  private static DatosDeRegla datosADominio(ReglaEntidad entidad) {
+  private static DatosDeRegla datosADominio(ReglaEntity entidad) {
     Categoria categoria = Categoria.desde(entidad.getCategoria());
     String json = ArgumentChecks.obligatorioNoVacio(entidad.getDatos(), "datos");
     try {

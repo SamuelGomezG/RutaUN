@@ -13,15 +13,15 @@ import co.edu.unal.rutaun.normativa.dominio.ComponenteDeLibreEleccion;
 import co.edu.unal.rutaun.normativa.dominio.DatosDeRegla;
 import co.edu.unal.rutaun.normativa.dominio.Regla;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
-import co.edu.unal.rutaun.normativa.persistencia.NormaEntidad;
+import co.edu.unal.rutaun.normativa.persistencia.NormaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.NormaJpaRepository;
-import co.edu.unal.rutaun.normativa.persistencia.ProgramaEntidad;
+import co.edu.unal.rutaun.normativa.persistencia.ProgramaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaJpaRepository;
-import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntidad;
+import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntity;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionJpaRepository;
-import co.edu.unal.rutaun.normativa.persistencia.ReglaEntidad;
+import co.edu.unal.rutaun.normativa.persistencia.ReglaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaJpaRepository;
-import co.edu.unal.rutaun.normativa.persistencia.VersionEntidad;
+import co.edu.unal.rutaun.normativa.persistencia.VersionEntity;
 import co.edu.unal.rutaun.normativa.persistencia.VersionJpaRepository;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
 import java.text.Collator;
@@ -138,23 +138,21 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
         .map(version -> aConsolidado(id, version));
   }
 
-  private ConsolidadoVista aConsolidado(ProgramaId programa, VersionEntidad version) {
+  private ConsolidadoVista aConsolidado(ProgramaId programa, VersionEntity version) {
     Map<UUID, EstadoRegla> estados = new HashMap<>();
-    for (ReglaEnVersionEntidad fila : reglasEnVersion.findByVersionId(version.getId())) {
+    for (ReglaEnVersionEntity fila : reglasEnVersion.findByVersionId(version.getId())) {
       EstadoRegla estado = EstadoRegla.valueOf(fila.getEstado());
       if (seMuestra(estado)) {
         estados.put(fila.getReglaId(), estado);
       }
     }
-    List<ReglaEntidad> filas = reglas.findAllById(estados.keySet());
-    Map<UUID, NormaEntidad> normasPorId =
-        normas
-            .findAllById(filas.stream().map(ReglaEntidad::getNormaId).distinct().toList())
-            .stream()
-            .collect(Collectors.toMap(NormaEntidad::getId, norma -> norma));
+    List<ReglaEntity> filas = reglas.findAllById(estados.keySet());
+    Map<UUID, NormaEntity> normasPorId =
+        normas.findAllById(filas.stream().map(ReglaEntity::getNormaId).distinct().toList()).stream()
+            .collect(Collectors.toMap(NormaEntity::getId, norma -> norma));
 
     List<Entrada> entradas = new ArrayList<>();
-    for (ReglaEntidad fila : filas) {
+    for (ReglaEntity fila : filas) {
       entradas.add(aEntrada(fila, estados.get(fila.getId()), normasPorId.get(fila.getNormaId())));
     }
     entradas.sort(ORDEN_DE_REGLAS);
@@ -173,7 +171,7 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
     return new ConsolidadoVista(programa, version.getNumero(), version.getFecha(), porCategoria);
   }
 
-  private static Entrada aEntrada(ReglaEntidad fila, EstadoRegla estado, NormaEntidad norma) {
+  private static Entrada aEntrada(ReglaEntity fila, EstadoRegla estado, NormaEntity norma) {
     Regla regla = ReglaMapper.aDominio(fila, estado);
     boolean temporal =
         esTemporal(regla.vigenciaPropia(), norma == null ? null : norma.getVigenteHasta());
@@ -215,7 +213,7 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
     return vigenciaPropia.map(Vigencia::esTemporal).orElse(false) || vigenteHastaDeLaNorma != null;
   }
 
-  private static FuenteVista aFuente(NormaEntidad norma, String articulo) {
+  private static FuenteVista aFuente(NormaEntity norma, String articulo) {
     return new FuenteVista(
         new NormaVista(
             TipoNorma.valueOf(norma.getTipo()),
@@ -249,7 +247,7 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
     };
   }
 
-  private static ProgramaVista aVista(ProgramaEntidad programa) {
+  private static ProgramaVista aVista(ProgramaEntity programa) {
     return new ProgramaVista(
         new ProgramaId(programa.getId()),
         programa.getNombre(),
