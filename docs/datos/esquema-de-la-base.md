@@ -188,10 +188,10 @@ scripts/consultar-base.sh "SELECT COUNT(*) FROM norma" ruta/a/otra/base
 Desde otro directorio, usa la ruta absoluta del script (y una ruta absoluta para la base, si la pasas):
 
 ```sh
-/ruta/al/repositorio/project/scripts/consultar-base.sh "SELECT COUNT(*) FROM norma"
+/ruta/al/repositorio/scripts/consultar-base.sh "SELECT COUNT(*) FROM norma"
 ```
 
-El script encuentra la raíz del repositorio desde su propia ubicación, abre la base en solo lectura y termina con código distinto de 0 si la consulta falla. La ruta es opcional y va sin `.mv.db`; si es relativa, se resuelve desde el directorio actual. Si la aplicación está corriendo, avisa que hay que detenerla. En Windows, el equivalente es `scripts\consultar-base.ps1`; con la política de ejecución por defecto, PowerShell no corre scripts: habilita la sesión con `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` antes de llamarlo.
+El script encuentra la raíz del repositorio desde su propia ubicación, abre la base en solo lectura y termina con código distinto de 0 si la consulta falla. La ruta es opcional y va sin `.mv.db`; si es relativa, se resuelve desde el directorio actual. Si la aplicación está corriendo, avisa que hay que detenerla. En Windows, incluido Git Bash, usa `scripts\consultar-base.ps1` con PowerShell: el `.sh` pasa rutas MSYS (`/c/…`, `/tmp/…`) que Java no traduce. Con la política de ejecución por defecto, PowerShell no corre scripts: habilita la sesión con `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` antes de llamarlo.
 
 Para una sesión interactiva, la consola directa:
 

@@ -43,6 +43,8 @@ Sirven cinco medios:
 | **D** | Una prueba de aceptación | Cuando el resultado se observe en el log de la prueba (por ejemplo, la concurrencia) | Una prueba con los componentes reales, sin dobles, que la PR pide correr sola y que escribe en el log lo que se observa: `./mvnw test -Dtest=<Prueba>` |
 | **E** | Un comando o un script | Cambios de proceso o de herramientas, sin pantalla ni filas (por ejemplo, los hooks), y un comando con código real que imprima un resultado de dominio | El comando o el script del cambio, con lo que imprime: `.githooks/probar.sh`, `herramientas/indice_ids.py <ID> --contexto` |
 
+En Windows, incluido Git Bash, los medios A y B se corren con los comandos de PowerShell (`.\mvnw.cmd` y `scripts\consultar-base.ps1`); `scripts/consultar-base.sh` y `base=$(mktemp -d)/rutaun` solo valen en Unix, porque Git Bash entrega rutas MSYS que Java resuelve con `C:`.
+
 La base de `data/` no se borra para demostrar. Si guarda normas incorporadas por fuera de `semilla/`, incidentes, avances o planes, no la elimines: respáldala y migra esos datos, como dicen [`cambios-de-boot-4.md`](cambios-de-boot-4.md) y [`solucion-de-problemas.md`](solucion-de-problemas.md) («Antes de borrar `data/`»). Si el comando A usó otra ruta, pásala al comando B como segundo argumento: `scripts/consultar-base.sh "<SQL>" "$base"`.
 
 Un conteo de pruebas o una mutación no bastan: son evidencia del tercer criterio, no del segundo. La excepción es el cambio que trata de las pruebas mismas: ahí la mutación es el flujo y cuenta como **Cumple**.

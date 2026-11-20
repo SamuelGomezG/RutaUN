@@ -132,7 +132,7 @@ project/                          raíz del repositorio
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev   # arranca y carga la semilla de Sistemas
 .githooks/probar.sh                                  # prueba los hooks de git (commit-msg, pre-commit y pre-push) sin tocar tu repositorio
 herramientas/indice_ids.py UC06-HU01 --contexto      # texto del SRS que una historia necesita (ver docs/requisitos/README.md)
-scripts/consultar-base.sh "<consulta SQL>"           # consulta la base de desarrollo; detén la aplicación antes
+scripts/consultar-base.sh "<consulta SQL>"           # consulta la base; en Windows usa el .ps1 con PowerShell; detén la aplicación antes
 ```
 
 ## Definición de terminado
