@@ -99,7 +99,7 @@ class EvaluadorDeRestriccionesTest {
             new Prerrequisito(
                 A,
                 new MateriaExterna(
-                    "Matemáticas Básicas", Optional.empty(), TipoDeMateriaExterna.NIVELACION)));
+                    "Matemáticas Básicas", Optional.empty(), TipoMateriaExterna.NIVELACION)));
 
     assertThat(estado.certeza()).isEqualTo(Certeza.CUMPLIDA);
   }
@@ -113,7 +113,7 @@ class EvaluadorDeRestriccionesTest {
                 new MateriaExterna(
                     "Electrónica Análoga I",
                     Optional.of(new CodigoMateria("2016699")),
-                    TipoDeMateriaExterna.OTRO_PROGRAMA)));
+                    TipoMateriaExterna.OTRO_PROGRAMA)));
 
     assertThat(estado.certeza()).isEqualTo(Certeza.PENDIENTE);
     assertThat(estado.razones().get(0)).contains("no se puede cursar desde este programa");

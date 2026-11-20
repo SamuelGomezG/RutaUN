@@ -31,10 +31,10 @@ import co.edu.unal.rutaun.normativa.dominio.Obligatoriedad;
 import co.edu.unal.rutaun.normativa.dominio.Prerrequisito;
 import co.edu.unal.rutaun.normativa.dominio.Regla;
 import co.edu.unal.rutaun.normativa.dominio.ReglaDeHabilitacion;
+import co.edu.unal.rutaun.normativa.dominio.TipoAfectacion;
+import co.edu.unal.rutaun.normativa.dominio.TipoCargaPorPeriodo;
 import co.edu.unal.rutaun.normativa.dominio.TipoComponente;
-import co.edu.unal.rutaun.normativa.dominio.TipoDeAfectacion;
-import co.edu.unal.rutaun.normativa.dominio.TipoDeCargaPorPeriodo;
-import co.edu.unal.rutaun.normativa.dominio.TipoDeMateriaExterna;
+import co.edu.unal.rutaun.normativa.dominio.TipoMateriaExterna;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
 import co.edu.unal.rutaun.utilidades.JsonConfig;
@@ -194,7 +194,7 @@ public final class IncorporacionJsonReader {
     if (valor.isMissingNode() || valor.isNull()) {
       return Optional.empty();
     }
-    TipoDeAfectacion tipo = TipoDeAfectacion.valueOf(texto(valor, "tipo"));
+    TipoAfectacion tipo = TipoAfectacion.valueOf(texto(valor, "tipo"));
     JsonNode destino = objeto(valor, "destino");
     String tipoDestino = texto(destino, "tipo");
     Optional<ReglaId> reglaAfectada = Optional.empty();
@@ -262,7 +262,7 @@ public final class IncorporacionJsonReader {
       case "CARGA_POR_PERIODO" ->
           new DatosDeRegla.DeCargaPorPeriodo(
               new Creditos(entero(nodo, "creditos")),
-              TipoDeCargaPorPeriodo.valueOf(texto(nodo, "tipoCarga")));
+              TipoCargaPorPeriodo.valueOf(texto(nodo, "tipoCarga")));
       case "REQUISITO_DE_GRADO" -> new DatosDeRegla.DeRequisitoDeGrado();
       case "OTRA" -> new DatosDeRegla.DeOtraCategoria();
       default -> throw new IllegalArgumentException("datos.tipo no es válido: " + tipo);
@@ -359,7 +359,7 @@ public final class IncorporacionJsonReader {
           new ExpresionDeMaterias.MateriaExterna(
               texto(nodo, "nombre"),
               codigoOpcional(nodo),
-              TipoDeMateriaExterna.valueOf(texto(nodo, "origen")));
+              TipoMateriaExterna.valueOf(texto(nodo, "origen")));
       case "Y" ->
           new ExpresionDeMaterias.Y(
               expresion(objeto(nodo, "izquierda")), expresion(objeto(nodo, "derecha")));

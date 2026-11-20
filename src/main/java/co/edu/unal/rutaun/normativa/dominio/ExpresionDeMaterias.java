@@ -28,7 +28,7 @@ public sealed interface ExpresionDeMaterias
    * «Materia externa»). El nombre y, si la norma lo da, el código identifican la materia; el tipo
    * indica si es de nivelación o de otro programa.
    */
-  record MateriaExterna(String nombre, Optional<CodigoMateria> codigo, TipoDeMateriaExterna tipo)
+  record MateriaExterna(String nombre, Optional<CodigoMateria> codigo, TipoMateriaExterna tipo)
       implements ExpresionDeMaterias {
 
     /** Exige el nombre y el tipo; el código es opcional. */

@@ -9,7 +9,7 @@ import co.edu.unal.rutaun.normativa.dominio.ExpresionDeMaterias;
 import co.edu.unal.rutaun.normativa.dominio.Malla;
 import co.edu.unal.rutaun.normativa.dominio.NodoDeMalla;
 import co.edu.unal.rutaun.normativa.dominio.Prerrequisito;
-import co.edu.unal.rutaun.normativa.dominio.TipoDeMateriaExterna;
+import co.edu.unal.rutaun.normativa.dominio.TipoMateriaExterna;
 import co.edu.unal.rutaun.soporte.MallaDePrueba;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -44,7 +44,7 @@ class JsonDeNormativaTest {
                             new ExpresionDeMaterias.MateriaExterna(
                                 "Matemáticas Básicas",
                                 Optional.empty(),
-                                TipoDeMateriaExterna.NIVELACION)))));
+                                TipoMateriaExterna.NIVELACION)))));
 
     // Componente y MateriaExterna tienen un campo «tipo»: el discriminante es «@tipo».
     assertThat(deComponente).contains("\"@tipo\":\"COMPONENTE\"").contains("\"tipo\":");

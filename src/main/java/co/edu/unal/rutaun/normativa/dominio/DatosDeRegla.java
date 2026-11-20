@@ -137,7 +137,7 @@ public sealed interface DatosDeRegla {
    * @param creditos créditos de la carga
    * @param tipo si la carga es mínima o máxima
    */
-  record DeCargaPorPeriodo(Creditos creditos, TipoDeCargaPorPeriodo tipo) implements DatosDeRegla {
+  record DeCargaPorPeriodo(Creditos creditos, TipoCargaPorPeriodo tipo) implements DatosDeRegla {
 
     /** Exige los créditos y el tipo. */
     public DeCargaPorPeriodo {

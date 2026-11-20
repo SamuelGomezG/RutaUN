@@ -9,7 +9,7 @@ import co.edu.unal.rutaun.normativa.dominio.Afectacion;
 import co.edu.unal.rutaun.normativa.dominio.DatosDeRegla;
 import co.edu.unal.rutaun.normativa.dominio.Fuente;
 import co.edu.unal.rutaun.normativa.dominio.Regla;
-import co.edu.unal.rutaun.normativa.dominio.TipoDeAfectacion;
+import co.edu.unal.rutaun.normativa.dominio.TipoAfectacion;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEntity;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
@@ -170,7 +170,7 @@ public final class ReglaMapper {
     }
     return Optional.of(
         new Afectacion(
-            TipoDeAfectacion.valueOf(tipo),
+            TipoAfectacion.valueOf(tipo),
             Optional.of(new ReglaId(entidad.getReglaAfectadaId())),
             Optional.empty(),
             Optional.empty()));

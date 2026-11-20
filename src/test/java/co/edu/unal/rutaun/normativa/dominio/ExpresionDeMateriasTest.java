@@ -35,11 +35,11 @@ class ExpresionDeMateriasTest {
   void tt03_seConstruyeUnaMateriaExternaConNombreTipoYCodigoOpcional() {
     ExpresionDeMaterias.MateriaExterna externa =
         new ExpresionDeMaterias.MateriaExterna(
-            "Matemáticas Básicas", Optional.empty(), TipoDeMateriaExterna.NIVELACION);
+            "Matemáticas Básicas", Optional.empty(), TipoMateriaExterna.NIVELACION);
 
     assertThat(externa.nombre()).isEqualTo("Matemáticas Básicas");
     assertThat(externa.codigo()).isEmpty();
-    assertThat(externa.tipo()).isEqualTo(TipoDeMateriaExterna.NIVELACION);
+    assertThat(externa.tipo()).isEqualTo(TipoMateriaExterna.NIVELACION);
   }
 
   @Test
@@ -48,10 +48,10 @@ class ExpresionDeMateriasTest {
         new ExpresionDeMaterias.MateriaExterna(
             "Electrónica Análoga I",
             Optional.of(new CodigoMateria("2016699")),
-            TipoDeMateriaExterna.OTRO_PROGRAMA);
+            TipoMateriaExterna.OTRO_PROGRAMA);
 
     assertThat(externa.codigo()).contains(new CodigoMateria("2016699"));
-    assertThat(externa.tipo()).isEqualTo(TipoDeMateriaExterna.OTRO_PROGRAMA);
+    assertThat(externa.tipo()).isEqualTo(TipoMateriaExterna.OTRO_PROGRAMA);
   }
 
   @Test
@@ -62,13 +62,13 @@ class ExpresionDeMateriasTest {
     assertThatThrownBy(
             () ->
                 new ExpresionDeMaterias.MateriaExterna(
-                    null, Optional.empty(), TipoDeMateriaExterna.NIVELACION))
+                    null, Optional.empty(), TipoMateriaExterna.NIVELACION))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("nombre no puede ser null");
     assertThatThrownBy(
             () ->
                 new ExpresionDeMaterias.MateriaExterna(
-                    "Matemáticas Básicas", null, TipoDeMateriaExterna.NIVELACION))
+                    "Matemáticas Básicas", null, TipoMateriaExterna.NIVELACION))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("codigo no puede ser null");
     assertThatThrownBy(

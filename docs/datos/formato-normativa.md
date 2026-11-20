@@ -308,10 +308,10 @@ para ese tipo, `desglose` debe ser `null`.
 #### `CARGA_POR_PERIODO`
 
 ```jsonc
-{ "tipo": "CARGA_POR_PERIODO", "creditos": 10, "tipoCarga": "MINIMA" }
+{ "tipo": "CARGA_POR_PERIODO", "creditos": 10, "tipoCarga": "MINIMO" }
 ```
 
-`tipoCarga`: `MINIMA` o `MAXIMA`.
+`tipoCarga`: `MINIMO` o `MAXIMO`.
 
 #### `REQUISITO_DE_GRADO` y `OTRA`
 

@@ -17,7 +17,7 @@ import java.util.Optional;
  * @param desde momento desde el que surte efecto; vacío si la norma no lo fija
  */
 public record Afectacion(
-    TipoDeAfectacion tipo,
+    TipoAfectacion tipo,
     Optional<ReglaId> reglaAfectada,
     Optional<Fuente> articuloAfectado,
     Optional<Momento> desde) {
