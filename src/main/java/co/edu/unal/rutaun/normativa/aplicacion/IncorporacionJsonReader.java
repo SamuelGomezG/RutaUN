@@ -42,6 +42,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -341,7 +342,8 @@ public final class IncorporacionJsonReader {
         Optional.of(
             new ExigenciaCreditos.Desglose(
                 new Creditos(entero(desglose, "obligatorios")),
-                new Creditos(entero(desglose, "optativos")))));
+                new Creditos(entero(desglose, "optativos")))),
+        Collections.emptySortedMap());
   }
 
   private static ExpresionDeMaterias expresion(JsonNode nodo) {
