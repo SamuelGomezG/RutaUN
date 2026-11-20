@@ -40,7 +40,7 @@ Ejemplos: `normativa` (con las cuatro capas) e `incidentes` (estilo simple, sin 
 5. **Si guarda datos**, agrega su migración (receta siguiente).
 6. **Pon las pruebas en el paquete espejo** de `src/test/java`.
 
-**Comprobación:** `./mvnw test -Dtest='ModulosTest,CapasTest,NombresTest'`. Para ver que las fronteras están activas, importa a propósito una clase de un subpaquete de otro módulo: `ModulosTest` debe fallar. Deshaz la prueba antes del commit.
+**Comprobación:** `./mvnw test -Dtest='ModulosTest,CapasTest,NombresTest,EntidadesTest'`. Para ver que las fronteras están activas, importa a propósito una clase de un subpaquete de otro módulo: `ModulosTest` debe fallar. Deshaz la prueba antes del commit.
 
 ## Agregar una migración
 
@@ -49,7 +49,7 @@ Ejemplo: `V2__incidente.sql`.
 1. **Crea** `src/main/resources/db/migration/V<n>__<descripcion>.sql`, con el número siguiente al último y dos guiones bajos. `V0` está ocupado por la migración de humo de las pruebas.
 2. **Escribe SQL estándar**, sin funciones propias de H2, para poder cambiar de motor sin reescribirla.
 3. **Nunca edites una migración ya fusionada en `develop`.** Flyway guarda su suma de comprobación, y toda base que ya la aplicó deja de arrancar («Migration checksum mismatch»). Un cambio sobre una tabla existente es una migración nueva.
-4. **Ajusta la entidad JPA** en `persistencia` del módulo. Hibernate valida al arrancar que la entidad y la tabla coincidan, y el arranque falla si no.
+4. **Ajusta la entidad JPA** en `persistencia` del módulo. Hibernate valida al arrancar que la entidad y la tabla coincidan, y el arranque falla si no. Si la tabla es nueva y su llave la asigna la aplicación (un UUID del dominio o un código), la entidad implementa `Persistable`, con un indicador `@Transient` que se apaga en `@PostPersist` y `@PostLoad`, como `ProgramaEntity`; o tiene un campo `@Version` de tipo envoltorio. Si no, guardar una entidad nueva con una llave existente sobrescribe la fila en vez de fallar ([#140](https://github.com/SamuelGomezG/RutaUN/issues/140)). `EntidadesTest` lo comprueba.
 5. **Actualiza** [`esquema-de-la-base.md`](../datos/esquema-de-la-base.md) en el mismo commit.
 
 Mientras la migración vive solo en tu rama, puedes editarla; después de cada cambio borra tu `data/` (si es desechable).
