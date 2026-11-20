@@ -142,6 +142,23 @@ class EvaluadorDeRestriccionesTest {
   }
 
   @Test
+  void tt03_unCorrequisitoQueNoEstaPendienteConservaSuCertezaAunqueElPlanLoUbique() {
+    Restriccion correquisito = new Correquisito(B, new MateriaDelPrograma(A));
+    for (Certeza certeza : List.of(Certeza.EN_CURSO, Certeza.INCIERTA)) {
+      ContextoDeEvaluacion ubicado =
+          ContextoDeEvaluacionFijo.nuevo()
+              .estado(A, new EstadoRestriccion(certeza, List.of("razón de " + certeza)))
+              .enElMismoSemestre(A)
+              .construir();
+
+      EstadoRestriccion estado = EvaluadorDeRestricciones.evaluar(correquisito, ubicado);
+
+      assertThat(estado.certeza()).isEqualTo(certeza);
+      assertThat(estado.razones()).containsExactly("razón de " + certeza);
+    }
+  }
+
+  @Test
   void tt03_unPrerrequisitoNoSeCumpleSoloPorqueElPlanLoUbique() {
     Restriccion prerrequisito = new Prerrequisito(B, new MateriaDelPrograma(A));
     ContextoDeEvaluacion ubicado =
