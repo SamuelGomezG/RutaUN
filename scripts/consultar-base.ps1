@@ -18,8 +18,10 @@
   demuestra un cambio» (comando B). La contraseña es la vacía por defecto de
   org.h2.tools.Shell; no se pasa -password.
 
-  Guardado en UTF-8 con BOM para Windows PowerShell 5.1. Sin probar todavía en
-  Windows: lo valida una persona del equipo antes de aprobar.
+  Guardado en UTF-8 con BOM para Windows PowerShell 5.1. Validado en Windows con
+  PowerShell 5.1 y 7.7.0. Con la política de ejecución por defecto, PowerShell no
+  corre scripts: habilita la sesión con
+  Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass.
 #>
 
 param(
