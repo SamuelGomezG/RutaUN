@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8"/>
+    <title>Regla completa · RutaUN</title>
+  </head>
+  <body>
+    <p><a th:href="@{/programas/{id}/reglas(id=${programa.id().valor()})}">Volver a las reglas del programa</a></p>
+    <h1 th:text="${programa.nombre()}">Programa</h1>
+    <h2>Regla completa</h2>
+    <p th:text="${regla.enunciado()}">Enunciado de la regla</p>
+    <ul>
+      <li>
+        Estado:
+        <span th:switch="${regla.estado().name()}">
+          <span th:case="'VIGENTE'">vigente</span>
+          <span th:case="'PROGRAMADA'">programada</span>
+          <span th:case="'YA_NO_RIGE'">ya no rige</span>
+          <span th:case="'EN_REVISION'">en revisión</span>
+        </span>
+        <strong th:if="${regla.temporal()}">temporal</strong>
+      </li>
+      <li>
+        El plan
+        <span th:if="${regla.clasificacion().name() == 'DEL_PLAN'}">aplica esta regla.</span>
+        <span th:unless="${regla.clasificacion().name() == 'DEL_PLAN'}">solo informa esta regla: no la aplica.</span>
+      </li>
+      <li th:if="${regla.aplicaDesde().isPresent()}"
+          th:text="'Fecha de aplicación: ' + ${regla.aplicaDesde().get()}">Fecha de aplicación: 2026-01-01</li>
+      <li>
+        Vigencia hasta:
+        <span th:if="${regla.vigenteHasta().isPresent()}" th:text="${regla.vigenteHasta().get()}">2026-12-31</span>
+        <span th:unless="${regla.vigenteHasta().isPresent()}">sin fecha de fin</span>
+      </li>
+      <li th:if="${regla.alcance().isPresent()}">
+        Alcance de la norma:
+        <span th:switch="${regla.alcance().get().name()}">
+          <span th:case="'TODOS'">todos los programas de pregrado de la Sede</span>
+          <span th:case="'FACULTADES'">programas de una o varias facultades</span>
+          <span th:case="'PROGRAMAS'">uno o varios programas concretos</span>
+        </span>
+        <span th:if="${regla.detalleDelAlcance().isPresent()}"
+              th:text="'(' + ${regla.detalleDelAlcance().get()} + ')'">(detalle)</span>
+      </li>
+    </ul>
+
+    <section th:if="${regla.fuente().isPresent()}" th:with="fuente=${regla.fuente().get()}">
+      <h2>Acuerdo de origen</h2>
+      <p>
+        <span th:switch="${fuente.norma().tipo().name()}">
+          <span th:case="'ACUERDO'">Acuerdo</span>
+          <span th:case="'RESOLUCION'">Resolución</span>
+          <span th:case="'CIRCULAR'">Circular</span>
+        </span>
+        <span th:text="${fuente.norma().numero()} + ' de ' + ${fuente.norma().anio()} + ', ' + ${fuente.norma().organo()} + ', ' + ${fuente.articulo()}">1 de 2026, Consejo, art. 1</span>
+      </p>
+      <p th:if="${fuente.enlace().isPresent()}">
+        <a th:href="${fuente.enlace().get()}" target="_blank" rel="noopener noreferrer">Abrir el acuerdo en Régimen Legal</a>
+      </p>
+      <p th:unless="${fuente.enlace().isPresent()}">
+        El enlace a Régimen Legal no está disponible. Para buscar el acuerdo, use la identificación completa de arriba.
+      </p>
+    </section>
+    <p th:unless="${regla.fuente().isPresent()}">sin fuente registrada</p>
+
+    <section th:if="${regla.tieneCadena()}">
+      <h2>Normas que han afectado esta regla</h2>
+      <ol>
+        <li th:each="eslabon : ${regla.cadena()}">
+          <span th:if="${eslabon.cambio().isEmpty()}">Expide la regla:</span>
+          <th:block th:if="${eslabon.cambio().isPresent()}">
+            <span th:switch="${eslabon.cambio().get().name()}">
+              <span th:case="'MODIFICA'">La modifica:</span>
+              <span th:case="'DEROGA'">La deroga:</span>
+              <span th:case="'EXCEPTUA'">La exceptúa:</span>
+            </span>
+          </th:block>
+          <span th:switch="${eslabon.fuente().norma().tipo().name()}">
+            <span th:case="'ACUERDO'">Acuerdo</span>
+            <span th:case="'RESOLUCION'">Resolución</span>
+            <span th:case="'CIRCULAR'">Circular</span>
+          </span>
+          <span th:text="${eslabon.fuente().norma().numero()} + ' de ' + ${eslabon.fuente().norma().anio()} + ', ' + ${eslabon.fuente().articulo()}">1 de 2026, art. 1</span>
+          <span th:text="'(expedido el ' + ${eslabon.fechaExpedicion()} + ')'">(expedido el 2026-01-01)</span>
+          <strong th:if="${eslabon.rige()}">rige hoy</strong>
+        </li>
+      </ol>
+    </section>
+    <p th:unless="${regla.tieneCadena()}">Ninguna otra norma ha afectado esta regla.</p>
+
+    <p>RutaUN no es la fuente oficial: la fuente oficial es el documento publicado en Régimen Legal.</p>
+  </body>
+</html>

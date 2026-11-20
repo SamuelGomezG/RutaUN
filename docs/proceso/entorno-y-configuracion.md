@@ -77,6 +77,7 @@ Repetir el arranque no duplica nada: un programa se reconoce por su código SIA 
 | `GET /` | 200, página de inicio con el enlace a la consulta | — |
 | `GET /programas` (UC06 paso 2) | 200, los programas cargados | Los lee `ConsultaNormativaService` de la base; con el perfil `dev` está cargado Ingeniería de Sistemas y Computación. Las pruebas de la página usan `ConsultaNormativaFalsa`. |
 | `GET /programas/{id}/reglas` (UC06 paso 4) | 200 con las reglas del consolidado vigente por categoría; 404 si el programa no está cargado o no tiene una versión vigente; 400 si `{id}` no es un UUID | Muestra las reglas vigentes, programadas y en revisión, no las que ya no rigen |
+| `GET /programas/{programa}/reglas/{regla}` (UC06 paso 8) | 200 con la regla completa y la cadena de normas que la han afectado; 404 si el programa no está cargado o la regla no está en su consolidado vigente; 400 si un id no es un UUID | Lo lee `ConsultaNormativaService.regla`; abre también las reglas que ya no rigen, con ese estado; el enlace a Régimen Legal sale de la norma, y si falta la página lo dice |
 
 No hay consola de H2 ni Spring Boot Actuator: la base se consulta con la aplicación detenida ([`esquema-de-la-base.md`](../datos/esquema-de-la-base.md), «Consultas de inspección»). Tampoco hay autenticación; llega con SOP-01 ([#53](https://github.com/SamuelGomezG/RutaUN/issues/53)).
 

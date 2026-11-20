@@ -19,6 +19,7 @@
       <ul>
         <li th:each="regla : ${categoria.value}">
           <span th:text="${regla.enunciado()}">Enunciado de la regla</span>
+          <a th:href="@{/programas/{programa}/reglas/{regla}(programa=${programa.id().valor()},regla=${regla.id().valor()})}">ver completa</a>
           <span th:switch="${regla.estado().name()}">
             <em th:case="'VIGENTE'">vigente</em>
             <em th:case="'PROGRAMADA'">programada</em>
