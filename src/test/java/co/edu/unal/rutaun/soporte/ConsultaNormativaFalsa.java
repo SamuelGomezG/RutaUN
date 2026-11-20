@@ -3,6 +3,7 @@ package co.edu.unal.rutaun.soporte;
 import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.ProgramaId;
 import co.edu.unal.rutaun.compartido.ReglaId;
+import co.edu.unal.rutaun.normativa.BusquedaDeReglas;
 import co.edu.unal.rutaun.normativa.ClasificacionRegla;
 import co.edu.unal.rutaun.normativa.ConsolidadoVista;
 import co.edu.unal.rutaun.normativa.ConsultaNormativaFacade;
@@ -21,11 +22,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 /**
  * Fachada de consulta falsa, con datos fijos y sintéticos, para probar la vista sin persistencia.
  * Se crea con Ingeniería de Sistemas y Computación y tres reglas, o con ese programa y un
- * consolidado vigente sin reglas (UC06 ext. 4a).
+ * consolidado vigente sin reglas (UC06 ext. 4a). Además de esas tres, que rigen, la búsqueda conoce
+ * una regla que ya no rige (UC06 ext. 5b), que el consolidado normal no muestra.
  */
 public final class ConsultaNormativaFalsa implements ConsultaNormativaFacade {
 
@@ -42,6 +45,9 @@ public final class ConsultaNormativaFalsa implements ConsultaNormativaFacade {
   /** Regla temporal de prueba: la expidió un acuerdo y la modifica otro, que es el que rige. */
   public static final ReglaId ID_TEMPORAL = new ReglaId(new UUID(0, 13));
 
+  /** Regla de prueba que ya no rige: solo la devuelve la búsqueda con ese estado. */
+  public static final ReglaId ID_YA_NO_RIGE = new ReglaId(new UUID(0, 14));
+
   /** Enlace de prueba a Régimen Legal. */
   public static final String ENLACE = "https://regimen-legal.example.org/prueba-regla-12";
 
@@ -49,7 +55,30 @@ public final class ConsultaNormativaFalsa implements ConsultaNormativaFacade {
       new ProgramaVista(
           SISTEMAS, "Ingeniería de Sistemas y Computación", "0000", "Facultad de Ingeniería");
 
+  private static final List<String> CATEGORIAS =
+      List.of(
+          "Componentes y créditos",
+          "Materias",
+          "Agrupaciones",
+          "Prerrequisitos y habilitación",
+          "Equivalencias",
+          "Libre elección",
+          "Carga mínima o máxima por periodo",
+          "Requisitos de grado",
+          "Otra");
+
   private static final ConsolidadoVista CONSOLIDADO = consolidado();
+
+  private static final ReglaVista REGLA_QUE_YA_NO_RIGE =
+      new ReglaVista(
+          ID_YA_NO_RIGE,
+          "Regla de prueba: el máximo era de 20 créditos por periodo.",
+          Optional.of(fuente("0", "art. 4")),
+          EstadoRegla.YA_NO_RIGE,
+          false,
+          ClasificacionRegla.DEL_PLAN,
+          Optional.of(LocalDate.of(2020, 1, 1)),
+          Optional.of(LocalDate.of(2025, 12, 31)));
 
   private static final ConsolidadoVista CONSOLIDADO_SIN_REGLAS =
       new ConsolidadoVista(SISTEMAS, 1, LocalDate.of(2026, 10, 1), Map.of());
@@ -175,6 +204,48 @@ public final class ConsultaNormativaFalsa implements ConsultaNormativaFacade {
       return Optional.empty();
     }
     return Optional.of(conReglas ? CONSOLIDADO : CONSOLIDADO_SIN_REGLAS);
+  }
+
+  @Override
+  public Optional<ConsolidadoVista> buscarReglas(ProgramaId id, BusquedaDeReglas busqueda) {
+    if (!SISTEMAS.equals(id)) {
+      return Optional.empty();
+    }
+    if (!conReglas) {
+      return Optional.of(CONSOLIDADO_SIN_REGLAS);
+    }
+    Map<String, List<ReglaVista>> porCategoria = new LinkedHashMap<>();
+    for (String categoria : CONSOLIDADO.reglasPorCategoria().keySet()) {
+      List<ReglaVista> encontradas =
+          Stream.concat(
+                  CONSOLIDADO.reglasPorCategoria().getOrDefault(categoria, List.of()).stream(),
+                  "Otra".equals(categoria) ? Stream.of(REGLA_QUE_YA_NO_RIGE) : Stream.empty())
+              .filter(regla -> coincide(regla, categoria, busqueda))
+              .toList();
+      if (!encontradas.isEmpty()) {
+        porCategoria.put(categoria, encontradas);
+      }
+    }
+    return Optional.of(new ConsolidadoVista(SISTEMAS, 1, LocalDate.of(2026, 10, 1), porCategoria));
+  }
+
+  @Override
+  public List<String> categoriasDeReglas() {
+    return CATEGORIAS;
+  }
+
+  private static boolean coincide(ReglaVista regla, String categoria, BusquedaDeReglas busqueda) {
+    boolean delEstado =
+        busqueda
+            .estado()
+            .map(pedido -> pedido == regla.estado())
+            .orElse(regla.estado() != EstadoRegla.YA_NO_RIGE);
+    return delEstado
+        && busqueda.categoria().map(categoria::equals).orElse(true)
+        && busqueda
+            .texto()
+            .map(texto -> regla.enunciado().toLowerCase().contains(texto.toLowerCase()))
+            .orElse(true);
   }
 
   @Override

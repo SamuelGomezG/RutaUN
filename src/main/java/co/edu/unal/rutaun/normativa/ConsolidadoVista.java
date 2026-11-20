@@ -20,8 +20,9 @@ import java.util.Map;
  *     (con el vocabulario del glosario, «Regla»: «Prerrequisitos y habilitación», «Otra»…). Las
  *     categorías van en el orden del glosario y, dentro de cada una, las reglas por fecha de
  *     expedición de su norma, artículo, enunciado e identificador: el mismo dato produce siempre la
- *     misma vista. Vacío si la versión no tiene reglas que mostrar (UC06 ext. 4a); una categoría
- *     presente tiene al menos una regla
+ *     misma vista. Vacío si la versión no tiene reglas que mostrar (UC06 ext. 4a) o si ninguna
+ *     cumple la búsqueda (ext. 5a); una categoría presente tiene al menos una regla. Si se buscó,
+ *     solo trae las que cumplen la búsqueda, y las que ya no rigen si se pidió ese estado
  */
 public record ConsolidadoVista(
     ProgramaId programa,

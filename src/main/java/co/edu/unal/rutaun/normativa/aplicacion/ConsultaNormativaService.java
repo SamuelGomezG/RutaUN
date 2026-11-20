@@ -3,6 +3,7 @@ package co.edu.unal.rutaun.normativa.aplicacion;
 import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.ProgramaId;
 import co.edu.unal.rutaun.compartido.ReglaId;
+import co.edu.unal.rutaun.normativa.BusquedaDeReglas;
 import co.edu.unal.rutaun.normativa.ConsolidadoVista;
 import co.edu.unal.rutaun.normativa.ConsultaNormativaFacade;
 import co.edu.unal.rutaun.normativa.EslabonVista;
@@ -57,6 +58,9 @@ import tools.jackson.core.JacksonException;
  * vigentes, programadas y en revisión, y deja fuera las que ya no rigen. Las agrupa por categoría
  * según el glosario («Regla») y, dentro de cada una, las ordena por fecha de expedición de su
  * norma, artículo, enunciado e identificador.
+ *
+ * <p>La búsqueda (UC06-HU02, #35) usa el mismo recorrido: filtra por texto, categoría y estado, y
+ * solo con el estado «ya no rige» incluye las que ya no rigen.
  *
  * <p>La regla completa sí abre las que ya no rigen, con ese estado: son las que la cadena de normas
  * explica.
@@ -145,10 +149,21 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
 
   @Override
   public Optional<ConsolidadoVista> consolidadoVigente(ProgramaId id) {
+    return buscarReglas(id, BusquedaDeReglas.TODAS);
+  }
+
+  @Override
+  public Optional<ConsolidadoVista> buscarReglas(ProgramaId id, BusquedaDeReglas busqueda) {
     ArgumentChecks.obligatorio(id, "id");
+    ArgumentChecks.obligatorio(busqueda, "busqueda");
     return versiones
         .findTopByProgramaIdOrderByNumeroDesc(id.valor())
-        .map(version -> aConsolidado(id, version));
+        .map(version -> aConsolidado(id, version, busqueda));
+  }
+
+  @Override
+  public List<String> categoriasDeReglas() {
+    return ORDEN_DE_CATEGORIAS;
   }
 
   @Override
@@ -193,10 +208,8 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
             estado,
             esTemporal(regla.vigenciaPropia(), norma == null ? null : norma.getVigenteHasta()),
             regla.clasificacion(),
-            Optional.ofNullable(fila.getVigenteDesde())
-                .or(() -> Optional.ofNullable(norma).map(NormaEntity::getAplicaDesde)),
-            Optional.ofNullable(fila.getVigenteHasta())
-                .or(() -> Optional.ofNullable(norma).map(NormaEntity::getVigenteHasta)),
+            aplicaDesde(fila, norma),
+            vigenteHasta(fila, norma),
             Optional.ofNullable(norma).map(n -> TipoAlcance.valueOf(n.getTipoAlcance())),
             Optional.ofNullable(norma)
                 .map(NormaEntity::getAlcanceDetalle)
@@ -286,11 +299,12 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
         estados.get(fila.getId()) == EstadoRegla.VIGENTE);
   }
 
-  private ConsolidadoVista aConsolidado(ProgramaId programa, VersionEntity version) {
+  private ConsolidadoVista aConsolidado(
+      ProgramaId programa, VersionEntity version, BusquedaDeReglas busqueda) {
     Map<UUID, EstadoRegla> estados = new HashMap<>();
     for (ReglaEnVersionEntity fila : reglasEnVersion.findByVersionId(version.getId())) {
       EstadoRegla estado = EstadoRegla.valueOf(fila.getEstado());
-      if (seMuestra(estado)) {
+      if (seBusca(estado, busqueda)) {
         estados.put(fila.getReglaId(), estado);
       }
     }
@@ -310,6 +324,7 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
       List<ReglaVista> deLaCategoria =
           entradas.stream()
               .filter(entrada -> entrada.categoria().equals(categoria))
+              .filter(entrada -> coincide(entrada, busqueda))
               .map(Entrada::vista)
               .toList();
       if (!deLaCategoria.isEmpty()) {
@@ -317,6 +332,22 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
       }
     }
     return new ConsolidadoVista(programa, version.getNumero(), version.getFecha(), porCategoria);
+  }
+
+  /**
+   * Fecha desde la que rige la regla: la de su vigencia propia o, si no la tiene, la de su norma.
+   */
+  private static Optional<LocalDate> aplicaDesde(ReglaEntity fila, NormaEntity norma) {
+    return Optional.ofNullable(fila.getVigenteDesde())
+        .or(() -> Optional.ofNullable(norma).map(NormaEntity::getAplicaDesde));
+  }
+
+  /**
+   * Fecha hasta la que rige la regla: la de su vigencia propia o, si no la tiene, la de su norma.
+   */
+  private static Optional<LocalDate> vigenteHasta(ReglaEntity fila, NormaEntity norma) {
+    return Optional.ofNullable(fila.getVigenteHasta())
+        .or(() -> Optional.ofNullable(norma).map(NormaEntity::getVigenteHasta));
   }
 
   private static Entrada aEntrada(ReglaEntity fila, EstadoRegla estado, NormaEntity norma) {
@@ -330,13 +361,32 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
             Optional.ofNullable(norma).map(n -> aFuente(n, regla.fuente().articulo())),
             estado,
             temporal,
-            regla.clasificacion());
+            regla.clasificacion(),
+            aplicaDesde(fila, norma),
+            vigenteHasta(fila, norma));
     return new Entrada(
         categoria(regla.datos()),
         norma == null ? null : norma.getFechaExpedicion(),
         regla.fuente().articulo(),
         fila.getId(),
         vista);
+  }
+
+  /**
+   * Si la búsqueda recorre las reglas con este estado: las que tienen el estado pedido o, sin
+   * estado, las que muestra el listado normal ({@link #seMuestra}).
+   */
+  static boolean seBusca(EstadoRegla estado, BusquedaDeReglas busqueda) {
+    return busqueda.estado().map(pedido -> pedido == estado).orElseGet(() -> seMuestra(estado));
+  }
+
+  /** Si la regla cumple el texto y la categoría de la búsqueda; el estado ya se filtró antes. */
+  private static boolean coincide(Entrada entrada, BusquedaDeReglas busqueda) {
+    return busqueda.categoria().map(entrada.categoria()::equals).orElse(true)
+        && busqueda
+            .texto()
+            .map(texto -> TextoDeBusqueda.coincide(entrada.vista(), texto))
+            .orElse(true);
   }
 
   /**
