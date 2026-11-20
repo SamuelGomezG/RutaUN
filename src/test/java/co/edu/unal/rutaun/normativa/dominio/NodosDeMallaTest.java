@@ -106,6 +106,26 @@ class NodosDeMallaTest {
   }
 
   @Test
+  void tt02_unSwitchSobreNodoDeMallaNoNecesitaDefault() {
+    NodoDeMalla agrupacion = new Agrupacion(AgrupacionId.nuevo(), "A", TRES, List.of(), List.of());
+    NodoDeMalla componente =
+        new Componente("C", TipoComponente.DISCIPLINAR, TRES, List.of(), List.of());
+    NodoDeMalla libreEleccion = new ComponenteDeLibreEleccion("L", TRES, List.of());
+
+    assertThat(claseDe(agrupacion)).isEqualTo("agrupación");
+    assertThat(claseDe(componente)).isEqualTo("componente");
+    assertThat(claseDe(libreEleccion)).isEqualTo("libre elección");
+  }
+
+  private static String claseDe(NodoDeMalla nodo) {
+    return switch (nodo) {
+      case Componente componente -> "componente";
+      case ComponenteDeLibreEleccion libreEleccion -> "libre elección";
+      case Agrupacion agrupacion -> "agrupación";
+    };
+  }
+
+  @Test
   void tt02_losNodosNoDejanModificarSusListas() {
     Agrupacion agrupacion =
         new Agrupacion(AgrupacionId.nuevo(), "A", TRES, List.of(FISICA), List.of());

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import co.edu.unal.rutaun.compartido.AgrupacionId;
 import co.edu.unal.rutaun.compartido.Creditos;
+import co.edu.unal.rutaun.normativa.TipoComponente;
 import co.edu.unal.rutaun.soporte.MallaDePrueba;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -114,5 +115,97 @@ class MallaTest {
   void tt02_mallaNoDejaModificarSusComponentes() {
     assertThatThrownBy(() -> malla.componentes().clear())
         .isInstanceOf(UnsupportedOperationException.class);
+  }
+
+  @Test
+  void uc07_ext6d_unaMallaSinLibreEleccionNoSeConstruye() {
+    assertThatThrownBy(() -> new Malla(List.of(fundamentacion(), disciplinar())))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("libre elección");
+  }
+
+  @Test
+  void uc07_ext6d_unaMallaConDosComponentesDeFundamentacionNoSeConstruye() {
+    Componente otra =
+        new Componente(
+            "Otra fundamentación",
+            TipoComponente.FUNDAMENTACION,
+            ExigenciaCreditos.de(new Creditos(0)),
+            List.of(),
+            List.of());
+
+    assertThatThrownBy(() -> Malla.de(fundamentacion(), otra, libreEleccion()))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("2 de fundamentación")
+        .hasMessageContaining("0 de disciplinar");
+  }
+
+  @Test
+  void uc07_ext6d_unaMallaConDosLibresEleccionNoSeConstruye() {
+    assertThatThrownBy(
+            () ->
+                new Malla(
+                    List.of(fundamentacion(), disciplinar(), libreEleccion(), libreEleccion())))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("2 de libre elección");
+  }
+
+  @Test
+  void tt02_unaAgrupacionRepetidaNoSeAcepta() {
+    AgrupacionId id = AgrupacionId.nuevo();
+    Agrupacion intermedia =
+        agrupacion(AgrupacionId.nuevo(), "Intermedia", List.of(agrupacion(id, "Repetida A")));
+    Agrupacion directa = agrupacion(id, "Repetida B");
+    Componente fundamentacion =
+        componente("Fundamentación", TipoComponente.FUNDAMENTACION, intermedia);
+    Componente disciplinar = componente("Disciplinar", TipoComponente.DISCIPLINAR, directa);
+
+    assertThatThrownBy(() -> Malla.de(fundamentacion, disciplinar, libreEleccion()))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("dos agrupaciones distintas usan el id");
+  }
+
+  @Test
+  void tt02_unaAgrupacionEnDosPadresNoSeAcepta() {
+    Agrupacion compartida = agrupacion(AgrupacionId.nuevo(), "Compartida");
+    Componente fundamentacion =
+        componente("Fundamentación", TipoComponente.FUNDAMENTACION, compartida);
+    Componente disciplinar = componente("Disciplinar", TipoComponente.DISCIPLINAR, compartida);
+
+    assertThatThrownBy(() -> Malla.de(fundamentacion, disciplinar, libreEleccion()))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("aparece dos veces");
+  }
+
+  @Test
+  void tt02_mallaDeExigeSusTresComponentes() {
+    assertThatThrownBy(() -> Malla.de(null, disciplinar(), libreEleccion()))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("fundamentacion no puede ser null");
+  }
+
+  private Componente fundamentacion() {
+    return (Componente) MallaDePrueba.nodo(malla, "Fundamentación");
+  }
+
+  private Componente disciplinar() {
+    return (Componente) MallaDePrueba.nodo(malla, "Disciplinar");
+  }
+
+  private ComponenteDeLibreEleccion libreEleccion() {
+    return (ComponenteDeLibreEleccion) MallaDePrueba.nodo(malla, "Libre elección");
+  }
+
+  private static Agrupacion agrupacion(AgrupacionId id, String nombre) {
+    return agrupacion(id, nombre, List.of());
+  }
+
+  private static Agrupacion agrupacion(AgrupacionId id, String nombre, List<Agrupacion> hijas) {
+    return new Agrupacion(id, nombre, ExigenciaCreditos.de(new Creditos(3)), List.of(), hijas);
+  }
+
+  private static Componente componente(String nombre, TipoComponente tipo, Agrupacion agrupacion) {
+    return new Componente(
+        nombre, tipo, ExigenciaCreditos.de(new Creditos(3)), List.of(), List.of(agrupacion));
   }
 }

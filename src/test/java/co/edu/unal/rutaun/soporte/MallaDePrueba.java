@@ -107,7 +107,7 @@ public final class MallaDePrueba {
         new ComponenteDeLibreEleccion(
             "Libre elección", ExigenciaCreditos.de(new Creditos(6)), List.of(electivas));
 
-    return new Malla(List.of(fundamentacion, disciplinar, libreEleccion));
+    return Malla.de(fundamentacion, disciplinar, libreEleccion);
   }
 
   /** Busca un nodo de la malla por su nombre. */
