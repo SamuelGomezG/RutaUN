@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.ProgramaId;
+import co.edu.unal.rutaun.compartido.ReglaId;
 import co.edu.unal.rutaun.incidentes.persistencia.IncidenteEntity;
 import co.edu.unal.rutaun.incidentes.persistencia.IncidenteRepository;
 import co.edu.unal.rutaun.normativa.ClasificacionRegla;
@@ -17,6 +18,7 @@ import co.edu.unal.rutaun.normativa.ConsultaNormativaFacade;
 import co.edu.unal.rutaun.normativa.FuenteVista;
 import co.edu.unal.rutaun.normativa.NormaVista;
 import co.edu.unal.rutaun.normativa.ProgramaVista;
+import co.edu.unal.rutaun.normativa.ReglaCompletaVista;
 import co.edu.unal.rutaun.normativa.ReglaVista;
 import co.edu.unal.rutaun.normativa.TipoNorma;
 import java.time.LocalDate;
@@ -54,13 +56,23 @@ class ReglasDelProgramaEstadosTest {
 
   private static ReglaVista regla(String enunciado, EstadoRegla estado, boolean temporal) {
     return new ReglaVista(
-        enunciado, Optional.empty(), estado, temporal, ClasificacionRegla.DEL_PLAN);
+        ReglaId.nuevo(),
+        enunciado,
+        Optional.empty(),
+        estado,
+        temporal,
+        ClasificacionRegla.DEL_PLAN);
   }
 
   private static ReglaVista regla(
       String enunciado, EstadoRegla estado, boolean temporal, FuenteVista fuente) {
     return new ReglaVista(
-        enunciado, Optional.of(fuente), estado, temporal, ClasificacionRegla.DEL_PLAN);
+        ReglaId.nuevo(),
+        enunciado,
+        Optional.of(fuente),
+        estado,
+        temporal,
+        ClasificacionRegla.DEL_PLAN);
   }
 
   private static FuenteVista fuente(TipoNorma tipo, String numero, String articulo) {
@@ -101,22 +113,29 @@ class ReglasDelProgramaEstadosTest {
                     Map.of(
                         "Otra",
                         List.of(
-                            regla(
+                            ReglasDelProgramaEstadosTest.regla(
                                 "Regla uno",
                                 EstadoRegla.VIGENTE,
                                 false,
                                 fuente(TipoNorma.RESOLUCION, "5", "art. 3")),
-                            regla("Regla dos", EstadoRegla.PROGRAMADA, false),
-                            regla(
+                            ReglasDelProgramaEstadosTest.regla(
+                                "Regla dos", EstadoRegla.PROGRAMADA, false),
+                            ReglasDelProgramaEstadosTest.regla(
                                 "Regla tres",
                                 EstadoRegla.YA_NO_RIGE,
                                 false,
                                 fuente(TipoNorma.CIRCULAR, "11", "num. 2")),
-                            regla("Regla cuatro", EstadoRegla.EN_REVISION, true)))));
+                            ReglasDelProgramaEstadosTest.regla(
+                                "Regla cuatro", EstadoRegla.EN_REVISION, true)))));
           }
           if (SIN_REGLAS.equals(id)) {
             return Optional.of(new ConsolidadoVista(id, 2, LocalDate.of(2026, 10, 1), Map.of()));
           }
+          return Optional.empty();
+        }
+
+        @Override
+        public Optional<ReglaCompletaVista> regla(ProgramaId programa, ReglaId regla) {
           return Optional.empty();
         }
       };

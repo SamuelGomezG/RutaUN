@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.ProgramaId;
+import co.edu.unal.rutaun.compartido.ReglaId;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,6 +22,7 @@ class ConsolidadoVistaTest {
 
   private static final ReglaVista REGLA =
       new ReglaVista(
+          ReglaId.nuevo(),
           "Regla de prueba",
           Optional.of(
               new FuenteVista(
@@ -158,17 +160,29 @@ class ConsolidadoVistaTest {
   @Test
   void tt02_reglaVistaAceptaFuenteAusentePeroNoOptionalNull() {
     assertThat(
-            new ReglaVista("Regla", Optional.empty(), EstadoRegla.EN_REVISION, false, DEL_PLAN)
+            new ReglaVista(
+                    ReglaId.nuevo(),
+                    "Regla",
+                    Optional.empty(),
+                    EstadoRegla.EN_REVISION,
+                    false,
+                    DEL_PLAN)
                 .fuente())
         .isEmpty();
-    assertThatThrownBy(() -> new ReglaVista("Regla", null, EstadoRegla.VIGENTE, false, DEL_PLAN))
+    assertThatThrownBy(
+            () ->
+                new ReglaVista(
+                    ReglaId.nuevo(), "Regla", null, EstadoRegla.VIGENTE, false, DEL_PLAN))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("fuente no puede ser null");
     assertThatThrownBy(
-            () -> new ReglaVista(" ", Optional.empty(), EstadoRegla.VIGENTE, false, DEL_PLAN))
+            () ->
+                new ReglaVista(
+                    ReglaId.nuevo(), " ", Optional.empty(), EstadoRegla.VIGENTE, false, DEL_PLAN))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("enunciado no puede ser vacío");
-    assertThatThrownBy(() -> new ReglaVista("Regla", Optional.empty(), null, false, DEL_PLAN))
+    assertThatThrownBy(
+            () -> new ReglaVista(ReglaId.nuevo(), "Regla", Optional.empty(), null, false, DEL_PLAN))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("estado no puede ser null");
   }
@@ -176,11 +190,19 @@ class ConsolidadoVistaTest {
   @Test
   void tt02_uc06_ext6c_reglaVistaDiceSiElPlanLaAplicaOSoloLaInforma() {
     assertThat(
-            new ReglaVista("Regla", Optional.empty(), EstadoRegla.VIGENTE, false, INFORMATIVA)
+            new ReglaVista(
+                    ReglaId.nuevo(),
+                    "Regla",
+                    Optional.empty(),
+                    EstadoRegla.VIGENTE,
+                    false,
+                    INFORMATIVA)
                 .clasificacion())
         .isEqualTo(INFORMATIVA);
     assertThatThrownBy(
-            () -> new ReglaVista("Regla", Optional.empty(), EstadoRegla.VIGENTE, false, null))
+            () ->
+                new ReglaVista(
+                    ReglaId.nuevo(), "Regla", Optional.empty(), EstadoRegla.VIGENTE, false, null))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("clasificacion no puede ser null");
   }

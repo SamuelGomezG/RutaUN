@@ -2,17 +2,23 @@ package co.edu.unal.rutaun.normativa.aplicacion;
 
 import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.ProgramaId;
+import co.edu.unal.rutaun.compartido.ReglaId;
 import co.edu.unal.rutaun.normativa.ConsolidadoVista;
 import co.edu.unal.rutaun.normativa.ConsultaNormativaFacade;
+import co.edu.unal.rutaun.normativa.EslabonVista;
 import co.edu.unal.rutaun.normativa.FuenteVista;
 import co.edu.unal.rutaun.normativa.NormaVista;
 import co.edu.unal.rutaun.normativa.ProgramaVista;
+import co.edu.unal.rutaun.normativa.ReglaCompletaVista;
 import co.edu.unal.rutaun.normativa.ReglaVista;
+import co.edu.unal.rutaun.normativa.TipoAlcance;
+import co.edu.unal.rutaun.normativa.TipoDeCambio;
 import co.edu.unal.rutaun.normativa.TipoNorma;
 import co.edu.unal.rutaun.normativa.dominio.ComponenteDeLibreEleccion;
 import co.edu.unal.rutaun.normativa.dominio.DatosDeRegla;
 import co.edu.unal.rutaun.normativa.dominio.Regla;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
+import co.edu.unal.rutaun.normativa.persistencia.AlcanceJson;
 import co.edu.unal.rutaun.normativa.persistencia.NormaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.NormaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaEntity;
@@ -24,10 +30,13 @@ import co.edu.unal.rutaun.normativa.persistencia.ReglaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.VersionDelConsolidadoRepository;
 import co.edu.unal.rutaun.normativa.persistencia.VersionEntity;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
+import co.edu.unal.rutaun.utilidades.JsonConfig;
 import java.text.Collator;
 import java.time.LocalDate;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -38,6 +47,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.core.JacksonException;
 
 /**
  * Implementación de la fachada de consulta de Normativa (UC06-HU01-T4, #132): lee el consolidado
@@ -47,6 +57,9 @@ import org.springframework.transaction.annotation.Transactional;
  * vigentes, programadas y en revisión, y deja fuera las que ya no rigen. Las agrupa por categoría
  * según el glosario («Regla») y, dentro de cada una, las ordena por fecha de expedición de su
  * norma, artículo, enunciado e identificador.
+ *
+ * <p>La regla completa sí abre las que ya no rigen, con ese estado: son las que la cadena de normas
+ * explica.
  *
  * <p>Es solo de lectura: no publica eventos ni guarda nada. El incidente de un consolidado sin
  * reglas lo publica el orquestador de UC06.
@@ -138,6 +151,141 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
         .map(version -> aConsolidado(id, version));
   }
 
+  @Override
+  public Optional<ReglaCompletaVista> regla(ProgramaId programa, ReglaId id) {
+    ArgumentChecks.obligatorio(programa, "programa");
+    ArgumentChecks.obligatorio(id, "id");
+    Optional<VersionEntity> version =
+        versiones.findTopByProgramaIdOrderByNumeroDesc(programa.valor());
+    Optional<ReglaEntity> encontrada = reglas.findById(id.valor());
+    if (version.isEmpty() || encontrada.isEmpty()) {
+      return Optional.empty();
+    }
+    ReglaEntity fila = encontrada.get();
+    List<ReglaEntity> linaje = linajeDeLaRegla(fila);
+
+    Map<UUID, EstadoRegla> estados = new HashMap<>();
+    for (ReglaEnVersionEntity enVersion :
+        reglasEnVersion.findByVersionIdAndReglaIdIn(
+            version.get().getId(), linaje.stream().map(ReglaEntity::getId).toList())) {
+      estados.put(enVersion.getReglaId(), EstadoRegla.valueOf(enVersion.getEstado()));
+    }
+    EstadoRegla estado = estados.get(fila.getId());
+    if (estado == null) {
+      return Optional.empty();
+    }
+    List<ReglaEntity> deLaVersion =
+        linaje.stream().filter(regla -> estados.containsKey(regla.getId())).toList();
+
+    Map<UUID, NormaEntity> normasPorId =
+        normas
+            .findAllById(deLaVersion.stream().map(ReglaEntity::getNormaId).distinct().toList())
+            .stream()
+            .collect(Collectors.toMap(NormaEntity::getId, norma -> norma));
+
+    Regla regla = ReglaMapper.aDominio(fila, estado);
+    NormaEntity norma = normasPorId.get(fila.getNormaId());
+    return Optional.of(
+        new ReglaCompletaVista(
+            regla.id(),
+            regla.enunciado(),
+            Optional.ofNullable(norma).map(n -> aFuente(n, regla.fuente().articulo())),
+            estado,
+            esTemporal(regla.vigenciaPropia(), norma == null ? null : norma.getVigenteHasta()),
+            regla.clasificacion(),
+            Optional.ofNullable(fila.getVigenteDesde())
+                .or(() -> Optional.ofNullable(norma).map(NormaEntity::getAplicaDesde)),
+            Optional.ofNullable(fila.getVigenteHasta())
+                .or(() -> Optional.ofNullable(norma).map(NormaEntity::getVigenteHasta)),
+            Optional.ofNullable(norma).map(n -> TipoAlcance.valueOf(n.getTipoAlcance())),
+            Optional.ofNullable(norma)
+                .map(NormaEntity::getAlcanceDetalle)
+                .flatMap(ConsultaNormativaService::textoDelAlcance),
+            cadenaDeNormas(deLaVersion, estados, normasPorId)));
+  }
+
+  /**
+   * La regla y todas las que la rodean por afectaciones: las que ella afecta, hacia arriba hasta la
+   * que la expidió, y todas las que afectan a cada una, hacia abajo. Así la cadena es la misma se
+   * abra la regla que se abra: la original, la que la modifica o una modificatoria de la
+   * modificatoria.
+   */
+  private List<ReglaEntity> linajeDeLaRegla(ReglaEntity fila) {
+    Map<UUID, ReglaEntity> linaje = new LinkedHashMap<>();
+    linaje.put(fila.getId(), fila);
+    UUID idDeLaAfectada = fila.getReglaAfectadaId();
+    while (idDeLaAfectada != null && !linaje.containsKey(idDeLaAfectada)) {
+      Optional<ReglaEntity> afectada = reglas.findById(idDeLaAfectada);
+      if (afectada.isEmpty()) {
+        break;
+      }
+      linaje.put(idDeLaAfectada, afectada.get());
+      idDeLaAfectada = afectada.get().getReglaAfectadaId();
+    }
+    Deque<ReglaEntity> pendientes = new ArrayDeque<>(linaje.values());
+    while (!pendientes.isEmpty()) {
+      for (ReglaEntity afectante : reglas.findByReglaAfectadaId(pendientes.poll().getId())) {
+        if (linaje.putIfAbsent(afectante.getId(), afectante) == null) {
+          pendientes.add(afectante);
+        }
+      }
+    }
+    return new ArrayList<>(linaje.values());
+  }
+
+  /**
+   * El texto con el que la norma fija su alcance. La columna guarda un JSON ({@link AlcanceJson});
+   * si no se puede leer, no hay texto que mostrar y la página sigue funcionando.
+   */
+  private static Optional<String> textoDelAlcance(String detalle) {
+    if (detalle.isBlank()) {
+      return Optional.empty();
+    }
+    try {
+      return Optional.ofNullable(JsonConfig.mapper().readValue(detalle, AlcanceJson.class).texto())
+          .filter(texto -> !texto.isBlank());
+    } catch (JacksonException e) {
+      return Optional.empty();
+    }
+  }
+
+  /**
+   * Las normas de la regla y de las que la rodean por afectaciones (ver {@link #linajeDeLaRegla}),
+   * de la más antigua a la más reciente (UC06 ext. 8a). Con la misma fecha, primero la que expidió
+   * la regla y luego por artículo. Marca como «rige» la regla que está vigente en el consolidado;
+   * deja fuera las reglas que no están en la versión del programa y las que no tienen norma.
+   */
+  private static List<EslabonVista> cadenaDeNormas(
+      List<ReglaEntity> deLaVersion,
+      Map<UUID, EstadoRegla> estados,
+      Map<UUID, NormaEntity> normasPorId) {
+    List<EslabonVista> cadena = new ArrayList<>();
+    for (ReglaEntity regla : deLaVersion) {
+      NormaEntity norma = normasPorId.get(regla.getNormaId());
+      if (norma != null) {
+        cadena.add(aEslabon(regla, norma, estados));
+      }
+    }
+    cadena.sort(
+        Comparator.comparing(EslabonVista::fechaExpedicion)
+            .thenComparing(eslabon -> eslabon.cambio().isPresent())
+            .thenComparing(eslabon -> eslabon.fuente().articulo(), OrdenDeArticulos.INSTANCIA));
+    return cadena;
+  }
+
+  private static EslabonVista aEslabon(
+      ReglaEntity fila, NormaEntity norma, Map<UUID, EstadoRegla> estados) {
+    Optional<TipoDeCambio> cambio =
+        fila.getReglaAfectadaId() == null
+            ? Optional.empty()
+            : Optional.ofNullable(fila.getTipoAfectacion()).map(TipoDeCambio::valueOf);
+    return new EslabonVista(
+        cambio,
+        aFuente(norma, fila.getFuente()),
+        norma.getFechaExpedicion(),
+        estados.get(fila.getId()) == EstadoRegla.VIGENTE);
+  }
+
   private ConsolidadoVista aConsolidado(ProgramaId programa, VersionEntity version) {
     Map<UUID, EstadoRegla> estados = new HashMap<>();
     for (ReglaEnVersionEntity fila : reglasEnVersion.findByVersionId(version.getId())) {
@@ -177,6 +325,7 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
         esTemporal(regla.vigenciaPropia(), norma == null ? null : norma.getVigenteHasta());
     ReglaVista vista =
         new ReglaVista(
+            regla.id(),
             regla.enunciado(),
             Optional.ofNullable(norma).map(n -> aFuente(n, regla.fuente().articulo())),
             estado,

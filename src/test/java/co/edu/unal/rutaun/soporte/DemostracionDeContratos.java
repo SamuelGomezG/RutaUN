@@ -1,6 +1,7 @@
 package co.edu.unal.rutaun.soporte;
 
 import co.edu.unal.rutaun.compartido.EstadoRegla;
+import co.edu.unal.rutaun.compartido.ReglaId;
 import co.edu.unal.rutaun.normativa.ClasificacionRegla;
 import co.edu.unal.rutaun.normativa.ConsolidadoVista;
 import co.edu.unal.rutaun.normativa.ReglaVista;
@@ -42,6 +43,7 @@ public final class DemostracionDeContratos {
         "  "
             + describir(
                 new ReglaVista(
+                    ReglaId.nuevo(),
                     "Regla de prueba sin fuente.",
                     Optional.empty(),
                     EstadoRegla.EN_REVISION,
