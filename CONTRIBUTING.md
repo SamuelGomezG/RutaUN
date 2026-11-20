@@ -126,7 +126,7 @@ Los hooks de [`.githooks/`](.githooks) revisan tu trabajo en tu máquina antes d
 - **`verify` revisa todo tu árbol de trabajo**, no solo lo que preparaste con `git add`; `pre-commit` avisa si hay cambios de código sin preparar y `pre-push`, si hay sin confirmar.
 - **Viven en el árbol de trabajo.** En una rama que no contenga `.githooks/` (por ejemplo, una creada antes de que se fusionaran), git no ejecuta nada y no avisa: rebásala sobre `develop`.
 - **Necesitan JDK 21** en el entorno desde el que haces el commit o el push. Si lo haces desde un IDE con otro `JAVA_HOME`, el Enforcer de Maven lo dirá.
-- **En Windows** deberían funcionar con Git Bash, que viene con Git for Windows, pero no se han probado ahí.
+- **En Windows:** los hooks se probaron con Git Bash y PowerShell (`.githooks/probar.sh`: 73 casos en verde). Los comandos Unix de demostración (`scripts/consultar-base.sh`, `base=$(mktemp -d)/rutaun`) no valen en Git Bash: usa los de PowerShell.
 - **Probarlos:** `.githooks/probar.sh` ejercita los tres con casos buenos y malos, sin tocar tu repositorio. Si cambias un hook, cambia ahí sus casos.
 - Si `verify` pasa de 30 s, conviene dejarlo solo en `pre-push` y quitarlo de `pre-commit`; el hook te avisa cuando ocurra.
 

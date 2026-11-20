@@ -48,6 +48,8 @@ Para cambiar una propiedad en una sola ejecución, sin editar archivos, pásala 
   "-Dspring-boot.run.arguments=--spring.datasource.url=jdbc:h2:file:/tmp/rutaun-prueba/rutaun --server.port=18080"
 ```
 
+En Windows, incluido Git Bash, usa `.\mvnw.cmd` con los argumentos de PowerShell: las rutas `/tmp/…` de este ejemplo son de Unix y Java las resolvería con `C:`.
+
 **El reloj.** `RelojConfig` publica un `Clock` en hora de Colombia (`America/Bogota`). Las fechas que pone la aplicación —la de una versión del consolidado, las de un incidente— salen de él, no del sistema operativo. Las pruebas lo reemplazan por uno fijo.
 
 ## Qué hace el arranque
