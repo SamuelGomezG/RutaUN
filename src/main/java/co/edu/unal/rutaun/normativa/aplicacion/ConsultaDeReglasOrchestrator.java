@@ -3,6 +3,7 @@ package co.edu.unal.rutaun.normativa.aplicacion;
 import co.edu.unal.rutaun.compartido.ProgramaId;
 import co.edu.unal.rutaun.compartido.ReglaId;
 import co.edu.unal.rutaun.incidentes.IncidenteDePrograma;
+import co.edu.unal.rutaun.normativa.BusquedaDeReglas;
 import co.edu.unal.rutaun.normativa.ConsolidadoVista;
 import co.edu.unal.rutaun.normativa.ConsultaNormativaFacade;
 import co.edu.unal.rutaun.normativa.ProgramaVista;
@@ -59,20 +60,45 @@ public class ConsultaDeReglasOrchestrator {
    * @return el programa y su consolidado, o la razón por la que no hay nada que mostrar
    */
   public ReglasDelPrograma reglasDelPrograma(ProgramaId id) {
+    return reglasDelPrograma(id, BusquedaDeReglas.TODAS);
+  }
+
+  /**
+   * Las reglas del programa que cumplen la búsqueda (UC06 paso 6). Que ninguna la cumpla (ext. 5a)
+   * no es un problema del consolidado: no publica ningún incidente y devuelve el consolidado sin
+   * reglas, para que la página lo diga. Solo el consolidado vigente que no tiene reglas (ext. 4a)
+   * publica el incidente, y se detecta al pedir las reglas sin búsqueda.
+   *
+   * @param id identificador del programa
+   * @param busqueda texto y filtros; {@link BusquedaDeReglas#TODAS} para el listado normal
+   * @return el programa y su consolidado con las reglas que cumplen la búsqueda, o la razón por la
+   *     que no hay nada que mostrar
+   */
+  public ReglasDelPrograma reglasDelPrograma(ProgramaId id, BusquedaDeReglas busqueda) {
+    ArgumentChecks.obligatorio(busqueda, "busqueda");
     Optional<ProgramaVista> programa = consulta.programa(id);
     if (programa.isEmpty()) {
       return new ReglasDelPrograma.ProgramaNoCargado();
     }
-    Optional<ConsolidadoVista> consolidado = consulta.consolidadoVigente(id);
+    Optional<ConsolidadoVista> consolidado = consulta.buscarReglas(id, busqueda);
     if (consolidado.isEmpty()) {
       return new ReglasDelPrograma.SinVersionVigente(programa.get());
     }
-    if (consolidado.get().sinReglas()) {
+    if (busqueda.esVacia() && consolidado.get().sinReglas()) {
       eventos.publicar(
           new IncidenteDePrograma(
               CASO_DE_USO, PASO, id, consolidado.get().version(), CAUSA, List.of()));
     }
     return new ReglasDelPrograma.Consultadas(programa.get(), consolidado.get());
+  }
+
+  /**
+   * Los nombres de las categorías de reglas, en el orden del glosario, para el filtro de la página.
+   *
+   * @return los nombres de las categorías
+   */
+  public List<String> categoriasDeReglas() {
+    return consulta.categoriasDeReglas();
   }
 
   /**

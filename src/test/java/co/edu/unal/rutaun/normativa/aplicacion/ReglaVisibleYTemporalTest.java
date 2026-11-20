@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.Momento;
+import co.edu.unal.rutaun.normativa.BusquedaDeReglas;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
 import java.time.LocalDate;
 import java.util.Optional;
@@ -50,5 +51,23 @@ class ReglaVisibleYTemporalTest {
   void uc06_paso4_noEsTemporalSiNiLaReglaNiLaNormaTienenFin() {
     assertThat(ConsultaNormativaService.esTemporal(Optional.empty(), null)).isFalse();
     assertThat(ConsultaNormativaService.esTemporal(Optional.of(vigencia(false)), null)).isFalse();
+  }
+
+  @Test
+  void uc06_paso6_sinEstadoLaBusquedaRecorreLasMismasQueElListadoNormal() {
+    for (EstadoRegla estado : EstadoRegla.values()) {
+      assertThat(ConsultaNormativaService.seBusca(estado, BusquedaDeReglas.TODAS))
+          .isEqualTo(ConsultaNormativaService.seMuestra(estado));
+    }
+  }
+
+  @Test
+  void uc06_ext5b_conUnEstadoLaBusquedaRecorreSoloLasQueLoTienen() {
+    for (EstadoRegla pedido : EstadoRegla.values()) {
+      BusquedaDeReglas busqueda = BusquedaDeReglas.de(null, null, pedido);
+      for (EstadoRegla estado : EstadoRegla.values()) {
+        assertThat(ConsultaNormativaService.seBusca(estado, busqueda)).isEqualTo(estado == pedido);
+      }
+    }
   }
 }

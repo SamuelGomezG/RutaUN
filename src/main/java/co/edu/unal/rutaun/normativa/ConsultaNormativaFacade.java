@@ -26,6 +26,19 @@ public interface ConsultaNormativaFacade {
   Optional<ConsolidadoVista> consolidadoVigente(ProgramaId id);
 
   /**
+   * Las reglas del consolidado vigente que cumplen la búsqueda (UC06 paso 6): por texto, por
+   * categoría y por estado. Con la búsqueda vacía, es el {@link #consolidadoVigente}. Con el estado
+   * «ya no rige» devuelve esas reglas, y solo esas, con su vigencia (ext. 5b). Si ninguna cumple la
+   * búsqueda (ext. 5a), devuelve el consolidado con {@link ConsolidadoVista#reglasPorCategoria()}
+   * vacío. Vacío solo si el programa no está cargado o no tiene una versión vigente del
+   * consolidado.
+   */
+  Optional<ConsolidadoVista> buscarReglas(ProgramaId id, BusquedaDeReglas busqueda);
+
+  /** Los nombres de las categorías de reglas, en el orden del glosario, para filtrar por ellas. */
+  List<String> categoriasDeReglas();
+
+  /**
    * La regla completa, tal como la muestra UC06 al abrirla (paso 8), con la cadena de normas que la
    * expidieron, la modificaron, la derogaron o la exceptuaron: es la misma cadena se abra la regla
    * original o la que la modifica. Abre también las reglas que ya no rigen, con ese estado. Vacío

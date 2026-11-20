@@ -12,6 +12,7 @@ import co.edu.unal.rutaun.compartido.ProgramaId;
 import co.edu.unal.rutaun.compartido.ReglaId;
 import co.edu.unal.rutaun.incidentes.persistencia.IncidenteEntity;
 import co.edu.unal.rutaun.incidentes.persistencia.IncidenteRepository;
+import co.edu.unal.rutaun.normativa.BusquedaDeReglas;
 import co.edu.unal.rutaun.normativa.ClasificacionRegla;
 import co.edu.unal.rutaun.normativa.ConsolidadoVista;
 import co.edu.unal.rutaun.normativa.ConsultaNormativaFacade;
@@ -100,6 +101,16 @@ class ReglasDelProgramaEstadosTest {
         @Override
         public Optional<ProgramaVista> programa(ProgramaId id) {
           return Optional.of(new ProgramaVista(id, "Programa de prueba", "0000", "Facultad"));
+        }
+
+        @Override
+        public Optional<ConsolidadoVista> buscarReglas(ProgramaId id, BusquedaDeReglas busqueda) {
+          return consolidadoVigente(id);
+        }
+
+        @Override
+        public List<String> categoriasDeReglas() {
+          return List.of();
         }
 
         @Override
