@@ -8,7 +8,7 @@ import java.util.stream.Stream;
  * Nodo de la malla (patrón Composite): un componente, el de libre elección o una agrupación. Quien
  * recorre la malla no distingue hojas de nodos compuestos: una hoja es un nodo sin {@link #hijos}.
  */
-public interface NodoDeMalla {
+public sealed interface NodoDeMalla permits Componente, ComponenteDeLibreEleccion, Agrupacion {
 
   /** Nombre del nodo. */
   String nombre();
@@ -33,8 +33,8 @@ public interface NodoDeMalla {
   }
 
   /**
-   * Suma los créditos de las materias que cubren este nodo, las suyas y las de lo que contiene. Una
-   * materia ubicada en varias agrupaciones se suma en cada una.
+   * Suma los créditos de todas las materias del nodo y de lo que contiene, incluidas las optativas,
+   * que son alternativas entre sí: es la oferta de créditos, no lo que cubre el nodo.
    */
   default Creditos creditosDeMaterias() {
     Creditos total = new Creditos(0);
