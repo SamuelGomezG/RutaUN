@@ -4,16 +4,28 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.PostPersist;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import org.springframework.data.domain.Persistable;
 
-/** Fila de la tabla {@code incidente}: un grupo de incidentes iguales con su conteo. */
+/**
+ * Fila de la tabla {@code incidente}: un grupo de incidentes iguales con su conteo.
+ *
+ * <p>Guardar no sobrescribe: si el id ya existe, la inserción falla; para cambiar la fila, se lee y
+ * se modifica la entidad leída.
+ */
 @Entity
 @Table(name = "incidente")
-public class IncidenteEntity {
+public class IncidenteEntity implements Persistable<UUID> {
 
   @Id private UUID id;
+
+  /** Si la fila todavía no está en la base. JPA no lo guarda. */
+  @Transient private boolean nueva = true;
 
   @Column(name = "caso_de_uso", nullable = false)
   private String casoDeUso;
@@ -74,8 +86,22 @@ public class IncidenteEntity {
     this.atendido = atendido;
   }
 
+  @Override
   public UUID getId() {
     return id;
+  }
+
+  /** Spring Data hace {@code persist}, y no {@code merge}, mientras la entidad sea nueva. */
+  @Override
+  public boolean isNew() {
+    return nueva;
+  }
+
+  /** Marca la entidad como ya guardada; la llaman JPA al insertar y al leer. */
+  @PostPersist
+  @PostLoad
+  void marcarComoGuardada() {
+    nueva = false;
   }
 
   public String getCasoDeUso() {
