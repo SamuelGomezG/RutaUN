@@ -40,7 +40,7 @@
       "datos": {
         "tipo": "CARGA_POR_PERIODO",
         "creditos": 10,
-        "tipoCarga": "MINIMA"
+        "tipoCarga": "MINIMO"
       }
     },
     {

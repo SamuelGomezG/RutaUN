@@ -22,9 +22,9 @@ class AfectacionTest {
   void tt03_afectacionPuedeSenalarUnaReglaConcreta() {
     Afectacion afectacion =
         new Afectacion(
-            TipoDeAfectacion.DEROGA, Optional.of(REGLA), Optional.empty(), Optional.of(DESDE));
+            TipoAfectacion.DEROGA, Optional.of(REGLA), Optional.empty(), Optional.of(DESDE));
 
-    assertThat(afectacion.tipo()).isEqualTo(TipoDeAfectacion.DEROGA);
+    assertThat(afectacion.tipo()).isEqualTo(TipoAfectacion.DEROGA);
     assertThat(afectacion.reglaAfectada()).contains(REGLA);
     assertThat(afectacion.articuloAfectado()).isEmpty();
     assertThat(afectacion.desde()).contains(DESDE);
@@ -35,7 +35,7 @@ class AfectacionTest {
     Fuente articulo = new Fuente(NORMA, "art. 2");
     Afectacion afectacion =
         new Afectacion(
-            TipoDeAfectacion.MODIFICA, Optional.empty(), Optional.of(articulo), Optional.empty());
+            TipoAfectacion.MODIFICA, Optional.empty(), Optional.of(articulo), Optional.empty());
 
     assertThat(afectacion.reglaAfectada()).isEmpty();
     assertThat(afectacion.articuloAfectado()).contains(articulo);
@@ -47,16 +47,13 @@ class AfectacionTest {
     assertThatThrownBy(
             () ->
                 new Afectacion(
-                    TipoDeAfectacion.EXCEPTUA,
-                    Optional.empty(),
-                    Optional.empty(),
-                    Optional.empty()))
+                    TipoAfectacion.EXCEPTUA, Optional.empty(), Optional.empty(), Optional.empty()))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("la afectación debe indicar exactamente una regla o un artículo");
     assertThatThrownBy(
             () ->
                 new Afectacion(
-                    TipoDeAfectacion.EXCEPTUA,
+                    TipoAfectacion.EXCEPTUA,
                     Optional.of(REGLA),
                     Optional.of(new Fuente(NORMA, "art. 2")),
                     Optional.empty()))
@@ -71,22 +68,21 @@ class AfectacionTest {
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("tipo no puede ser null");
     assertThatThrownBy(
-            () -> new Afectacion(TipoDeAfectacion.DEROGA, null, Optional.empty(), Optional.empty()))
+            () -> new Afectacion(TipoAfectacion.DEROGA, null, Optional.empty(), Optional.empty()))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("reglaAfectada no puede ser null");
     assertThatThrownBy(
-            () -> new Afectacion(TipoDeAfectacion.DEROGA, Optional.empty(), null, Optional.empty()))
+            () -> new Afectacion(TipoAfectacion.DEROGA, Optional.empty(), null, Optional.empty()))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("articuloAfectado no puede ser null");
     assertThatThrownBy(
-            () ->
-                new Afectacion(TipoDeAfectacion.DEROGA, Optional.of(REGLA), Optional.empty(), null))
+            () -> new Afectacion(TipoAfectacion.DEROGA, Optional.of(REGLA), Optional.empty(), null))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("desde no puede ser null");
     assertThatThrownBy(
             () ->
                 new Afectacion(
-                    TipoDeAfectacion.DEROGA,
+                    TipoAfectacion.DEROGA,
                     Optional.empty(),
                     Optional.of(new Fuente(NORMA, " ")),
                     Optional.empty()))

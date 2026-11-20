@@ -107,7 +107,7 @@ No se usan columnas de tipo JSON: son `CLOB` con texto que escriben y leen los m
 
 | Columna | Qué guarda | Ejemplo |
 | --- | --- | --- |
-| `regla.datos` | Los datos propios de la categoría de la regla. La categoría la dice la columna `categoria`, no el JSON | `{"creditos":{"valor":10},"tipo":"MINIMA"}` en una regla `CARGA_POR_PERIODO` |
+| `regla.datos` | Los datos propios de la categoría de la regla. La categoría la dice la columna `categoria`, no el JSON | `{"creditos":{"valor":10},"tipo":"MINIMO"}` en una regla `CARGA_POR_PERIODO` |
 | `norma.alcance_detalle` | Facultades, programas, exclusiones y texto del alcance. Los programas van por su `id`, no por el código SIA del archivo | `{"facultades":[],"programas":["6c6d…"],"exclusiones":[],"texto":"…"}` |
 | `version_consolidado.detalle_motivo` | Los datos del motivo de la versión. Excepción a la convención: es `VARCHAR(300)`, no `CLOB`; el mapper limita el detalle a 300 caracteres | `{"norma":{"valor":"205c…"},"administrador":"Semilla de desarrollo"}` |
 | `version_consolidado.cambios` | Los cambios respecto a la versión anterior | Hoy `null` |

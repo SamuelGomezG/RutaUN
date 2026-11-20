@@ -8,7 +8,7 @@ import co.edu.unal.rutaun.normativa.ClasificacionRegla;
 import co.edu.unal.rutaun.normativa.dominio.DatosDeRegla;
 import co.edu.unal.rutaun.normativa.dominio.ExpresionDeMaterias;
 import co.edu.unal.rutaun.normativa.dominio.Regla;
-import co.edu.unal.rutaun.normativa.dominio.TipoDeCargaPorPeriodo;
+import co.edu.unal.rutaun.normativa.dominio.TipoCargaPorPeriodo;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
 import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoRepository;
 import co.edu.unal.rutaun.normativa.persistencia.NormaRepository;
@@ -167,13 +167,13 @@ class SemillaDeSistemasTest {
         .anyMatch(
             regla ->
                 regla.datos() instanceof DatosDeRegla.DeCargaPorPeriodo carga
-                    && carga.tipo() == TipoDeCargaPorPeriodo.MINIMA);
+                    && carga.tipo() == TipoCargaPorPeriodo.MINIMO);
     assertThat(reglasVigentes)
         .as("una carga máxima por periodo")
         .anyMatch(
             regla ->
                 regla.datos() instanceof DatosDeRegla.DeCargaPorPeriodo carga
-                    && carga.tipo() == TipoDeCargaPorPeriodo.MAXIMA);
+                    && carga.tipo() == TipoCargaPorPeriodo.MAXIMO);
     assertThat(reglasVigentes)
         .as("un prerrequisito")
         .anyMatch(regla -> regla.datos() instanceof DatosDeRegla.DePrerrequisito);

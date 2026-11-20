@@ -111,7 +111,7 @@ class DatosDeReglaTest {
         new DatosDeRegla.DeComponente(fundamentacion),
         new DatosDeRegla.DePrograma(new Creditos(160)),
         new DatosDeRegla.DeEquivalencia(Set.of(A), B),
-        new DatosDeRegla.DeCargaPorPeriodo(new Creditos(10), TipoDeCargaPorPeriodo.MINIMA),
+        new DatosDeRegla.DeCargaPorPeriodo(new Creditos(10), TipoCargaPorPeriodo.MINIMO),
         new DatosDeRegla.DeRequisitoDeGrado(),
         new DatosDeRegla.DeOtraCategoria());
   }

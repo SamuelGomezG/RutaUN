@@ -40,7 +40,7 @@
       "datos": {
         "tipo": "CARGA_POR_PERIODO",
         "creditos": 25,
-        "tipoCarga": "MAXIMA"
+        "tipoCarga": "MAXIMO"
       }
     },
     {

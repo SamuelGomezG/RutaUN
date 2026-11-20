@@ -13,7 +13,7 @@ import co.edu.unal.rutaun.normativa.dominio.MedidaDeCreditos;
 import co.edu.unal.rutaun.normativa.dominio.NodoDeMalla;
 import co.edu.unal.rutaun.normativa.dominio.Prerrequisito;
 import co.edu.unal.rutaun.normativa.dominio.ReglaDeHabilitacion;
-import co.edu.unal.rutaun.normativa.dominio.TipoDeCargaPorPeriodo;
+import co.edu.unal.rutaun.normativa.dominio.TipoCargaPorPeriodo;
 import co.edu.unal.rutaun.soporte.MallaDePrueba;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
@@ -83,7 +83,7 @@ class CategoriaDeReglaTest {
         .isEqualTo("Equivalencias");
     assertThat(
             ConsultaNormativaService.categoria(
-                new DatosDeRegla.DeCargaPorPeriodo(new Creditos(10), TipoDeCargaPorPeriodo.MINIMA)))
+                new DatosDeRegla.DeCargaPorPeriodo(new Creditos(10), TipoCargaPorPeriodo.MINIMO)))
         .isEqualTo("Carga mínima o máxima por periodo");
     assertThat(ConsultaNormativaService.categoria(new DatosDeRegla.DeRequisitoDeGrado()))
         .isEqualTo("Requisitos de grado");

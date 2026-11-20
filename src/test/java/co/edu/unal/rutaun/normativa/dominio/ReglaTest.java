@@ -25,10 +25,7 @@ class ReglaTest {
   private static final DatosDeRegla DATOS = new DatosDeRegla.DePrograma(new Creditos(160));
   private static final Afectacion AFECTACION =
       new Afectacion(
-          TipoDeAfectacion.DEROGA,
-          Optional.of(ReglaId.nuevo()),
-          Optional.empty(),
-          Optional.empty());
+          TipoAfectacion.DEROGA, Optional.of(ReglaId.nuevo()), Optional.empty(), Optional.empty());
 
   @Test
   void tt03_reglaGuardaSusDatosYSuCategoria() {

@@ -23,8 +23,8 @@ import co.edu.unal.rutaun.normativa.dominio.Norma;
 import co.edu.unal.rutaun.normativa.dominio.Prerrequisito;
 import co.edu.unal.rutaun.normativa.dominio.Regla;
 import co.edu.unal.rutaun.normativa.dominio.ReglaDeHabilitacion;
-import co.edu.unal.rutaun.normativa.dominio.TipoDeCargaPorPeriodo;
-import co.edu.unal.rutaun.normativa.dominio.TipoDeMateriaExterna;
+import co.edu.unal.rutaun.normativa.dominio.TipoCargaPorPeriodo;
+import co.edu.unal.rutaun.normativa.dominio.TipoMateriaExterna;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
 import co.edu.unal.rutaun.soporte.MallaDePrueba;
 import java.time.LocalDate;
@@ -100,7 +100,7 @@ final class ReglasDePrueba {
                 new ExpresionDeMaterias.MateriaExterna(
                     "Matemáticas Básicas",
                     Optional.of(new CodigoMateria("1000001")),
-                    TipoDeMateriaExterna.OTRO_PROGRAMA)));
+                    TipoMateriaExterna.OTRO_PROGRAMA)));
     return List.of(
         new DatosDeRegla.DeMateria(materia, fundamentacion),
         new DatosDeRegla.DePrerrequisito(new Prerrequisito(B, compuesta)),
@@ -110,7 +110,7 @@ final class ReglasDePrueba {
                 new ExpresionDeMaterias.MateriaExterna(
                     "Nivelación de lectoescritura",
                     Optional.empty(),
-                    TipoDeMateriaExterna.NIVELACION))),
+                    TipoMateriaExterna.NIVELACION))),
         new DatosDeRegla.DeHabilitacion(
             new ReglaDeHabilitacion(
                 B, MedidaDeCreditos.deComponente("Fundamentación"), new Creditos(40))),
@@ -118,7 +118,7 @@ final class ReglasDePrueba {
         new DatosDeRegla.DeComponente(fundamentacion),
         new DatosDeRegla.DePrograma(new Creditos(160)),
         new DatosDeRegla.DeEquivalencia(Set.of(A, B), new CodigoMateria("9000010")),
-        new DatosDeRegla.DeCargaPorPeriodo(new Creditos(10), TipoDeCargaPorPeriodo.MINIMA),
+        new DatosDeRegla.DeCargaPorPeriodo(new Creditos(10), TipoCargaPorPeriodo.MINIMO),
         new DatosDeRegla.DeRequisitoDeGrado(),
         new DatosDeRegla.DeOtraCategoria(),
         new DatosDeRegla.DeComponente(libreEleccion),

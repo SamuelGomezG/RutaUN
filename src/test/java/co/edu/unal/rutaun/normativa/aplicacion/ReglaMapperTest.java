@@ -14,7 +14,7 @@ import co.edu.unal.rutaun.normativa.dominio.DatosDeRegla;
 import co.edu.unal.rutaun.normativa.dominio.Fuente;
 import co.edu.unal.rutaun.normativa.dominio.Norma;
 import co.edu.unal.rutaun.normativa.dominio.Regla;
-import co.edu.unal.rutaun.normativa.dominio.TipoDeAfectacion;
+import co.edu.unal.rutaun.normativa.dominio.TipoAfectacion;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
 import co.edu.unal.rutaun.normativa.persistencia.NormaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEntity;
@@ -94,7 +94,7 @@ class ReglaMapperTest {
             EstadoRegla.PROGRAMADA,
             Optional.of(
                 new Afectacion(
-                    TipoDeAfectacion.EXCEPTUA,
+                    TipoAfectacion.EXCEPTUA,
                     Optional.of(afectada.id()),
                     Optional.empty(),
                     Optional.empty())),
@@ -139,7 +139,7 @@ class ReglaMapperTest {
     Regla conArticulo =
         conAfectacion(
             new Afectacion(
-                TipoDeAfectacion.MODIFICA,
+                TipoAfectacion.MODIFICA,
                 Optional.empty(),
                 Optional.of(new Fuente(norma.id(), "art. 7")),
                 Optional.empty()));
@@ -154,7 +154,7 @@ class ReglaMapperTest {
     Regla conDesde =
         conAfectacion(
             new Afectacion(
-                TipoDeAfectacion.DEROGA,
+                TipoAfectacion.DEROGA,
                 Optional.of(ReglaId.nuevo()),
                 Optional.empty(),
                 Optional.of(new Momento.EnFecha(LocalDate.of(2027, 1, 1)))));
