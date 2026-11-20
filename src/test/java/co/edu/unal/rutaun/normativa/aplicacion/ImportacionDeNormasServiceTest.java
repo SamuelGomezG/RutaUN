@@ -13,6 +13,7 @@ import co.edu.unal.rutaun.normativa.persistencia.ReglaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.VersionDelConsolidadoRepository;
 import co.edu.unal.rutaun.normativa.persistencia.VersionEntity;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
+import jakarta.persistence.EntityManager;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Comparator;
@@ -43,6 +44,8 @@ class ImportacionDeNormasServiceTest {
   private final VersionDelConsolidadoRepository versiones;
   private final ReglaEnVersionRepository reglasEnVersion;
   private final ProgramaRepository programasGuardados;
+
+  @Autowired private EntityManager em;
 
   @Autowired
   ImportacionDeNormasServiceTest(
@@ -104,12 +107,13 @@ class ImportacionDeNormasServiceTest {
 
     VersionEntity primera = versionesOrdenadas().get(0);
     ReglaEnVersionEntity heredada = reglasEnVersion.findByVersionId(primera.getId()).get(0);
-    reglasEnVersion.saveAndFlush(
-        new ReglaEnVersionEntity(
-            heredada.getId(),
-            heredada.getVersionId(),
-            heredada.getReglaId(),
-            EstadoRegla.YA_NO_RIGE.name()));
+    // Una versión no se modifica por el dominio: el estado se fija con un UPDATE.
+    em.flush();
+    em.createQuery("UPDATE ReglaEnVersionEntity r SET r.estado = :estado WHERE r.id = :id")
+        .setParameter("estado", EstadoRegla.YA_NO_RIGE.name())
+        .setParameter("id", heredada.getId())
+        .executeUpdate();
+    em.clear();
 
     importarNorma("semilla/acuerdo-008-2008.json");
 
