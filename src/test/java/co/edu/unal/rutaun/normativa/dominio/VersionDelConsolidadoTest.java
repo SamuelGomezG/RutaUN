@@ -23,15 +23,15 @@ class VersionDelConsolidadoTest {
   private static final MotivoDeVersion MOTIVO = new MotivoDeVersion.PorIncorporacion(NORMA, "Ana");
   private static final MotivoDeVersion CORRECCION = new MotivoDeVersion.PorCorreccion("Ana");
 
-  private static Regla estructural(ReglaId id, EstadoRegla estado) {
-    return regla(id, estado, new DatosDeRegla.DePrograma(new Creditos(160)));
+  private static ReglaEnVersion estructural(ReglaId id, EstadoRegla estado) {
+    return new ReglaEnVersion(regla(id, new DatosDeRegla.DePrograma(new Creditos(160))), estado);
   }
 
-  private static Regla noEstructural(ReglaId id, EstadoRegla estado) {
-    return regla(id, estado, new DatosDeRegla.DeOtraCategoria());
+  private static ReglaEnVersion noEstructural(ReglaId id, EstadoRegla estado) {
+    return new ReglaEnVersion(regla(id, new DatosDeRegla.DeOtraCategoria()), estado);
   }
 
-  private static Regla regla(ReglaId id, EstadoRegla estado, DatosDeRegla datos) {
+  private static Regla regla(ReglaId id, DatosDeRegla datos) {
     return Regla.reconstituir(
         id,
         "Objeto",
@@ -39,18 +39,17 @@ class VersionDelConsolidadoTest {
         new Fuente(NORMA, "art. 1"),
         Optional.empty(),
         ClasificacionRegla.DEL_PLAN,
-        estado,
         Optional.empty(),
         datos);
   }
 
-  private static ConsolidadoValidado validado(Regla... reglas) {
+  private static ConsolidadoValidado validado(ReglaEnVersion... reglas) {
     return new ConsolidadoValidado(PROGRAMA, List.of(reglas));
   }
 
   @Test
   void tt02_primeraVersionEmpiezaEnUnoYGuardaSusDatos() {
-    Regla regla = estructural(ReglaId.nuevo(), EstadoRegla.VIGENTE);
+    ReglaEnVersion regla = estructural(ReglaId.nuevo(), EstadoRegla.VIGENTE);
 
     VersionDelConsolidado primera = VersionDelConsolidado.primera(validado(regla), MOTIVO, FECHA);
 
@@ -64,7 +63,7 @@ class VersionDelConsolidadoTest {
 
   @Test
   void tt02_siguienteCreaLaVersionConElNumeroSiguienteYNoTocaLaAnterior() {
-    Regla vieja = estructural(ReglaId.nuevo(), EstadoRegla.VIGENTE);
+    ReglaEnVersion vieja = estructural(ReglaId.nuevo(), EstadoRegla.VIGENTE);
     VersionDelConsolidado primera = VersionDelConsolidado.primera(validado(vieja), MOTIVO, FECHA);
     LocalDate despues = FECHA.plusDays(30);
 
@@ -82,8 +81,8 @@ class VersionDelConsolidadoTest {
 
   @Test
   void tt02_laVersionDelPlanNoSubeSiSoloCambianReglasQueNoSonDeEstructura() {
-    Regla plan = estructural(ReglaId.nuevo(), EstadoRegla.VIGENTE);
-    Regla carga = noEstructural(ReglaId.nuevo(), EstadoRegla.VIGENTE);
+    ReglaEnVersion plan = estructural(ReglaId.nuevo(), EstadoRegla.VIGENTE);
+    ReglaEnVersion carga = noEstructural(ReglaId.nuevo(), EstadoRegla.VIGENTE);
     VersionDelConsolidado primera = VersionDelConsolidado.primera(validado(plan), MOTIVO, FECHA);
 
     VersionDelConsolidado segunda = primera.siguiente(validado(plan, carga), MOTIVO, FECHA);
@@ -94,8 +93,8 @@ class VersionDelConsolidadoTest {
 
   @Test
   void tt02_laVersionDelPlanSubeSiSeAgregaUnaReglaDeEstructura() {
-    Regla plan = estructural(ReglaId.nuevo(), EstadoRegla.VIGENTE);
-    Regla otra = estructural(ReglaId.nuevo(), EstadoRegla.VIGENTE);
+    ReglaEnVersion plan = estructural(ReglaId.nuevo(), EstadoRegla.VIGENTE);
+    ReglaEnVersion otra = estructural(ReglaId.nuevo(), EstadoRegla.VIGENTE);
     VersionDelConsolidado primera = VersionDelConsolidado.primera(validado(plan), MOTIVO, FECHA);
 
     VersionDelConsolidado segunda = primera.siguiente(validado(plan, otra), MOTIVO, FECHA);
@@ -106,13 +105,13 @@ class VersionDelConsolidadoTest {
 
   @Test
   void tt02_laVersionDelPlanNoSubeSiUnaReglaDeEstructuraSoloCambiaDeEstado() {
-    ReglaId id = ReglaId.nuevo();
+    Regla regla = regla(ReglaId.nuevo(), new DatosDeRegla.DePrograma(new Creditos(160)));
     VersionDelConsolidado primera =
         VersionDelConsolidado.primera(
-            validado(estructural(id, EstadoRegla.PROGRAMADA)), MOTIVO, FECHA);
+            validado(new ReglaEnVersion(regla, EstadoRegla.PROGRAMADA)), MOTIVO, FECHA);
 
     VersionDelConsolidado segunda =
-        primera.siguiente(validado(estructural(id, EstadoRegla.VIGENTE)), MOTIVO, FECHA);
+        primera.siguiente(validado(new ReglaEnVersion(regla, EstadoRegla.VIGENTE)), MOTIVO, FECHA);
 
     assertThat(segunda.numero()).isEqualTo(2);
     assertThat(segunda.versionDelPlan()).isEqualTo(1);
@@ -120,15 +119,16 @@ class VersionDelConsolidadoTest {
 
   @Test
   void tt02_unaReformaProgramadaYSuVersionAutomaticaSubenElPlanUnaSolaVez() {
-    Regla base = estructural(ReglaId.nuevo(), EstadoRegla.VIGENTE);
-    ReglaId reforma = ReglaId.nuevo();
+    ReglaEnVersion base = estructural(ReglaId.nuevo(), EstadoRegla.VIGENTE);
+    Regla reforma = regla(ReglaId.nuevo(), new DatosDeRegla.DePrograma(new Creditos(160)));
     VersionDelConsolidado v1 = VersionDelConsolidado.primera(validado(base), MOTIVO, FECHA);
 
     VersionDelConsolidado v2 =
-        v1.siguiente(validado(base, estructural(reforma, EstadoRegla.PROGRAMADA)), MOTIVO, FECHA);
+        v1.siguiente(
+            validado(base, new ReglaEnVersion(reforma, EstadoRegla.PROGRAMADA)), MOTIVO, FECHA);
     VersionDelConsolidado v3 =
         v2.siguiente(
-            validado(base, estructural(reforma, EstadoRegla.VIGENTE)),
+            validado(base, new ReglaEnVersion(reforma, EstadoRegla.VIGENTE)),
             new MotivoDeVersion.AutomaticoPorFecha(FECHA),
             FECHA);
 
@@ -140,7 +140,7 @@ class VersionDelConsolidadoTest {
 
   @Test
   void tt02_laVersionDelPlanSubeSiSeRetiraUnaReglaDeEstructura() {
-    Regla plan = estructural(ReglaId.nuevo(), EstadoRegla.VIGENTE);
+    ReglaEnVersion plan = estructural(ReglaId.nuevo(), EstadoRegla.VIGENTE);
     VersionDelConsolidado primera = VersionDelConsolidado.primera(validado(plan), MOTIVO, FECHA);
 
     VersionDelConsolidado segunda = primera.siguiente(validado(), MOTIVO, FECHA);
@@ -150,8 +150,8 @@ class VersionDelConsolidadoTest {
 
   @Test
   void tt02_laVersionDelPlanSeConservaEnLasVersionesSiguientes() {
-    Regla plan = estructural(ReglaId.nuevo(), EstadoRegla.VIGENTE);
-    Regla otra = estructural(ReglaId.nuevo(), EstadoRegla.VIGENTE);
+    ReglaEnVersion plan = estructural(ReglaId.nuevo(), EstadoRegla.VIGENTE);
+    ReglaEnVersion otra = estructural(ReglaId.nuevo(), EstadoRegla.VIGENTE);
     VersionDelConsolidado v1 = VersionDelConsolidado.primera(validado(plan), MOTIVO, FECHA);
     VersionDelConsolidado v2 = v1.siguiente(validado(plan, otra), MOTIVO, FECHA);
 
@@ -159,6 +159,26 @@ class VersionDelConsolidadoTest {
 
     assertThat(v3.numero()).isEqualTo(3);
     assertThat(v3.versionDelPlan()).isEqualTo(2);
+  }
+
+  @Test
+  void tt02_laMismaReglaPuedeTenerEstadosDistintosEnDosVersiones() {
+    Regla regla = regla(ReglaId.nuevo(), new DatosDeRegla.DePrograma(new Creditos(160)));
+    VersionDelConsolidado v1 =
+        VersionDelConsolidado.primera(
+            validado(new ReglaEnVersion(regla, EstadoRegla.PROGRAMADA)), MOTIVO, FECHA);
+
+    VersionDelConsolidado v2 =
+        v1.siguiente(
+            validado(new ReglaEnVersion(regla, EstadoRegla.VIGENTE)),
+            new MotivoDeVersion.AutomaticoPorFecha(FECHA),
+            FECHA);
+
+    assertThat(v1.reglas()).containsExactly(new ReglaEnVersion(regla, EstadoRegla.PROGRAMADA));
+    assertThat(v2.reglas()).containsExactly(new ReglaEnVersion(regla, EstadoRegla.VIGENTE));
+    assertThat(v2.reglas().get(0).regla()).isSameAs(v1.reglas().get(0).regla());
+    assertThat(v1.versionDelPlan()).isEqualTo(1);
+    assertThat(v2.versionDelPlan()).isEqualTo(1);
   }
 
   @Test
@@ -183,8 +203,8 @@ class VersionDelConsolidadoTest {
 
   @Test
   void tt02_laVersionNoSeAfectaPorCambiosEnLaListaDeReglasQueRecibio() {
-    Regla regla = estructural(ReglaId.nuevo(), EstadoRegla.VIGENTE);
-    List<Regla> reglas = new ArrayList<>(List.of(regla));
+    ReglaEnVersion regla = estructural(ReglaId.nuevo(), EstadoRegla.VIGENTE);
+    List<ReglaEnVersion> reglas = new ArrayList<>(List.of(regla));
     VersionDelConsolidado version =
         VersionDelConsolidado.reconstituir(PROGRAMA, 1, FECHA, MOTIVO, reglas, 1);
 
@@ -205,7 +225,7 @@ class VersionDelConsolidadoTest {
 
   @Test
   void tt02_reconstituirRechazaDatosInvalidos() {
-    List<Regla> sinReglas = List.of();
+    List<ReglaEnVersion> sinReglas = List.of();
 
     assertThatThrownBy(
             () -> VersionDelConsolidado.reconstituir(PROGRAMA, 0, FECHA, MOTIVO, sinReglas, 1))

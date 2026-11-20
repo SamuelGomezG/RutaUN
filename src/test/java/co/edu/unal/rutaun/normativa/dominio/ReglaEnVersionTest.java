@@ -19,7 +19,6 @@ class ReglaEnVersionTest {
         new Fuente(NormaId.nuevo(), "art. 1"),
         Optional.empty(),
         ClasificacionRegla.DEL_PLAN,
-        EstadoRegla.VIGENTE,
         Optional.empty(),
         new DatosDeRegla.DePrograma(new Creditos(160)));
   }

@@ -13,10 +13,10 @@ import java.util.List;
 public final class ConsolidadoValidado {
 
   private final ProgramaId programa;
-  private final List<Regla> reglas;
+  private final List<ReglaEnVersion> reglas;
 
   /** Reúne las reglas validadas de un programa; solo lo usa el validador. */
-  ConsolidadoValidado(ProgramaId programa, List<Regla> reglas) {
+  ConsolidadoValidado(ProgramaId programa, List<ReglaEnVersion> reglas) {
     this.programa = ArgumentChecks.obligatorio(programa, "programa");
     this.reglas = ArgumentChecks.copiaSinNulos(reglas, "reglas");
   }
@@ -29,7 +29,8 @@ public final class ConsolidadoValidado {
    * @param reglas reglas ya validadas
    * @return consolidado validado
    */
-  public static ConsolidadoValidado paraImportacion(ProgramaId programa, List<Regla> reglas) {
+  public static ConsolidadoValidado paraImportacion(
+      ProgramaId programa, List<ReglaEnVersion> reglas) {
     return new ConsolidadoValidado(programa, reglas);
   }
 
@@ -38,8 +39,8 @@ public final class ConsolidadoValidado {
     return programa;
   }
 
-  /** Reglas validadas, cada una con su estado; la lista no se puede modificar. */
-  public List<Regla> reglas() {
+  /** Reglas validadas, cada una con su estado en la versión; la lista no se puede modificar. */
+  public List<ReglaEnVersion> reglas() {
     return reglas;
   }
 }

@@ -2,7 +2,6 @@ package co.edu.unal.rutaun.normativa.aplicacion;
 
 import co.edu.unal.rutaun.compartido.CodigoMateria;
 import co.edu.unal.rutaun.compartido.Creditos;
-import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.Momento;
 import co.edu.unal.rutaun.normativa.ClasificacionRegla;
 import co.edu.unal.rutaun.normativa.TipoAlcance;
@@ -58,30 +57,15 @@ final class ReglasDePrueba {
   }
 
   /** Una regla del plan, sin vigencia propia ni afectación, de la norma dada. */
-  static Regla regla(Norma norma, DatosDeRegla datos, EstadoRegla estado) {
+  static Regla regla(Norma norma, DatosDeRegla datos) {
     return Regla.registrar(
         "Objeto de prueba",
         "Enunciado de prueba",
         new Fuente(norma.id(), "art. 1"),
         Optional.empty(),
         ClasificacionRegla.DEL_PLAN,
-        estado,
         Optional.empty(),
         datos);
-  }
-
-  /** La misma regla, con el mismo identificador, pero con otro estado. */
-  static Regla conEstado(Regla regla, EstadoRegla estado) {
-    return Regla.reconstituir(
-        regla.id(),
-        regla.objeto(),
-        regla.enunciado(),
-        regla.fuente(),
-        regla.vigenciaPropia(),
-        regla.clasificacion(),
-        estado,
-        regla.afectacion(),
-        regla.datos());
   }
 
   /** Datos de las once categorías, más los del componente de libre elección y uno anidado. */
