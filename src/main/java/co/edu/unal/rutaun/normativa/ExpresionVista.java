@@ -17,10 +17,11 @@ public sealed interface ExpresionVista
         ExpresionVista.Condicion {
 
   /**
-   * La expresión escrita para leerla (UC05 paso 4, «qué la satisface»): los nombres de las materias
-   * unidos con «y» y «o», con paréntesis cuando una conjunción y una disyunción se anidan, como en
-   * «Fundamentos de Mecánica y (Cálculo Integral o Cálculo integral en una variable)». Con más de
-   * dos términos, los separa con comas: «A, B y C».
+   * La expresión escrita para leerla (UC05 paso 4, «qué la satisface»): el nombre de cada materia
+   * entre «», para que se distinga de los conectores aunque el nombre lleve «y» o comas, unidos con
+   * «y» y «o», con paréntesis cuando una conjunción y una disyunción se anidan, como en
+   * «Fundamentos de Mecánica» y («Cálculo Integral» o «Cálculo integral en una variable»). Con más
+   * de dos términos, los separa con comas: «A», «B» y «C».
    */
   String redaccion();
 
@@ -40,7 +41,7 @@ public sealed interface ExpresionVista
 
     @Override
     public String redaccion() {
-      return nombre;
+      return "«" + nombre + "»";
     }
   }
 

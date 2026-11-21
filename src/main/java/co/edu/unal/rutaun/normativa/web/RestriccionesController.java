@@ -30,13 +30,13 @@ class RestriccionesController {
    * Las restricciones de la materia en el consolidado vigente del programa (UC05 paso 4). Si la
    * materia no exige nada, lo dice y recuerda que eso no significa que esté ofrecida ni que haya
    * cupo (ext. 3a); una restricción sin fuente se muestra «sin fuente registrada» (ext. 4d).
-   * Responde 404 si el programa no está cargado, no tiene una versión vigente del consolidado o la
-   * materia no figura en ella.
+   * Responde 400 si el código de la materia está vacío y 404 si el programa no está cargado, no
+   * tiene una versión vigente del consolidado o la materia no figura en ella.
    */
   @GetMapping("/programas/{programa}/materias/{codigo}/restricciones")
   ModelAndView restricciones(@PathVariable UUID programa, @PathVariable String codigo) {
     RestriccionesDeLaMateria resultado =
-        orquestador.restriccionesDe(new ProgramaId(programa), new CodigoMateria(codigo));
+        orquestador.restriccionesDe(new ProgramaId(programa), codigoDeLaMateria(codigo));
     return switch (resultado) {
       case RestriccionesDeLaMateria.Explicadas explicadas -> {
         ModelAndView vista = new ModelAndView("publico/restricciones");
@@ -53,5 +53,15 @@ class RestriccionesController {
           throw new ResponseStatusException(
               HttpStatus.NOT_FOUND, "la materia no figura en el consolidado vigente");
     };
+  }
+
+  /** El código de la materia; si viene vacío, la petición es inválida. */
+  private static CodigoMateria codigoDeLaMateria(String codigo) {
+    try {
+      return new CodigoMateria(codigo);
+    } catch (IllegalArgumentException e) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "el código de la materia no puede estar vacío", e);
+    }
   }
 }
