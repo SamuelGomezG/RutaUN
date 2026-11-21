@@ -14,8 +14,8 @@
     "fechaExpedicion": "2008-04-15",
     "vigencia": {
       "aplicaDesde": {
-        "tipo": "FECHA",
-        "fecha": "2009-01-01"
+        "tipo": "PERIODO",
+        "periodo": "2009-1"
       },
       "vigenteHasta": null
     },

@@ -132,6 +132,8 @@ La vigencia se representa con dos momentos: `aplicaDesde` y `vigenteHasta`. El s
 La vigencia propia de una regla usa la misma forma. Si es `null`, la regla rige con la vigencia de
 su norma.
 
+**Límite actual de la importación.** Mientras [#147](https://github.com/SamuelGomezG/RutaUN/issues/147) no calcule el estado por periodo, se rechaza una vigencia cuyo `vigenteHasta` sea un periodo o cuyo `aplicaDesde` sea un periodo del año en curso o posterior. Un periodo de inicio de un año anterior se acepta y queda vigente.
+
 ### `alcance`
 
 | Campo | Tipo | Regla |
@@ -186,6 +188,8 @@ periodo en curso. En el archivo no se escribe `estado`.
 - `destino.tipo = "ARTICULO"`: afecta todas las reglas de ese artículo de la norma indicada.
 - `destino.tipo = "REGLA"`: afecta una regla concreta; añade `objeto` a la referencia.
 - `desde`: momento opcional desde el que surte efecto.
+
+**Límite actual de la importación.** Una afectación a un artículo solo se importa si el artículo es de la misma norma. Si es de otra, se rechaza hasta que [#182](https://github.com/SamuelGomezG/RutaUN/issues/182) resuelva la norma citada.
 
 ### Datos por categoría
 
@@ -325,19 +329,14 @@ No llevan más datos. Son siempre informativas.
 
 ## Datos provisionales de la semilla
 
-Las fechas de `fechaExpedicion` y `aplicaDesde` de la semilla real
-(`src/main/resources/semilla/`) se toman de Régimen Legal, que las escribe como **día/mes/año**:
-«11/01/2023» es el 11 de enero de 2023. En el JSON van como `AAAA-MM-DD`.
+Las fechas de `fechaExpedicion` de la semilla real (`src/main/resources/semilla/`) se toman de
+Régimen Legal, que las escribe como **día/mes/año**: «11/01/2023» es el 11 de enero de 2023. En el
+JSON van como `AAAA-MM-DD`. Lo mismo vale para las fechas de aplicación que la norma publica como
+fecha.
 
-| Norma | Dato en la semilla | Lo que dice la norma | Por qué es provisional | Cuándo se corrige |
-|---|---|---|---|---|
-| Acuerdo 008 de 2008, CSU | `aplicaDesde`: fecha `2009-01-01` («fecha de entrada en vigencia» de Régimen Legal) | Art. 61: rige «a partir del primer período académico de 2009» | La tabla `norma` todavía no guarda periodos académicos | Con #141 pasa a `{ "tipo": "PERIODO", "periodo": "2009-1" }` |
+Hoy no hay datos provisionales. El Acuerdo 008 de 2008 rige «a partir del primer período académico de 2009» (art. 61), y la semilla lo registra como `{ "tipo": "PERIODO", "periodo": "2009-1" }`.
 
-El Acuerdo 003-A de 2022 tiene como fecha de aplicación la de su publicación (art. 13): 11 de
-enero de 2023. Su art. 12 (régimen de transición) dice además que el plan empieza a regir «a
-partir de la cohorte que ingresa en el período 2023-2S». La semilla no registra ese periodo; se
-revisa cuando el esquema guarde periodos (#141), donde queda anotado junto con la
-actualización del Acuerdo 008 y de la prueba de fechas.
+El Acuerdo 003-A de 2022 tiene como fecha de aplicación la de su publicación (art. 13): 11 de enero de 2023. Su art. 12 (régimen de transición) dice qué cohortes y estudiantes pasan al plan desde 2023-2S; no se registra como fecha de aplicación, porque RutaUN no maneja versiones del plan por cohorte (glosario, «Programa»).
 
 La importación omite una norma ya registrada (por tipo, número, año y órgano). Para que una base
 de desarrollo tome un dato corregido de la semilla hay que borrar `data/` y volver a arrancar con
@@ -366,8 +365,9 @@ contienen el texto exacto «(datos de prueba)»; en los demás archivos de norma
 en ningún campo. `DatosDePruebaDeLaSemillaTest` vigila la convención.
 
 **Por qué no se usan las normas reales.** La Circular 11 de 2026 (máximo de 23 créditos) y la
-Resolución 057 de 2026 rigen por periodo académico, y las tablas `norma` y `regla` solo guardan
-fechas; los periodos llegan con [#141](https://github.com/SamuelGomezG/RutaUN/issues/141).
+Resolución 057 de 2026 rigen por periodo académico, y la importación todavía no calcula el estado
+de una vigencia por periodo del año en curso
+([#147](https://github.com/SamuelGomezG/RutaUN/issues/147)).
 Además, el importador todavía no aplica afectaciones
 ([#175](https://github.com/SamuelGomezG/RutaUN/issues/175)). Las fechas futuras (2099) son
 deliberadas: no se vencen durante la vida del proyecto y delatan que los datos son ficticios. Las
