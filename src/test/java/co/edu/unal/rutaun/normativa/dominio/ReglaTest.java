@@ -183,9 +183,11 @@ class ReglaTest {
 
   @Test
   void tt02_reglaNoGuardaSuEstado() {
-    assertThat(Regla.class.getDeclaredFields())
-        .extracting(Field::getType)
-        .doesNotContain(EstadoRegla.class);
+    assertThat(
+            java.util.Arrays.stream(Regla.class.getDeclaredFields())
+                .map(Field::getType)
+                .noneMatch(EstadoRegla.class::equals))
+        .isTrue();
   }
 
   private static Regla reconstituir(ReglaId id) {

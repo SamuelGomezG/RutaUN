@@ -1,6 +1,7 @@
 package co.edu.unal.rutaun.compartido;
 
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,13 +18,11 @@ public record PeriodoAcademico(int anio, ParteDelAnio parte)
 
   private static final int ANIO_MINIMO = 1000;
   private static final int ANIO_MAXIMO = 9999;
-  private static final Pattern FORMATO = Pattern.compile("([0-9]{4})-([12])");
+  private static final Pattern FORMATO = Pattern.compile("(\\d{4})-([12])");
 
   /** Exige un año de cuatro cifras y una parte del año. */
   public PeriodoAcademico {
-    if (anio < ANIO_MINIMO || anio > ANIO_MAXIMO) {
-      throw new IllegalArgumentException("anio debe tener cuatro cifras");
-    }
+    ArgumentChecks.obligatorioEnRango(anio, ANIO_MINIMO, ANIO_MAXIMO, "anio");
     ArgumentChecks.obligatorio(parte, "parte");
   }
 
@@ -35,20 +34,19 @@ public record PeriodoAcademico(int anio, ParteDelAnio parte)
    * @throws IllegalArgumentException si el texto es nulo o no tiene ese formato
    */
   public static PeriodoAcademico desdeTexto(String texto) {
-    if (texto == null) {
-      throw new IllegalArgumentException("periodo debe tener el formato AAAA-1 o AAAA-2");
+    Matcher m = FORMATO.matcher(ArgumentChecks.obligatorioNoVacio(texto, "texto").strip());
+    if (!m.matches()) {
+      throw new IllegalArgumentException("un periodo se escribe AAAA-1 o AAAA-2: " + texto);
     }
-    Matcher coincidencia = FORMATO.matcher(texto);
-    if (!coincidencia.matches()) {
-      throw new IllegalArgumentException("periodo debe tener el formato AAAA-1 o AAAA-2");
-    }
-    ParteDelAnio parte =
-        "1".equals(coincidencia.group(2)) ? ParteDelAnio.PRIMERO : ParteDelAnio.SEGUNDO;
-    return new PeriodoAcademico(Integer.parseInt(coincidencia.group(1)), parte);
+    ParteDelAnio parte = m.group(2).equals("1") ? ParteDelAnio.PRIMERO : ParteDelAnio.SEGUNDO;
+    return new PeriodoAcademico(Integer.parseInt(m.group(1)), parte);
   }
 
   /** Devuelve el periodo que sigue a este: después de 2026-2 viene 2027-1. */
   public PeriodoAcademico siguiente() {
+    if (anio == ANIO_MAXIMO && parte == ParteDelAnio.SEGUNDO) {
+      throw new IllegalStateException("no hay periodo después de 9999-2");
+    }
     return switch (parte) {
       case PRIMERO -> new PeriodoAcademico(anio, ParteDelAnio.SEGUNDO);
       case SEGUNDO -> new PeriodoAcademico(anio + 1, ParteDelAnio.PRIMERO);
@@ -58,8 +56,13 @@ public record PeriodoAcademico(int anio, ParteDelAnio parte)
   /** Ordena los periodos cronológicamente: primero por año y, en el mismo año, por parte. */
   @Override
   public int compareTo(PeriodoAcademico otro) {
-    ArgumentChecks.obligatorio(otro, "otro");
+    Objects.requireNonNull(otro, "otro");
     int porAnio = Integer.compare(anio, otro.anio);
     return porAnio != 0 ? porAnio : parte.compareTo(otro.parte);
+  }
+
+  @Override
+  public String toString() {
+    return anio + "-" + parte.numero();
   }
 }
