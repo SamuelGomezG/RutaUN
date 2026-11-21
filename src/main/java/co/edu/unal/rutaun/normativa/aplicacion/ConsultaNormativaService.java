@@ -309,9 +309,12 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
             .sorted(ORDEN_DE_RESTRICCIONES)
             .flatMap(candidata -> candidata.aVista(nombre).stream())
             .toList();
+    // Solo cuentan las reglas que ya rigen: una programada o en revisión se muestra sin evaluarla
+    // (ext. 4e), así que tampoco puede decir que la materia no se puede cursar.
     boolean noCursable =
         candidatas.stream()
             .filter(candidata -> candidata.materia().equals(materia))
+            .filter(candidata -> candidata.estado() == EstadoRegla.VIGENTE)
             .filter(candidata -> candidata.tipo() == TipoDeRestriccion.PRERREQUISITO)
             .anyMatch(candidata -> ExpresionAVista.noSePuedeCumplir(candidata.expresion()));
     return Optional.of(
