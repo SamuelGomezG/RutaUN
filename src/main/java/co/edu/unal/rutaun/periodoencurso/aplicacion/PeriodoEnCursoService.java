@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 /**
  * Periodo en curso tomado de la propiedad {@code rutaun.periodo-en-curso} de application.yml, que
  * es el único punto donde se cambia. Se lee y se valida al arrancar: si falta o no tiene el formato
- * AAAA-1 o AAAA-2, la aplicación no arranca.
+ * AAAA-1 o AAAA-2, la aplicación no arranca. Se ignoran los espacios al inicio y al final.
  */
 @Component
 public class PeriodoEnCursoService implements PeriodoEnCursoFacade {

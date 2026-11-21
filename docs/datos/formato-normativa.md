@@ -125,7 +125,7 @@ La vigencia se representa con dos momentos: `aplicaDesde` y `vigenteHasta`. El s
 { "tipo": "FECHA", "fecha": "2022-05-25" }
 ```
 
-- `PERIODO` usa el formato `AAAA-1` o `AAAA-2`.
+- `PERIODO` usa el formato `AAAA-1` o `AAAA-2`; se ignoran los espacios al inicio y al final.
 - `FECHA` usa `AAAA-MM-DD`.
 - Si `tipoDeEfecto` es `EXCEPCION_O_MEDIDA_TEMPORAL`, `vigenteHasta` es obligatorio.
 
