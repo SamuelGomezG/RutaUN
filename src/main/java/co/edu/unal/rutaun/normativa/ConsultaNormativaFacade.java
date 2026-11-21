@@ -49,12 +49,13 @@ public interface ConsultaNormativaFacade {
 
   /**
    * Lo que la materia exige para cursarla en el consolidado vigente del programa (UC05 pasos 2 a
-   * 4): sus prerrequisitos y correquisitos, cada uno con lo que exige, su fuente, su fecha de
-   * aplicación y su vigencia. Incluye las reglas vigentes, programadas y en revisión, y deja fuera
-   * las que ya no rigen. No muestra las materias externas (ext. 4k). Una materia que no exige nada
-   * (ext. 3a) devuelve la vista con {@link RestriccionesDeMateriaVista#restricciones()} vacía.
-   * Vacío si el programa no está cargado, no tiene una versión vigente del consolidado o la materia
-   * no figura en ella.
+   * 4): sus prerrequisitos, correquisitos y reglas de habilitación, cada uno con lo que exige, su
+   * fuente, su fecha de aplicación y su vigencia. Incluye las reglas vigentes, programadas y en
+   * revisión, y deja fuera las que ya no rigen. No muestra las materias externas (ext. 4k) y, si el
+   * prerrequisito vigente solo se cumple con una materia de otro programa, lo dice en {@link
+   * RestriccionesDeMateriaVista#noCursable()}. Una materia que no exige nada (ext. 3a) devuelve la
+   * vista con {@link RestriccionesDeMateriaVista#restricciones()} vacía. Vacío si el programa no
+   * está cargado, no tiene una versión vigente del consolidado o la materia no figura en ella.
    */
   Optional<RestriccionesDeMateriaVista> restriccionesDe(ProgramaId programa, CodigoMateria materia);
 }

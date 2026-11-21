@@ -16,11 +16,13 @@ import java.util.List;
  * @param fecha fecha de esa versión
  * @param materia código de la materia
  * @param nombre nombre de la materia en esa versión
- * @param restricciones sus prerrequisitos y correquisitos: primero los prerrequisitos y, dentro de
- *     cada clase, por fecha de expedición de su norma, artículo e identificador; el mismo dato
- *     produce siempre la misma vista. Vacía si la materia no exige nada (ext. 3a)
- * @param noCursable si el prerrequisito de la materia solo se cumple con una materia de otro
- *     programa, así que no se puede cursar desde el programa (ext. 4k)
+ * @param restricciones sus prerrequisitos, correquisitos y reglas de habilitación: primero los
+ *     prerrequisitos y, dentro de cada clase, por fecha de expedición de su norma, artículo e
+ *     identificador; el mismo dato produce siempre la misma vista. Vacía si la materia no exige
+ *     nada (ext. 3a)
+ * @param noCursable si el prerrequisito vigente de la materia solo se cumple con una materia de
+ *     otro programa, así que no se puede cursar desde el programa (ext. 4k); las reglas programadas
+ *     y en revisión no cuentan
  */
 public record RestriccionesDeMateriaVista(
     ProgramaId programa,

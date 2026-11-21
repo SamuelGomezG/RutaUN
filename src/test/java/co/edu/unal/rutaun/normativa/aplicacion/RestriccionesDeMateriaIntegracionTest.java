@@ -134,6 +134,17 @@ class RestriccionesDeMateriaIntegracionTest {
   }
 
   @Test
+  void uc05_ext4e_unaReglaProgramadaOEnRevisionNoHaceQueLaMateriaNoSeaCursable() {
+    UUID regla = prerrequisitoDe(COMUNICACIONES);
+
+    for (EstadoRegla estado : List.of(EstadoRegla.PROGRAMADA, EstadoRegla.EN_REVISION)) {
+      laReglaPasaAEstado(regla, estado);
+
+      assertThat(restriccionesDe(COMUNICACIONES).noCursable()).as(estado.name()).isFalse();
+    }
+  }
+
+  @Test
   void uc05_ext4k_unaMateriaCuyoPrerrequisitoEsDeNivelacionSeCursaYNoExigeNada() {
     RestriccionesDeMateriaVista vista = restriccionesDe(CALCULO_DIFERENCIAL);
 
