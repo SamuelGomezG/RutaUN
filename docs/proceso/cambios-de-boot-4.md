@@ -50,19 +50,22 @@ en `AGENTS.md`; el diseño, en `docs/diseno/`.
 - **Jackson 3 (R1) ya se usa.** `JsonConfig` crea el `JsonMapper`
   (`tools.jackson.databind`), y el lector de UC07-HU03 usa la misma API. Ya no
   queda nada «por verificar».
-- **Hibernate 7.4 y JSON (R2): no se usan columnas JSON.** Los datos variables
-  se guardan como `@Lob String` y los escribe y lee `JsonDeNormativa`, un
-  `JsonMapper` con mix-ins y discriminante `@tipo`; los mappers de `aplicacion`
-  convierten entre dominio y texto. No se usa
-  `@JdbcTypeCode(SqlTypes.JSON)`. Si cambia el dominio, en una base de
-  **desarrollo desechable** borra `data/` y vuelve a cargar la semilla. Si la
-  base contiene datos que debes conservar —normas incorporadas con UC07 fuera
-  de `semilla/`, incidentes o, cuando existan, avances y planes—, no la borres:
-  respáldala y migra esos datos al dominio nuevo; el respaldo solo no los
-  recupera con el dominio nuevo.
 - **Flyway 12 con H2 2.4** mantiene el WARN de versión, pero no bloquea; el
   arranque y las pruebas pasan. El esquema lo posee Flyway (`ddl-auto:
   validate`).
+
+## Verificado en TT-04 (sprint 2)
+
+- **R1.** El único `JsonMapper` de Jackson 3 es el de `JsonConfig`. Lo usan
+  Spring, Hibernate y los lectores de JSON.
+- **R2.** `@JdbcTypeCode(SqlTypes.JSON)` funciona sobre H2 2.4.240 con Hibernate
+  7.4.13 y Jackson 3. Sin configurar, Hibernate escribe las fechas como arreglo;
+  con `Jackson3JsonFormatMapper(JsonConfig.mapper())` las escribe en ISO.
+- **Bases de desarrollo.** Si cambia la forma de un JSON guardado, en una base
+  **desechable** borra `data/` y vuelve a cargar la semilla. Si contiene datos
+  que debes conservar —normas incorporadas con UC07 fuera de `semilla/`,
+  incidentes o, cuando existan, avances y planes—, no la borres: respáldala y
+  migra esos datos.
 
 ## Decisiones de stack (TT-01)
 
@@ -84,8 +87,8 @@ Riesgos de versión y cómo se cerraron:
 
 | # | Riesgo | Resultado |
 | --- | --- | --- |
-| R1 | Jackson 3 cambia de paquetes (`tools.jackson`) | Verificado: `JsonConfig` y el lector usan `tools.jackson`. |
-| R2 | Hibernate 7.4 con columnas JSON | No se usan columnas JSON: `@Lob String` + `JsonDeNormativa`. |
+| R1 | Jackson 3 cambia de paquetes (`tools.jackson`) | Verificado: `JsonConfig` es el único `JsonMapper`. |
+| R2 | Hibernate 7.4 con columnas JSON | Verificado en TT-04: columnas `JSON` con `@JdbcTypeCode(SqlTypes.JSON)`. |
 | R3 | JUnit 6 con jqwik y ArchUnit | Verificado en el PR 2: ambos corren. |
 | R4 | Paquetes de prueba de Boot 4 | `@AutoConfigureMockMvc` vive en `org.springframework.boot.webmvc.test.autoconfigure`; `pruebas.md` deja los ejemplos. |
 | R5 | Flyway 12 con H2 2.4 y directorio sin migraciones | Resuelto: `V1__esquema.sql` existe y `application-test.yml` incluye `db/migration` y `db/humo`. |

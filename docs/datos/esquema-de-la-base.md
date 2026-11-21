@@ -40,7 +40,7 @@ erDiagram
         DATE aplica_desde
         DATE vigente_hasta
         VARCHAR tipo_alcance
-        CLOB alcance_detalle
+        JSON alcance_detalle
     }
     regla {
         UUID id PK
@@ -50,7 +50,7 @@ erDiagram
         VARCHAR enunciado
         VARCHAR fuente
         VARCHAR clasificacion
-        CLOB datos
+        JSON datos
     }
     version_consolidado {
         UUID id PK
@@ -93,22 +93,22 @@ El diagrama muestra las columnas principales; la lista completa está en las mig
 | `materia` | Una materia del catálogo: código y créditos | Solo la llave primaria | Hoy queda vacía: la importación todavía no la llena ([#155](https://github.com/SamuelGomezG/RutaUN/issues/155)) |
 | `incidente` | Un grupo de incidentes iguales sin atender | Solo la llave primaria | `conteo`, `primera_fecha` y `ultima_fecha` resumen las ocurrencias. `programa_id` y `version_consolidado` son nulos en un incidente interno |
 
-## Columnas que guardan JSON como texto
+## Columnas que guardan JSON
 
-No se usan columnas de tipo JSON: son `CLOB` con texto que escriben y leen los mappers de `normativa/aplicacion` ([`cambios-de-boot-4.md`](../proceso/cambios-de-boot-4.md), «Verificado en los carriles 2 y 3»). La excepción es `version_consolidado.detalle_motivo` (`VARCHAR(300)`), detallada abajo.
+`regla.datos`, `norma.alcance_detalle`, `version_consolidado.cambios` e `incidente.elementos` son columnas `JSON`. Hibernate las escribe y las lee con el `JsonMapper` de `JsonConfig`, y su forma la definen los records de `persistencia`. La excepción es `version_consolidado.detalle_motivo`, un `VARCHAR(300)` con JSON como texto.
 
 | Columna | Qué guarda | Ejemplo |
 | --- | --- | --- |
-| `regla.datos` | Los datos propios de la categoría de la regla. La categoría la dice la columna `categoria`, no el JSON | `{"creditos":{"valor":10},"tipo":"MINIMO"}` en una regla `CARGA_POR_PERIODO` |
-| `norma.alcance_detalle` | Facultades, programas, exclusiones y texto del alcance. Los programas van por su `id`, no por el código SIA del archivo | `{"facultades":[],"programas":["6c6d…"],"exclusiones":[],"texto":"…"}` |
-| `version_consolidado.detalle_motivo` | Los datos del motivo de la versión. Excepción a la convención: es `VARCHAR(300)`, no `CLOB`; el mapper limita el detalle a 300 caracteres | `{"norma":{"valor":"205c…"},"administrador":"Semilla de desarrollo"}` |
+| `regla.datos` | Los datos propios de la categoría de la regla, con su `categoria` como discriminante. Debe coincidir con la columna `categoria` | `{"categoria":"CARGA_POR_PERIODO","esquema":1,"creditos":10,"tipo":"MINIMO"}` |
+| `norma.alcance_detalle` | Facultades, programas, exclusiones y texto del alcance. Los programas van por su `id`, no por el código SIA del archivo | `{"esquema":1,"facultades":[],"programas":["6c6d…"],"exclusiones":[],"texto":"…"}` |
+| `version_consolidado.detalle_motivo` | Los datos del motivo de la versión. El mapper limita el detalle a 300 caracteres | `{"esquema":1,"norma":"205c…","administrador":"Semilla de desarrollo"}` |
 | `version_consolidado.cambios` | Los cambios respecto a la versión anterior | Hoy `null` |
-| `incidente.elementos` | Los elementos involucrados. No es JSON: es una lista ordenada y separada por comas | — |
+| `incidente.elementos` | Los elementos involucrados, en orden | `{"esquema":1,"elementos":["2016699"]}` |
 
 Tres cosas que no se deducen del esquema:
 
-- **El JSON guardado sigue la forma de las clases del dominio**, y no la del archivo de importación. Los subtipos llevan el discriminante `@tipo` (`AGRUPACION`, `MATERIA_DEL_PROGRAMA`, `Y`, `O`…).
-- **Es un formato provisional y sin versión.** Si cambia una clase del dominio, lo ya guardado puede dejar de leerse; qué hacer está en [`cambios-de-boot-4.md`](../proceso/cambios-de-boot-4.md). Los records propios de persistencia y el campo de versión llegan con [#145](https://github.com/SamuelGomezG/RutaUN/issues/145).
+- **Cada JSON guardado lleva `esquema`.** Hoy solo existe la versión 1, y un valor distinto se rechaza al leer. El dominio no se serializa: los mappers de `aplicacion` convierten entre él y los records.
+- **Una base creada antes de #145 no se migra.** La migración falla si `regla`, `norma` o `incidente` tienen filas, y no borra nada. En una base de desarrollo desechable, borra `data/` y vuelve a cargar la semilla. Si contiene datos que debes conservar, respáldalos antes.
 - **Mientras no haya cuentas**, quien crea una versión va como texto dentro de `detalle_motivo` y `administrador_id` queda en `null`.
 
 ## Migraciones
@@ -118,6 +118,7 @@ Tres cosas que no se deducen del esquema:
 | `db/migration/V1__esquema.sql` | Las siete tablas de Normativa |
 | `db/migration/V2__incidente.sql` | `incidente` |
 | `db/migration/V4__alinear_con_el_diseno.sql` | Restricciones de unicidad y llaves foráneas, el día de la versión automática y el retiro de `consolidado` |
+| `db/migration/V5__columnas_json.sql` | Convierte `regla.datos`, `norma.alcance_detalle`, `version_consolidado.cambios` e `incidente.elementos` a `JSON` |
 | `src/test/resources/db/humo/V0__humo.sql` | La tabla `humo`. Solo existe con el perfil `test` |
 
 Flyway registra lo aplicado en la tabla `flyway_schema_history`. Cómo agregar una migración está en [`recetas.md`](../proceso/recetas.md).
@@ -130,7 +131,6 @@ Antes de apoyarte en un detalle de una tabla, revisa si uno de estos issues lo c
 | --- | --- |
 | [#141](https://github.com/SamuelGomezG/RutaUN/issues/141) | El esquema no guarda vigencias por periodo ni el inicio de una afectación: `aplica_desde` y `vigente_hasta` son fechas |
 | [#143](https://github.com/SamuelGomezG/RutaUN/issues/143) | Un repositorio por raíz, sin borrado del historial |
-| [#145](https://github.com/SamuelGomezG/RutaUN/issues/145) | Los datos de las reglas, en columnas JSON |
 | [#155](https://github.com/SamuelGomezG/RutaUN/issues/155) | El catálogo de materias queda vacío |
 | [#167](https://github.com/SamuelGomezG/RutaUN/issues/167), [#168](https://github.com/SamuelGomezG/RutaUN/issues/168) y [#169](https://github.com/SamuelGomezG/RutaUN/issues/169) | Cómo se agrupan los incidentes y qué pasa con dos registros simultáneos |
 
