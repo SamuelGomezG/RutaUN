@@ -6,7 +6,10 @@ import co.edu.unal.rutaun.compartido.EstadoRestriccion;
 import co.edu.unal.rutaun.normativa.ContextoDeEvaluacion;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.function.BinaryOperator;
 
 /**
  * Evalúa una restricción contra un {@link ContextoDeEvaluacion} y combina sus términos por certeza
@@ -65,18 +68,30 @@ public final class EvaluadorDeRestricciones {
   private static EstadoRestriccion evaluarExpresion(
       ExpresionDeMaterias expresion, ContextoDeEvaluacion contexto, boolean esCorrequisito) {
     return switch (expresion) {
-      case ExpresionDeMaterias.MateriaDelPrograma materia ->
+      case ExpresionDeMaterias.TerminoMateria materia ->
           evaluarMateria(materia.codigo(), contexto, esCorrequisito);
       case ExpresionDeMaterias.MateriaExterna externa -> evaluarMateriaExterna(externa);
-      case ExpresionDeMaterias.Y conjuncion ->
-          combinarY(
-              evaluarExpresion(conjuncion.izquierda(), contexto, esCorrequisito),
-              evaluarExpresion(conjuncion.derecha(), contexto, esCorrequisito));
-      case ExpresionDeMaterias.O disyuncion ->
-          combinarO(
-              evaluarExpresion(disyuncion.izquierda(), contexto, esCorrequisito),
-              evaluarExpresion(disyuncion.derecha(), contexto, esCorrequisito));
+      case ExpresionDeMaterias.TodasLas todas ->
+          combinar(todas.terminos(), contexto, esCorrequisito, EvaluadorDeRestricciones::combinarY);
+      case ExpresionDeMaterias.AlgunaDe alguna ->
+          combinar(
+              alguna.terminos(), contexto, esCorrequisito, EvaluadorDeRestricciones::combinarO);
     };
+  }
+
+  private static EstadoRestriccion combinar(
+      Set<ExpresionDeMaterias> terminos,
+      ContextoDeEvaluacion contexto,
+      boolean esCorrequisito,
+      BinaryOperator<EstadoRestriccion> combinador) {
+    Iterator<ExpresionDeMaterias> pendientes = terminos.iterator();
+    EstadoRestriccion acumulado = evaluarExpresion(pendientes.next(), contexto, esCorrequisito);
+    while (pendientes.hasNext()) {
+      acumulado =
+          combinador.apply(
+              acumulado, evaluarExpresion(pendientes.next(), contexto, esCorrequisito));
+    }
+    return acumulado;
   }
 
   private static EstadoRestriccion evaluarMateria(

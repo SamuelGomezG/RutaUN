@@ -14,8 +14,7 @@ class DatosDeReglaTest {
 
   private static final CodigoMateria A = new CodigoMateria("A");
   private static final CodigoMateria B = new CodigoMateria("B");
-  private static final ExpresionDeMaterias EXPRESION =
-      new ExpresionDeMaterias.MateriaDelPrograma(A);
+  private static final ExpresionDeMaterias EXPRESION = new ExpresionDeMaterias.TerminoMateria(A);
 
   private final Malla malla = MallaDePrueba.pequena();
   private final NodoDeMalla fundamentacion = MallaDePrueba.nodo(malla, "Fundamentación");
