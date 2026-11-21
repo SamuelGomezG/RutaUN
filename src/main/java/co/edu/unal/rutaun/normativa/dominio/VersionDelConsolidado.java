@@ -20,7 +20,8 @@ import java.util.Set;
  * <p>Es una raíz de solo agregar: nunca se modifica. La primera se registra con {@link #primera} y
  * cada una de las siguientes la crea la anterior con {@link #siguiente}. La vigente es la de mayor
  * número. Crear una versión no carga ni toca las anteriores. El número de la versión del plan de
- * estudios solo sube cuando cambian reglas de estructura.
+ * estudios sube una sola vez por cada norma incorporada que toca reglas de estructura (S19); no lo
+ * suben una versión automática ni una corrección.
  */
 public final class VersionDelConsolidado {
 
@@ -71,21 +72,24 @@ public final class VersionDelConsolidado {
 
   /**
    * Crea la versión que sigue a esta, con las reglas ya validadas. La versión actual no cambia. El
-   * número de la versión del plan sube solo si cambia el conjunto de reglas de estructura: se
-   * agregó o se retiró alguna. Que una regla de estructura cambie de estado (por ejemplo, de
-   * programada a vigente en una versión automática) no lo hace subir: esa versión no incorpora
-   * normas ni cambia reglas (glosario, «Versión del consolidado»).
+   * número de la versión del plan sube una sola vez por cada norma incorporada que toca reglas de
+   * estructura, aunque esas reglas queden programadas (S19). No lo suben una corrección ni una
+   * versión automática, que solo cambia el estado de las reglas (glosario, «Versión del
+   * consolidado»).
    *
-   * @throws IllegalArgumentException si las reglas validadas son de otro programa
+   * @throws IllegalArgumentException si el motivo o la fecha son nulos, o si las reglas validadas
+   *     son de otro programa
    */
   public VersionDelConsolidado siguiente(
       ConsolidadoValidado resultante, MotivoDeVersion motivo, LocalDate fecha) {
     ArgumentChecks.obligatorio(resultante, "resultante");
+    ArgumentChecks.obligatorio(motivo, "motivo");
+    ArgumentChecks.obligatorio(fecha, "fecha");
     if (!resultante.programa().equals(programa)) {
       throw new IllegalArgumentException("las reglas validadas son de otro programa");
     }
-    boolean cambia = cambiaLaEstructura(reglas, resultante.reglas());
-    int plan = cambia ? versionDelPlan + 1 : versionDelPlan;
+    boolean sube = incorporaUnaNorma(motivo) && cambiaLaEstructura(reglas, resultante.reglas());
+    int plan = sube ? versionDelPlan + 1 : versionDelPlan;
     return new VersionDelConsolidado(
         programa, numero + 1, fecha, motivo, resultante.reglas(), plan);
   }
@@ -145,6 +149,16 @@ public final class VersionDelConsolidado {
     return "VersionDelConsolidado[programa=" + programa.valor() + ", numero=" + numero + "]";
   }
 
+  /** Dice si el motivo incorpora una norma, que es cuando la versión del plan puede subir (S19). */
+  private static boolean incorporaUnaNorma(MotivoDeVersion motivo) {
+    return switch (motivo) {
+      case MotivoDeVersion.PorIncorporacion ignored -> true;
+      case MotivoDeVersion.PorCorreccion ignored -> false;
+      case MotivoDeVersion.AutomaticoPorPeriodo ignored -> false;
+      case MotivoDeVersion.AutomaticoPorFecha ignored -> false;
+    };
+  }
+
   private static boolean cambiaLaEstructura(
       List<ReglaEnVersion> antes, List<ReglaEnVersion> despues) {
     return !idsDeEstructura(antes).equals(idsDeEstructura(despues));
@@ -162,9 +176,8 @@ public final class VersionDelConsolidado {
 
   /**
    * Una regla es de estructura si define la malla del plan de estudios: sus materias, agrupaciones
-   * y componentes, o los créditos que exige el programa. Es el supuesto del equipo mientras la
-   * norma no lo precise; el {@code switch} sin {@code default} obliga a decidirlo para cada
-   * categoría nueva.
+   * y componentes, o los créditos que exige el programa (S19). El {@code switch} sin {@code
+   * default} obliga a decidirlo para cada categoría nueva.
    */
   private static boolean esDeEstructura(Regla regla) {
     return switch (regla.datos()) {
