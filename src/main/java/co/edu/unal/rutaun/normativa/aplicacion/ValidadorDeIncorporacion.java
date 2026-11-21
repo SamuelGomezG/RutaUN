@@ -1,17 +1,16 @@
 package co.edu.unal.rutaun.normativa.aplicacion;
 
 import co.edu.unal.rutaun.normativa.ClasificacionRegla;
-import co.edu.unal.rutaun.normativa.dominio.Regla;
-import co.edu.unal.rutaun.normativa.dominio.Vigencia;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Valida las reglas de una incorporación después de leerlas. Las reglas sin enunciado, sin fuente o
- * con datos incompletos ya las rechaza {@link IncorporacionJsonReader}; este validador aplica las
- * reglas de temporalidad y clasificación de UC07 ext. 6f y determina si la norma es toda
- * informativa (ext. 5a).
+ * con datos incompletos ya las rechaza {@link IncorporacionJsonReader}; este validador aplica lo
+ * propio del archivo y determina si la norma es toda informativa (ext. 5a). La temporalidad y
+ * clasificación de UC07 ext. 6f las valida {@link
+ * co.edu.unal.rutaun.normativa.dominio.ValidadorDelConsolidado}.
  */
 public final class ValidadorDeIncorporacion {
 
@@ -33,19 +32,6 @@ public final class ValidadorDeIncorporacion {
     List<String> motivos = new ArrayList<>();
     if (incorporacion.reglas().isEmpty()) {
       motivos.add("La incorporación no tiene reglas.");
-    }
-    boolean normaTemporal = incorporacion.norma().vigencia().esTemporal();
-    for (Regla regla : incorporacion.reglas()) {
-      boolean temporal =
-          normaTemporal || regla.vigenciaPropia().map(Vigencia::esTemporal).orElse(false);
-      if (temporal && regla.clasificacion() == ClasificacionRegla.DEL_PLAN) {
-        motivos.add(
-            "La regla \""
-                + regla.objeto()
-                + "\" ("
-                + regla.fuente().articulo()
-                + ") es temporal y está clasificada como DEL_PLAN; debe ser INFORMATIVA.");
-      }
     }
     if (!motivos.isEmpty()) {
       return new ResultadoDeValidacion.Invalida(motivos);

@@ -55,26 +55,6 @@ class ValidadorDeIncorporacionTest {
   }
 
   @Test
-  void uc07_ext6f_rechazaReglaDelPlanDeUnaNormaTemporal() {
-    NormaLeida norma = norma(true);
-    IncorporacionLeida incorporacion =
-        new IncorporacionLeida(
-            PROGRAMA,
-            norma,
-            List.of(
-                regla(
-                    norma,
-                    "Regla de norma temporal",
-                    Optional.empty(),
-                    ClasificacionRegla.DEL_PLAN)));
-
-    var resultado = ValidadorDeIncorporacion.validar(incorporacion);
-
-    assertThat(resultado)
-        .isInstanceOf(ValidadorDeIncorporacion.ResultadoDeValidacion.Invalida.class);
-  }
-
-  @Test
   void uc07_ext5a_aceptaUnaNormaConTodasSusReglasInformativas() {
     NormaLeida norma = norma(true);
     IncorporacionLeida incorporacion =

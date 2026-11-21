@@ -3,13 +3,14 @@ package co.edu.unal.rutaun.normativa.aplicacion;
 import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.Momento;
 import co.edu.unal.rutaun.compartido.ProgramaId;
-import co.edu.unal.rutaun.compartido.ReglaId;
 import co.edu.unal.rutaun.normativa.dominio.Alcance;
 import co.edu.unal.rutaun.normativa.dominio.ConsolidadoValidado;
 import co.edu.unal.rutaun.normativa.dominio.MotivoDeVersion;
 import co.edu.unal.rutaun.normativa.dominio.Norma;
 import co.edu.unal.rutaun.normativa.dominio.Regla;
 import co.edu.unal.rutaun.normativa.dominio.ReglaEnVersion;
+import co.edu.unal.rutaun.normativa.dominio.Validacion;
+import co.edu.unal.rutaun.normativa.dominio.ValidadorDelConsolidado;
 import co.edu.unal.rutaun.normativa.dominio.VersionDelConsolidado;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
 import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoEntity;
@@ -27,6 +28,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -40,12 +42,13 @@ import org.springframework.transaction.annotation.Transactional;
  * Confirma una incorporación leída de un archivo JSON: guarda la norma y sus reglas, y crea una
  * versión nueva del consolidado por cada programa del alcance. La operación es atómica por archivo.
  *
- * <p>UC07-HU03-T4 (#96, #130). La norma ya registrada por su identificación se omite. Los programas
- * se resuelven contra los ya cargados por SOP-03; no se generan identificadores de programa. La
- * versión nueva del consolidado lleva las reglas de la versión anterior del programa, con el estado
- * que tenían en ella, más las de la norma incorporada validadas por {@link
- * ValidadorDeIncorporacion}; las afectaciones todavía no se aplican al armar la versión (#175). El
- * resultado informa si ningún plan queda desactualizado (UC07 ext. 5a, #135).
+ * <p>UC07-HU03-T4 (#96, #130). La norma ya registrada por su identificación se omite, sin validar
+ * sus reglas (UC07 paso 4). Los programas se resuelven contra los ya cargados por SOP-03; no se
+ * generan identificadores de programa. Antes de guardar, {@link ValidadorDelConsolidado} valida las
+ * reglas nuevas en cada programa del alcance y arma la versión resultante con las reglas de la
+ * anterior, con el estado que tenían en ella, más las de la norma incorporada; las afectaciones
+ * todavía no se aplican al armar la versión (#175). El resultado informa si ningún plan queda
+ * desactualizado (UC07 ext. 5a, #135).
  */
 @Service
 public class ImportacionDeNormasService {
@@ -123,16 +126,19 @@ public class ImportacionDeNormasService {
     }
 
     LocalDate fecha = LocalDate.now(reloj);
-    List<ReglaEnVersion> reglasIncorporadas =
-        conSuEstado(incorporacion.reglas(), normaLeida, fecha);
+    List<VersionPorCrear> porCrear =
+        validarEnCadaPrograma(
+            programasDelAlcance,
+            normaLeida.vigencia(),
+            conSuEstado(incorporacion.reglas(), normaLeida, fecha));
     normas.save(NormaMapper.aEntidad(norma));
     reglas.saveAll(incorporacion.reglas().stream().map(ReglaMapper::aEntidad).toList());
 
     MotivoDeVersion motivo =
         new MotivoDeVersion.PorIncorporacion(norma.id(), ADMINISTRADOR_DE_SEMILLA);
     int creadas = 0;
-    for (ProgramaEntity programa : programasDelAlcance) {
-      crearVersion(programa, reglasIncorporadas, motivo, fecha);
+    for (VersionPorCrear version : porCrear) {
+      crearVersion(version, motivo, fecha);
       creadas++;
     }
     return new ResultadoDeImportacionDeNormas(
@@ -205,25 +211,38 @@ public class ImportacionDeNormasService {
                     "No hay un programa cargado con el código SIA " + codigo + "."));
   }
 
-  private void crearVersion(
-      ProgramaEntity programa,
-      List<ReglaEnVersion> reglas,
-      MotivoDeVersion motivo,
-      LocalDate fecha) {
+  private List<VersionPorCrear> validarEnCadaPrograma(
+      List<ProgramaEntity> programasDelAlcance, Vigencia vigencia, List<ReglaEnVersion> nuevas) {
+    List<VersionPorCrear> porCrear = new ArrayList<>(programasDelAlcance.size());
+    Set<String> motivos = new LinkedHashSet<>();
+    for (ProgramaEntity programa : programasDelAlcance) {
+      Optional<VersionDelConsolidado> anterior =
+          versiones.findTopByProgramaIdOrderByNumeroDesc(programa.getId()).map(this::cargarVersion);
+      switch (ValidadorDelConsolidado.validar(
+          new ProgramaId(programa.getId()), anterior, vigencia, nuevas)) {
+        case Validacion.Valido valido ->
+            porCrear.add(new VersionPorCrear(anterior, valido.consolidado()));
+        case Validacion.Invalido invalido -> motivos.addAll(invalido.motivos());
+      }
+    }
+    if (!motivos.isEmpty()) {
+      throw new ArchivoDeNormativaInvalidoException(String.join(" ", motivos));
+    }
+    return porCrear;
+  }
+
+  private void crearVersion(VersionPorCrear porCrear, MotivoDeVersion motivo, LocalDate fecha) {
+    ConsolidadoValidado validado = porCrear.validado();
     ConsolidadoEntity consolidado =
         consolidados
-            .findByProgramaId(programa.getId())
+            .findByProgramaId(validado.programa().valor())
             .orElseGet(
                 () ->
-                    consolidados.save(new ConsolidadoEntity(UUID.randomUUID(), programa.getId())));
-    Optional<VersionDelConsolidado> anterior =
-        versiones.findTopByProgramaIdOrderByNumeroDesc(programa.getId()).map(this::cargarVersion);
-    List<ReglaEnVersion> resultantes =
-        reglasAcumuladas(anterior.map(VersionDelConsolidado::reglas).orElse(List.of()), reglas);
-    ConsolidadoValidado validado =
-        ConsolidadoValidado.paraImportacion(new ProgramaId(programa.getId()), resultantes);
+                    consolidados.save(
+                        new ConsolidadoEntity(UUID.randomUUID(), validado.programa().valor())));
     VersionDelConsolidado version =
-        anterior
+        porCrear
+            .anterior()
             .map(v -> v.siguiente(validado, motivo, fecha))
             .orElseGet(() -> VersionDelConsolidado.primera(validado, motivo, fecha));
     VersionDelConsolidadoMapper.Filas filas =
@@ -232,44 +251,8 @@ public class ImportacionDeNormasService {
     reglasEnVersion.saveAll(filas.reglasEnVersion());
   }
 
-  /**
-   * Las reglas de la versión siguiente: las de la anterior, con el estado que tenían en ella, más
-   * las nuevas. Todavía no aplica afectaciones (#175). R-33 (#154) lleva esta unión al validador
-   * del consolidado.
-   *
-   * <p>El rechazo compara {@link ReglaId}. El lector crea cada regla con {@link Regla#registrar},
-   * que genera un id nuevo, así que hoy no se puede provocar desde un archivo: la comprobación
-   * defiende a los llamadores programáticos y al futuro validador del consolidado.
-   *
-   * @throws ArchivoDeNormativaInvalidoException si una regla nueva ya está en la versión anterior o
-   *     está repetida entre las nuevas
-   */
-  static List<ReglaEnVersion> reglasAcumuladas(
-      List<ReglaEnVersion> anteriores, List<ReglaEnVersion> nuevas) {
-    Set<ReglaId> idsDeLasAnteriores =
-        anteriores.stream().map(enVersion -> enVersion.regla().id()).collect(Collectors.toSet());
-    Set<ReglaId> idsDeLasNuevas = new HashSet<>();
-    for (ReglaEnVersion enVersion : nuevas) {
-      Regla regla = enVersion.regla();
-      boolean yaEnLaAnterior = idsDeLasAnteriores.contains(regla.id());
-      boolean yaEntreLasNuevas = !idsDeLasNuevas.add(regla.id());
-      if (yaEnLaAnterior || yaEntreLasNuevas) {
-        throw new ArchivoDeNormativaInvalidoException(
-            "La regla \""
-                + regla.objeto()
-                + "\" ("
-                + regla.fuente().articulo()
-                + ") "
-                + (yaEnLaAnterior
-                    ? "ya está en la versión anterior del consolidado."
-                    : "está repetida en la norma que se importa."));
-      }
-    }
-    List<ReglaEnVersion> resultantes = new ArrayList<>(anteriores.size() + nuevas.size());
-    resultantes.addAll(anteriores);
-    resultantes.addAll(nuevas);
-    return resultantes;
-  }
+  private record VersionPorCrear(
+      Optional<VersionDelConsolidado> anterior, ConsolidadoValidado validado) {}
 
   private VersionDelConsolidado cargarVersion(VersionEntity entidad) {
     List<co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntity> filas =
