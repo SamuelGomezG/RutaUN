@@ -30,7 +30,6 @@ import co.edu.unal.rutaun.normativa.persistencia.ReglaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.VersionDelConsolidadoRepository;
 import co.edu.unal.rutaun.normativa.persistencia.VersionEntity;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
-import co.edu.unal.rutaun.utilidades.JsonConfig;
 import java.text.Collator;
 import java.time.LocalDate;
 import java.util.ArrayDeque;
@@ -47,7 +46,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tools.jackson.core.JacksonException;
 
 /**
  * Implementación de la fachada de consulta de Normativa (UC06-HU01-T4, #132): lee el consolidado
@@ -235,18 +233,10 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
 
   /**
    * El texto con el que la norma fija su alcance. La columna guarda un JSON ({@link AlcanceJson});
-   * si no se puede leer, no hay texto que mostrar y la página sigue funcionando.
+   * si no trae texto, no hay nada que mostrar.
    */
-  private static Optional<String> textoDelAlcance(String detalle) {
-    if (detalle.isBlank()) {
-      return Optional.empty();
-    }
-    try {
-      return Optional.ofNullable(JsonConfig.mapper().readValue(detalle, AlcanceJson.class).texto())
-          .filter(texto -> !texto.isBlank());
-    } catch (JacksonException e) {
-      return Optional.empty();
-    }
+  private static Optional<String> textoDelAlcance(AlcanceJson detalle) {
+    return Optional.ofNullable(detalle.texto()).filter(texto -> !texto.isBlank());
   }
 
   /**

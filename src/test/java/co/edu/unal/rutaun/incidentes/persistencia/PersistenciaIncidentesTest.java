@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
 import jakarta.persistence.EntityManager;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +58,7 @@ class PersistenciaIncidentesTest {
         null,
         null,
         "El calculo supero el plazo",
-        "[]",
+        new ElementosJson(ElementosJson.ESQUEMA, List.of()),
         fecha,
         fecha,
         conteo,

@@ -10,19 +10,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
-import tools.jackson.databind.json.JsonMapper;
 
 /**
- * TT-04-T2 (#90): comprueba que los datos de una regla viajan de un {@code record} a la columna
- * {@code datos} (CLOB) y de vuelta, con Hibernate 7, H2 2.4.240 y Jackson 3. Las clases hijas
- * eligen la base: en memoria o en archivo.
+ * TT-04-T6 (#145): los datos de una regla viajan de un record de persistencia a la columna {@code
+ * datos} JSON y de vuelta, con Hibernate 7, H2 2.4.240 y Jackson 3. Las clases hijas eligen la
+ * base: en memoria o en archivo.
  *
  * <p>No lleva {@code @Transactional}: cada operación del repositorio hace commit de verdad, así la
  * lectura sale de la base y no de la memoria de Hibernate.
  */
 abstract class ColumnaJsonIdaYVueltaBase {
-
-  private static final JsonMapper JSON = JsonMapper.builder().build();
 
   @Autowired private NormaRepository normas;
   @Autowired private ReglaRepository reglas;
@@ -33,15 +30,6 @@ abstract class ColumnaJsonIdaYVueltaBase {
 
   private UUID normaId;
   private UUID reglaId;
-
-  /** Datos de ejemplo de una regla de materia; imita lo que guardará el mapper real. */
-  record DatosDeReglaPrueba(
-      String materia,
-      String nombre,
-      int creditos,
-      boolean obligatoria,
-      List<String> prerrequisitos,
-      LocalDate vigenteDesde) {}
 
   /** Prefijo de la URL JDBC que debe estar usando la prueba. */
   protected abstract String prefijoDeUrlEsperado();
@@ -64,30 +52,37 @@ abstract class ColumnaJsonIdaYVueltaBase {
 
   @Test
   void tt04_columnaJsonIdaYVuelta() {
+    DatosDeReglaJson original =
+        new DatosDeReglaJson.CargaPorPeriodoJson(DatosDeReglaJson.ESQUEMA, 10, "MINIMO");
     NormaEntity norma = normas.save(nuevaNorma());
     normaId = norma.getId();
-    DatosDeReglaPrueba original =
-        new DatosDeReglaPrueba(
-            "2015714",
-            "Cálculo diferencial en una variable",
-            4,
-            true,
-            List.of("2015710", "1000001"),
-            LocalDate.of(2022, 2, 1));
-    String json = JSON.writeValueAsString(original);
-    ReglaEntity regla = reglas.save(nuevaRegla(normaId, json));
+    ReglaEntity regla = reglas.save(nuevaRegla(normaId, original));
     reglaId = regla.getId();
 
-    String leidoPorHibernate = reglas.findById(reglaId).orElseThrow().getDatos();
-    String leidoPorSql =
+    DatosDeReglaJson leido = reglas.findById(reglaId).orElseThrow().getDatos();
+    String crudo =
         jdbc.queryForObject(
-            "SELECT datos FROM regla WHERE CAST(id AS VARCHAR) = ?",
-            String.class,
-            reglaId.toString());
+            "SELECT CAST(datos AS VARCHAR(2000)) FROM regla WHERE id = ?", String.class, reglaId);
 
-    assertThat(leidoPorHibernate).isEqualTo(json);
-    assertThat(leidoPorSql).isEqualTo(json);
-    assertThat(JSON.readValue(leidoPorHibernate, DatosDeReglaPrueba.class)).isEqualTo(original);
+    assertThat(leido).isEqualTo(original);
+    assertThat(crudo).contains("\"categoria\":\"CARGA_POR_PERIODO\"").contains("\"esquema\":1");
+  }
+
+  @Test
+  void tt04_lasCuatroColumnasSonJson() {
+    assertThat(tipoDe("REGLA", "DATOS")).isEqualTo("JSON");
+    assertThat(tipoDe("NORMA", "ALCANCE_DETALLE")).isEqualTo("JSON");
+    assertThat(tipoDe("VERSION_CONSOLIDADO", "CAMBIOS")).isEqualTo("JSON");
+    assertThat(tipoDe("INCIDENTE", "ELEMENTOS")).isEqualTo("JSON");
+  }
+
+  private String tipoDe(String tabla, String columna) {
+    return jdbc.queryForObject(
+        "SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS"
+            + " WHERE TABLE_NAME = ? AND COLUMN_NAME = ?",
+        String.class,
+        tabla,
+        columna);
   }
 
   private static NormaEntity nuevaNorma() {
@@ -103,16 +98,16 @@ abstract class ColumnaJsonIdaYVueltaBase {
         null,
         null,
         "PROGRAMAS",
-        "{}");
+        new AlcanceJson(AlcanceJson.ESQUEMA, List.of(), List.of(), List.of(), null));
   }
 
-  private static ReglaEntity nuevaRegla(UUID normaId, String datos) {
+  private static ReglaEntity nuevaRegla(UUID normaId, DatosDeReglaJson datos) {
     return new ReglaEntity(
         UUID.randomUUID(),
         normaId,
-        "MATERIA",
-        "Cálculo diferencial",
-        "La materia vale 4 créditos.",
+        "CARGA_POR_PERIODO",
+        "Carga mínima",
+        "La carga mínima es de 10 créditos.",
         "Artículo 5",
         null,
         null,

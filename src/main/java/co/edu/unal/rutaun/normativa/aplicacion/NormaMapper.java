@@ -14,7 +14,6 @@ import co.edu.unal.rutaun.normativa.dominio.Vigencia;
 import co.edu.unal.rutaun.normativa.persistencia.AlcanceJson;
 import co.edu.unal.rutaun.normativa.persistencia.NormaEntity;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
-import co.edu.unal.rutaun.utilidades.JsonConfig;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -81,11 +80,10 @@ public final class NormaMapper {
   }
 
   private static Alcance alcanceADominio(NormaEntity entidad) {
-    AlcanceJson json =
-        JsonConfig.mapper()
-            .readValue(
-                ArgumentChecks.obligatorioNoVacio(entidad.getAlcanceDetalle(), "alcanceDetalle"),
-                AlcanceJson.class);
+    AlcanceJson json = ArgumentChecks.obligatorio(entidad.getAlcanceDetalle(), "alcanceDetalle");
+    if (json.esquema() != AlcanceJson.ESQUEMA) {
+      throw new IllegalArgumentException("esquema desconocido: " + json.esquema());
+    }
     return new Alcance(
         TipoAlcance.valueOf(entidad.getTipoAlcance()),
         aConjunto(json.facultades(), Facultad::new, "facultades"),
@@ -94,14 +92,13 @@ public final class NormaMapper {
         json.texto());
   }
 
-  private static String alcanceAJson(Alcance alcance) {
-    return JsonConfig.mapper()
-        .writeValueAsString(
-            new AlcanceJson(
-                alcance.facultades().stream().map(Facultad::nombre).sorted().toList(),
-                alcance.programas().stream().map(ProgramaId::valor).sorted().toList(),
-                alcance.exclusiones().stream().map(ProgramaId::valor).sorted().toList(),
-                alcance.texto()));
+  private static AlcanceJson alcanceAJson(Alcance alcance) {
+    return new AlcanceJson(
+        AlcanceJson.ESQUEMA,
+        alcance.facultades().stream().map(Facultad::nombre).sorted().toList(),
+        alcance.programas().stream().map(ProgramaId::valor).sorted().toList(),
+        alcance.exclusiones().stream().map(ProgramaId::valor).sorted().toList(),
+        alcance.texto());
   }
 
   private static <T, R> Set<R> aConjunto(List<T> lista, Function<T, R> conversion, String nombre) {

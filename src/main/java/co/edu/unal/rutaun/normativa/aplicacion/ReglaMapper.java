@@ -10,11 +10,11 @@ import co.edu.unal.rutaun.normativa.dominio.Fuente;
 import co.edu.unal.rutaun.normativa.dominio.Regla;
 import co.edu.unal.rutaun.normativa.dominio.TipoAfectacion;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
+import co.edu.unal.rutaun.normativa.persistencia.DatosDeReglaJson;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEntity;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
 import java.time.LocalDate;
 import java.util.Optional;
-import tools.jackson.core.JacksonException;
 
 /**
  * Convierte entre la {@link Regla} del dominio y su fila {@link ReglaEntity}. No guarda estado.
@@ -31,29 +31,23 @@ import tools.jackson.core.JacksonException;
  * <p>La tabla no puede guardar todo lo que el dominio admite, y el mapper lo rechaza en vez de
  * inventar datos: una vigencia propia dada por periodos (#141), una afectación a un artículo y una
  * afectación con un momento «desde» (#141). La categoría va en su columna y los datos propios de la
- * categoría, como JSON (provisional hasta #145; ver {@link JsonDeNormativa}).
+ * categoría, en la columna JSON, con la forma de {@link DatosDeReglaJson}.
  */
 public final class ReglaMapper {
 
-  /** Las categorías de regla, con el nombre que se guarda y la clase de sus datos. */
+  /** Las categorías de regla, con el nombre que se guarda en su columna. */
   private enum Categoria {
-    MATERIA(DatosDeRegla.DeMateria.class),
-    PRERREQUISITO(DatosDeRegla.DePrerrequisito.class),
-    CORREQUISITO(DatosDeRegla.DeCorrequisito.class),
-    HABILITACION(DatosDeRegla.DeHabilitacion.class),
-    AGRUPACION(DatosDeRegla.DeAgrupacion.class),
-    COMPONENTE(DatosDeRegla.DeComponente.class),
-    PROGRAMA(DatosDeRegla.DePrograma.class),
-    EQUIVALENCIA(DatosDeRegla.DeEquivalencia.class),
-    CARGA_POR_PERIODO(DatosDeRegla.DeCargaPorPeriodo.class),
-    REQUISITO_DE_GRADO(DatosDeRegla.DeRequisitoDeGrado.class),
-    OTRA(DatosDeRegla.DeOtraCategoria.class);
-
-    private final Class<? extends DatosDeRegla> clase;
-
-    Categoria(Class<? extends DatosDeRegla> clase) {
-      this.clase = clase;
-    }
+    MATERIA,
+    PRERREQUISITO,
+    CORREQUISITO,
+    HABILITACION,
+    AGRUPACION,
+    COMPONENTE,
+    PROGRAMA,
+    EQUIVALENCIA,
+    CARGA_POR_PERIODO,
+    REQUISITO_DE_GRADO,
+    OTRA;
 
     /** Un {@code switch} exhaustivo: el compilador avisa si se agrega una categoría de datos. */
     static Categoria de(DatosDeRegla datos) {
@@ -133,7 +127,7 @@ public final class ReglaMapper {
         afectacion.map(a -> a.tipo().name()).orElse(null),
         afectacion.flatMap(Afectacion::reglaAfectada).map(ReglaId::valor).orElse(null),
         null,
-        JsonDeNormativa.mapper().writeValueAsString(regla.datos()));
+        DatosDeReglaJsonMapper.aJson(regla.datos()));
   }
 
   private static Optional<Vigencia> vigenciaADominio(ReglaEntity entidad) {
@@ -175,13 +169,25 @@ public final class ReglaMapper {
 
   private static DatosDeRegla datosADominio(ReglaEntity entidad) {
     Categoria categoria = Categoria.desde(entidad.getCategoria());
-    String json = ArgumentChecks.obligatorioNoVacio(entidad.getDatos(), "datos");
+    DatosDeReglaJson json = ArgumentChecks.obligatorio(entidad.getDatos(), "datos");
+    DatosDeRegla datos;
     try {
-      return JsonDeNormativa.mapper().readValue(json, categoria.clase);
-    } catch (JacksonException e) {
+      datos = DatosDeReglaJsonMapper.aDominio(json);
+    } catch (IllegalArgumentException e) {
       throw new IllegalArgumentException(
           "los datos de la regla " + entidad.getId() + " no son válidos para " + categoria, e);
     }
+    Categoria real = Categoria.de(datos);
+    if (real != categoria) {
+      throw new IllegalArgumentException(
+          "los datos de la regla "
+              + entidad.getId()
+              + " son de "
+              + real
+              + " y la columna categoria dice "
+              + categoria);
+    }
+    return datos;
   }
 
   private static void exigirQueSePuedaGuardar(Afectacion afectacion) {
