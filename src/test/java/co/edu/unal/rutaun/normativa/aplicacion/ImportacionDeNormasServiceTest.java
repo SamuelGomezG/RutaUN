@@ -133,6 +133,19 @@ class ImportacionDeNormasServiceTest {
   }
 
   @Test
+  void uc07_hu03_t4_unaNormaVencidaDejaSusReglasEnYaNoRige() throws IOException {
+    cargarProgramas();
+
+    importarNorma("json/validos/norma-vencida.json");
+
+    assertThat(reglasEnVersion.findAll())
+        .as("las reglas de una norma vencida quedan en YA_NO_RIGE")
+        .isNotEmpty()
+        .extracting(ReglaEnVersionEntity::getEstado)
+        .containsOnly(EstadoRegla.YA_NO_RIGE.name());
+  }
+
+  @Test
   void uc07_ext5a_unaNormaConTodasSusReglasInformativasLoInforma() throws IOException {
     cargarProgramas();
     importarNorma("semilla/acuerdo-003a-2022.json");
