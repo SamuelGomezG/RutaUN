@@ -158,6 +158,42 @@ class RestriccionesControllerTest {
   }
 
   @Test
+  void uc05_ge2_unaRestriccionProgramadaOEnRevisionLoSenalaYUnaVigenteNo() throws Exception {
+    String conEstados = pagina(ConsultaNormativaFalsa.MATERIA_CON_ESTADOS);
+    String vigentes = pagina(ConsultaNormativaFalsa.MATERIA_CON_RESTRICCIONES);
+
+    assertThat(conEstados).contains("Programada:").contains("En revisión:");
+    assertThat(vigentes).doesNotContain("Programada:").doesNotContain("En revisión:");
+  }
+
+  @Test
+  void uc05_ext4e_soloLaRestriccionTemporalLlevaLaSenalTemporal() throws Exception {
+    String conEstados = pagina(ConsultaNormativaFalsa.MATERIA_CON_ESTADOS);
+    String vigentes = pagina(ConsultaNormativaFalsa.MATERIA_CON_RESTRICCIONES);
+
+    assertThat(conEstados.split("<strong>temporal</strong>", -1)).hasSize(2);
+    assertThat(vigentes).doesNotContain("<strong>temporal</strong>");
+  }
+
+  @Test
+  void uc05_ge2_laVigenciaDiceHastaCuandoRigeOQueNoTieneFin() throws Exception {
+    String conEstados = pagina(ConsultaNormativaFalsa.MATERIA_CON_ESTADOS);
+    String vigentes = pagina(ConsultaNormativaFalsa.MATERIA_CON_RESTRICCIONES);
+
+    assertThat(conEstados).contains("hasta 2026-12-31").contains("2027-01-15");
+    assertThat(vigentes).contains("sin fecha de fin").doesNotContain("hasta 20");
+  }
+
+  private String pagina(CodigoMateria materia) throws Exception {
+    return mockMvc
+        .perform(get(ruta(materia)))
+        .andExpect(status().isOk())
+        .andReturn()
+        .getResponse()
+        .getContentAsString();
+  }
+
+  @Test
   void uc05_gm3_laExplicacionNuncaAfirmaQueAlguienPuedaONoInscribirLaMateria() throws Exception {
     for (CodigoMateria materia :
         new CodigoMateria[] {
