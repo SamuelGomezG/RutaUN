@@ -348,17 +348,17 @@ public final class IncorporacionJsonReader {
   private static ExpresionDeMaterias expresion(JsonNode nodo) {
     return switch (texto(nodo, "tipo")) {
       case "MATERIA_DEL_PROGRAMA" ->
-          new ExpresionDeMaterias.MateriaDelPrograma(new CodigoMateria(texto(nodo, "codigo")));
+          new ExpresionDeMaterias.TerminoMateria(new CodigoMateria(texto(nodo, "codigo")));
       case "MATERIA_EXTERNA" ->
           new ExpresionDeMaterias.MateriaExterna(
               texto(nodo, "nombre"),
               codigoOpcional(nodo),
               TipoMateriaExterna.valueOf(texto(nodo, "origen")));
       case "Y" ->
-          new ExpresionDeMaterias.Y(
+          ExpresionDeMaterias.todasLas(
               expresion(objeto(nodo, "izquierda")), expresion(objeto(nodo, "derecha")));
       case "O" ->
-          new ExpresionDeMaterias.O(
+          ExpresionDeMaterias.algunaDe(
               expresion(objeto(nodo, "izquierda")), expresion(objeto(nodo, "derecha")));
       default -> throw new IllegalArgumentException("expresion.tipo no es válido");
     };
