@@ -72,4 +72,19 @@ class ExpresionVistaTest {
     assertThatThrownBy(() -> new ExpresionVista.AlgunaDe(List.of(materia("A"))))
         .isInstanceOf(IllegalArgumentException.class);
   }
+
+  @Test
+  void uc05_ext4c_unaCondicionSeEscribeConElTextoDeLaRegla() {
+    ExpresionVista condicion =
+        new ExpresionVista.Condicion("Materia E: haber aprobado 40 créditos del componente.");
+
+    assertThat(condicion.redaccion())
+        .isEqualTo("Materia E: haber aprobado 40 créditos del componente.");
+  }
+
+  @Test
+  void uc05_ext4c_unaCondicionSinTextoSeRechaza() {
+    assertThatThrownBy(() -> new ExpresionVista.Condicion(" "))
+        .isInstanceOf(IllegalArgumentException.class);
+  }
 }

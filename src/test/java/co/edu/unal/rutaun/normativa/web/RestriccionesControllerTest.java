@@ -122,6 +122,23 @@ class RestriccionesControllerTest {
   }
 
   @Test
+  void uc05_ext4c_unaReglaDeHabilitacionSeMuestraComoRestriccionDeLaMateria() throws Exception {
+    String pagina =
+        mockMvc
+            .perform(get(ruta(ConsultaNormativaFalsa.MATERIA_CON_HABILITACION)))
+            .andExpect(status().isOk())
+            .andExpect(content().string(containsString("Regla de habilitación")))
+            .andExpect(content().string(containsString("haber aprobado 40 créditos")))
+            .andExpect(content().string(containsString("Lo establece el")))
+            .andExpect(content().string(not(containsString("no tiene restricciones"))))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+    assertThat(pagina.split("haber aprobado 40 créditos", -1)).hasSize(2);
+  }
+
+  @Test
   void uc05_gm3_laExplicacionNuncaAfirmaQueAlguienPuedaONoInscribirLaMateria() throws Exception {
     for (CodigoMateria materia :
         new CodigoMateria[] {

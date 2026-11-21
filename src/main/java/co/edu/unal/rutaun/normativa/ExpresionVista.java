@@ -5,12 +5,16 @@ import co.edu.unal.rutaun.utilidades.ArgumentChecks;
 import java.util.List;
 
 /**
- * Vista inmutable de lo que exige una restricción: una materia, o varias combinadas con «y» y «o»
- * (UC05 paso 4 y ext. 4a). Una conjunción o una disyunción siempre tiene al menos dos términos, y
- * ninguno de ellos es otra del mismo tipo: «A y (B y C)» se lee como «A, B y C».
+ * Vista inmutable de lo que exige una restricción: una materia, varias combinadas con «y» y «o»
+ * (UC05 paso 4 y ext. 4a) o una condición escrita, la de una regla de habilitación. Una conjunción
+ * o una disyunción siempre tiene al menos dos términos, y ninguno de ellos es otra del mismo tipo:
+ * «A y (B y C)» se lee como «A, B y C».
  */
 public sealed interface ExpresionVista
-    permits ExpresionVista.Materia, ExpresionVista.TodasLas, ExpresionVista.AlgunaDe {
+    permits ExpresionVista.Materia,
+        ExpresionVista.TodasLas,
+        ExpresionVista.AlgunaDe,
+        ExpresionVista.Condicion {
 
   /**
    * La expresión escrita para leerla (UC05 paso 4, «qué la satisface»): los nombres de las materias
@@ -37,6 +41,26 @@ public sealed interface ExpresionVista
     @Override
     public String redaccion() {
       return nombre;
+    }
+  }
+
+  /**
+   * Una condición que no es de materias, como la de una regla de habilitación (haber aprobado un
+   * mínimo de créditos). Se muestra con el texto de la regla; el detalle de cuántos créditos y de
+   * qué componente es de UC05 ext. 4c.
+   *
+   * @param texto la condición, tal como la escribe la regla
+   */
+  record Condicion(String texto) implements ExpresionVista {
+
+    /** Exige el texto. */
+    public Condicion {
+      ArgumentChecks.obligatorioNoVacio(texto, "texto");
+    }
+
+    @Override
+    public String redaccion() {
+      return texto;
     }
   }
 

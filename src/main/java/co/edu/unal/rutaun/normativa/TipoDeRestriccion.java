@@ -1,8 +1,9 @@
 package co.edu.unal.rutaun.normativa;
 
 /**
- * Clase de restricción que muestra UC05-HU01 (glosario, «Restricción (de una materia)»). Las reglas
- * de habilitación quedan fuera de esta historia.
+ * Clase de restricción que muestra UC05-HU01 (glosario, «Restricción (de una materia)»): el
+ * prerrequisito, el correquisito y la regla de habilitación. Se declaran en el orden en que se
+ * muestran.
  */
 public enum TipoDeRestriccion {
   /** Materias que deben estar aprobadas, o en curso para efectos del plan, antes de cursarla. */
@@ -12,7 +13,12 @@ public enum TipoDeRestriccion {
           + " materia"),
   /** Materias que deben cursarse en el mismo semestre que la materia o antes. */
   CORREQUISITO(
-      "Correquisito", "Materias que deben cursarse en el mismo semestre que la materia o antes");
+      "Correquisito", "Materias que deben cursarse en el mismo semestre que la materia o antes"),
+  /** Un mínimo de créditos aprobados, de un componente o del programa. */
+  HABILITACION(
+      "Regla de habilitación",
+      "Condición distinta de un prerrequisito: haber aprobado un número mínimo de créditos de un"
+          + " componente o del programa");
 
   private final String nombre;
   private final String definicion;

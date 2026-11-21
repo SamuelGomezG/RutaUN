@@ -30,7 +30,8 @@
         <dd th:text="${restriccion.exige().redaccion()}">Materia A y (Materia B o Materia C)</dd>
         <dt>Por qué aplica</dt>
         <dd>
-          <span th:text="${restriccion.enunciado()}">Enunciado de la regla</span>
+          <span th:unless="${restriccion.tipo().name() == 'HABILITACION'}"
+                th:text="${restriccion.enunciado()}">Enunciado de la regla</span>
           <span th:if="${restriccion.fuente().isPresent()}" th:with="fuente=${restriccion.fuente().get()}">
             Lo establece el
             <span th:switch="${fuente.norma().tipo().name()}">
