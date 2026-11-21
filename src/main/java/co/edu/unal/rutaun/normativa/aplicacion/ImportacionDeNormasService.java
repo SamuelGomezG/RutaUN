@@ -1,19 +1,24 @@
 package co.edu.unal.rutaun.normativa.aplicacion;
 
+import co.edu.unal.rutaun.compartido.CodigoMateria;
 import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.Momento;
 import co.edu.unal.rutaun.compartido.ProgramaId;
 import co.edu.unal.rutaun.compartido.ReglaId;
 import co.edu.unal.rutaun.normativa.dominio.Alcance;
 import co.edu.unal.rutaun.normativa.dominio.ConsolidadoValidado;
+import co.edu.unal.rutaun.normativa.dominio.DatosDeRegla;
+import co.edu.unal.rutaun.normativa.dominio.Materia;
 import co.edu.unal.rutaun.normativa.dominio.MotivoDeVersion;
 import co.edu.unal.rutaun.normativa.dominio.Norma;
 import co.edu.unal.rutaun.normativa.dominio.Regla;
 import co.edu.unal.rutaun.normativa.dominio.ReglaEnVersion;
+import co.edu.unal.rutaun.normativa.dominio.RevisionDelCatalogo;
 import co.edu.unal.rutaun.normativa.dominio.VersionDelConsolidado;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
 import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoEntity;
 import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoRepository;
+import co.edu.unal.rutaun.normativa.persistencia.MateriaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.NormaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaRepository;
@@ -40,6 +45,9 @@ import org.springframework.transaction.annotation.Transactional;
  * Confirma una incorporación leída de un archivo JSON: guarda la norma y sus reglas, y crea una
  * versión nueva del consolidado por cada programa del alcance. La operación es atómica por archivo.
  *
+ * <p>También registra en el catálogo global las materias nuevas de las reglas de materia y rechaza
+ * la incorporación si una materia llega con otros créditos (UC07 ext. 6d).
+ *
  * <p>UC07-HU03-T4 (#96, #130). La norma ya registrada por su identificación se omite. Los programas
  * se resuelven contra los ya cargados por SOP-03; no se generan identificadores de programa. La
  * versión nueva del consolidado lleva las reglas de la versión anterior del programa, con el estado
@@ -55,6 +63,7 @@ public class ImportacionDeNormasService {
   private final ProgramaRepository programas;
   private final NormaRepository normas;
   private final ReglaRepository reglas;
+  private final MateriaRepository materias;
   private final ConsolidadoRepository consolidados;
   private final VersionDelConsolidadoRepository versiones;
   private final ReglaEnVersionRepository reglasEnVersion;
@@ -65,6 +74,7 @@ public class ImportacionDeNormasService {
       ProgramaRepository programas,
       NormaRepository normas,
       ReglaRepository reglas,
+      MateriaRepository materias,
       ConsolidadoRepository consolidados,
       VersionDelConsolidadoRepository versiones,
       ReglaEnVersionRepository reglasEnVersion,
@@ -72,6 +82,7 @@ public class ImportacionDeNormasService {
     this.programas = ArgumentChecks.obligatorio(programas, "programas");
     this.normas = ArgumentChecks.obligatorio(normas, "normas");
     this.reglas = ArgumentChecks.obligatorio(reglas, "reglas");
+    this.materias = ArgumentChecks.obligatorio(materias, "materias");
     this.consolidados = ArgumentChecks.obligatorio(consolidados, "consolidados");
     this.versiones = ArgumentChecks.obligatorio(versiones, "versiones");
     this.reglasEnVersion = ArgumentChecks.obligatorio(reglasEnVersion, "reglasEnVersion");
@@ -123,10 +134,10 @@ public class ImportacionDeNormasService {
     }
 
     LocalDate fecha = LocalDate.now(reloj);
+    List<Materia> materiasNuevas = materiasNuevas(incorporacion.reglas());
     List<ReglaEnVersion> reglasIncorporadas =
         conSuEstado(incorporacion.reglas(), normaLeida, fecha);
-    normas.save(NormaMapper.aEntidad(norma));
-    reglas.saveAll(incorporacion.reglas().stream().map(ReglaMapper::aEntidad).toList());
+    guardar(norma, incorporacion.reglas(), materiasNuevas);
 
     MotivoDeVersion motivo =
         new MotivoDeVersion.PorIncorporacion(norma.id(), ADMINISTRADOR_DE_SEMILLA);
@@ -137,6 +148,30 @@ public class ImportacionDeNormasService {
     }
     return new ResultadoDeImportacionDeNormas(
         true, identificacion, creadas, valida.ningunPlanQuedaDesactualizado());
+  }
+
+  private List<Materia> materiasNuevas(List<Regla> reglasDeLaNorma) {
+    List<CodigoMateria> codigos =
+        reglasDeLaNorma.stream()
+            .filter(regla -> regla.datos() instanceof DatosDeRegla.DeMateria)
+            .map(regla -> ((DatosDeRegla.DeMateria) regla.datos()).materia().codigo())
+            .distinct()
+            .toList();
+    List<Materia> catalogo =
+        materias.findAllById(codigos.stream().map(CodigoMateria::valor).toList()).stream()
+            .map(MateriaMapper::aDominio)
+            .toList();
+    RevisionDelCatalogo revision = RevisionDelCatalogo.de(reglasDeLaNorma, catalogo);
+    if (!revision.motivos().isEmpty()) {
+      throw new ArchivoDeNormativaInvalidoException(String.join(" ", revision.motivos()));
+    }
+    return revision.nuevas();
+  }
+
+  private void guardar(Norma norma, List<Regla> reglasDeLaNorma, List<Materia> materiasNuevas) {
+    materias.saveAll(materiasNuevas.stream().map(MateriaMapper::aEntidad).toList());
+    normas.save(NormaMapper.aEntidad(norma));
+    reglas.saveAll(reglasDeLaNorma.stream().map(ReglaMapper::aEntidad).toList());
   }
 
   private static List<ReglaEnVersion> conSuEstado(

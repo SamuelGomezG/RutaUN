@@ -98,7 +98,7 @@ El diagrama muestra las columnas principales; la lista completa está en las mig
 | `consolidado` | El consolidado de un programa | Uno por programa | `version_bloqueo` es el contador de bloqueo optimista de JPA (`@Version`). No es el número de la versión del consolidado |
 | `version_consolidado` | Una versión del consolidado de un programa | Única por `programa_id` y `numero` | Solo se agregan filas. `motivo` es `POR_INCORPORACION`, `POR_CORRECCION`, `AUTOMATICO_POR_PERIODO` o `AUTOMATICO_POR_FECHA` |
 | `regla_en_version` | Que una regla está en una versión, y con qué estado | Única por `version_id` y `regla_id` | `estado` es `VIGENTE`, `PROGRAMADA` o `YA_NO_RIGE`. Una versión lleva las reglas de la anterior más las de la norma incorporada, así que una misma regla tiene una fila por cada versión en que está |
-| `materia` | Una materia del catálogo: código y créditos | Solo la llave primaria | Hoy queda vacía: la importación todavía no la llena ([#155](https://github.com/SamuelGomezG/RutaUN/issues/155)) |
+| `materia` | Una materia del catálogo: código y créditos | Solo la llave primaria | La importación registra las materias nuevas de las reglas de materia y rechaza un código con otros créditos (UC07 ext. 6d). El nombre vive en la regla |
 | `incidente` | Un grupo de incidentes iguales sin atender | Solo la llave primaria | `conteo`, `primera_fecha` y `ultima_fecha` resumen las ocurrencias. `programa_id` y `version_consolidado` son nulos en un incidente interno |
 
 ## Columnas que guardan JSON como texto
@@ -139,7 +139,6 @@ Antes de apoyarte en un detalle de una tabla, revisa si uno de estos issues lo c
 | [#142](https://github.com/SamuelGomezG/RutaUN/issues/142) | El esquema se aparta del diseño y acepta datos incoherentes |
 | [#143](https://github.com/SamuelGomezG/RutaUN/issues/143) | Un repositorio por raíz, sin borrado del historial |
 | [#145](https://github.com/SamuelGomezG/RutaUN/issues/145) | Los datos de las reglas, en columnas JSON |
-| [#155](https://github.com/SamuelGomezG/RutaUN/issues/155) | El catálogo de materias queda vacío |
 | [#167](https://github.com/SamuelGomezG/RutaUN/issues/167), [#168](https://github.com/SamuelGomezG/RutaUN/issues/168) y [#169](https://github.com/SamuelGomezG/RutaUN/issues/169) | Cómo se agrupan los incidentes y qué pasa con dos registros simultáneos |
 
 ## Qué deja la semilla
@@ -154,7 +153,7 @@ Con una base nueva y el perfil `dev`:
 | `consolidado` | 1 |
 | `version_consolidado` | 5 |
 | `regla_en_version` | 880 |
-| `materia` | 0 |
+| `materia` | 105 |
 | `incidente` | 0 |
 
 Las cinco versiones salen del orden en que se cargan los archivos ([`entorno-y-configuracion.md`](../proceso/entorno-y-configuracion.md), «Qué hace el arranque»):
@@ -169,10 +168,12 @@ Las cinco versiones salen del orden en que se cargan los archivos ([`entorno-y-c
 
 Las 880 filas de `regla_en_version` son la suma de las reglas de cada versión (20 + 27 + 276 + 277 + 280). En la versión vigente (la 5), 279 quedan `VIGENTE` y 1 `PROGRAMADA`; una de las vigentes tiene `vigente_hasta`. La fecha de cada versión es el día de la carga, no la de la norma.
 
+Las 105 materias salen de 107 reglas de materia: 2027313 y 2028837 figuran en dos agrupaciones. Una base de desarrollo cargada antes de [#155](https://github.com/SamuelGomezG/RutaUN/issues/155) conserva `materia` vacía, porque la importación omite las normas ya registradas: para llenarla hay que borrar `data/` y volver a arrancar con el perfil `dev`.
+
 Los dos archivos `datos-de-prueba-*.json` son ficticios y llevan la marca «(datos de prueba)»; su convención está en [`formato-normativa.md`](formato-normativa.md), «Datos de prueba de la semilla».
 Cada dato se retira solo cuando su caso pase a estar cubierto por una norma real: los demás se conservan, y las cifras de esta tabla y de `SemillaDeSistemasTest` se recalculan con los datos que queden; `DatosDePruebaDeLaSemillaTest` y `SoporteDeSemilla` descubren los archivos por su nombre y no fijan cifras. Retirar un archivo no limpia una base ya cargada: hay que borrar `data/` y volver a arrancar con `dev`.
 
-Estas cifras cambian cuando cambie la semilla: [#178](https://github.com/SamuelGomezG/RutaUN/issues/178) (doce agrupaciones registradas dos veces) y [#146](https://github.com/SamuelGomezG/RutaUN/issues/146) (orden de carga). [#146](https://github.com/SamuelGomezG/RutaUN/issues/146) reordena la carga por fecha de expedición: las 280 filas de `regla` no cambian, pero las de `regla_en_version` pasan de 880 (20 + 27 + 276 + 277 + 280) a 867 (7 + 27 + 276 + 277 + 280), porque son la suma de las reglas de cada versión. `normativa/aplicacion/SemillaDeSistemasTest` fija las cifras en sus constantes: quien cambie la semilla las actualiza ahí; si el cambio toca uno de los tres acuerdos, también la prueba de #130 de `ImportacionDeNormasServiceTest`; y actualiza el conteo de `regla_en_version` de esta tabla. Si no coinciden con lo que ves, corre las consultas de abajo y corrige esta sección.
+Estas cifras cambian cuando cambie la semilla: [#178](https://github.com/SamuelGomezG/RutaUN/issues/178) (doce agrupaciones registradas dos veces) y [#146](https://github.com/SamuelGomezG/RutaUN/issues/146) (orden de carga). [#146](https://github.com/SamuelGomezG/RutaUN/issues/146) reordena la carga por fecha de expedición: las 280 filas de `regla` no cambian, pero las de `regla_en_version` pasan de 880 (20 + 27 + 276 + 277 + 280) a 867 (7 + 27 + 276 + 277 + 280), porque son la suma de las reglas de cada versión. `normativa/aplicacion/SemillaDeSistemasTest` fija las cifras en sus constantes: quien cambie la semilla las actualiza ahí; si el cambio toca uno de los tres acuerdos, también la prueba de #130 de `ImportacionDeNormasServiceTest`; y actualiza los conteos de `materia` y `regla_en_version` de esta tabla. Si no coinciden con lo que ves, corre las consultas de abajo y corrige esta sección.
 
 ## Consultas de inspección
 
