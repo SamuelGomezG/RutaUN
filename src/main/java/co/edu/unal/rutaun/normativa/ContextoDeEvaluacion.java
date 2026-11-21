@@ -11,8 +11,9 @@ import co.edu.unal.rutaun.compartido.EstadoRestriccion;
 public interface ContextoDeEvaluacion {
 
   /**
-   * Certeza con que el término se cumple, con su razón. Quien implementa aplica antes las
-   * equivalencias: una materia que ya no rige sin equivalencia que la traduzca es INCIERTA.
+   * Certeza con que el término se cumple, con su razón estructurada. Quien implementa aplica antes
+   * las equivalencias: una materia que ya no rige sin equivalencia que la traduzca es INCIERTA. La
+   * razón nunca nombra una materia externa (S17).
    *
    * @param materia materia del término que se evalúa
    * @return estado del término con las razones que lo explican

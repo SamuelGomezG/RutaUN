@@ -8,43 +8,48 @@ import org.junit.jupiter.api.Test;
 
 class EstadoRestriccionTest {
 
+  private static final CodigoMateria A = new CodigoMateria("A");
+  private static final CodigoMateria B = new CodigoMateria("B");
+
   @Test
   void tt03_elEstadoGuardaLaCertezaYLasRazones() {
     EstadoRestriccion estado =
-        new EstadoRestriccion(EstadoRestriccion.Certeza.EN_CURSO, List.of("A está en curso"));
+        new EstadoRestriccion(
+            EstadoRestriccion.Certeza.EN_CURSO, List.of(new Razon.TerminoEnCurso(A)));
 
     assertThat(estado.certeza()).isEqualTo(EstadoRestriccion.Certeza.EN_CURSO);
-    assertThat(estado.razones()).containsExactly("A está en curso");
+    assertThat(estado.razones()).containsExactly(new Razon.TerminoEnCurso(A));
   }
 
   @Test
   void tt03_seConstruyenLosCuatroEstadosPorCerteza() {
-    assertThat(EstadoRestriccion.cumplida("A aprobada").certeza())
+    assertThat(EstadoRestriccion.cumplida(new Razon.TerminoAprobado(A)).certeza())
         .isEqualTo(EstadoRestriccion.Certeza.CUMPLIDA);
-    assertThat(EstadoRestriccion.enCurso("A en curso").certeza())
+    assertThat(EstadoRestriccion.enCurso(new Razon.TerminoEnCurso(A)).certeza())
         .isEqualTo(EstadoRestriccion.Certeza.EN_CURSO);
-    assertThat(EstadoRestriccion.incierta("A ya no rige").certeza())
+    assertThat(EstadoRestriccion.incierta(new Razon.TerminoQueYaNoRige(A)).certeza())
         .isEqualTo(EstadoRestriccion.Certeza.INCIERTA);
-    assertThat(EstadoRestriccion.pendiente("A pendiente").certeza())
+    assertThat(EstadoRestriccion.pendiente(new Razon.TerminoPendiente(A)).certeza())
         .isEqualTo(EstadoRestriccion.Certeza.PENDIENTE);
   }
 
   @Test
   void tt03_elEstadoNoDejaModificarSusRazones() {
-    EstadoRestriccion estado = EstadoRestriccion.cumplida("A aprobada");
+    EstadoRestriccion estado = EstadoRestriccion.cumplida(new Razon.TerminoAprobado(A));
 
-    assertThatThrownBy(() -> estado.razones().add("otra razón"))
+    assertThatThrownBy(() -> estado.razones().add(new Razon.TerminoAprobado(B)))
         .isInstanceOf(UnsupportedOperationException.class);
   }
 
   @Test
   void tt03_unaYDeTerminosCumplidosConservaSusRazones() {
     EstadoRestriccion estado =
-        EstadoRestriccion.cumplida("A está aprobada")
-            .y(EstadoRestriccion.cumplida("B está aprobada"));
+        EstadoRestriccion.cumplida(new Razon.TerminoAprobado(A))
+            .y(EstadoRestriccion.cumplida(new Razon.TerminoAprobado(B)));
 
     assertThat(estado.certeza()).isEqualTo(EstadoRestriccion.Certeza.CUMPLIDA);
-    assertThat(estado.razones()).containsExactly("A está aprobada", "B está aprobada");
+    assertThat(estado.razones())
+        .containsExactly(new Razon.TerminoAprobado(A), new Razon.TerminoAprobado(B));
   }
 
   @Test
@@ -64,7 +69,7 @@ class EstadoRestriccionTest {
 
   @Test
   void tt03_yYORechazanUnEstadoNulo() {
-    EstadoRestriccion estado = EstadoRestriccion.cumplida("A está aprobada");
+    EstadoRestriccion estado = EstadoRestriccion.cumplida(new Razon.TerminoAprobado(A));
 
     assertThatThrownBy(() -> estado.y(null))
         .isInstanceOf(IllegalArgumentException.class)
@@ -75,7 +80,7 @@ class EstadoRestriccionTest {
   }
 
   private static EstadoRestriccion estado(EstadoRestriccion.Certeza certeza) {
-    return new EstadoRestriccion(certeza, List.of(certeza.name()));
+    return new EstadoRestriccion(certeza, List.of(new Razon.TerminoAprobado(A)));
   }
 
   @Test
@@ -89,7 +94,7 @@ class EstadoRestriccionTest {
     assertThatThrownBy(
             () ->
                 new EstadoRestriccion(
-                    EstadoRestriccion.Certeza.CUMPLIDA, java.util.Arrays.asList((String) null)))
+                    EstadoRestriccion.Certeza.CUMPLIDA, java.util.Arrays.asList((Razon) null)))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("razones no puede tener elementos null");
   }

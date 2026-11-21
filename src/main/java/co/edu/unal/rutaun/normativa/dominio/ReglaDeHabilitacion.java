@@ -3,6 +3,7 @@ package co.edu.unal.rutaun.normativa.dominio;
 import co.edu.unal.rutaun.compartido.CodigoMateria;
 import co.edu.unal.rutaun.compartido.Creditos;
 import co.edu.unal.rutaun.compartido.EstadoRestriccion;
+import co.edu.unal.rutaun.compartido.Razon;
 import co.edu.unal.rutaun.normativa.ContextoDeEvaluacion;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
 
@@ -31,15 +32,10 @@ public record ReglaDeHabilitacion(CodigoMateria materia, MedidaDeCreditos medida
         medida().esDelPrograma()
             ? contexto.creditosAprobadosDelPrograma()
             : contexto.creditosAprobadosDelComponente(medida().componente().orElseThrow());
-    String deQue =
-        medida().esDelPrograma()
-            ? "del programa"
-            : "del componente " + medida().componente().orElseThrow();
-    String detalle =
-        "créditos aprobados " + deQue + ": " + aprobados.valor() + "; umbral: " + umbral().valor();
+    Razon razon = new Razon.CreditosDeHabilitacion(aprobados, umbral());
     if (aprobados.valor() >= umbral().valor()) {
-      return EstadoRestriccion.cumplida(detalle);
+      return EstadoRestriccion.cumplida(razon);
     }
-    return EstadoRestriccion.pendiente(detalle);
+    return EstadoRestriccion.pendiente(razon);
   }
 }

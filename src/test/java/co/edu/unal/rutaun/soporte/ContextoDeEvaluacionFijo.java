@@ -3,6 +3,7 @@ package co.edu.unal.rutaun.soporte;
 import co.edu.unal.rutaun.compartido.CodigoMateria;
 import co.edu.unal.rutaun.compartido.Creditos;
 import co.edu.unal.rutaun.compartido.EstadoRestriccion;
+import co.edu.unal.rutaun.compartido.Razon;
 import co.edu.unal.rutaun.normativa.ContextoDeEvaluacion;
 import co.edu.unal.rutaun.normativa.TipoComponente;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
@@ -86,7 +87,7 @@ public final class ContextoDeEvaluacionFijo implements ContextoDeEvaluacion {
   }
 
   private static EstadoRestriccion pendiente(CodigoMateria materia) {
-    return EstadoRestriccion.pendiente(materia.valor() + " está pendiente");
+    return EstadoRestriccion.pendiente(new Razon.TerminoPendiente(materia));
   }
 
   /** Constructor de {@link ContextoDeEvaluacionFijo} para escribir las pruebas cómodamente. */
@@ -101,17 +102,26 @@ public final class ContextoDeEvaluacionFijo implements ContextoDeEvaluacion {
 
     /** La materia está aprobada: certeza cumplida. */
     public Constructor aprobada(CodigoMateria materia) {
-      return estado(materia, EstadoRestriccion.cumplida(materia.valor() + " está aprobada"));
+      return estado(
+          materia,
+          EstadoRestriccion.cumplida(
+              new Razon.TerminoAprobado(ArgumentChecks.obligatorio(materia, "materia"))));
     }
 
     /** La materia está en curso. */
     public Constructor enCurso(CodigoMateria materia) {
-      return estado(materia, EstadoRestriccion.enCurso(materia.valor() + " está en curso"));
+      return estado(
+          materia,
+          EstadoRestriccion.enCurso(
+              new Razon.TerminoEnCurso(ArgumentChecks.obligatorio(materia, "materia"))));
     }
 
     /** La materia ya no rige y ninguna equivalencia la traduce: certeza incierta. */
     public Constructor yaNoRige(CodigoMateria materia) {
-      return estado(materia, EstadoRestriccion.incierta(materia.valor() + " ya no rige"));
+      return estado(
+          materia,
+          EstadoRestriccion.incierta(
+              new Razon.TerminoQueYaNoRige(ArgumentChecks.obligatorio(materia, "materia"))));
     }
 
     /** La materia está pendiente (es lo que figura si no se dice nada). */

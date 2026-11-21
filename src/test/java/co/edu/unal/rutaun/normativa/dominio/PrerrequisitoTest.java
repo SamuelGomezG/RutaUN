@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import co.edu.unal.rutaun.compartido.CodigoMateria;
 import co.edu.unal.rutaun.compartido.EstadoRestriccion;
 import co.edu.unal.rutaun.compartido.EstadoRestriccion.Certeza;
+import co.edu.unal.rutaun.compartido.Razon;
 import co.edu.unal.rutaun.normativa.ContextoDeEvaluacion;
 import co.edu.unal.rutaun.normativa.dominio.ExpresionDeMaterias.MateriaExterna;
 import co.edu.unal.rutaun.normativa.dominio.ExpresionDeMaterias.TerminoMateria;
@@ -23,15 +24,16 @@ class PrerrequisitoTest {
   @Test
   void tt03_unPrerrequisitoTomaLaCertezaYLasRazonesQueDaElContexto() {
     for (Certeza certeza : Certeza.values()) {
+      Razon razon = new Razon.TerminoAprobado(A);
       ContextoDeEvaluacion contexto =
           ContextoDeEvaluacionFijo.nuevo()
-              .estado(A, new EstadoRestriccion(certeza, List.of("razón de " + certeza)))
+              .estado(A, new EstadoRestriccion(certeza, List.of(razon)))
               .construir();
 
       EstadoRestriccion estado = new Prerrequisito(B, new TerminoMateria(A)).evaluar(contexto);
 
       assertThat(estado.certeza()).isEqualTo(certeza);
-      assertThat(estado.razones()).containsExactly("razón de " + certeza);
+      assertThat(estado.razones()).containsExactly(razon);
     }
   }
 
@@ -42,7 +44,7 @@ class PrerrequisitoTest {
     EstadoRestriccion estado = new Prerrequisito(B, new TerminoMateria(A)).evaluar(contexto);
 
     assertThat(estado.certeza()).isEqualTo(Certeza.INCIERTA);
-    assertThat(estado.razones()).containsExactly("A ya no rige");
+    assertThat(estado.razones()).containsExactly(new Razon.TerminoQueYaNoRige(A));
   }
 
   @Test
@@ -56,7 +58,7 @@ class PrerrequisitoTest {
             .evaluar(contexto);
 
     assertThat(estado.certeza()).isEqualTo(Certeza.EN_CURSO);
-    assertThat(estado.razones()).containsExactly("B está en curso");
+    assertThat(estado.razones()).containsExactly(new Razon.TerminoEnCurso(B));
   }
 
   @Test
@@ -70,7 +72,7 @@ class PrerrequisitoTest {
             .evaluar(contexto);
 
     assertThat(estado.certeza()).isEqualTo(Certeza.CUMPLIDA);
-    assertThat(estado.razones()).containsExactly("B está aprobada");
+    assertThat(estado.razones()).containsExactly(new Razon.TerminoAprobado(B));
   }
 
   @Test
@@ -87,7 +89,7 @@ class PrerrequisitoTest {
             .evaluar(contexto);
 
     assertThat(estado.certeza()).isEqualTo(Certeza.EN_CURSO);
-    assertThat(estado.razones()).containsExactly("C está en curso");
+    assertThat(estado.razones()).containsExactly(new Razon.TerminoEnCurso(C));
   }
 
   @Test
@@ -103,19 +105,33 @@ class PrerrequisitoTest {
             .evaluar(contexto);
 
     assertThat(estado.certeza()).isEqualTo(Certeza.CUMPLIDA);
-    assertThat(estado.razones()).containsExactly("B está aprobada", "C está aprobada");
+    assertThat(estado.razones())
+        .containsExactly(new Razon.TerminoAprobado(B), new Razon.TerminoAprobado(C));
   }
 
   @Test
-  void tt03_unaMateriaDeNivelacionSeDaPorCumplida() {
-    EstadoRestriccion estado =
-        evaluarConContextoVacio(
-            new Prerrequisito(
-                A,
-                new MateriaExterna(
-                    "Matemáticas Básicas", Optional.empty(), TipoMateriaExterna.NIVELACION)));
+  void uc05_ext4k_unaMateriaDeNivelacionSeDaPorCumplidaYNoSeLista() {
+    MateriaExterna nivelacion =
+        new MateriaExterna("Matemáticas Básicas", Optional.empty(), TipoMateriaExterna.NIVELACION);
 
-    assertThat(estado.certeza()).isEqualTo(Certeza.CUMPLIDA);
+    EstadoRestriccion sola = evaluarConContextoVacio(new Prerrequisito(A, nivelacion));
+
+    assertThat(sola.certeza()).isEqualTo(Certeza.CUMPLIDA);
+    assertThat(sola.razones()).isEmpty();
+
+    EstadoRestriccion conPendiente =
+        new Prerrequisito(A, ExpresionDeMaterias.todasLas(nivelacion, new TerminoMateria(B)))
+            .evaluar(ContextoDeEvaluacionFijo.nuevo().pendiente(B).construir());
+
+    assertThat(conPendiente.certeza()).isEqualTo(Certeza.PENDIENTE);
+    assertThat(conPendiente.razones()).containsExactly(new Razon.TerminoPendiente(B));
+
+    EstadoRestriccion conAprobada =
+        new Prerrequisito(A, ExpresionDeMaterias.todasLas(nivelacion, new TerminoMateria(B)))
+            .evaluar(ContextoDeEvaluacionFijo.nuevo().aprobada(B).construir());
+
+    assertThat(conAprobada.certeza()).isEqualTo(Certeza.CUMPLIDA);
+    assertThat(conAprobada.razones()).containsExactly(new Razon.TerminoAprobado(B));
   }
 
   @Test
@@ -130,7 +146,7 @@ class PrerrequisitoTest {
                     TipoMateriaExterna.OTRO_PROGRAMA)));
 
     assertThat(estado.certeza()).isEqualTo(Certeza.PENDIENTE);
-    assertThat(estado.razones().get(0)).contains("no se puede cursar desde este programa");
+    assertThat(estado.razones()).containsExactly(new Razon.NoCursableDesdeElPrograma());
   }
 
   @Test

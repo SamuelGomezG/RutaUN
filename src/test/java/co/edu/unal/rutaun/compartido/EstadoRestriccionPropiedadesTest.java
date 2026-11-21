@@ -66,7 +66,8 @@ class EstadoRestriccionPropiedadesTest {
   }
 
   private static EstadoRestriccion estado(EstadoRestriccion.Certeza certeza) {
-    return new EstadoRestriccion(certeza, List.of(certeza.name()));
+    return new EstadoRestriccion(
+        certeza, List.of(new Razon.TerminoAprobado(new CodigoMateria("A"))));
   }
 
   private static EstadoRestriccion.Certeza peor(

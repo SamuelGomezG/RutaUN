@@ -3,6 +3,7 @@ package co.edu.unal.rutaun.soporte.demostraciones;
 import co.edu.unal.rutaun.compartido.CodigoMateria;
 import co.edu.unal.rutaun.compartido.Creditos;
 import co.edu.unal.rutaun.compartido.EstadoRestriccion;
+import co.edu.unal.rutaun.compartido.Razon;
 import co.edu.unal.rutaun.normativa.ContextoDeEvaluacion;
 import co.edu.unal.rutaun.normativa.TipoComponente;
 import co.edu.unal.rutaun.normativa.dominio.Correquisito;
@@ -20,12 +21,13 @@ import co.edu.unal.rutaun.soporte.ContextoDeEvaluacionFijo;
 import java.util.Optional;
 
 /**
- * Demostración ejecutable de TT-03-T9 (#161), TT-03-T7 (#163) y TT-03-T10 (#164): evalúa el
- * prerrequisito de Algoritmos (2016696) contra un {@link ContextoDeEvaluacion} publicado como
- * interfaz, con tres avances sintéticos (nunca datos personales) que implementan la interfaz con
- * {@link ContextoDeEvaluacionFijo}, e imprime además que «y» y «o» son iguales sin importar el
+ * Demostración ejecutable de TT-03-T9 (#161), TT-03-T7 (#163), TT-03-T10 (#164) y TT-03-T4 (#165):
+ * evalúa el prerrequisito de Algoritmos (2016696) contra un {@link ContextoDeEvaluacion} publicado
+ * como interfaz, con tres avances sintéticos (nunca datos personales) que implementan la interfaz
+ * con {@link ContextoDeEvaluacionFijo}, e imprime además que «y» y «o» son iguales sin importar el
  * orden de sus términos, los términos aplanados de esa expresión y la evaluación de un
- * correquisito, una habilitación del programa y de un componente, y materias externas. No necesita
+ * correquisito, una habilitación del programa y de un componente, y materias externas. Traduce cada
+ * {@link Razon} a un texto y comprueba que ninguna nombra una materia externa (S17). No necesita
  * Spring ni base de datos; se ejecuta con {@code ./mvnw -q test-compile} y {@code java -cp
  * target/classes:target/test-classes
  * co.edu.unal.rutaun.soporte.demostraciones.DemostracionDeLasRestricciones}. En Windows, el
@@ -152,13 +154,31 @@ public final class DemostracionDeLasRestricciones {
         ContextoDeEvaluacionFijo.nuevo().pendiente(SINTETICA).construir());
   }
 
+  /** Traduce cada variante de {@link Razon} a un texto para leerla en la demostración. */
+  private static String traducir(Razon razon) {
+    return switch (razon) {
+      case Razon.TerminoAprobado termino -> termino.materia().valor() + " está aprobada";
+      case Razon.TerminoEnCurso termino -> termino.materia().valor() + " está en curso";
+      case Razon.TerminoPendiente termino -> termino.materia().valor() + " está pendiente";
+      case Razon.TerminoQueYaNoRige termino -> termino.materia().valor() + " ya no rige";
+      case Razon.UbicadoPorElPlan termino ->
+          "el plan ubica " + termino.materia().valor() + " en el mismo semestre o antes";
+      case Razon.CreditosDeHabilitacion creditos ->
+          "créditos aprobados: "
+              + creditos.aprobados().valor()
+              + "; umbral: "
+              + creditos.umbral().valor();
+      case Razon.NoCursableDesdeElPrograma noCursable -> "no se puede cursar desde este programa";
+    };
+  }
+
   private static void mostrar(
       String avance, Prerrequisito prerrequisito, ContextoDeEvaluacion contexto) {
     EstadoRestriccion estado = prerrequisito.evaluar(contexto);
     System.out.println();
     System.out.println("[" + avance + "]");
     System.out.println("  certeza: " + estado.certeza());
-    estado.razones().forEach(razon -> System.out.println("  - " + razon));
+    estado.razones().forEach(razon -> System.out.println("  - " + traducir(razon)));
   }
 
   private static void mostrarRestriccion(
@@ -170,7 +190,9 @@ public final class DemostracionDeLasRestricciones {
             + ": "
             + estado.certeza()
             + " ["
-            + String.join(", ", estado.razones())
+            + estado.razones().stream()
+                .map(DemostracionDeLasRestricciones::traducir)
+                .collect(java.util.stream.Collectors.joining(", "))
             + "]");
   }
 

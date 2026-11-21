@@ -2,6 +2,7 @@ package co.edu.unal.rutaun.normativa.dominio;
 
 import co.edu.unal.rutaun.compartido.CodigoMateria;
 import co.edu.unal.rutaun.compartido.EstadoRestriccion;
+import co.edu.unal.rutaun.compartido.Razon;
 import co.edu.unal.rutaun.normativa.ContextoDeEvaluacion;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
 
@@ -33,8 +34,7 @@ public record Correquisito(CodigoMateria materia, ExpresionDeMaterias expresion)
     EstadoRestriccion estado = contexto.estadoDe(materia);
     if (estado.certeza() == EstadoRestriccion.Certeza.PENDIENTE
         && contexto.enElMismoSemestre(materia)) {
-      return EstadoRestriccion.cumplida(
-          "el plan ubica " + materia.valor() + " en el mismo semestre o antes");
+      return EstadoRestriccion.cumplida(new Razon.UbicadoPorElPlan(materia));
     }
     return estado;
   }
