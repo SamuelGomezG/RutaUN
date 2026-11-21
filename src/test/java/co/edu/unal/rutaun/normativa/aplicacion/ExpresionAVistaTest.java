@@ -87,4 +87,40 @@ class ExpresionAVistaTest {
     assertThat(convertir(conjuncion)).contains(vista("1"));
     assertThat(convertir(disyuncion)).contains(vista("2"));
   }
+
+  @Test
+  void uc05_ext4k_unaMateriaDeOtroProgramaNoSePuedeCumplir() {
+    assertThat(ExpresionAVista.noSePuedeCumplir(externa(TipoMateriaExterna.OTRO_PROGRAMA)))
+        .isTrue();
+  }
+
+  @Test
+  void uc05_ext4k_unaMateriaDeNivelacionSeDaPorCumplida() {
+    assertThat(ExpresionAVista.noSePuedeCumplir(externa(TipoMateriaExterna.NIVELACION))).isFalse();
+  }
+
+  @Test
+  void uc05_ext4k_unaMateriaDelProgramaSePuedeCumplir() {
+    assertThat(ExpresionAVista.noSePuedeCumplir(a("1"))).isFalse();
+  }
+
+  @Test
+  void uc05_ext4k_unaConjuncionConUnaMateriaDeOtroProgramaNoSePuedeCumplir() {
+    ExpresionDeMaterias expresion =
+        new ExpresionDeMaterias.Y(a("1"), externa(TipoMateriaExterna.OTRO_PROGRAMA));
+
+    assertThat(ExpresionAVista.noSePuedeCumplir(expresion)).isTrue();
+  }
+
+  @Test
+  void uc05_ext4k_unaDisyuncionSeCumpleSiAlgunaRamaSePuede() {
+    ExpresionDeMaterias conUnaRamaPosible =
+        new ExpresionDeMaterias.O(a("1"), externa(TipoMateriaExterna.OTRO_PROGRAMA));
+    ExpresionDeMaterias sinRamaPosible =
+        new ExpresionDeMaterias.O(
+            externa(TipoMateriaExterna.OTRO_PROGRAMA), externa(TipoMateriaExterna.OTRO_PROGRAMA));
+
+    assertThat(ExpresionAVista.noSePuedeCumplir(conUnaRamaPosible)).isFalse();
+    assertThat(ExpresionAVista.noSePuedeCumplir(sinRamaPosible)).isTrue();
+  }
 }

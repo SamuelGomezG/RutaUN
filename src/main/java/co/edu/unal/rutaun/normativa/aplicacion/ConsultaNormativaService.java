@@ -309,6 +309,11 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
             .sorted(ORDEN_DE_RESTRICCIONES)
             .flatMap(candidata -> candidata.aVista(nombre).stream())
             .toList();
+    boolean noCursable =
+        candidatas.stream()
+            .filter(candidata -> candidata.materia().equals(materia))
+            .filter(candidata -> candidata.tipo() == TipoDeRestriccion.PRERREQUISITO)
+            .anyMatch(candidata -> ExpresionAVista.noSePuedeCumplir(candidata.expresion()));
     return Optional.of(
         new RestriccionesDeMateriaVista(
             programa,
@@ -316,7 +321,8 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
             version.getFecha(),
             materia,
             nombres.get(materia),
-            restricciones));
+            restricciones,
+            noCursable));
   }
 
   /**

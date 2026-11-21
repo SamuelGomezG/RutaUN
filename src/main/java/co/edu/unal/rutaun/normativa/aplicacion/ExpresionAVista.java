@@ -3,6 +3,7 @@ package co.edu.unal.rutaun.normativa.aplicacion;
 import co.edu.unal.rutaun.compartido.CodigoMateria;
 import co.edu.unal.rutaun.normativa.ExpresionVista;
 import co.edu.unal.rutaun.normativa.dominio.ExpresionDeMaterias;
+import co.edu.unal.rutaun.normativa.dominio.TipoMateriaExterna;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,8 +17,9 @@ import java.util.function.Function;
  * qué mostrar y devuelve vacío.
  *
  * <p>Simplificación de UC05-HU01: toda materia externa se omite igual, sea de nivelación o de otro
- * programa. La señal «no se puede cursar desde este programa» y el trato distinto de cada origen
- * son de UC05-HU07 (#33).
+ * programa. Qué hacer cuando la expresión no se puede cumplir sin una materia de otro programa lo
+ * dice {@link #noSePuedeCumplir}; la parte de UC05-HU07 (#33) que falta es la del avance del
+ * estudiante.
  */
 final class ExpresionAVista {
 
@@ -42,6 +44,28 @@ final class ExpresionAVista {
           combinar(true, aVista(y.izquierda(), nombres), aVista(y.derecha(), nombres));
       case ExpresionDeMaterias.O o ->
           combinar(false, aVista(o.izquierda(), nombres), aVista(o.derecha(), nombres));
+    };
+  }
+
+  /**
+   * Si la expresión no se puede cumplir desde el programa (UC05 ext. 4k): una materia de otro
+   * programa no se puede cumplir; una de nivelación se da por cumplida; una conjunción no se puede
+   * cumplir si alguno de sus términos no se puede, y una disyunción solo si ninguno puede.
+   *
+   * @param expresion expresión de un prerrequisito
+   * @return {@code true} si la materia que la exige no se puede cursar sin una materia de otro
+   *     programa
+   */
+  static boolean noSePuedeCumplir(ExpresionDeMaterias expresion) {
+    ArgumentChecks.obligatorio(expresion, "expresion");
+    return switch (expresion) {
+      case ExpresionDeMaterias.MateriaDelPrograma materia -> false;
+      case ExpresionDeMaterias.MateriaExterna externa ->
+          externa.tipo() == TipoMateriaExterna.OTRO_PROGRAMA;
+      case ExpresionDeMaterias.Y y ->
+          noSePuedeCumplir(y.izquierda()) || noSePuedeCumplir(y.derecha());
+      case ExpresionDeMaterias.O o ->
+          noSePuedeCumplir(o.izquierda()) && noSePuedeCumplir(o.derecha());
     };
   }
 

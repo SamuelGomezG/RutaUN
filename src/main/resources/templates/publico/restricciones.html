@@ -10,6 +10,14 @@
     <p th:text="${programa.nombre()} + ' · versión ' + ${restricciones.version()} + ' del consolidado (' + ${restricciones.fecha()} + ')'">Programa · versión 1 del consolidado (2026-01-01)</p>
     <h2>Qué exige para cursarla</h2>
 
+    <section th:if="${restricciones.noCursable()}">
+      <h3>No se puede cursar desde este programa</h3>
+      <p>
+        Su prerrequisito exige una materia que los estudiantes del programa no pueden inscribir.
+        El plan de carrera no la ubica.
+      </p>
+    </section>
+
     <p th:if="${restricciones.sinRestricciones()}">
       Según las reglas del programa, esta materia no tiene restricciones.
       Eso no significa que esté ofrecida ni que haya cupo.
