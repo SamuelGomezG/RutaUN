@@ -16,7 +16,7 @@ class ExpresionVistaTest {
 
   @Test
   void uc05_paso4_unaMateriaSeEscribeConSuNombre() {
-    assertThat(materia("Estructuras de Datos").redaccion()).isEqualTo("Estructuras de Datos");
+    assertThat(materia("Estructuras de Datos").redaccion()).isEqualTo("«Estructuras de Datos»");
   }
 
   @Test
@@ -24,8 +24,8 @@ class ExpresionVistaTest {
     ExpresionVista todas = new ExpresionVista.TodasLas(List.of(materia("A"), materia("B")));
     ExpresionVista alguna = new ExpresionVista.AlgunaDe(List.of(materia("A"), materia("B")));
 
-    assertThat(todas.redaccion()).isEqualTo("A y B");
-    assertThat(alguna.redaccion()).isEqualTo("A o B");
+    assertThat(todas.redaccion()).isEqualTo("«A» y «B»");
+    assertThat(alguna.redaccion()).isEqualTo("«A» o «B»");
   }
 
   @Test
@@ -35,8 +35,8 @@ class ExpresionVistaTest {
     ExpresionVista alguna =
         new ExpresionVista.AlgunaDe(List.of(materia("A"), materia("B"), materia("C")));
 
-    assertThat(todas.redaccion()).isEqualTo("A, B y C");
-    assertThat(alguna.redaccion()).isEqualTo("A, B o C");
+    assertThat(todas.redaccion()).isEqualTo("«A», «B» y «C»");
+    assertThat(alguna.redaccion()).isEqualTo("«A», «B» o «C»");
   }
 
   @Test
@@ -52,7 +52,8 @@ class ExpresionVistaTest {
 
     assertThat(expresion.redaccion())
         .isEqualTo(
-            "Fundamentos de Mecánica y (Cálculo Integral o Cálculo integral en una variable)");
+            "«Fundamentos de Mecánica» y («Cálculo Integral» o"
+                + " «Cálculo integral en una variable»)");
   }
 
   @Test
@@ -62,7 +63,7 @@ class ExpresionVistaTest {
             List.of(
                 materia("A"), new ExpresionVista.TodasLas(List.of(materia("B"), materia("C")))));
 
-    assertThat(expresion.redaccion()).isEqualTo("A o (B y C)");
+    assertThat(expresion.redaccion()).isEqualTo("«A» o («B» y «C»)");
   }
 
   @Test
@@ -86,5 +87,20 @@ class ExpresionVistaTest {
   void uc05_ext4c_unaCondicionSinTextoSeRechaza() {
     assertThatThrownBy(() -> new ExpresionVista.Condicion(" "))
         .isInstanceOf(IllegalArgumentException.class);
+  }
+
+  @Test
+  void uc05_ext4a_unNombreConYOConComasNoSeConfundeConLosConectores() {
+    ExpresionVista expresion =
+        new ExpresionVista.TodasLas(
+            List.of(
+                materia("Fundamentos de Electricidad y Magnetismo"),
+                materia("Arquitectura de Computadores"),
+                materia("Algoritmos, estructuras y análisis")));
+
+    assertThat(expresion.redaccion())
+        .isEqualTo(
+            "«Fundamentos de Electricidad y Magnetismo», «Arquitectura de Computadores» y"
+                + " «Algoritmos, estructuras y análisis»");
   }
 }

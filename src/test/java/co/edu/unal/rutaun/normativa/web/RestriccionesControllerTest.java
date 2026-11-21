@@ -92,7 +92,7 @@ class RestriccionesControllerTest {
     mockMvc
         .perform(get(ruta(ConsultaNormativaFalsa.MATERIA_CON_RESTRICCIONES)))
         .andExpect(status().isOk())
-        .andExpect(content().string(containsString("Materia C o Materia D")));
+        .andExpect(content().string(containsString("«Materia C» o «Materia D»")));
   }
 
   @Test
@@ -162,7 +162,11 @@ class RestriccionesControllerTest {
     String conEstados = pagina(ConsultaNormativaFalsa.MATERIA_CON_ESTADOS);
     String vigentes = pagina(ConsultaNormativaFalsa.MATERIA_CON_RESTRICCIONES);
 
-    assertThat(conEstados).contains("Programada:").contains("En revisión:");
+    assertThat(conEstados)
+        .contains("Programada:")
+        .contains("En revisión:")
+        .contains("la regla está en revisión")
+        .doesNotContain("la norma está en revisión");
     assertThat(vigentes).doesNotContain("Programada:").doesNotContain("En revisión:");
   }
 
@@ -191,6 +195,17 @@ class RestriccionesControllerTest {
         .andReturn()
         .getResponse()
         .getContentAsString();
+  }
+
+  @Test
+  void uc05_paso3_unCodigoDeMateriaEnBlancoEsUnaPeticionInvalida() throws Exception {
+    mockMvc
+        .perform(
+            get(
+                "/programas/{programa}/materias/{materia}/restricciones",
+                ConsultaNormativaFalsa.SISTEMAS.valor(),
+                " "))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
