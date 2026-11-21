@@ -1,5 +1,6 @@
 package co.edu.unal.rutaun.normativa.dominio;
 
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -7,7 +8,14 @@ import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.NormaId;
 import co.edu.unal.rutaun.compartido.ProgramaId;
 import co.edu.unal.rutaun.normativa.ClasificacionRegla;
+import com.tngtech.archunit.base.DescribedPredicate;
+import com.tngtech.archunit.core.domain.JavaClasses;
+import com.tngtech.archunit.core.importer.ClassFileImporter;
+import com.tngtech.archunit.core.importer.ImportOption;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -55,6 +63,31 @@ class ConsolidadoValidadoTest {
 
     assertThatThrownBy(() -> validado.reglas().clear())
         .isInstanceOf(UnsupportedOperationException.class);
+  }
+
+  @Test
+  void tt02_soloElValidadorCreaUnConsolidadoValidado() {
+    assertThat(ConsolidadoValidado.class.getConstructors()).isEmpty();
+    assertThat(
+            Arrays.stream(ConsolidadoValidado.class.getDeclaredMethods())
+                .filter(metodo -> Modifier.isStatic(metodo.getModifiers()))
+                .map(Method::getReturnType))
+        .doesNotContain(ConsolidadoValidado.class);
+
+    JavaClasses clases =
+        new ClassFileImporter()
+            .withImportOption(new ImportOption.DoNotIncludeTests())
+            .importPackages("co.edu.unal.rutaun");
+    noClasses()
+        .that()
+        .doNotHaveSimpleName("ValidadorDelConsolidado")
+        .should()
+        .callConstructorWhere(
+            DescribedPredicate.describe(
+                "crear un ConsolidadoValidado",
+                llamada ->
+                    llamada.getTarget().getOwner().isEquivalentTo(ConsolidadoValidado.class)))
+        .check(clases);
   }
 
   @Test
