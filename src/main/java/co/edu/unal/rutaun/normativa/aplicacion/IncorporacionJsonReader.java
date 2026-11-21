@@ -25,8 +25,10 @@ import co.edu.unal.rutaun.normativa.dominio.Fuente;
 import co.edu.unal.rutaun.normativa.dominio.IdentificacionNorma;
 import co.edu.unal.rutaun.normativa.dominio.MateriaEnMalla;
 import co.edu.unal.rutaun.normativa.dominio.MedidaDeCreditos;
+import co.edu.unal.rutaun.normativa.dominio.NivelDeOrgano;
 import co.edu.unal.rutaun.normativa.dominio.NodoDeMalla;
 import co.edu.unal.rutaun.normativa.dominio.Obligatoriedad;
+import co.edu.unal.rutaun.normativa.dominio.Organo;
 import co.edu.unal.rutaun.normativa.dominio.Prerrequisito;
 import co.edu.unal.rutaun.normativa.dominio.Regla;
 import co.edu.unal.rutaun.normativa.dominio.ReglaDeHabilitacion;
@@ -93,7 +95,8 @@ public final class IncorporacionJsonReader {
     return new ProgramaJson(
         textoNoVacio(nodo, "nombre"),
         textoNoVacio(nodo, "codigoSia"),
-        textoNoVacio(nodo, "facultad"));
+        textoNoVacio(nodo, "facultad"),
+        textoNoVacio(nodo, "codigoFacultad"));
   }
 
   private static NormaLeida norma(JsonNode nodo) {
@@ -102,7 +105,7 @@ public final class IncorporacionJsonReader {
             TipoNorma.valueOf(texto(nodo, "tipo")),
             texto(nodo, "numero"),
             entero(nodo, "anio"),
-            texto(nodo, "organo"));
+            organo(objeto(nodo, "organo")));
     return new NormaLeida(
         NormaId.nuevo(),
         identificacion,
@@ -111,6 +114,13 @@ public final class IncorporacionJsonReader {
         vigencia(objeto(nodo, "vigencia")),
         textoOpcional(nodo, "enlaceRegimenLegal"),
         alcance(objeto(nodo, "alcance")));
+  }
+
+  private static Organo organo(JsonNode nodo) {
+    return new Organo(
+        texto(nodo, "nombre"),
+        NivelDeOrgano.valueOf(texto(nodo, "nivel")),
+        textoOpcional(nodo, "facultad").map(Facultad::new));
   }
 
   private static AlcanceLeida alcance(JsonNode nodo) {
@@ -210,17 +220,17 @@ public final class IncorporacionJsonReader {
   }
 
   private static NormaId normaId(JsonNode nodo, NormaLeida actual) {
-    String tipo = texto(nodo, "tipo");
-    String numero = texto(nodo, "numero");
-    int anio = entero(nodo, "anio");
-    String organo = texto(nodo, "organo");
-    if (tipo.equals(actual.identificacion().tipo().name())
-        && numero.equals(actual.identificacion().numero())
-        && anio == actual.identificacion().anio()
-        && organo.equals(actual.identificacion().organo())) {
+    IdentificacionNorma citada =
+        new IdentificacionNorma(
+            TipoNorma.valueOf(texto(nodo, "tipo")),
+            texto(nodo, "numero"),
+            entero(nodo, "anio"),
+            organo(objeto(nodo, "organo")));
+    if (citada.equals(actual.identificacion())) {
       return actual.id();
     }
-    String llave = tipo + "|" + numero + "|" + anio + "|" + organo;
+    String llave =
+        citada.tipo() + "|" + citada.numero() + "|" + citada.anio() + "|" + citada.organo().clave();
     return new NormaId(UUID.nameUUIDFromBytes(llave.getBytes(StandardCharsets.UTF_8)));
   }
 

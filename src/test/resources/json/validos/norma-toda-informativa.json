@@ -3,13 +3,14 @@
   "programa": {
     "codigoSia": "2879",
     "nombre": "Ingeniería de Sistemas y Computación",
-    "facultad": "Ingeniería"
+    "facultad": "Ingeniería",
+    "codigoFacultad": "ING"
   },
   "norma": {
     "tipo": "CIRCULAR",
     "numero": "99",
     "anio": 2026,
-    "organo": "Vicerrectoría Académica (datos de prueba)",
+    "organo": { "nombre": "Vicerrectoría Académica (datos de prueba)", "nivel": "SEDE", "facultad": null },
     "tipoDeEfecto": "EXCEPCION_O_MEDIDA_TEMPORAL",
     "fechaExpedicion": "2026-01-15",
     "vigencia": {

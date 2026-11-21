@@ -101,11 +101,11 @@ public class ImportacionDeNormasService {
     NormaLeida normaLeida = incorporacion.norma();
     String identificacion = identificacion(normaLeida);
     if (normas
-        .findByTipoAndNumeroAndAnioAndOrgano(
+        .findByTipoAndNumeroAndAnioAndOrganoClave(
             normaLeida.identificacion().tipo().name(),
             normaLeida.identificacion().numero(),
             normaLeida.identificacion().anio(),
-            normaLeida.identificacion().organo())
+            normaLeida.identificacion().organo().clave())
         .isPresent()) {
       return new ResultadoDeImportacionDeNormas(false, identificacion, 0, false);
     }
@@ -203,7 +203,8 @@ public class ImportacionDeNormasService {
                       programa ->
                           alcance.facultades().stream()
                               .anyMatch(
-                                  facultad -> facultad.nombre().equals(programa.getFacultad())))
+                                  facultad ->
+                                      facultad.codigo().equals(programa.getFacultadCodigo())))
                   .toList();
           case PROGRAMAS ->
               alcance.programas().stream().map(this::programaPorCodigo).distinct().toList();
@@ -298,6 +299,6 @@ public class ImportacionDeNormasService {
         + " de "
         + norma.identificacion().anio()
         + ", "
-        + norma.identificacion().organo();
+        + norma.identificacion().organo().nombre();
   }
 }

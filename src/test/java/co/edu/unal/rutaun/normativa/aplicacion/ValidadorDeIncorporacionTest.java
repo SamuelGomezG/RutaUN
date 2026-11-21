@@ -15,6 +15,8 @@ import co.edu.unal.rutaun.normativa.dominio.Afectacion;
 import co.edu.unal.rutaun.normativa.dominio.DatosDeRegla;
 import co.edu.unal.rutaun.normativa.dominio.Fuente;
 import co.edu.unal.rutaun.normativa.dominio.IdentificacionNorma;
+import co.edu.unal.rutaun.normativa.dominio.NivelDeOrgano;
+import co.edu.unal.rutaun.normativa.dominio.Organo;
 import co.edu.unal.rutaun.normativa.dominio.Regla;
 import co.edu.unal.rutaun.normativa.dominio.TipoAfectacion;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
@@ -28,7 +30,8 @@ import org.junit.jupiter.api.Test;
 class ValidadorDeIncorporacionTest {
 
   private static final ProgramaJson PROGRAMA =
-      new ProgramaJson("Ingeniería de Sistemas y Computación", "2541", "Facultad de Ingeniería");
+      new ProgramaJson(
+          "Ingeniería de Sistemas y Computación", "2541", "Facultad de Ingeniería", "ING");
   private static final List<String> EXT6A =
       List.of(
           "/json/invalidos/regla-sin-enunciado.json",
@@ -164,7 +167,11 @@ class ValidadorDeIncorporacionTest {
   private static NormaLeida norma(boolean temporal) {
     return new NormaLeida(
         NormaId.nuevo(),
-        new IdentificacionNorma(TipoNorma.ACUERDO, "003-A", 2022, "Consejo Académico"),
+        new IdentificacionNorma(
+            TipoNorma.ACUERDO,
+            "003-A",
+            2022,
+            new Organo("Consejo Académico", NivelDeOrgano.NACIONAL, Optional.empty())),
         TipoDeEfecto.BASE,
         LocalDate.of(2022, 5, 25),
         new Vigencia(

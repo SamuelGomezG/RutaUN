@@ -41,24 +41,40 @@ class PersistenciaNormativaTest {
 
   private ProgramaEntity nuevoPrograma() {
     return programas.save(
-        new ProgramaEntity(UUID.randomUUID(), "Ingenieria de Sistemas", "2879", "Ingenieria"));
+        new ProgramaEntity(
+            UUID.randomUUID(), "Ingenieria de Sistemas", "2879", "Ingenieria", "ING"));
+  }
+
+  private static NormaEntity entidadNorma(
+      String tipo,
+      String numero,
+      int anio,
+      String organoNombre,
+      String organoNivel,
+      String organoFacultadCodigo,
+      String organoClave) {
+    return new NormaEntity(
+        UUID.randomUUID(),
+        tipo,
+        numero,
+        anio,
+        organoNombre,
+        organoNivel,
+        organoFacultadCodigo,
+        organoClave,
+        "BASE",
+        LocalDate.of(2022, 1, 1),
+        LocalDate.of(2022, 2, 1),
+        null,
+        null,
+        "PROGRAMAS",
+        "{}");
   }
 
   private NormaEntity nuevaNorma() {
     return normas.save(
-        new NormaEntity(
-            UUID.randomUUID(),
-            "ACUERDO",
-            "003-A",
-            2022,
-            "Consejo Superior",
-            "BASE",
-            LocalDate.of(2022, 1, 1),
-            LocalDate.of(2022, 2, 1),
-            null,
-            null,
-            "PROGRAMAS",
-            "{}"));
+        entidadNorma(
+            "ACUERDO", "003-A", 2022, "Consejo Superior", "NACIONAL", null, "CONSEJO SUPERIOR"));
   }
 
   private VersionEntity nuevaVersion(UUID programaId, int numero) {
@@ -84,7 +100,8 @@ class PersistenciaNormativaTest {
     assertThatThrownBy(
             () ->
                 programas.saveAndFlush(
-                    new ProgramaEntity(UUID.randomUUID(), "Otro nombre", "2879", "Ingenieria")))
+                    new ProgramaEntity(
+                        UUID.randomUUID(), "Otro nombre", "2879", "Ingenieria", "ING")))
         .isInstanceOf(DataIntegrityViolationException.class)
         .hasMessageContaining("UQ_PROGRAMA_CODIGO_SIA");
   }
@@ -256,7 +273,7 @@ class PersistenciaNormativaTest {
   @Test
   void tt04_unaEntidadRecienCreadaEsNuevaYAlGuardarseDejaDeSerlo() {
     ProgramaEntity programa =
-        new ProgramaEntity(UUID.randomUUID(), "Ingenieria Civil", "2501", "Ingenieria");
+        new ProgramaEntity(UUID.randomUUID(), "Ingenieria Civil", "2501", "Ingenieria", "ING");
 
     assertThat(programa.isNew()).isTrue();
     programas.saveAndFlush(programa);
@@ -326,6 +343,9 @@ class PersistenciaNormativaTest {
             "007-B",
             2023,
             "Consejo Superior",
+            "NACIONAL",
+            null,
+            "CONSEJO SUPERIOR",
             "BASE",
             LocalDate.of(2023, 1, 1),
             LocalDate.of(2023, 2, 1),
@@ -342,6 +362,70 @@ class PersistenciaNormativaTest {
         .get()
         .extracting(NormaEntity::getNumero)
         .isEqualTo("003-A");
+  }
+
+  @Test
+  void tt04_laBaseRechazaUnaIdentificacionRepetidaYUnOrganoIncoherente() {
+    nuevaNorma();
+
+    assertThatThrownBy(
+            () ->
+                normas.saveAndFlush(
+                    entidadNorma(
+                        "ACUERDO",
+                        "003-A",
+                        2022,
+                        "Consejo Superior",
+                        "NACIONAL",
+                        null,
+                        "CONSEJO SUPERIOR")))
+        .as("misma identificación")
+        .isInstanceOf(DataIntegrityViolationException.class)
+        .hasMessageContaining("UQ_NORMA_IDENTIFICACION");
+  }
+
+  @Test
+  void tt04_laBaseRechazaUnOrganoDeFacultadSinCodigo() {
+    assertThatThrownBy(
+            () ->
+                normas.saveAndFlush(
+                    entidadNorma(
+                        "ACUERDO",
+                        "010",
+                        2022,
+                        "Consejo de Facultad",
+                        "FACULTAD",
+                        null,
+                        "CONSEJO DE FACULTAD")))
+        .isInstanceOf(DataIntegrityViolationException.class)
+        .hasMessageContaining("CK_NORMA_ORGANO_FACULTAD");
+  }
+
+  @Test
+  void tt04_laBaseRechazaUnCodigoDeFacultadConOtroNivel() {
+    assertThatThrownBy(
+            () ->
+                normas.saveAndFlush(
+                    entidadNorma(
+                        "ACUERDO",
+                        "011",
+                        2022,
+                        "Consejo Académico",
+                        "NACIONAL",
+                        "ING",
+                        "CONSEJO ACADEMICO|ING")))
+        .isInstanceOf(DataIntegrityViolationException.class)
+        .hasMessageContaining("CK_NORMA_ORGANO_FACULTAD");
+  }
+
+  @Test
+  void tt04_laBaseRechazaUnNivelDeOrganoDesconocido() {
+    assertThatThrownBy(
+            () ->
+                normas.saveAndFlush(
+                    entidadNorma("ACUERDO", "012", 2022, "Consejo", "MUNDIAL", null, "CONSEJO")))
+        .isInstanceOf(DataIntegrityViolationException.class)
+        .hasMessageContaining("CK_NORMA_ORGANO_NIVEL");
   }
 
   @ParameterizedTest(name = "{0} con día {1}")

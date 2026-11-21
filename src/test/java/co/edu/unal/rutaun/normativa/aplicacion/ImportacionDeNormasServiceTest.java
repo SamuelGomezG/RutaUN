@@ -223,6 +223,76 @@ class ImportacionDeNormasServiceTest {
     assertThat(normasDeLaVigente).hasSize(3);
   }
 
+  @Test
+  void uc07_ext4c_laMismaNormaConElOrganoEscritoDistintoSeReconoce() throws IOException {
+    cargarProgramas();
+    importarNorma("semilla/acuerdo-008-2008.json");
+    String conOtraEscritura =
+        leerTexto("semilla/acuerdo-008-2008.json")
+            .replace("Consejo Superior Universitario", "  CONSEJO   superior universitario");
+
+    ResultadoDeImportacionDeNormas segunda = importarTexto(conOtraEscritura);
+
+    assertThat(segunda.creada()).isFalse();
+    assertThat(segunda.versionesCreadas()).isZero();
+    assertThat(normasGuardadas.count()).isEqualTo(1);
+  }
+
+  @Test
+  void uc07_ext4c_laMismaNormaConElNumeroEscritoDistintoSeReconoce() throws IOException {
+    cargarProgramas();
+    importarNorma("semilla/acuerdo-003a-2022.json");
+    String conOtraEscritura =
+        leerTexto("semilla/acuerdo-003a-2022.json")
+            .replace("\"numero\": \"003-A\"", "\"numero\": \"003a\"");
+
+    ResultadoDeImportacionDeNormas segunda = importarTexto(conOtraEscritura);
+
+    assertThat(segunda.creada()).isFalse();
+    assertThat(normasGuardadas.count()).isEqualTo(1);
+  }
+
+  @Test
+  void uc07_paso4_unAlcancePorFacultadSeResuelvePorSuCodigo() throws IOException {
+    cargarProgramas();
+    String porFacultad =
+        leerTexto("semilla/acuerdo-008-2008.json")
+            .replace(
+                "\"tipo\": \"TODOS\",\n      \"facultades\": [],",
+                "\"tipo\": \"FACULTADES\",\n      \"facultades\": [\"ing\"],");
+
+    ResultadoDeImportacionDeNormas resultado = importarTexto(porFacultad);
+
+    assertThat(resultado.creada()).isTrue();
+    assertThat(resultado.versionesCreadas()).isEqualTo(1);
+    assertThat(normasGuardadas.findAll().get(0).getAlcanceDetalle()).contains("\"ING\"");
+  }
+
+  @Test
+  void uc07_paso4_unAlcancePorFacultadSinProgramasSeRechaza() throws IOException {
+    cargarProgramas();
+    String porFacultad =
+        leerTexto("semilla/acuerdo-008-2008.json")
+            .replace(
+                "\"tipo\": \"TODOS\",\n      \"facultades\": [],",
+                "\"tipo\": \"FACULTADES\",\n      \"facultades\": [\"MED\"],");
+
+    assertThatThrownBy(() -> importarTexto(porFacultad))
+        .isInstanceOf(ArchivoDeNormativaInvalidoException.class)
+        .hasMessageContaining("no comprende ningún programa");
+  }
+
+  private static String leerTexto(String archivo) throws IOException {
+    try (InputStream entrada = new ClassPathResource(archivo).getInputStream()) {
+      return new String(entrada.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+    }
+  }
+
+  private ResultadoDeImportacionDeNormas importarTexto(String json) {
+    return normas.importar(
+        new java.io.ByteArrayInputStream(json.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+  }
+
   private void cargarProgramas() throws IOException {
     try (InputStream entrada = new ClassPathResource("semilla/programas.json").getInputStream()) {
       programas.importar(

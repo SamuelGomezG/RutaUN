@@ -38,13 +38,14 @@ class IncorporacionJsonReaderTest {
         "programa": {
           "codigoSia": "2541",
           "nombre": "Ingeniería de Sistemas y Computación",
-          "facultad": "Facultad de Ingeniería"
+          "facultad": "Facultad de Ingeniería",
+          "codigoFacultad": "ING"
         },
         "norma": {
           "tipo": "ACUERDO",
           "numero": "003-A",
           "anio": 2022,
-          "organo": "Consejo Académico",
+          "organo": { "nombre": "Consejo Académico", "nivel": "NACIONAL", "facultad": null },
           "tipoDeEfecto": "BASE",
           "fechaExpedicion": "2022-05-25",
           "vigencia": {
@@ -113,6 +114,63 @@ class IncorporacionJsonReaderTest {
   private static final String COMPONENTE_LIBRE = CABECERA + REGLA_COMPONENTE_LIBRE + CIERRE;
 
   private static final String HABILITACION = CABECERA + REGLA_HABILITACION + CIERRE;
+
+  private static final String AFECTACION_A_SI_MISMA =
+      """
+      {
+        "schemaVersion": "1.0",
+        "programa": {
+          "codigoSia": "2541",
+          "nombre": "Ingeniería de Sistemas y Computación",
+          "facultad": "Facultad de Ingeniería",
+          "codigoFacultad": "ING"
+        },
+        "norma": {
+          "tipo": "ACUERDO",
+          "numero": "003-A",
+          "anio": 2022,
+          "organo": { "nombre": "Consejo Académico", "nivel": "NACIONAL", "facultad": null },
+          "tipoDeEfecto": "BASE",
+          "fechaExpedicion": "2022-05-25",
+          "vigencia": {
+            "aplicaDesde": { "tipo": "PERIODO", "periodo": "2022-2" },
+            "vigenteHasta": null
+          },
+          "enlaceRegimenLegal": null,
+          "alcance": {
+            "tipo": "PROGRAMAS",
+            "facultades": [],
+            "programas": ["2541"],
+            "exclusiones": [],
+            "texto": "Aplica al programa de prueba."
+          }
+        },
+        "reglas": [
+          {
+            "categoria": "OTRA",
+            "objeto": "Regla que cita su propia norma",
+            "enunciado": "La regla cita su norma con otra escritura.",
+            "articulo": "art. 1",
+            "vigenciaPropia": null,
+            "clasificacion": "INFORMATIVA",
+            "afectacion": {
+              "tipo": "MODIFICA",
+              "destino": {
+                "tipo": "ARTICULO",
+                "norma": {
+                  "tipo": "ACUERDO",
+                  "numero": "003a",
+                  "anio": 2022,
+                  "organo": { "nombre": "CONSEJO   académico", "nivel": "NACIONAL", "facultad": null }
+                },
+                "articulo": "art. 9"
+              }
+            },
+            "datos": { "tipo": "OTRA" }
+          }
+        ]
+      }
+      """;
 
   @Test
   void uc07_hu03_t2_elArchivoValidoSeLeeCompleto() {
@@ -232,6 +290,34 @@ class IncorporacionJsonReaderTest {
       assertThat(((IncorporacionJsonReader.ResultadoDeLectura.Invalida) resultado).motivo())
           .isNotBlank();
     }
+  }
+
+  @Test
+  void uc07_paso5_unaAfectacionASuPropiaNormaEscritaDistintoLaResuelve() {
+    var resultado = leerTexto(AFECTACION_A_SI_MISMA);
+
+    assertThat(resultado).isInstanceOf(IncorporacionJsonReader.ResultadoDeLectura.Leida.class);
+    IncorporacionLeida incorporacion =
+        ((IncorporacionJsonReader.ResultadoDeLectura.Leida) resultado).incorporacion();
+    Regla regla = incorporacion.reglas().get(0);
+
+    assertThat(regla.afectacion().orElseThrow().articuloAfectado().orElseThrow().norma())
+        .isEqualTo(incorporacion.norma().id());
+  }
+
+  @Test
+  void uc07_paso3_unOrganoEnElFormatoAnteriorSeRechaza() {
+    String anterior =
+        CABECERA.replace(
+            "\"organo\": { \"nombre\": \"Consejo Académico\","
+                + " \"nivel\": \"NACIONAL\", \"facultad\": null }",
+            "\"organo\": \"Consejo Académico\"");
+
+    var resultado = leerTexto(anterior + REGLA_COMPONENTE_LIBRE.formatted("null") + CIERRE);
+
+    assertThat(resultado).isInstanceOf(IncorporacionJsonReader.ResultadoDeLectura.Invalida.class);
+    assertThat(((IncorporacionJsonReader.ResultadoDeLectura.Invalida) resultado).motivo())
+        .contains("organo debe ser un objeto");
   }
 
   @Test

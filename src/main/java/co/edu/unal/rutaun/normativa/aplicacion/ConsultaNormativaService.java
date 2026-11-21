@@ -368,7 +368,7 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
             TipoNorma.valueOf(norma.getTipo()),
             norma.getNumero(),
             norma.getAnio(),
-            norma.getOrgano()),
+            norma.getOrganoNombre()),
         articulo,
         Optional.ofNullable(norma.getEnlaceRegimenLegal()));
   }

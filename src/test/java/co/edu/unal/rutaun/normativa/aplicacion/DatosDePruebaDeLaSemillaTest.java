@@ -36,7 +36,7 @@ class DatosDePruebaDeLaSemillaTest {
         .isNotEmpty();
     for (Resource recurso : archivosDePrueba) {
       IncorporacionLeida incorporacion = leer(recurso);
-      assertThat(incorporacion.norma().identificacion().organo())
+      assertThat(incorporacion.norma().identificacion().organo().nombre())
           .as("%s: el órgano de la norma", recurso.getFilename())
           .contains(MARCA);
       for (Regla regla : incorporacion.reglas()) {
@@ -60,7 +60,7 @@ class DatosDePruebaDeLaSemillaTest {
     assertThat(normasReales).as("la semilla debe traer normas reales").isNotEmpty();
     for (Resource recurso : normasReales) {
       IncorporacionLeida incorporacion = leer(recurso);
-      assertThat(incorporacion.norma().identificacion().organo())
+      assertThat(incorporacion.norma().identificacion().organo().nombre())
           .as("%s: el órgano de la norma", recurso.getFilename())
           .doesNotContain(MARCA);
       for (Regla regla : incorporacion.reglas()) {

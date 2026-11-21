@@ -11,8 +11,11 @@ import co.edu.unal.rutaun.normativa.TipoAlcance;
 import co.edu.unal.rutaun.normativa.TipoDeEfecto;
 import co.edu.unal.rutaun.normativa.TipoNorma;
 import co.edu.unal.rutaun.normativa.dominio.Alcance;
+import co.edu.unal.rutaun.normativa.dominio.Facultad;
 import co.edu.unal.rutaun.normativa.dominio.IdentificacionNorma;
+import co.edu.unal.rutaun.normativa.dominio.NivelDeOrgano;
 import co.edu.unal.rutaun.normativa.dominio.Norma;
+import co.edu.unal.rutaun.normativa.dominio.Organo;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
 import co.edu.unal.rutaun.normativa.persistencia.NormaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.NormaRepository;
@@ -57,7 +60,11 @@ class NormaMapperTest {
     Norma original =
         Norma.registrar(
             new IdentificacionNorma(
-                TipoNorma.ACUERDO, numeroUnico(), 2024, "Consejo Superior Universitario"),
+                TipoNorma.ACUERDO,
+                numeroUnico(),
+                2024,
+                new Organo(
+                    "Consejo Superior Universitario", NivelDeOrgano.NACIONAL, Optional.empty())),
             TipoDeEfecto.MODIFICATORIA,
             LocalDate.of(2024, 7, 15),
             new Vigencia(
@@ -84,7 +91,11 @@ class NormaMapperTest {
   void tt04_normaMinimaIdaYVuelta() {
     Norma original =
         Norma.registrar(
-            new IdentificacionNorma(TipoNorma.RESOLUCION, numeroUnico(), 2023, "Consejo de Sede"),
+            new IdentificacionNorma(
+                TipoNorma.RESOLUCION,
+                numeroUnico(),
+                2023,
+                new Organo("Consejo de Sede", NivelDeOrgano.SEDE, Optional.empty())),
             TipoDeEfecto.BASE,
             LocalDate.of(2023, 3, 1),
             new Vigencia(new Momento.EnFecha(LocalDate.of(2023, 3, 1)), Optional.empty()),
@@ -125,7 +136,11 @@ class NormaMapperTest {
   void tt04_normaConPeriodoNoSeGuarda() {
     Norma conPeriodo =
         Norma.registrar(
-            new IdentificacionNorma(TipoNorma.CIRCULAR, numeroUnico(), 2026, "Vicerrectoría"),
+            new IdentificacionNorma(
+                TipoNorma.CIRCULAR,
+                numeroUnico(),
+                2026,
+                new Organo("Vicerrectoría", NivelDeOrgano.SEDE, Optional.empty())),
             TipoDeEfecto.BASE,
             LocalDate.of(2026, 1, 20),
             new Vigencia(
@@ -140,6 +155,38 @@ class NormaMapperTest {
         .hasMessageContaining("aplicaDesde");
   }
 
+  @Test
+  void tt04_elOrganoSeGuardaYSeReconstruye() {
+    Organo organo =
+        new Organo(
+            "Consejo de Facultad de Ingeniería",
+            NivelDeOrgano.FACULTAD,
+            Optional.of(new Facultad("ING")));
+    Norma original =
+        Norma.registrar(
+            new IdentificacionNorma(TipoNorma.ACUERDO, numeroUnico(), 2024, organo),
+            TipoDeEfecto.BASE,
+            LocalDate.of(2024, 3, 1),
+            new Vigencia(new Momento.EnFecha(LocalDate.of(2024, 3, 1)), Optional.empty()),
+            Optional.empty(),
+            new Alcance(
+                TipoAlcance.TODOS, Set.of(), Set.of(), Set.of(), "Aplica a todos los programas."));
+    normaId = original.id().valor();
+
+    normas.save(NormaMapper.aEntidad(original));
+    NormaEntity leida = normas.findById(normaId).orElseThrow();
+    Norma reconstruida = NormaMapper.aDominio(leida);
+
+    assertThat(reconstruida.identificacion().organo().nombre())
+        .isEqualTo("Consejo de Facultad de Ingeniería");
+    assertThat(reconstruida.identificacion().organo().nivel()).isEqualTo(NivelDeOrgano.FACULTAD);
+    assertThat(reconstruida.identificacion().organo().facultad()).contains(new Facultad("ING"));
+    assertThat(leida.getOrganoNombre()).isEqualTo("Consejo de Facultad de Ingeniería");
+    assertThat(leida.getOrganoNivel()).isEqualTo("FACULTAD");
+    assertThat(leida.getOrganoFacultadCodigo()).isEqualTo("ING");
+    assertThat(leida.getOrganoClave()).isEqualTo("CONSEJO DE FACULTAD DE INGENIERIA|ING");
+  }
+
   private static String numeroUnico() {
     return "T3-" + UUID.randomUUID().toString().substring(0, 8);
   }
@@ -151,6 +198,9 @@ class NormaMapperTest {
         "1",
         2024,
         "Consejo Superior Universitario",
+        "NACIONAL",
+        null,
+        "CONSEJO SUPERIOR UNIVERSITARIO",
         "BASE",
         LocalDate.of(2024, 1, 1),
         LocalDate.of(2024, 2, 1),

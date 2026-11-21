@@ -36,8 +36,17 @@ public class NormaEntity implements Persistable<UUID> {
   @Column(nullable = false)
   private int anio;
 
-  @Column(nullable = false)
-  private String organo;
+  @Column(name = "organo_nombre", nullable = false)
+  private String organoNombre;
+
+  @Column(name = "organo_nivel", nullable = false)
+  private String organoNivel;
+
+  @Column(name = "organo_facultad_codigo")
+  private String organoFacultadCodigo;
+
+  @Column(name = "organo_clave", nullable = false)
+  private String organoClave;
 
   @Column(name = "tipo_de_efecto", nullable = false)
   private String tipoDeEfecto;
@@ -70,7 +79,10 @@ public class NormaEntity implements Persistable<UUID> {
       String tipo,
       String numero,
       int anio,
-      String organo,
+      String organoNombre,
+      String organoNivel,
+      String organoFacultadCodigo,
+      String organoClave,
       String tipoDeEfecto,
       LocalDate fechaExpedicion,
       LocalDate aplicaDesde,
@@ -82,7 +94,10 @@ public class NormaEntity implements Persistable<UUID> {
     this.tipo = tipo;
     this.numero = numero;
     this.anio = anio;
-    this.organo = organo;
+    this.organoNombre = organoNombre;
+    this.organoNivel = organoNivel;
+    this.organoFacultadCodigo = organoFacultadCodigo;
+    this.organoClave = organoClave;
     this.tipoDeEfecto = tipoDeEfecto;
     this.fechaExpedicion = fechaExpedicion;
     this.aplicaDesde = aplicaDesde;
@@ -122,8 +137,20 @@ public class NormaEntity implements Persistable<UUID> {
     return anio;
   }
 
-  public String getOrgano() {
-    return organo;
+  public String getOrganoNombre() {
+    return organoNombre;
+  }
+
+  public String getOrganoNivel() {
+    return organoNivel;
+  }
+
+  public String getOrganoFacultadCodigo() {
+    return organoFacultadCodigo;
+  }
+
+  public String getOrganoClave() {
+    return organoClave;
   }
 
   public String getTipoDeEfecto() {

@@ -10,6 +10,7 @@ import co.edu.unal.rutaun.normativa.dominio.ExpresionDeMaterias;
 import co.edu.unal.rutaun.normativa.dominio.ReglaEnVersion;
 import co.edu.unal.rutaun.normativa.dominio.TipoCargaPorPeriodo;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
+import co.edu.unal.rutaun.normativa.persistencia.NormaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.NormaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntity;
@@ -139,6 +140,30 @@ class SemillaDeSistemasTest {
     assertThat(identificadores())
         .as("la segunda corrida no debe borrar y recrear filas")
         .isEqualTo(antes);
+  }
+
+  @Test
+  void tt04_cadaOrganoDeLaSemillaTieneSuNivelYSuFacultad() {
+    cargarLaSemilla();
+
+    Map<String, NormaEntity> porNumero =
+        normasGuardadas.findAll().stream()
+            .collect(Collectors.toMap(NormaEntity::getNumero, norma -> norma));
+
+    assertThat(porNumero.get("008").getOrganoNombre()).isEqualTo("Consejo Superior Universitario");
+    assertThat(porNumero.get("008").getOrganoNivel()).isEqualTo("NACIONAL");
+    assertThat(porNumero.get("008").getOrganoFacultadCodigo()).isNull();
+
+    assertThat(porNumero.get("003-A").getOrganoNombre()).isEqualTo("Consejo Académico");
+    assertThat(porNumero.get("003-A").getOrganoNivel()).isEqualTo("NACIONAL");
+    assertThat(porNumero.get("003-A").getOrganoFacultadCodigo()).isNull();
+
+    for (String numero : List.of("11", "901", "902")) {
+      assertThat(porNumero.get(numero).getOrganoNivel()).as(numero).isEqualTo("FACULTAD");
+      assertThat(porNumero.get(numero).getOrganoFacultadCodigo()).as(numero).isEqualTo("ING");
+    }
+    assertThat(porNumero.get("11").getOrganoNombre())
+        .isEqualTo("Consejo de Facultad de Ingeniería");
   }
 
   @Test
