@@ -78,9 +78,9 @@ final class ReglasDePrueba {
     NodoDeMalla libreEleccion = MallaDePrueba.nodo(malla, "Libre elección");
     MateriaEnMalla materia = malla.materias().get(0);
     ExpresionDeMaterias compuesta =
-        new ExpresionDeMaterias.Y(
+        ExpresionDeMaterias.todasLas(
             new ExpresionDeMaterias.TerminoMateria(A),
-            new ExpresionDeMaterias.O(
+            ExpresionDeMaterias.algunaDe(
                 new ExpresionDeMaterias.TerminoMateria(B),
                 new ExpresionDeMaterias.MateriaExterna(
                     "Matemáticas Básicas",

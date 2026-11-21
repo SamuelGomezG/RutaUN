@@ -10,9 +10,7 @@ import co.edu.unal.rutaun.compartido.EstadoRestriccion.Certeza;
 import co.edu.unal.rutaun.normativa.ContextoDeEvaluacion;
 import co.edu.unal.rutaun.normativa.TipoComponente;
 import co.edu.unal.rutaun.normativa.dominio.ExpresionDeMaterias.MateriaExterna;
-import co.edu.unal.rutaun.normativa.dominio.ExpresionDeMaterias.O;
 import co.edu.unal.rutaun.normativa.dominio.ExpresionDeMaterias.TerminoMateria;
-import co.edu.unal.rutaun.normativa.dominio.ExpresionDeMaterias.Y;
 import co.edu.unal.rutaun.soporte.ContextoDeEvaluacionFijo;
 import java.util.List;
 import java.util.Optional;
@@ -61,7 +59,9 @@ class EvaluadorDeRestriccionesTest {
 
     EstadoRestriccion estado =
         EvaluadorDeRestricciones.evaluar(
-            new Prerrequisito(C, new Y(new TerminoMateria(A), new TerminoMateria(B))), contexto);
+            new Prerrequisito(
+                C, ExpresionDeMaterias.todasLas(new TerminoMateria(A), new TerminoMateria(B))),
+            contexto);
 
     assertThat(estado.certeza()).isEqualTo(Certeza.EN_CURSO);
     assertThat(estado.razones()).containsExactly("B está en curso");
@@ -74,7 +74,9 @@ class EvaluadorDeRestriccionesTest {
 
     EstadoRestriccion estado =
         EvaluadorDeRestricciones.evaluar(
-            new Prerrequisito(C, new O(new TerminoMateria(A), new TerminoMateria(B))), contexto);
+            new Prerrequisito(
+                C, ExpresionDeMaterias.algunaDe(new TerminoMateria(A), new TerminoMateria(B))),
+            contexto);
 
     assertThat(estado.certeza()).isEqualTo(Certeza.CUMPLIDA);
     assertThat(estado.razones()).containsExactly("B está aprobada");
@@ -89,11 +91,30 @@ class EvaluadorDeRestriccionesTest {
         EvaluadorDeRestricciones.evaluar(
             new Prerrequisito(
                 A,
-                new Y(new TerminoMateria(A), new O(new TerminoMateria(B), new TerminoMateria(C)))),
+                ExpresionDeMaterias.todasLas(
+                    new TerminoMateria(A),
+                    ExpresionDeMaterias.algunaDe(new TerminoMateria(B), new TerminoMateria(C)))),
             contexto);
 
     assertThat(estado.certeza()).isEqualTo(Certeza.EN_CURSO);
     assertThat(estado.razones()).containsExactly("C está en curso");
+  }
+
+  @Test
+  void tt03_unaODeTresTerminosConservaLasRazonesDeLosMejores() {
+    ContextoDeEvaluacion contexto =
+        ContextoDeEvaluacionFijo.nuevo().pendiente(A).aprobada(B).aprobada(C).construir();
+
+    EstadoRestriccion estado =
+        EvaluadorDeRestricciones.evaluar(
+            new Prerrequisito(
+                B,
+                ExpresionDeMaterias.algunaDe(
+                    new TerminoMateria(A), new TerminoMateria(B), new TerminoMateria(C))),
+            contexto);
+
+    assertThat(estado.certeza()).isEqualTo(Certeza.CUMPLIDA);
+    assertThat(estado.razones()).containsExactly("B está aprobada", "C está aprobada");
   }
 
   @Test

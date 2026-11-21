@@ -245,6 +245,10 @@ Una expresión es:
 { "tipo": "O", "izquierda": { }, "derecha": { } }
 ```
 
+Una «y» o una «o» es la misma regla sin importar el orden de sus términos, y una «y» dentro de
+otra «y» (o una «o» dentro de otra «o») equivale a una sola con todos los términos. Un término
+repetido cuenta una vez: «A y A» se lee como «A».
+
 `origen` de una materia externa: `NIVELACION` u `OTRO_PROGRAMA`.
 
 #### `HABILITACION`

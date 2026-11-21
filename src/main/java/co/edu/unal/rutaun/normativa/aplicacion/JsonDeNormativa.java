@@ -8,6 +8,9 @@ import co.edu.unal.rutaun.normativa.dominio.NodoDeMalla;
 import co.edu.unal.rutaun.utilidades.JsonConfig;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import tools.jackson.databind.annotation.JsonDeserialize;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
@@ -24,6 +27,11 @@ import tools.jackson.databind.json.JsonMapper;
  * ExpresionDeMaterias.MateriaExterna} ya tienen un campo {@code tipo}: con el mismo nombre el JSON
  * saldría con la clave repetida, y un JSON con una clave repetida no es válido. Los nombres de los
  * subtipos de las expresiones son los del formato de UC07-HU03 (#93).
+ *
+ * <p>Los términos de una expresión se guardan como arreglo {@code terminos} en el orden de la
+ * norma: los <em>mix-ins</em> de {@link ExpresionDeMaterias.TodasLas} y {@link
+ * ExpresionDeMaterias.AlgunaDe} leen ese arreglo en un {@link LinkedHashSet}. Una base cargada
+ * antes de #163 guardó {@code izquierda}/{@code derecha} y deja de leerse.
  *
  * <p>La categoría de primer nivel de unos datos no lleva discriminante: la dice la columna {@code
  * categoria} de la regla, y {@link ReglaMapper} lee con la clase concreta.
@@ -44,16 +52,25 @@ final class JsonDeNormativa {
         value = ExpresionDeMaterias.TerminoMateria.class,
         name = "MATERIA_DEL_PROGRAMA"),
     @JsonSubTypes.Type(value = ExpresionDeMaterias.MateriaExterna.class, name = "MATERIA_EXTERNA"),
-    @JsonSubTypes.Type(value = ExpresionDeMaterias.Y.class, name = "Y"),
-    @JsonSubTypes.Type(value = ExpresionDeMaterias.O.class, name = "O")
+    @JsonSubTypes.Type(value = ExpresionDeMaterias.TodasLas.class, name = "Y"),
+    @JsonSubTypes.Type(value = ExpresionDeMaterias.AlgunaDe.class, name = "O")
   })
   private interface ExpresionDeMateriasMixIn {}
+
+  /** Lee los términos en el orden del arreglo, no en el de un {@code HashSet}. */
+  private interface TerminosMixIn {
+
+    @JsonDeserialize(as = LinkedHashSet.class)
+    Set<ExpresionDeMaterias> terminos();
+  }
 
   private static final JsonMapper MAPPER =
       JsonConfig.mapper()
           .rebuild()
           .addMixIn(NodoDeMalla.class, NodoDeMallaMixIn.class)
           .addMixIn(ExpresionDeMaterias.class, ExpresionDeMateriasMixIn.class)
+          .addMixIn(ExpresionDeMaterias.TodasLas.class, TerminosMixIn.class)
+          .addMixIn(ExpresionDeMaterias.AlgunaDe.class, TerminosMixIn.class)
           .build();
 
   private JsonDeNormativa() {}
