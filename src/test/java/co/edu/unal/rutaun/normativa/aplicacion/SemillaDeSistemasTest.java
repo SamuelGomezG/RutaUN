@@ -305,7 +305,7 @@ class SemillaDeSistemasTest {
 
   private static Set<CodigoMateria> codigosDe(ExpresionDeMaterias expresion) {
     return switch (expresion) {
-      case ExpresionDeMaterias.MateriaDelPrograma materia -> Set.of(materia.codigo());
+      case ExpresionDeMaterias.TerminoMateria materia -> Set.of(materia.codigo());
       case ExpresionDeMaterias.MateriaExterna ignored -> Set.of();
       case ExpresionDeMaterias.Y y -> union(codigosDe(y.izquierda()), codigosDe(y.derecha()));
       case ExpresionDeMaterias.O o -> union(codigosDe(o.izquierda()), codigosDe(o.derecha()));

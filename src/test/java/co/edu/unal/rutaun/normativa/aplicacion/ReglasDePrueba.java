@@ -79,9 +79,9 @@ final class ReglasDePrueba {
     MateriaEnMalla materia = malla.materias().get(0);
     ExpresionDeMaterias compuesta =
         new ExpresionDeMaterias.Y(
-            new ExpresionDeMaterias.MateriaDelPrograma(A),
+            new ExpresionDeMaterias.TerminoMateria(A),
             new ExpresionDeMaterias.O(
-                new ExpresionDeMaterias.MateriaDelPrograma(B),
+                new ExpresionDeMaterias.TerminoMateria(B),
                 new ExpresionDeMaterias.MateriaExterna(
                     "Matemáticas Básicas",
                     Optional.of(new CodigoMateria("1000001")),

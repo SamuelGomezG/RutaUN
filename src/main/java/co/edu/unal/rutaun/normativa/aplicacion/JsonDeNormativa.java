@@ -41,7 +41,7 @@ final class JsonDeNormativa {
   @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "@tipo")
   @JsonSubTypes({
     @JsonSubTypes.Type(
-        value = ExpresionDeMaterias.MateriaDelPrograma.class,
+        value = ExpresionDeMaterias.TerminoMateria.class,
         name = "MATERIA_DEL_PROGRAMA"),
     @JsonSubTypes.Type(value = ExpresionDeMaterias.MateriaExterna.class, name = "MATERIA_EXTERNA"),
     @JsonSubTypes.Type(value = ExpresionDeMaterias.Y.class, name = "Y"),
