@@ -126,6 +126,9 @@ class RestriccionesDeMateriaIntegracionTest {
                         List.of(
                             materia("1000005", "Cálculo Integral"),
                             materia("2015556", "Cálculo integral en una variable"))))));
+    assertThat(restriccion.exige().redaccion())
+        .isEqualTo(
+            "Fundamentos de Mecánica y (Cálculo Integral o Cálculo integral en una variable)");
   }
 
   @Test
