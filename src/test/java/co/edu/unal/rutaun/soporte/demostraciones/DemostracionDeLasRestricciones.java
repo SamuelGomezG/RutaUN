@@ -5,7 +5,7 @@ import co.edu.unal.rutaun.compartido.EstadoRestriccion;
 import co.edu.unal.rutaun.normativa.ContextoDeEvaluacion;
 import co.edu.unal.rutaun.normativa.dominio.EvaluadorDeRestricciones;
 import co.edu.unal.rutaun.normativa.dominio.ExpresionDeMaterias;
-import co.edu.unal.rutaun.normativa.dominio.ExpresionDeMaterias.MateriaDelPrograma;
+import co.edu.unal.rutaun.normativa.dominio.ExpresionDeMaterias.TerminoMateria;
 import co.edu.unal.rutaun.normativa.dominio.Prerrequisito;
 import co.edu.unal.rutaun.soporte.ContextoDeEvaluacionFijo;
 
@@ -73,15 +73,15 @@ public final class DemostracionDeLasRestricciones {
 
   private static ExpresionDeMaterias expresion() {
     return new ExpresionDeMaterias.Y(
-        new MateriaDelPrograma(ESTRUCTURAS_DE_DATOS),
+        new TerminoMateria(ESTRUCTURAS_DE_DATOS),
         new ExpresionDeMaterias.Y(
             new ExpresionDeMaterias.O(
-                new MateriaDelPrograma(MATEMATICAS_DISCRETAS_II),
-                new MateriaDelPrograma(SISTEMAS_NUMERICOS)),
+                new TerminoMateria(MATEMATICAS_DISCRETAS_II),
+                new TerminoMateria(SISTEMAS_NUMERICOS)),
             new ExpresionDeMaterias.O(
-                new MateriaDelPrograma(PROBABILIDAD_Y_ESTADISTICA),
+                new TerminoMateria(PROBABILIDAD_Y_ESTADISTICA),
                 new ExpresionDeMaterias.O(
-                    new MateriaDelPrograma(PROBABILIDAD_FUNDAMENTAL),
-                    new MateriaDelPrograma(PROBABILIDAD)))));
+                    new TerminoMateria(PROBABILIDAD_FUNDAMENTAL),
+                    new TerminoMateria(PROBABILIDAD)))));
   }
 }

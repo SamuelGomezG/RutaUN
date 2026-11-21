@@ -9,16 +9,16 @@ import java.util.Optional;
  * o un correquisito exigen una materia del programa o, si la norma las menciona, materias externas.
  */
 public sealed interface ExpresionDeMaterias
-    permits ExpresionDeMaterias.MateriaDelPrograma,
+    permits ExpresionDeMaterias.TerminoMateria,
         ExpresionDeMaterias.MateriaExterna,
         ExpresionDeMaterias.Y,
         ExpresionDeMaterias.O {
 
   /** Materia que figura en la malla del programa. */
-  record MateriaDelPrograma(CodigoMateria codigo) implements ExpresionDeMaterias {
+  record TerminoMateria(CodigoMateria codigo) implements ExpresionDeMaterias {
 
     /** Exige el código de la materia. */
-    public MateriaDelPrograma {
+    public TerminoMateria {
       ArgumentChecks.obligatorio(codigo, "codigo");
     }
   }

@@ -347,7 +347,7 @@ public final class IncorporacionJsonReader {
   private static ExpresionDeMaterias expresion(JsonNode nodo) {
     return switch (texto(nodo, "tipo")) {
       case "MATERIA_DEL_PROGRAMA" ->
-          new ExpresionDeMaterias.MateriaDelPrograma(new CodigoMateria(texto(nodo, "codigo")));
+          new ExpresionDeMaterias.TerminoMateria(new CodigoMateria(texto(nodo, "codigo")));
       case "MATERIA_EXTERNA" ->
           new ExpresionDeMaterias.MateriaExterna(
               texto(nodo, "nombre"),
