@@ -183,7 +183,7 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
             .stream()
             .collect(Collectors.toMap(NormaEntity::getId, norma -> norma));
 
-    Regla regla = ReglaMapper.aDominio(fila, estado);
+    Regla regla = ReglaMapper.aDominio(fila);
     NormaEntity norma = normasPorId.get(fila.getNormaId());
     return Optional.of(
         new ReglaCompletaVista(
@@ -320,7 +320,7 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
   }
 
   private static Entrada aEntrada(ReglaEntity fila, EstadoRegla estado, NormaEntity norma) {
-    Regla regla = ReglaMapper.aDominio(fila, estado);
+    Regla regla = ReglaMapper.aDominio(fila);
     boolean temporal =
         esTemporal(regla.vigenciaPropia(), norma == null ? null : norma.getVigenteHasta());
     ReglaVista vista =

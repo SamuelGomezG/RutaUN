@@ -9,6 +9,7 @@ import co.edu.unal.rutaun.normativa.dominio.ConsolidadoValidado;
 import co.edu.unal.rutaun.normativa.dominio.MotivoDeVersion;
 import co.edu.unal.rutaun.normativa.dominio.Norma;
 import co.edu.unal.rutaun.normativa.dominio.Regla;
+import co.edu.unal.rutaun.normativa.dominio.ReglaEnVersion;
 import co.edu.unal.rutaun.normativa.dominio.VersionDelConsolidado;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
 import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoEntity;
@@ -122,35 +123,26 @@ public class ImportacionDeNormasService {
     }
 
     LocalDate fecha = LocalDate.now(reloj);
-    List<Regla> reglasConEstado = conEstado(incorporacion.reglas(), normaLeida, fecha);
+    List<ReglaEnVersion> reglasIncorporadas =
+        conSuEstado(incorporacion.reglas(), normaLeida, fecha);
     normas.save(NormaMapper.aEntidad(norma));
-    reglas.saveAll(reglasConEstado.stream().map(ReglaMapper::aEntidad).toList());
+    reglas.saveAll(incorporacion.reglas().stream().map(ReglaMapper::aEntidad).toList());
 
     MotivoDeVersion motivo =
         new MotivoDeVersion.PorIncorporacion(norma.id(), ADMINISTRADOR_DE_SEMILLA);
     int creadas = 0;
     for (ProgramaEntity programa : programasDelAlcance) {
-      crearVersion(programa, reglasConEstado, motivo, fecha);
+      crearVersion(programa, reglasIncorporadas, motivo, fecha);
       creadas++;
     }
     return new ResultadoDeImportacionDeNormas(
         true, identificacion, creadas, valida.ningunPlanQuedaDesactualizado());
   }
 
-  private static List<Regla> conEstado(List<Regla> reglas, NormaLeida norma, LocalDate hoy) {
+  private static List<ReglaEnVersion> conSuEstado(
+      List<Regla> reglas, NormaLeida norma, LocalDate hoy) {
     return reglas.stream()
-        .map(
-            regla ->
-                Regla.reconstituir(
-                    regla.id(),
-                    regla.objeto(),
-                    regla.enunciado(),
-                    regla.fuente(),
-                    regla.vigenciaPropia(),
-                    regla.clasificacion(),
-                    estadoDe(regla, norma, hoy),
-                    regla.afectacion(),
-                    regla.datos()))
+        .map(regla -> new ReglaEnVersion(regla, estadoDe(regla, norma, hoy)))
         .toList();
   }
 
@@ -214,7 +206,10 @@ public class ImportacionDeNormasService {
   }
 
   private void crearVersion(
-      ProgramaEntity programa, List<Regla> reglas, MotivoDeVersion motivo, LocalDate fecha) {
+      ProgramaEntity programa,
+      List<ReglaEnVersion> reglas,
+      MotivoDeVersion motivo,
+      LocalDate fecha) {
     ConsolidadoEntity consolidado =
         consolidados
             .findByProgramaId(programa.getId())
@@ -223,7 +218,7 @@ public class ImportacionDeNormasService {
                     consolidados.save(new ConsolidadoEntity(UUID.randomUUID(), programa.getId())));
     Optional<VersionDelConsolidado> anterior =
         versiones.findTopByProgramaIdOrderByNumeroDesc(programa.getId()).map(this::cargarVersion);
-    List<Regla> resultantes =
+    List<ReglaEnVersion> resultantes =
         reglasAcumuladas(anterior.map(VersionDelConsolidado::reglas).orElse(List.of()), reglas);
     ConsolidadoValidado validado =
         ConsolidadoValidado.paraImportacion(new ProgramaId(programa.getId()), resultantes);
@@ -249,11 +244,13 @@ public class ImportacionDeNormasService {
    * @throws ArchivoDeNormativaInvalidoException si una regla nueva ya está en la versión anterior o
    *     está repetida entre las nuevas
    */
-  static List<Regla> reglasAcumuladas(List<Regla> anteriores, List<Regla> nuevas) {
+  static List<ReglaEnVersion> reglasAcumuladas(
+      List<ReglaEnVersion> anteriores, List<ReglaEnVersion> nuevas) {
     Set<ReglaId> idsDeLasAnteriores =
-        anteriores.stream().map(Regla::id).collect(Collectors.toSet());
+        anteriores.stream().map(enVersion -> enVersion.regla().id()).collect(Collectors.toSet());
     Set<ReglaId> idsDeLasNuevas = new HashSet<>();
-    for (Regla regla : nuevas) {
+    for (ReglaEnVersion enVersion : nuevas) {
+      Regla regla = enVersion.regla();
       boolean yaEnLaAnterior = idsDeLasAnteriores.contains(regla.id());
       boolean yaEntreLasNuevas = !idsDeLasNuevas.add(regla.id());
       if (yaEnLaAnterior || yaEntreLasNuevas) {
@@ -268,7 +265,7 @@ public class ImportacionDeNormasService {
                     : "está repetida en la norma que se importa."));
       }
     }
-    List<Regla> resultantes = new ArrayList<>(anteriores.size() + nuevas.size());
+    List<ReglaEnVersion> resultantes = new ArrayList<>(anteriores.size() + nuevas.size());
     resultantes.addAll(anteriores);
     resultantes.addAll(nuevas);
     return resultantes;

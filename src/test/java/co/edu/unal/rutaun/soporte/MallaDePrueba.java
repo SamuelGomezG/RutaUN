@@ -13,6 +13,10 @@ import co.edu.unal.rutaun.normativa.dominio.MateriaEnMalla;
 import co.edu.unal.rutaun.normativa.dominio.NodoDeMalla;
 import co.edu.unal.rutaun.normativa.dominio.Obligatoriedad;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * Malla sintética y pequeña para probar sin persistencia. Nada de esto es normativa real: los
@@ -21,12 +25,12 @@ import java.util.List;
  * <pre>
  * Fundamentación (10 = 4 obligatorios + 6 optativos)
  *   Cálculo diferencial (obligatoria, 4)
- *   Ciencias básicas (6): Física I (3), Química básica (3)
- *     Cómputo (3): Programación I (3), Programación II (3)
+ *   Ciencias básicas (6; sugeridos: s1 = 3): Física I (3), Química básica (3)
+ *     Cómputo (3): Programación I (3), Programación II (3; no cursable desde el programa)
  * Disciplinar (9 = 6 obligatorios + 3 optativos)
  *   Estructuras de datos (obligatoria, 3), Algoritmos (obligatoria, 3)
  *   Profundización (3): Redes (3), Bases de datos (3)
- * Libre elección (6)
+ * Libre elección (6; sugeridos: s1 = 2, s5 = 4)
  *   Electivas sugeridas (0): Cátedra de inducción (2)
  * </pre>
  */
@@ -42,12 +46,12 @@ public final class MallaDePrueba {
             ExigenciaCreditos.de(new Creditos(3)),
             List.of(
                 optativa("9000004", "Programación I", 3, 2),
-                optativa("9000005", "Programación II", 3, 3)),
+                noCursable("9000005", "Programación II", 3, 3)),
             List.of());
     Agrupacion cienciasBasicas =
         agrupacion(
             "Ciencias básicas",
-            ExigenciaCreditos.de(new Creditos(6)),
+            ExigenciaCreditos.de(new Creditos(6)).conSugeridos(sugeridos(Map.of(1, 3))),
             List.of(
                 optativa("9000002", "Física I", 3, 1), optativa("9000003", "Química básica", 3, 2)),
             List.of(computo));
@@ -105,9 +109,11 @@ public final class MallaDePrueba {
             List.of());
     ComponenteDeLibreEleccion libreEleccion =
         new ComponenteDeLibreEleccion(
-            "Libre elección", ExigenciaCreditos.de(new Creditos(6)), List.of(electivas));
+            "Libre elección",
+            ExigenciaCreditos.de(new Creditos(6)).conSugeridos(sugeridos(Map.of(1, 2, 5, 4))),
+            List.of(electivas));
 
-    return new Malla(List.of(fundamentacion, disciplinar, libreEleccion));
+    return Malla.de(fundamentacion, disciplinar, libreEleccion);
   }
 
   /** Busca un nodo de la malla por su nombre. */
@@ -127,6 +133,12 @@ public final class MallaDePrueba {
     return new Agrupacion(AgrupacionId.nuevo(), nombre, exigencia, materias, subagrupaciones);
   }
 
+  private static SortedMap<Integer, Creditos> sugeridos(Map<Integer, Integer> porSemestre) {
+    SortedMap<Integer, Creditos> mapa = new TreeMap<>();
+    porSemestre.forEach((semestre, creditos) -> mapa.put(semestre, new Creditos(creditos)));
+    return mapa;
+  }
+
   private static MateriaEnMalla optativa(String codigo, String nombre, int creditos, int semestre) {
     return MateriaEnMalla.enSemestre(
         new CodigoMateria(codigo),
@@ -134,5 +146,16 @@ public final class MallaDePrueba {
         new Creditos(creditos),
         Obligatoriedad.OPTATIVA,
         semestre);
+  }
+
+  private static MateriaEnMalla noCursable(
+      String codigo, String nombre, int creditos, int semestre) {
+    return new MateriaEnMalla(
+        new CodigoMateria(codigo),
+        nombre,
+        new Creditos(creditos),
+        Obligatoriedad.OPTATIVA,
+        Optional.of(semestre),
+        false);
   }
 }

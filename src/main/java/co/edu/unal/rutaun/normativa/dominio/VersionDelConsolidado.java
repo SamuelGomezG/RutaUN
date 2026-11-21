@@ -28,7 +28,7 @@ public final class VersionDelConsolidado {
   private final int numero;
   private final LocalDate fecha;
   private final MotivoDeVersion motivo;
-  private final List<Regla> reglas;
+  private final List<ReglaEnVersion> reglas;
   private final int versionDelPlan;
 
   private VersionDelConsolidado(
@@ -36,7 +36,7 @@ public final class VersionDelConsolidado {
       int numero,
       LocalDate fecha,
       MotivoDeVersion motivo,
-      List<Regla> reglas,
+      List<ReglaEnVersion> reglas,
       int versionDelPlan) {
     this.programa = ArgumentChecks.obligatorio(programa, "programa");
     this.numero = ArgumentChecks.obligatorioPositivo(numero, "numero");
@@ -64,7 +64,7 @@ public final class VersionDelConsolidado {
       int numero,
       LocalDate fecha,
       MotivoDeVersion motivo,
-      List<Regla> reglas,
+      List<ReglaEnVersion> reglas,
       int versionDelPlan) {
     return new VersionDelConsolidado(programa, numero, fecha, motivo, reglas, versionDelPlan);
   }
@@ -117,8 +117,8 @@ public final class VersionDelConsolidado {
     return motivo;
   }
 
-  /** Reglas de la versión, cada una con su estado; la lista no se puede modificar. */
-  public List<Regla> reglas() {
+  /** Reglas de la versión, cada una con su estado en ella; la lista no se puede modificar. */
+  public List<ReglaEnVersion> reglas() {
     return reglas;
   }
 
@@ -145,15 +145,16 @@ public final class VersionDelConsolidado {
     return "VersionDelConsolidado[programa=" + programa.valor() + ", numero=" + numero + "]";
   }
 
-  private static boolean cambiaLaEstructura(List<Regla> antes, List<Regla> despues) {
+  private static boolean cambiaLaEstructura(
+      List<ReglaEnVersion> antes, List<ReglaEnVersion> despues) {
     return !idsDeEstructura(antes).equals(idsDeEstructura(despues));
   }
 
-  private static Set<ReglaId> idsDeEstructura(List<Regla> reglas) {
+  private static Set<ReglaId> idsDeEstructura(List<ReglaEnVersion> reglas) {
     Set<ReglaId> ids = new HashSet<>();
-    for (Regla regla : reglas) {
-      if (esDeEstructura(regla)) {
-        ids.add(regla.id());
+    for (ReglaEnVersion enVersion : reglas) {
+      if (esDeEstructura(enVersion.regla())) {
+        ids.add(enVersion.regla().id());
       }
     }
     return ids;

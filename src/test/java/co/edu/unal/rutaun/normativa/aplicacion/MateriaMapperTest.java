@@ -45,6 +45,9 @@ class MateriaMapperTest {
     Materia reconstruida = MateriaMapper.aDominio(leida);
 
     assertThat(reconstruida).isEqualTo(original);
+    // La igualdad solo mira el código, así que los créditos se comprueban aparte.
+    assertThat(leida.getCreditos()).isEqualTo(4);
+    assertThat(reconstruida.creditos()).isEqualTo(original.creditos());
   }
 
   @Test

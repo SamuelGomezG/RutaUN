@@ -3,7 +3,6 @@ package co.edu.unal.rutaun.normativa.aplicacion;
 import co.edu.unal.rutaun.compartido.AgrupacionId;
 import co.edu.unal.rutaun.compartido.CodigoMateria;
 import co.edu.unal.rutaun.compartido.Creditos;
-import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.Momento;
 import co.edu.unal.rutaun.compartido.NormaId;
 import co.edu.unal.rutaun.compartido.PeriodoAcademico;
@@ -42,6 +41,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -55,9 +55,9 @@ import tools.jackson.databind.JsonNode;
  * aplicación para que lo usen el arranque de desarrollo y, después, el formulario de carga sin
  * rehacerlo.
  *
- * <p>El estado de cada regla queda en {@link EstadoRegla#VIGENTE}; el servicio de importación lo
- * ajusta con el periodo en curso. Las referencias de una afectación usan identificadores
- * provisionales hasta que el servicio las resuelva contra el consolidado.
+ * <p>El lector no asigna estados: el estado de cada regla en la versión lo calcula el servicio de
+ * importación. Las referencias de una afectación usan identificadores provisionales hasta que el
+ * servicio las resuelva contra el consolidado.
  */
 public final class IncorporacionJsonReader {
 
@@ -165,7 +165,6 @@ public final class IncorporacionJsonReader {
           new Fuente(norma.id(), articulo),
           vigenciaPropia(nodo),
           ClasificacionRegla.valueOf(texto(nodo, "clasificacion")),
-          EstadoRegla.VIGENTE,
           afectacion(nodo, norma),
           datos);
     } catch (IllegalArgumentException e) {
@@ -284,7 +283,8 @@ public final class IncorporacionJsonReader {
         texto(nodo, "nombre"),
         new Creditos(entero(nodo, "creditos")),
         Obligatoriedad.valueOf(texto(nodo, "obligatoriedad")),
-        enteroOpcional(nodo, "semestreSugerido"));
+        enteroOpcional(nodo, "semestreSugerido"),
+        true);
   }
 
   private static NodoDeMalla contenedor(JsonNode nodo) {
@@ -341,7 +341,8 @@ public final class IncorporacionJsonReader {
         Optional.of(
             new ExigenciaCreditos.Desglose(
                 new Creditos(entero(desglose, "obligatorios")),
-                new Creditos(entero(desglose, "optativos")))));
+                new Creditos(entero(desglose, "optativos")))),
+        Collections.emptySortedMap());
   }
 
   private static ExpresionDeMaterias expresion(JsonNode nodo) {

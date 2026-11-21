@@ -2,7 +2,6 @@ package co.edu.unal.rutaun.normativa.aplicacion;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.Momento;
 import co.edu.unal.rutaun.compartido.NormaId;
 import co.edu.unal.rutaun.compartido.ParteDelAnio;
@@ -155,7 +154,6 @@ class ValidadorDeIncorporacionTest {
         new Fuente(norma.id(), "art. 1"),
         vigenciaPropia,
         clasificacion,
-        EstadoRegla.VIGENTE,
         Optional.empty(),
         new DatosDeRegla.DeOtraCategoria());
   }

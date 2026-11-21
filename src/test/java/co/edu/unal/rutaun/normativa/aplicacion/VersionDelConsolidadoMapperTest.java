@@ -16,6 +16,7 @@ import co.edu.unal.rutaun.normativa.dominio.Norma;
 import co.edu.unal.rutaun.normativa.dominio.Prerrequisito;
 import co.edu.unal.rutaun.normativa.dominio.Programa;
 import co.edu.unal.rutaun.normativa.dominio.Regla;
+import co.edu.unal.rutaun.normativa.dominio.ReglaEnVersion;
 import co.edu.unal.rutaun.normativa.dominio.VersionDelConsolidado;
 import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoEntity;
 import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoRepository;
@@ -98,13 +99,15 @@ class VersionDelConsolidadoMapperTest {
 
   @Test
   void tt04_versionIdaYVuelta() {
-    List<Regla> deLaVersion =
+    List<ReglaEnVersion> deLaVersion =
         List.of(
-            guardarRegla(new DatosDeRegla.DePrograma(new Creditos(160)), EstadoRegla.VIGENTE),
-            guardarRegla(
-                new DatosDeRegla.DeMateria(
-                    MallaDePrueba.pequena().materias().get(0),
-                    MallaDePrueba.nodo(MallaDePrueba.pequena(), "Fundamentación")),
+            new ReglaEnVersion(
+                guardarRegla(new DatosDeRegla.DePrograma(new Creditos(160))), EstadoRegla.VIGENTE),
+            new ReglaEnVersion(
+                guardarRegla(
+                    new DatosDeRegla.DeMateria(
+                        MallaDePrueba.pequena().materias().get(0),
+                        MallaDePrueba.nodo(MallaDePrueba.pequena(), "Fundamentación"))),
                 EstadoRegla.VIGENTE),
             guardarRegla(
                 new DatosDeRegla.DePrerrequisito(
@@ -129,7 +132,8 @@ class VersionDelConsolidadoMapperTest {
 
   @Test
   void tt04_versionConCadaMotivoIdaYVuelta() {
-    Regla regla = guardarRegla(new DatosDeRegla.DeOtraCategoria(), EstadoRegla.VIGENTE);
+    Regla regla = guardarRegla(new DatosDeRegla.DeOtraCategoria());
+    ReglaEnVersion enVersion = new ReglaEnVersion(regla, EstadoRegla.VIGENTE);
     List<MotivoDeVersion> motivos =
         List.of(
             new MotivoDeVersion.PorIncorporacion(norma.id(), ADMINISTRADOR),
@@ -139,7 +143,7 @@ class VersionDelConsolidadoMapperTest {
             new MotivoDeVersion.AutomaticoPorFecha(LocalDate.of(2027, 2, 1)));
 
     for (int i = 0; i < motivos.size(); i++) {
-      VersionDelConsolidado original = version(i + 1, motivos.get(i), List.of(regla));
+      VersionDelConsolidado original = version(i + 1, motivos.get(i), List.of(enVersion));
 
       VersionDelConsolidado reconstruida = leer(guardar(original));
 
@@ -152,16 +156,17 @@ class VersionDelConsolidadoMapperTest {
 
   @Test
   void tt04_laMismaReglaTieneElEstadoDeCadaVersion() {
-    Regla programada =
-        guardarRegla(new DatosDeRegla.DePrograma(new Creditos(160)), EstadoRegla.PROGRAMADA);
-    Regla vigente = ReglasDePrueba.conEstado(programada, EstadoRegla.VIGENTE);
+    Regla regla = guardarRegla(new DatosDeRegla.DePrograma(new Creditos(160)));
     VersionDelConsolidado primera =
         version(
             1,
             new MotivoDeVersion.PorIncorporacion(norma.id(), ADMINISTRADOR),
-            List.of(programada));
+            List.of(new ReglaEnVersion(regla, EstadoRegla.PROGRAMADA)));
     VersionDelConsolidado segunda =
-        version(2, new MotivoDeVersion.AutomaticoPorFecha(FECHA), List.of(vigente));
+        version(
+            2,
+            new MotivoDeVersion.AutomaticoPorFecha(FECHA),
+            List.of(new ReglaEnVersion(regla, EstadoRegla.VIGENTE)));
 
     UUID primeraId = guardar(primera);
     UUID segundaId = guardar(segunda);
@@ -174,10 +179,10 @@ class VersionDelConsolidadoMapperTest {
         .extracting(ReglaEnVersionEntity::getEstado)
         .containsExactly("VIGENTE");
     assertThat(leer(primeraId).reglas())
-        .extracting(Regla::estado)
+        .extracting(ReglaEnVersion::estado)
         .containsExactly(EstadoRegla.PROGRAMADA);
     assertThat(leer(segundaId).reglas())
-        .extracting(Regla::estado)
+        .extracting(ReglaEnVersion::estado)
         .containsExactly(EstadoRegla.VIGENTE);
     assertThat(leer(primeraId)).usingRecursiveComparison().isEqualTo(primera);
     assertThat(leer(segundaId)).usingRecursiveComparison().isEqualTo(segunda);
@@ -247,9 +252,12 @@ class VersionDelConsolidadoMapperTest {
 
   @Test
   void tt04_guardarDosVecesLaMismaVersionFalla() {
-    Regla regla = guardarRegla(new DatosDeRegla.DeOtraCategoria(), EstadoRegla.VIGENTE);
+    Regla regla = guardarRegla(new DatosDeRegla.DeOtraCategoria());
     VersionDelConsolidado original =
-        version(1, new MotivoDeVersion.PorIncorporacion(norma.id(), ADMINISTRADOR), List.of(regla));
+        version(
+            1,
+            new MotivoDeVersion.PorIncorporacion(norma.id(), ADMINISTRADOR),
+            List.of(new ReglaEnVersion(regla, EstadoRegla.VIGENTE)));
     guardar(original);
     VersionDelConsolidadoMapper.Filas otraVez =
         VersionDelConsolidadoMapper.aEntidades(original, consolidadoId);
@@ -261,15 +269,15 @@ class VersionDelConsolidadoMapperTest {
   }
 
   /** Guarda una regla de la norma de la prueba y devuelve la regla de dominio. */
-  private Regla guardarRegla(DatosDeRegla datos, EstadoRegla estado) {
-    Regla regla = ReglasDePrueba.regla(norma, datos, estado);
+  private Regla guardarRegla(DatosDeRegla datos) {
+    Regla regla = ReglasDePrueba.regla(norma, datos);
     reglas.save(ReglaMapper.aEntidad(regla));
     reglasGuardadas.add(regla.id().valor());
     return regla;
   }
 
   private VersionDelConsolidado version(
-      int numero, MotivoDeVersion motivo, List<Regla> deLaVersion) {
+      int numero, MotivoDeVersion motivo, List<ReglaEnVersion> deLaVersion) {
     return VersionDelConsolidado.reconstituir(programa.id(), numero, FECHA, motivo, deLaVersion, 1);
   }
 

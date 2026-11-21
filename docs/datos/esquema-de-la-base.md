@@ -139,7 +139,6 @@ Antes de apoyarte en un detalle de una tabla, revisa si uno de estos issues lo c
 | [#142](https://github.com/SamuelGomezG/RutaUN/issues/142) | El esquema se aparta del diseño y acepta datos incoherentes |
 | [#143](https://github.com/SamuelGomezG/RutaUN/issues/143) | Un repositorio por raíz, sin borrado del historial |
 | [#145](https://github.com/SamuelGomezG/RutaUN/issues/145) | Los datos de las reglas, en columnas JSON |
-| [#152](https://github.com/SamuelGomezG/RutaUN/issues/152) | El estado de las reglas pasa a la versión del consolidado |
 | [#155](https://github.com/SamuelGomezG/RutaUN/issues/155) | El catálogo de materias queda vacío |
 | [#167](https://github.com/SamuelGomezG/RutaUN/issues/167), [#168](https://github.com/SamuelGomezG/RutaUN/issues/168) y [#169](https://github.com/SamuelGomezG/RutaUN/issues/169) | Cómo se agrupan los incidentes y qué pasa con dos registros simultáneos |
 

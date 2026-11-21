@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "1.0",
+  "programa": {
+    "codigoSia": "2879",
+    "nombre": "Ingeniería de Sistemas y Computación",
+    "facultad": "Ingeniería"
+  },
+  "norma": {
+    "tipo": "ACUERDO",
+    "numero": "901",
+    "anio": 2000,
+    "organo": "Consejo de Facultad de Ingeniería (datos de prueba)",
+    "tipoDeEfecto": "EXCEPCION_O_MEDIDA_TEMPORAL",
+    "fechaExpedicion": "2000-01-01",
+    "vigencia": {
+      "aplicaDesde": {
+        "tipo": "FECHA",
+        "fecha": "2000-01-01"
+      },
+      "vigenteHasta": {
+        "tipo": "FECHA",
+        "fecha": "2000-12-31"
+      }
+    },
+    "enlaceRegimenLegal": null,
+    "alcance": {
+      "tipo": "PROGRAMAS",
+      "facultades": [],
+      "programas": ["2879"],
+      "exclusiones": [],
+      "texto": "Norma ficticia vencida: aplicó solo al programa de Ingeniería de Sistemas y Computación (datos de prueba)."
+    }
+  },
+  "reglas": [
+    {
+      "categoria": "OTRA",
+      "objeto": "Horario de atención de la secretaría (datos de prueba)",
+      "enunciado": "Durante su vigencia, la secretaría atendió en horario continuo (datos de prueba).",
+      "articulo": "art. 1",
+      "vigenciaPropia": null,
+      "clasificacion": "INFORMATIVA",
+      "afectacion": null,
+      "datos": {
+        "tipo": "OTRA"
+      }
+    }
+  ]
+}

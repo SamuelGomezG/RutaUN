@@ -3,7 +3,7 @@ package co.edu.unal.rutaun.normativa.aplicacion;
 import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.ProgramaId;
 import co.edu.unal.rutaun.normativa.dominio.MotivoDeVersion;
-import co.edu.unal.rutaun.normativa.dominio.Regla;
+import co.edu.unal.rutaun.normativa.dominio.ReglaEnVersion;
 import co.edu.unal.rutaun.normativa.dominio.VersionDelConsolidado;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntity;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEntity;
@@ -17,27 +17,28 @@ import tools.jackson.core.JacksonException;
 
 /**
  * Convierte entre la raíz {@link VersionDelConsolidado} y sus filas: la de la versión ({@code
- * version_consolidado}) y una por regla con su estado ({@code regla_en_version}). No guarda estado.
+ * version_consolidado}) y una por regla con su estado ({@code regla_en_version}).
  *
  * <p>TT-04-T3 (#91). Reconstruye con {@link VersionDelConsolidado#reconstituir}, así que no calcula
  * nada, no genera eventos y pasa por las mismas validaciones que una versión creada. Las reglas las
- * reconstruye {@link ReglaMapper} con el estado que cada una tiene en esta versión; el mapper no
- * lee la base, de modo que quien lo llama trae las filas.
+ * reconstruye {@link ReglaMapper} y el mapper las une a su estado en esta versión en un {@link
+ * ReglaEnVersion}; el mapper no lee la base, de modo que quien lo llama trae las filas.
  *
  * <p>Una versión es una raíz de solo agregar: cada llamada a {@link #aEntidades} produce
  * identificadores nuevos, y guardar dos veces la misma versión choca con la restricción de unicidad
  * del programa y el número, que es lo que se espera.
  *
- * <p>Lo que el esquema y el dominio de hoy no calzan, y qué hace el mapper (lo corrigen #142, #145
- * y #152):
+ * <p>Lo que el esquema y el dominio de hoy no calzan, y qué hace el mapper (lo corrigen #142 y
+ * #145):
  *
  * <ul>
  *   <li>El administrador del motivo es un texto en el dominio y {@code administrador_id} es un
  *       UUID: va dentro de {@code detalle_motivo} y la columna queda en {@code null} (D-11, #91).
  *   <li>La tabla {@code consolidado} no existe en el dominio: {@code consolidadoId} entra como
  *       parámetro (#142).
- *   <li>{@code regla_en_version} no guarda el orden de las reglas: se leen ordenadas por
- *       identificador (pendiente; anotado en #152).
+ *   <li>{@code regla_en_version} no guarda el orden de las reglas, y el dominio no lo necesita: la
+ *       versión es un conjunto de reglas y el orden en que se muestran lo calcula la consulta. Se
+ *       leen ordenadas por identificador para que la lectura sea determinista.
  *   <li>La columna {@code cambios} no tiene contraparte en el dominio todavía: queda en {@code
  *       null} (pendiente; anotado en #145).
  * </ul>
@@ -114,7 +115,7 @@ public final class VersionDelConsolidadoMapper {
     ArgumentChecks.obligatorio(version, "version");
     ArgumentChecks.obligatorio(reglasEnVersion, "reglasEnVersion");
     ArgumentChecks.obligatorio(reglasPorId, "reglasPorId");
-    List<Regla> reglas =
+    List<ReglaEnVersion> reglas =
         reglasEnVersion.stream()
             .sorted(Comparator.comparing(ReglaEnVersionEntity::getReglaId))
             .map(fila -> reglaDeLaVersion(version, fila, reglasPorId))
@@ -154,14 +155,17 @@ public final class VersionDelConsolidadoMapper {
     List<ReglaEnVersionEntity> reglasEnVersion =
         version.reglas().stream()
             .map(
-                regla ->
+                enVersion ->
                     new ReglaEnVersionEntity(
-                        UUID.randomUUID(), versionId, regla.id().valor(), regla.estado().name()))
+                        UUID.randomUUID(),
+                        versionId,
+                        enVersion.regla().id().valor(),
+                        enVersion.estado().name()))
             .toList();
     return new Filas(fila, reglasEnVersion);
   }
 
-  private static Regla reglaDeLaVersion(
+  private static ReglaEnVersion reglaDeLaVersion(
       VersionEntity version, ReglaEnVersionEntity fila, Map<UUID, ReglaEntity> reglasPorId) {
     if (!version.getId().equals(fila.getVersionId())) {
       throw new IllegalArgumentException(
@@ -177,7 +181,7 @@ public final class VersionDelConsolidadoMapper {
               + " del programa "
               + version.getProgramaId());
     }
-    return ReglaMapper.aDominio(regla, EstadoRegla.valueOf(fila.getEstado()));
+    return new ReglaEnVersion(ReglaMapper.aDominio(regla), EstadoRegla.valueOf(fila.getEstado()));
   }
 
   private static MotivoDeVersion motivoADominio(VersionEntity version) {

@@ -1,6 +1,5 @@
 package co.edu.unal.rutaun.normativa.aplicacion;
 
-import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.Momento;
 import co.edu.unal.rutaun.compartido.NormaId;
 import co.edu.unal.rutaun.compartido.ReglaId;
@@ -26,8 +25,8 @@ import tools.jackson.core.JacksonException;
  *
  * <p>El estado de la regla no está en la fila de {@code regla} sino en {@code regla_en_version},
  * porque una misma regla tiene un estado distinto en cada versión del consolidado. Por eso {@link
- * #aEntidad} no lo guarda y {@link #aDominio} lo recibe: quien lee una versión lo toma de la fila
- * de esa versión (#152, lo saca de {@code Regla}).
+ * #aEntidad} no lo guarda y {@link #aDominio} solo reconstruye la regla; {@code
+ * VersionDelConsolidadoMapper} la une a su estado en un {@code ReglaEnVersion}.
  *
  * <p>La tabla no puede guardar todo lo que el dominio admite, y el mapper lo rechaza en vez de
  * inventar datos: una vigencia propia dada por periodos (#141), una afectación a un artículo y una
@@ -87,13 +86,12 @@ public final class ReglaMapper {
   private ReglaMapper() {}
 
   /**
-   * Reconstruye la regla que guarda esta fila, con el estado que tiene en la versión que la lee.
+   * Reconstruye la regla que guarda esta fila.
    *
    * @throws IllegalArgumentException si la fila trae un dato inválido o una categoría desconocida
    */
-  public static Regla aDominio(ReglaEntity entidad, EstadoRegla estado) {
+  public static Regla aDominio(ReglaEntity entidad) {
     ArgumentChecks.obligatorio(entidad, "entidad");
-    ArgumentChecks.obligatorio(estado, "estado");
     return Regla.reconstituir(
         new ReglaId(entidad.getId()),
         entidad.getObjeto(),
@@ -101,7 +99,6 @@ public final class ReglaMapper {
         new Fuente(new NormaId(entidad.getNormaId()), entidad.getFuente()),
         vigenciaADominio(entidad),
         ClasificacionRegla.valueOf(entidad.getClasificacion()),
-        estado,
         afectacionADominio(entidad),
         datosADominio(entidad));
   }
