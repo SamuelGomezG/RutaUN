@@ -11,13 +11,17 @@ import co.edu.unal.rutaun.utilidades.ArgumentChecks;
 public sealed interface ReglasDelPrograma {
 
   /**
-   * El programa y su consolidado vigente. El consolidado puede no tener reglas (UC06 ext. 4a); en
+   * El programa y su consolidado vigente. El consolidado puede no tener reglas porque la búsqueda
+   * no encontró ninguna (UC06 ext. 5a) o porque el consolidado vigente no las tiene (ext. 4a); en
    * ese caso el incidente ya se publicó.
    *
    * @param programa el programa consultado
-   * @param consolidado su consolidado vigente
+   * @param consolidado su consolidado vigente, con las reglas que cumplen la búsqueda
+   * @param consolidadoSinReglas si el consolidado vigente no tiene reglas aunque no se filtre (ext.
+   *     4a), y no solo ninguna que cumpla la búsqueda
    */
-  record Consultadas(ProgramaVista programa, ConsolidadoVista consolidado)
+  record Consultadas(
+      ProgramaVista programa, ConsolidadoVista consolidado, boolean consolidadoSinReglas)
       implements ReglasDelPrograma {
 
     /** Exige los dos datos. */

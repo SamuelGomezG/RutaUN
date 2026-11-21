@@ -159,6 +159,17 @@ class BuscarReglasIntegracionTest {
     entityManager.clear();
   }
 
+  /** Pasa todas las reglas de la versión 3 a «ya no rige»: el listado normal queda sin reglas. */
+  private void todasLasReglasYaNoRigen() {
+    entityManager.flush();
+    jdbc.update(
+        "UPDATE regla_en_version SET estado = 'YA_NO_RIGE' WHERE version_id ="
+            + " (SELECT id FROM version_consolidado WHERE programa_id = ? AND numero = 3)",
+        sistemas().valor());
+    entityManager.flush();
+    entityManager.clear();
+  }
+
   @Test
   void uc06_paso6_sinBusquedaDevuelveElMismoConsolidadoQueElListadoNormal() {
     assertThat(consulta.buscarReglas(sistemas(), BusquedaDeReglas.TODAS))
@@ -340,5 +351,26 @@ class BuscarReglasIntegracionTest {
         .andExpect(content().string(containsString("debe consultarse Régimen Legal")));
 
     assertThat(incidentes.count()).isEqualTo(antes);
+  }
+
+  @Test
+  void uc06_ext4a_unaBusquedaConElConsolidadoSinReglasDiceElProblemaYRegistraElIncidente()
+      throws Exception {
+    todasLasReglasYaNoRigen();
+    long antes = incidentes.count();
+
+    String pagina =
+        mockMvc
+            .perform(get("/programas/" + sistemas().valor() + "/reglas?texto=creditos"))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+    assertThat(pagina)
+        .contains("No hay reglas para mostrar.")
+        .contains("tiene un problema que ya se informó al administrador de normativa")
+        .doesNotContain("No se encontraron reglas");
+    assertThat(incidentes.count()).isEqualTo(antes + 1);
   }
 }

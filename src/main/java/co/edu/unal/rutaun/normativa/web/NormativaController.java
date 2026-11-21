@@ -49,8 +49,10 @@ class NormativaController {
    * consolidado y su fecha (UC06 paso 4). Si el consolidado no tiene reglas, lo dice (ext. 4a). Con
    * {@code texto}, {@code categoria} o {@code estado} muestra solo las reglas que los cumplen (paso
    * 6): las que ya no rigen salen solo al pedir ese estado (ext. 5b) y, si ninguna cumple la
-   * búsqueda, la página lo dice y recuerda que debe consultarse Régimen Legal (ext. 5a). Responde
-   * 404 si el programa no está cargado o no tiene una versión vigente del consolidado.
+   * búsqueda, la página lo dice y recuerda que debe consultarse Régimen Legal (ext. 5a), salvo que
+   * el consolidado vigente no tenga reglas: entonces dice el problema del consolidado aunque haya
+   * búsqueda (ext. 4a). Responde 404 si el programa no está cargado o no tiene una versión vigente
+   * del consolidado.
    */
   @GetMapping("/programas/{id}/reglas")
   ModelAndView reglas(
@@ -64,6 +66,7 @@ class NormativaController {
         ModelAndView vista = new ModelAndView("publico/reglas");
         vista.addObject("programa", consultadas.programa());
         vista.addObject("consolidado", consultadas.consolidado());
+        vista.addObject("consolidadoSinReglas", consultadas.consolidadoSinReglas());
         vista.addObject("busqueda", busqueda);
         vista.addObject("categorias", orquestador.categoriasDeReglas());
         vista.addObject("estados", ESTADOS_QUE_SE_FILTRAN);

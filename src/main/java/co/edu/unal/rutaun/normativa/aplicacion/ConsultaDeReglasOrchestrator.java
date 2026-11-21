@@ -64,10 +64,11 @@ public class ConsultaDeReglasOrchestrator {
   }
 
   /**
-   * Las reglas del programa que cumplen la búsqueda (UC06 paso 6). Que ninguna la cumpla (ext. 5a)
-   * no es un problema del consolidado: no publica ningún incidente y devuelve el consolidado sin
-   * reglas, para que la página lo diga. Solo el consolidado vigente que no tiene reglas (ext. 4a)
-   * publica el incidente, y se detecta al pedir las reglas sin búsqueda.
+   * Las reglas del programa que cumplen la búsqueda (UC06 paso 6). Si ninguna la cumple, mira el
+   * consolidado sin filtrar: si tiene reglas, la búsqueda no encontró nada (ext. 5a) y no publica
+   * ningún incidente; si tampoco las tiene, el problema es del consolidado (ext. 4a) y publica el
+   * incidente, lo mismo que sin búsqueda. En ambos casos devuelve el consolidado sin reglas y dice
+   * cuál de las dos situaciones es, para que la página lo diga.
    *
    * @param id identificador del programa
    * @param busqueda texto y filtros; {@link BusquedaDeReglas#TODAS} para el listado normal
@@ -84,12 +85,19 @@ public class ConsultaDeReglasOrchestrator {
     if (consolidado.isEmpty()) {
       return new ReglasDelPrograma.SinVersionVigente(programa.get());
     }
-    if (busqueda.esVacia() && consolidado.get().sinReglas()) {
+    boolean consolidadoSinReglas = consolidado.get().sinReglas() && esVacioSinFiltrar(id, busqueda);
+    if (consolidadoSinReglas) {
       eventos.publicar(
           new IncidenteDePrograma(
               CASO_DE_USO, PASO, id, consolidado.get().version(), CAUSA, List.of()));
     }
-    return new ReglasDelPrograma.Consultadas(programa.get(), consolidado.get());
+    return new ReglasDelPrograma.Consultadas(
+        programa.get(), consolidado.get(), consolidadoSinReglas);
+  }
+
+  private boolean esVacioSinFiltrar(ProgramaId id, BusquedaDeReglas busqueda) {
+    return busqueda.esVacia()
+        || consulta.consolidadoVigente(id).map(ConsolidadoVista::sinReglas).orElse(false);
   }
 
   /**
