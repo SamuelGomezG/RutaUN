@@ -2,6 +2,8 @@ package co.edu.unal.rutaun.normativa.dominio;
 
 import co.edu.unal.rutaun.compartido.CodigoMateria;
 import co.edu.unal.rutaun.compartido.Creditos;
+import co.edu.unal.rutaun.compartido.EstadoRestriccion;
+import co.edu.unal.rutaun.normativa.ContextoDeEvaluacion;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
 
 /**
@@ -20,5 +22,24 @@ public record ReglaDeHabilitacion(CodigoMateria materia, MedidaDeCreditos medida
     ArgumentChecks.obligatorio(materia, "materia");
     ArgumentChecks.obligatorio(medida, "medida");
     ArgumentChecks.obligatorio(umbral, "umbral");
+  }
+
+  @Override
+  public EstadoRestriccion evaluar(ContextoDeEvaluacion contexto) {
+    ArgumentChecks.obligatorio(contexto, "contexto");
+    Creditos aprobados =
+        medida().esDelPrograma()
+            ? contexto.creditosAprobadosDelPrograma()
+            : contexto.creditosAprobadosDelComponente(medida().componente().orElseThrow());
+    String deQue =
+        medida().esDelPrograma()
+            ? "del programa"
+            : "del componente " + medida().componente().orElseThrow();
+    String detalle =
+        "créditos aprobados " + deQue + ": " + aprobados.valor() + "; umbral: " + umbral().valor();
+    if (aprobados.valor() >= umbral().valor()) {
+      return EstadoRestriccion.cumplida(detalle);
+    }
+    return EstadoRestriccion.pendiente(detalle);
   }
 }

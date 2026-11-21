@@ -1,13 +1,17 @@
 package co.edu.unal.rutaun.normativa.dominio;
 
 import co.edu.unal.rutaun.compartido.CodigoMateria;
+import co.edu.unal.rutaun.compartido.EstadoRestriccion;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
 
 /**
  * Expresión de materias combinadas con «y» y «o» (glosario, «Datos de una regla»). Un prerrequisito
@@ -21,12 +25,27 @@ public sealed interface ExpresionDeMaterias
         ExpresionDeMaterias.TodasLas,
         ExpresionDeMaterias.AlgunaDe {
 
+  /**
+   * Evalúa cada término con la función que da el estado de una materia del programa. Las materias
+   * externas se evalúan solas y las combinaciones se acumulan de izquierda a derecha.
+   *
+   * @param estadoDe estado de una materia del programa
+   * @return estado de la expresión
+   */
+  EstadoRestriccion evaluar(Function<CodigoMateria, EstadoRestriccion> estadoDe);
+
   /** Materia que figura en la malla del programa. */
   record TerminoMateria(CodigoMateria codigo) implements ExpresionDeMaterias {
 
     /** Exige el código de la materia. */
     public TerminoMateria {
       ArgumentChecks.obligatorio(codigo, "codigo");
+    }
+
+    @Override
+    public EstadoRestriccion evaluar(Function<CodigoMateria, EstadoRestriccion> estadoDe) {
+      ArgumentChecks.obligatorio(estadoDe, "estadoDe");
+      return estadoDe.apply(codigo);
     }
   }
 
@@ -44,6 +63,21 @@ public sealed interface ExpresionDeMaterias
       ArgumentChecks.obligatorio(codigo, "codigo");
       ArgumentChecks.obligatorio(tipo, "tipo");
     }
+
+    @Override
+    public EstadoRestriccion evaluar(Function<CodigoMateria, EstadoRestriccion> estadoDe) {
+      ArgumentChecks.obligatorio(estadoDe, "estadoDe");
+      return switch (tipo()) {
+        case NIVELACION ->
+            EstadoRestriccion.cumplida(
+                "la materia de nivelación " + nombre() + " se da por cumplida");
+        case OTRO_PROGRAMA ->
+            EstadoRestriccion.pendiente(
+                "la materia de otro programa "
+                    + nombre()
+                    + " no se puede cursar desde este programa");
+      };
+    }
   }
 
   /**
@@ -58,6 +92,11 @@ public sealed interface ExpresionDeMaterias
       if (terminos.size() < 2) {
         throw new IllegalArgumentException("una «y» necesita al menos dos términos distintos");
       }
+    }
+
+    @Override
+    public EstadoRestriccion evaluar(Function<CodigoMateria, EstadoRestriccion> estadoDe) {
+      return reducir(terminos, estadoDe, EstadoRestriccion::y);
     }
   }
 
@@ -74,6 +113,11 @@ public sealed interface ExpresionDeMaterias
         throw new IllegalArgumentException("una «o» necesita al menos dos términos distintos");
       }
     }
+
+    @Override
+    public EstadoRestriccion evaluar(Function<CodigoMateria, EstadoRestriccion> estadoDe) {
+      return reducir(terminos, estadoDe, EstadoRestriccion::o);
+    }
   }
 
   /** «y» de varios términos; si queda uno, devuelve ese término. */
@@ -88,6 +132,22 @@ public sealed interface ExpresionDeMaterias
     ArgumentChecks.obligatorio(terminos, "terminos");
     return combinar(
         Arrays.asList(terminos), AlgunaDe.class, "una «o» necesita al menos un término");
+  }
+
+  private static EstadoRestriccion reducir(
+      Set<ExpresionDeMaterias> terminos,
+      Function<CodigoMateria, EstadoRestriccion> estadoDe,
+      BinaryOperator<EstadoRestriccion> combinador) {
+    ArgumentChecks.obligatorio(estadoDe, "estadoDe");
+    Iterator<ExpresionDeMaterias> pendientes = terminos.iterator();
+    EstadoRestriccion acumulado =
+        ArgumentChecks.obligatorio(pendientes.next().evaluar(estadoDe), "estado");
+    while (pendientes.hasNext()) {
+      EstadoRestriccion siguiente =
+          ArgumentChecks.obligatorio(pendientes.next().evaluar(estadoDe), "estado");
+      acumulado = combinador.apply(acumulado, siguiente);
+    }
+    return acumulado;
   }
 
   private static ExpresionDeMaterias combinar(

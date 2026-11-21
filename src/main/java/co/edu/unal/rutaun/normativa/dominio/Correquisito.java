@@ -1,6 +1,8 @@
 package co.edu.unal.rutaun.normativa.dominio;
 
 import co.edu.unal.rutaun.compartido.CodigoMateria;
+import co.edu.unal.rutaun.compartido.EstadoRestriccion;
+import co.edu.unal.rutaun.normativa.ContextoDeEvaluacion;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
 
 /**
@@ -18,5 +20,22 @@ public record Correquisito(CodigoMateria materia, ExpresionDeMaterias expresion)
   public Correquisito {
     ArgumentChecks.obligatorio(materia, "materia");
     ArgumentChecks.obligatorio(expresion, "expresion");
+  }
+
+  @Override
+  public EstadoRestriccion evaluar(ContextoDeEvaluacion contexto) {
+    ArgumentChecks.obligatorio(contexto, "contexto");
+    return expresion.evaluar(materia -> estadoComoCorrequisito(contexto, materia));
+  }
+
+  private static EstadoRestriccion estadoComoCorrequisito(
+      ContextoDeEvaluacion contexto, CodigoMateria materia) {
+    EstadoRestriccion estado = contexto.estadoDe(materia);
+    if (estado.certeza() == EstadoRestriccion.Certeza.PENDIENTE
+        && contexto.enElMismoSemestre(materia)) {
+      return EstadoRestriccion.cumplida(
+          "el plan ubica " + materia.valor() + " en el mismo semestre o antes");
+    }
+    return estado;
   }
 }

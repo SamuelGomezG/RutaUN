@@ -129,6 +129,16 @@ class ExpresionDeMateriasTest {
   }
 
   @Test
+  void tt03_unaCombinacionRechazaUnEstadoNuloDelContexto() {
+    ExpresionDeMaterias expresion =
+        ExpresionDeMaterias.todasLas(new TerminoMateria(A), new TerminoMateria(B));
+
+    assertThatThrownBy(() -> expresion.evaluar(materia -> null))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("estado no puede ser null");
+  }
+
+  @Test
   void tt03_seConstruyeUnaMateriaExternaConNombreTipoYCodigoOpcional() {
     ExpresionDeMaterias.MateriaExterna externa =
         new ExpresionDeMaterias.MateriaExterna(
