@@ -9,14 +9,17 @@ import co.edu.unal.rutaun.normativa.ClasificacionRegla;
 import co.edu.unal.rutaun.normativa.ConsolidadoVista;
 import co.edu.unal.rutaun.normativa.ConsultaNormativaFacade;
 import co.edu.unal.rutaun.normativa.EslabonVista;
+import co.edu.unal.rutaun.normativa.ExpresionVista;
 import co.edu.unal.rutaun.normativa.FuenteVista;
 import co.edu.unal.rutaun.normativa.NormaVista;
 import co.edu.unal.rutaun.normativa.ProgramaVista;
 import co.edu.unal.rutaun.normativa.ReglaCompletaVista;
 import co.edu.unal.rutaun.normativa.ReglaVista;
+import co.edu.unal.rutaun.normativa.RestriccionVista;
 import co.edu.unal.rutaun.normativa.RestriccionesDeMateriaVista;
 import co.edu.unal.rutaun.normativa.TipoAlcance;
 import co.edu.unal.rutaun.normativa.TipoDeCambio;
+import co.edu.unal.rutaun.normativa.TipoDeRestriccion;
 import co.edu.unal.rutaun.normativa.TipoNorma;
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
@@ -49,6 +52,18 @@ public final class ConsultaNormativaFalsa implements ConsultaNormativaFacade {
 
   /** Regla de prueba que ya no rige: solo la devuelve la búsqueda con ese estado. */
   public static final ReglaId ID_YA_NO_RIGE = new ReglaId(new UUID(0, 14));
+
+  /** Prerrequisito de prueba sin fuente registrada (UC05 ext. 4d). */
+  public static final ReglaId ID_PRERREQUISITO_SIN_FUENTE = new ReglaId(new UUID(0, 15));
+
+  /** Correquisito de prueba. */
+  public static final ReglaId ID_CORREQUISITO = new ReglaId(new UUID(0, 16));
+
+  /** Materia de prueba que no exige nada (UC05 ext. 3a). */
+  public static final CodigoMateria MATERIA_SIN_RESTRICCIONES = new CodigoMateria("2000001");
+
+  /** Materia de prueba con dos prerrequisitos, uno de ellos sin fuente, y un correquisito. */
+  public static final CodigoMateria MATERIA_CON_RESTRICCIONES = new CodigoMateria("2000002");
 
   /** Enlace de prueba a Régimen Legal. */
   public static final String ENLACE = "https://regimen-legal.example.org/prueba-regla-12";
@@ -261,6 +276,69 @@ public final class ConsultaNormativaFalsa implements ConsultaNormativaFacade {
   @Override
   public Optional<RestriccionesDeMateriaVista> restriccionesDe(
       ProgramaId programa, CodigoMateria materia) {
+    if (!SISTEMAS.equals(programa) || !conReglas) {
+      return Optional.empty();
+    }
+    if (MATERIA_SIN_RESTRICCIONES.equals(materia)) {
+      return Optional.of(restriccionesDeLaMateria(materia, "Materia A", List.of()));
+    }
+    if (MATERIA_CON_RESTRICCIONES.equals(materia)) {
+      ExpresionVista.Materia materiaA = materiaDePrueba("2000001", "Materia A");
+      return Optional.of(
+          restriccionesDeLaMateria(
+              materia,
+              "Materia B",
+              List.of(
+                  restriccion(
+                      ID_PRERREQUISITO,
+                      TipoDeRestriccion.PRERREQUISITO,
+                      "Regla de prueba: la materia B exige haber aprobado la materia A.",
+                      materiaA,
+                      Optional.of(fuente("1", "art. 2"))),
+                  restriccion(
+                      ID_PRERREQUISITO_SIN_FUENTE,
+                      TipoDeRestriccion.PRERREQUISITO,
+                      "Regla de prueba: la materia B exige la materia C o la materia D.",
+                      new ExpresionVista.AlgunaDe(
+                          List.of(
+                              materiaDePrueba("2000003", "Materia C"),
+                              materiaDePrueba("2000004", "Materia D"))),
+                      Optional.empty()),
+                  restriccion(
+                      ID_CORREQUISITO,
+                      TipoDeRestriccion.CORREQUISITO,
+                      "Regla de prueba: la materia B se cursa con la materia A o después.",
+                      materiaA,
+                      Optional.of(fuente("1", "art. 3"))))));
+    }
     return Optional.empty();
+  }
+
+  private static ExpresionVista.Materia materiaDePrueba(String codigo, String nombre) {
+    return new ExpresionVista.Materia(new CodigoMateria(codigo), nombre);
+  }
+
+  private static RestriccionVista restriccion(
+      ReglaId id,
+      TipoDeRestriccion tipo,
+      String enunciado,
+      ExpresionVista exige,
+      Optional<FuenteVista> fuente) {
+    return new RestriccionVista(
+        id,
+        tipo,
+        enunciado,
+        exige,
+        fuente,
+        EstadoRegla.VIGENTE,
+        false,
+        Optional.of(LocalDate.of(2026, 1, 15)),
+        Optional.empty());
+  }
+
+  private static RestriccionesDeMateriaVista restriccionesDeLaMateria(
+      CodigoMateria materia, String nombre, List<RestriccionVista> restricciones) {
+    return new RestriccionesDeMateriaVista(
+        SISTEMAS, 1, LocalDate.of(2026, 10, 1), materia, nombre, restricciones);
   }
 }

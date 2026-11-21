@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8"/>
+    <title>Restricciones de una materia · RutaUN</title>
+  </head>
+  <body>
+    <p><a th:href="@{/programas/{id}/reglas(id=${programa.id().valor()})}">Volver a las reglas del programa</a></p>
+    <h1 th:text="${restricciones.nombre()}">Materia</h1>
+    <p th:text="${programa.nombre()} + ' · versión ' + ${restricciones.version()} + ' del consolidado (' + ${restricciones.fecha()} + ')'">Programa · versión 1 del consolidado (2026-01-01)</p>
+    <h2>Qué exige para cursarla</h2>
+
+    <p th:if="${restricciones.sinRestricciones()}">
+      Según las reglas del programa, esta materia no tiene restricciones.
+      Eso no significa que esté ofrecida ni que haya cupo.
+    </p>
+
+    <section th:each="restriccion : ${restricciones.restricciones()}">
+      <h3 th:text="${restriccion.tipo().nombre()}">Prerrequisito</h3>
+      <p th:if="${restriccion.estado().name() == 'PROGRAMADA'}">
+        <strong>Programada:</strong> todavía no rige.
+      </p>
+      <p th:if="${restriccion.estado().name() == 'EN_REVISION'}">
+        <strong>En revisión:</strong> la norma está en revisión y RutaUN no afirma si rige.
+      </p>
+      <dl>
+        <dt>Qué es</dt>
+        <dd th:text="${restriccion.tipo().definicion()}">Materias que deben estar aprobadas</dd>
+        <dt>Qué la satisface</dt>
+        <dd th:text="${restriccion.exige().redaccion()}">Materia A y (Materia B o Materia C)</dd>
+        <dt>Por qué aplica</dt>
+        <dd>
+          <span th:text="${restriccion.enunciado()}">Enunciado de la regla</span>
+          <span th:if="${restriccion.fuente().isPresent()}" th:with="fuente=${restriccion.fuente().get()}">
+            Lo establece el
+            <span th:switch="${fuente.norma().tipo().name()}">
+              <span th:case="'ACUERDO'">Acuerdo</span>
+              <span th:case="'RESOLUCION'">Resolución</span>
+              <span th:case="'CIRCULAR'">Circular</span>
+            </span>
+            <span th:text="${fuente.norma().numero()} + ' de ' + ${fuente.norma().anio()} + ', ' + ${fuente.norma().organo()} + ', ' + ${fuente.articulo()}">1 de 2026, Consejo, art. 1</span>.
+          </span>
+          <strong th:unless="${restriccion.fuente().isPresent()}">sin fuente registrada</strong>
+        </dd>
+        <dt>Fecha de aplicación</dt>
+        <dd>
+          <span th:if="${restriccion.aplicaDesde().isPresent()}" th:text="${restriccion.aplicaDesde().get()}">2026-01-01</span>
+          <span th:unless="${restriccion.aplicaDesde().isPresent()}">sin fecha registrada</span>
+        </dd>
+        <dt>Vigencia</dt>
+        <dd>
+          <span th:if="${restriccion.vigenteHasta().isPresent()}"
+                th:text="'hasta ' + ${restriccion.vigenteHasta().get()}">hasta 2026-12-31</span>
+          <span th:unless="${restriccion.vigenteHasta().isPresent()}">sin fecha de fin</span>
+          <strong th:if="${restriccion.temporal()}">temporal</strong>
+        </dd>
+      </dl>
+      <p>
+        <a th:href="@{/programas/{programa}/reglas/{regla}(programa=${programa.id().valor()}, regla=${restriccion.regla().valor()})}">Ver la regla completa</a>
+      </p>
+    </section>
+
+    <th:block th:replace="~{layout/aviso-no-verifica :: aviso}"></th:block>
+  </body>
+</html>
