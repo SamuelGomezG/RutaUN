@@ -1,6 +1,7 @@
 package co.edu.unal.rutaun.normativa.aplicacion;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoRepository;
@@ -14,6 +15,7 @@ import co.edu.unal.rutaun.normativa.persistencia.VersionDelConsolidadoRepository
 import co.edu.unal.rutaun.normativa.persistencia.VersionEntity;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
 import jakarta.persistence.EntityManager;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Comparator;
@@ -214,6 +216,31 @@ class ImportacionDeNormasServiceTest {
     assertThat(normasDeLaVigente).hasSize(3);
   }
 
+  @Test
+  void uc07_ext6f_importarUnaReglaDelPlanDeUnaNormaTemporalNoGuardaNada() throws IOException {
+    cargarProgramas();
+
+    assertThatThrownBy(() -> importarNorma("json/invalidos/norma-temporal-con-regla-del-plan.json"))
+        .isInstanceOf(ArchivoDeNormativaInvalidoException.class)
+        .hasMessageContaining("es temporal");
+
+    assertThat(normasGuardadas.findAll()).isEmpty();
+    assertThat(reglas.findAll()).isEmpty();
+    assertThat(versiones.findAll()).isEmpty();
+  }
+
+  @Test
+  void uc07_ext4c_unaNormaYaRegistradaSeOmiteSinValidarSusReglas() throws IOException {
+    cargarProgramas();
+    String archivo = "json/invalidos/norma-temporal-con-regla-del-plan.json";
+    importarNormaConClasificacion(archivo, "INFORMATIVA");
+
+    ResultadoDeImportacionDeNormas segunda = importarNorma(archivo);
+
+    assertThat(segunda.creada()).isFalse();
+    assertThat(segunda.versionesCreadas()).isZero();
+  }
+
   private void cargarProgramas() throws IOException {
     try (InputStream entrada = new ClassPathResource("semilla/programas.json").getInputStream()) {
       programas.importar(
@@ -229,6 +256,18 @@ class ImportacionDeNormasServiceTest {
     try (InputStream entrada = new ClassPathResource(archivo).getInputStream()) {
       return normas.importar(entrada);
     }
+  }
+
+  private ResultadoDeImportacionDeNormas importarNormaConClasificacion(
+      String archivo, String clasificacion) throws IOException {
+    String json;
+    try (InputStream entrada = new ClassPathResource(archivo).getInputStream()) {
+      json =
+          new String(entrada.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8)
+              .replace("\"DEL_PLAN\"", "\"" + clasificacion + "\"");
+    }
+    return normas.importar(
+        new ByteArrayInputStream(json.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
   }
 
   private List<VersionEntity> versionesOrdenadas() {
