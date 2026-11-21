@@ -21,7 +21,7 @@ Fuera de `docs/`: [`README.md`](../README.md) (qué es y cómo arrancarlo), [`AG
 | Implementar o revisar un caso de uso o una historia | [`requisitos/README.md`](requisitos/README.md) |
 | Arrancar el proyecto, entender un perfil o lo que hace `./mvnw verify` | [`proceso/entorno-y-configuracion.md`](proceso/entorno-y-configuracion.md) |
 | Resolver un fallo del build, del arranque o de la CI | [`proceso/solucion-de-problemas.md`](proceso/solucion-de-problemas.md) |
-| Crear un módulo, una migración, una norma de la semilla o un incidente | [`proceso/recetas.md`](proceso/recetas.md) |
+| Crear un módulo, una migración, una norma de la semilla, un incidente o conectar la comprobación de versión de un caso que guarda | [`proceso/recetas.md`](proceso/recetas.md) |
 | Escribir o mover una prueba | [`proceso/pruebas.md`](proceso/pruebas.md) |
 | Escribir o leer un JSON de normativa | [`datos/formato-normativa.md`](datos/formato-normativa.md) |
 | Consultar la base o cambiar una tabla | [`datos/esquema-de-la-base.md`](datos/esquema-de-la-base.md) |

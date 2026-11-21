@@ -11,7 +11,7 @@ depends_on:
 
 ## 0′ · Cuándo cargar este archivo
 
-Al crear el módulo de un contexto, agregar una migración, agregar una norma a la semilla o publicar un incidente. Cada receta lista los pasos, los archivos que se tocan y cómo comprobar el resultado.
+Al crear el módulo de un contexto, agregar una migración, agregar una norma a la semilla, publicar un incidente o conectar la comprobación de versión de un caso que guarda. Cada receta lista los pasos, los archivos que se tocan y cómo comprobar el resultado.
 
 Las recetas no fijan reglas: las reglas de capas, módulos y nombres están en `AGENTS.md` y, cuando se publique, en `docs/diseno/` ([#176](https://github.com/SamuelGomezG/RutaUN/issues/176)). Aquí está el orden de los pasos y lo que no se ve leyendo esas reglas. Cada receta sigue un ejemplo que ya existe en el código.
 
@@ -93,3 +93,39 @@ Ejemplo: `ConsultaDeReglasOrchestrator`, que publica el de UC06 ext. 4a.
 Lo que pasa después no lo programas tú: `IncidentesEventListener` registra el incidente en una transacción propia, para que quede guardado aunque tu operación falle. Si el registro falla, lo anota en el log y no interrumpe tu caso de uso. La fecha la pone Incidentes con su reloj.
 
 **Comprobación:** en la prueba del orquestador, un `DomainEventPublisher` de prueba recibe el evento esperado (`ConsultaDeReglasOrchestratorTest`). De punta a punta, provoca el caso en la aplicación y corre la consulta de incidentes de [`esquema-de-la-base.md`](../datos/esquema-de-la-base.md).
+
+## Conectar la comprobación de versión de un caso que guarda
+
+Ejemplo: `ComprobacionDeVersionTest` (SOP-07, [#59](https://github.com/SamuelGomezG/RutaUN/issues/59)), que recorre cada componente con fuentes de prueba. Lo usan UC01 paso 10, UC02 paso 11, UC03 paso 7 y UC04 paso 10.
+
+1. **Crea las fuentes del caso** en su orquestador (capa `aplicacion`), una por cada componente que el caso lee en el paso 2. Cada fuente se arma con `FuenteDeVersion.de(componente, lector)` y devuelve el valor actual como texto:
+
+   - `AVANCE` y `PLAN_VIGENTE`: el número de `@Version` del agregado. Si el estudiante aún no tiene plan, devuelve `FuenteDeVersion.SIN_VALOR`.
+   - `VERSION_DEL_CONSOLIDADO`: `ConsolidadoVista.version()` del programa del estudiante, que llega por la fachada de `normativa`.
+   - `PERIODO_EN_CURSO`: el texto del periodo que devuelve `PeriodoEnCursoFacade.actual()`. Sirve cualquier texto que no cambie mientras el periodo sea el mismo (por ejemplo, el `toString()` del `PeriodoAcademico`).
+2. **Toma la huella en el paso 2**, con lo mismo que lees para calcular, y consérvala con el resto de lo cargado mientras dure el caso.  Si el caso solo compara un componente cuando se cumple una condición (UC03 con el periodo), toma una huella aparte para ese componente y compárala solo cuando se cumpla.
+3. **Comprueba justo antes de guardar** y haz un `switch` exhaustivo sobre el resultado:
+
+   ```java
+   List<FuenteDeVersion> fuentes = List.of(/* una por componente del caso */);
+   HuellaDeVersion huella = ComprobacionDeVersion.tomar(fuentes); // paso 2
+
+   switch (ComprobacionDeVersion.comprobar(huella, fuentes)) { // antes de guardar
+     case ResultadoDeComprobacion.SinCambios sinCambios -> guardar();
+     case ResultadoDeComprobacion.Cambiaron cambiaron ->
+         ofrecerRecalcular(cambiaron.componentes());
+   }
+   ```
+
+4. **Si cambió algo, no guardes y deja que el caso decida qué sigue.** La comprobación solo detecta: dice qué componentes cambiaron (`cambiaron.componentes()`). El mensaje y lo que se hace con lo que el estudiante tenía en pantalla son del caso, y no son iguales en todos:
+
+   - **UC01 (ext. 10a y 10c):** informa qué cambió, descarta el plan mostrado y ofrece recalcular con los datos vigentes, conservando el tope y las optativas fijadas que el estudiante había indicado.
+   - **UC02 (ext. 11a y 11c):** informa cuál cambió (el avance, la versión del consolidado, el plan vigente o el periodo en curso), descarta el plan nuevo mostrado y ofrece recalcular desde el paso 2 conservando el tope y las optativas fijadas que el estudiante había indicado. Si no acepta, el caso termina sin cambios.
+   - **UC03 (ext. 7a), si cambió el avance:** no guardes, muestra las diferencias y ofrece recargar el avance actual. Si el estudiante acepta, recarga y muestra aparte sus cambios sin guardar para que decida cuáles vuelve a aplicar (vuelve al paso 2); si no acepta, el caso termina sin cambios.
+   - **UC03 (ext. 7b), si cambió la versión del consolidado:** no guardes y recarga la malla con la versión vigente sin preguntar. Conserva los cambios del estudiante sobre materias que siguen rigiendo, descarta y señala los que recaen en materias que ya no rigen, y vuelve al paso 4 para validarlos de nuevo.
+   - **UC03 (ext. 7c), si cambió el periodo en curso:** el periodo solo se comprueba si entre los cambios hay marcas «en curso» nuevas o modificadas o semestres cursados; si el estudiante solo marcó aprobadas o pendientes, un cambio de periodo no impide guardar. Cuando aplica, no guardes nada: señala esas marcas «en curso», pide volver a marcarlas y confirmar los semestres cursados, conserva en pantalla las demás marcas y cambios, toma el periodo actual como referencia y vuelve al paso 3.
+   - **UC04 (ext. 10a y 10c):** informa cuál cambió (el avance, la versión del consolidado, el plan vigente o el periodo en curso) y ofrece recalcular la comparación desde el paso 2 conservando las alternativas definidas. Las cifras mostradas dejaron de valer, así que no guardes ninguna. Si no acepta, el caso termina sin cambios.
+5. **Declara la dependencia** en el `package-info.java` del contexto si hace falta (`compartido` ya es un módulo abierto, pero `periodoencurso` y `normativa` se declaran) y justifícala en la solicitud de integración. La comprobación vive en `compartido`; el porqué está en [`0003-comprobacion-de-version-en-compartido.md`](../diseno/decisiones/0003-comprobacion-de-version-en-compartido.md).
+6. **No escribas la huella en los logs** ni la guardes más allá de la sesión (regla de oro 7). Esta comprobación no reemplaza el `@Version` de JPA, que sigue protegiendo el guardado frente a dos guardados simultáneos.
+
+**Comprobación:** `./mvnw test -Dtest=ComprobacionDeVersionTest` para el mecanismo. Para el caso, una prueba de su orquestador que cambie el valor de una fuente entre `tomar` y `comprobar`: el resultado debe ser `Cambiaron` con ese componente y no debe haberse llamado al guardado.
