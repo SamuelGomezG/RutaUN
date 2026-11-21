@@ -1,5 +1,6 @@
 package co.edu.unal.rutaun.soporte;
 
+import co.edu.unal.rutaun.compartido.CodigoMateria;
 import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.ProgramaId;
 import co.edu.unal.rutaun.compartido.ReglaId;
@@ -13,6 +14,7 @@ import co.edu.unal.rutaun.normativa.NormaVista;
 import co.edu.unal.rutaun.normativa.ProgramaVista;
 import co.edu.unal.rutaun.normativa.ReglaCompletaVista;
 import co.edu.unal.rutaun.normativa.ReglaVista;
+import co.edu.unal.rutaun.normativa.RestriccionesDeMateriaVista;
 import co.edu.unal.rutaun.normativa.TipoAlcance;
 import co.edu.unal.rutaun.normativa.TipoDeCambio;
 import co.edu.unal.rutaun.normativa.TipoNorma;
@@ -254,5 +256,11 @@ public final class ConsultaNormativaFalsa implements ConsultaNormativaFacade {
       return Optional.empty();
     }
     return reglaCompleta(regla);
+  }
+
+  @Override
+  public Optional<RestriccionesDeMateriaVista> restriccionesDe(
+      ProgramaId programa, CodigoMateria materia) {
+    return Optional.empty();
   }
 }

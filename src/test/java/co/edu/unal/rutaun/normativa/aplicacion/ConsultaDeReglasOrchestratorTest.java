@@ -2,6 +2,7 @@ package co.edu.unal.rutaun.normativa.aplicacion;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import co.edu.unal.rutaun.compartido.CodigoMateria;
 import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.EventoDeDominio;
 import co.edu.unal.rutaun.compartido.ProgramaId;
@@ -12,6 +13,7 @@ import co.edu.unal.rutaun.normativa.ConsolidadoVista;
 import co.edu.unal.rutaun.normativa.ConsultaNormativaFacade;
 import co.edu.unal.rutaun.normativa.ProgramaVista;
 import co.edu.unal.rutaun.normativa.ReglaCompletaVista;
+import co.edu.unal.rutaun.normativa.RestriccionesDeMateriaVista;
 import co.edu.unal.rutaun.puertos.DomainEventPublisher;
 import co.edu.unal.rutaun.soporte.ConsultaNormativaFalsa;
 import java.util.ArrayList;
@@ -121,6 +123,12 @@ class ConsultaDeReglasOrchestratorTest {
 
           @Override
           public Optional<ReglaCompletaVista> regla(ProgramaId programa, ReglaId regla) {
+            return Optional.empty();
+          }
+
+          @Override
+          public Optional<RestriccionesDeMateriaVista> restriccionesDe(
+              ProgramaId programa, CodigoMateria materia) {
             return Optional.empty();
           }
         };
