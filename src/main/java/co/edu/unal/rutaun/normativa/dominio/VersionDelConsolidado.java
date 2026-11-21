@@ -88,7 +88,7 @@ public final class VersionDelConsolidado {
     if (!resultante.programa().equals(programa)) {
       throw new IllegalArgumentException("las reglas validadas son de otro programa");
     }
-    boolean sube = incorporaUnaNorma(motivo) && cambiaLaEstructura(reglas, resultante.reglas());
+    boolean sube = incorporaUnaNorma(motivo) && tocaLaEstructura(reglas, resultante.reglas());
     int plan = sube ? versionDelPlan + 1 : versionDelPlan;
     return new VersionDelConsolidado(
         programa, numero + 1, fecha, motivo, resultante.reglas(), plan);
@@ -159,9 +159,57 @@ public final class VersionDelConsolidado {
     };
   }
 
+  private static boolean tocaLaEstructura(
+      List<ReglaEnVersion> antes, List<ReglaEnVersion> despues) {
+    return cambiaLaEstructura(antes, despues) || algunaNuevaAfectaLaEstructura(antes, despues);
+  }
+
   private static boolean cambiaLaEstructura(
       List<ReglaEnVersion> antes, List<ReglaEnVersion> despues) {
     return !idsDeEstructura(antes).equals(idsDeEstructura(despues));
+  }
+
+  private static boolean algunaNuevaAfectaLaEstructura(
+      List<ReglaEnVersion> antes, List<ReglaEnVersion> despues) {
+    Set<ReglaId> idsDeAntes = idsDeReglas(antes);
+    Set<ReglaId> idsDeEstructura = idsDeEstructura(antes);
+    Set<Fuente> fuentesDeEstructura = fuentesDeEstructura(antes);
+    for (ReglaEnVersion enVersion : despues) {
+      Regla regla = enVersion.regla();
+      if (idsDeAntes.contains(regla.id())) {
+        continue;
+      }
+      Optional<Afectacion> afectacion = regla.afectacion();
+      if (afectacion.isEmpty()) {
+        continue;
+      }
+      boolean afectaUnaRegla =
+          afectacion.get().reglaAfectada().map(idsDeEstructura::contains).orElse(false);
+      boolean afectaUnArticulo =
+          afectacion.get().articuloAfectado().map(fuentesDeEstructura::contains).orElse(false);
+      if (afectaUnaRegla || afectaUnArticulo) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static Set<ReglaId> idsDeReglas(List<ReglaEnVersion> reglas) {
+    Set<ReglaId> ids = new HashSet<>();
+    for (ReglaEnVersion enVersion : reglas) {
+      ids.add(enVersion.regla().id());
+    }
+    return ids;
+  }
+
+  private static Set<Fuente> fuentesDeEstructura(List<ReglaEnVersion> reglas) {
+    Set<Fuente> fuentes = new HashSet<>();
+    for (ReglaEnVersion enVersion : reglas) {
+      if (esDeEstructura(enVersion.regla())) {
+        fuentes.add(enVersion.regla().fuente());
+      }
+    }
+    return fuentes;
   }
 
   private static Set<ReglaId> idsDeEstructura(List<ReglaEnVersion> reglas) {
