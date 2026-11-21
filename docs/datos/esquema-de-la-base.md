@@ -39,8 +39,12 @@ erDiagram
         VARCHAR organo
         VARCHAR tipo_de_efecto
         DATE fecha_expedicion
-        DATE aplica_desde
-        DATE vigente_hasta
+        VARCHAR aplica_desde_tipo
+        DATE aplica_desde_fecha
+        VARCHAR aplica_desde_periodo
+        VARCHAR vigente_hasta_tipo
+        DATE vigente_hasta_fecha
+        VARCHAR vigente_hasta_periodo
         VARCHAR tipo_alcance
         CLOB alcance_detalle
     }
@@ -94,7 +98,7 @@ El diagrama muestra las columnas principales; la lista completa está en las mig
 | --- | --- | --- | --- |
 | `programa` | Un programa cargado | Solo la llave primaria | El código SIA único lo cuida `ImportacionDeProgramasService`, no la base |
 | `norma` | Una norma incorporada | Única por `tipo`, `numero`, `anio` y `organo` | Por esa identificación, la importación omite una norma ya registrada (UC07 ext. 4c) |
-| `regla` | Una regla de una norma | `norma_id` existe | Las columnas comunes a toda regla, y en `datos` lo propio de su categoría. `regla_afectada_id` no es llave foránea |
+| `regla` | Una regla de una norma | `norma_id` existe | Las columnas comunes a toda regla, y en `datos` lo propio de su categoría. `regla_afectada_id` no es llave foránea. Cada momento (vigencia propia e inicio de la afectación) ocupa tres columnas: `…_tipo` (`FECHA` o `PERIODO`), `…_fecha` y `…_periodo`, y un `CHECK` exige que coincidan. Una afectación apunta a una regla o a un artículo con su norma (`norma_afectada_id` es llave foránea) |
 | `consolidado` | El consolidado de un programa | Uno por programa | `version_bloqueo` es el contador de bloqueo optimista de JPA (`@Version`). No es el número de la versión del consolidado |
 | `version_consolidado` | Una versión del consolidado de un programa | Única por `programa_id` y `numero` | Solo se agregan filas. `motivo` es `POR_INCORPORACION`, `POR_CORRECCION`, `AUTOMATICO_POR_PERIODO` o `AUTOMATICO_POR_FECHA` |
 | `regla_en_version` | Que una regla está en una versión, y con qué estado | Única por `version_id` y `regla_id` | `estado` es `VIGENTE`, `PROGRAMADA` o `YA_NO_RIGE`. Una versión lleva las reglas de la anterior más las de la norma incorporada, así que una misma regla tiene una fila por cada versión en que está |
@@ -135,7 +139,6 @@ Antes de apoyarte en un detalle de una tabla, revisa si uno de estos issues lo c
 
 | Issue | Qué cambia |
 | --- | --- |
-| [#141](https://github.com/SamuelGomezG/RutaUN/issues/141) | El esquema no guarda vigencias por periodo ni el inicio de una afectación: `aplica_desde` y `vigente_hasta` son fechas |
 | [#142](https://github.com/SamuelGomezG/RutaUN/issues/142) | El esquema se aparta del diseño y acepta datos incoherentes |
 | [#143](https://github.com/SamuelGomezG/RutaUN/issues/143) | Un repositorio por raíz, sin borrado del historial |
 | [#145](https://github.com/SamuelGomezG/RutaUN/issues/145) | Los datos de las reglas, en columnas JSON |
@@ -213,10 +216,13 @@ ORDER BY v.programa_id, v.numero;
 Normas incorporadas y cuántas reglas trajo cada una:
 
 ```sql
-SELECT n.tipo, n.numero, n.anio, n.organo, n.aplica_desde, COUNT(r.id) AS reglas
+SELECT n.tipo, n.numero, n.anio, n.organo,
+       n.aplica_desde_tipo, n.aplica_desde_fecha, n.aplica_desde_periodo,
+       COUNT(r.id) AS reglas
 FROM norma n
 LEFT JOIN regla r ON r.norma_id = n.id
-GROUP BY n.tipo, n.numero, n.anio, n.organo, n.aplica_desde
+GROUP BY n.tipo, n.numero, n.anio, n.organo,
+         n.aplica_desde_tipo, n.aplica_desde_fecha, n.aplica_desde_periodo
 ORDER BY n.anio;
 ```
 

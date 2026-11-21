@@ -4,8 +4,10 @@ import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.Momento;
 import co.edu.unal.rutaun.compartido.ProgramaId;
 import co.edu.unal.rutaun.compartido.ReglaId;
+import co.edu.unal.rutaun.normativa.dominio.Afectacion;
 import co.edu.unal.rutaun.normativa.dominio.Alcance;
 import co.edu.unal.rutaun.normativa.dominio.ConsolidadoValidado;
+import co.edu.unal.rutaun.normativa.dominio.Fuente;
 import co.edu.unal.rutaun.normativa.dominio.MotivoDeVersion;
 import co.edu.unal.rutaun.normativa.dominio.Norma;
 import co.edu.unal.rutaun.normativa.dominio.Regla;
@@ -107,7 +109,7 @@ public class ImportacionDeNormasService {
     }
 
     Alcance alcance = alcance(normaLeida.alcance());
-    Norma norma =
+    final Norma norma =
         Norma.reconstituir(
             normaLeida.id(),
             normaLeida.identificacion(),
@@ -123,6 +125,8 @@ public class ImportacionDeNormasService {
     }
 
     LocalDate fecha = LocalDate.now(reloj);
+    exigirQueElEstadoSePuedaCalcular(normaLeida, incorporacion.reglas(), fecha);
+    exigirQueLasNormasAfectadasExistan(normaLeida, incorporacion.reglas());
     List<ReglaEnVersion> reglasIncorporadas =
         conSuEstado(incorporacion.reglas(), normaLeida, fecha);
     normas.save(NormaMapper.aEntidad(norma));
@@ -137,6 +141,62 @@ public class ImportacionDeNormasService {
     }
     return new ResultadoDeImportacionDeNormas(
         true, identificacion, creadas, valida.ningunPlanQuedaDesactualizado());
+  }
+
+  /**
+   * Mientras #147 no calcule el estado por periodo, rechaza una vigencia cuyo estado no se puede
+   * decidir con las comparaciones de fechas de hoy.
+   */
+  private static void exigirQueElEstadoSePuedaCalcular(
+      NormaLeida norma, List<Regla> reglas, LocalDate hoy) {
+    exigirVigenciaConEstado(norma.vigencia(), "la norma " + identificacion(norma), hoy);
+    for (Regla regla : reglas) {
+      regla
+          .vigenciaPropia()
+          .ifPresent(
+              vigencia ->
+                  exigirVigenciaConEstado(vigencia, "la regla \"" + regla.objeto() + "\"", hoy));
+    }
+  }
+
+  private static void exigirVigenciaConEstado(Vigencia vigencia, String ambito, LocalDate hoy) {
+    if (vigencia.aplicaDesde() instanceof Momento.EnPeriodo periodo
+        && periodo.periodo().anio() >= hoy.getYear()) {
+      throw new ArchivoDeNormativaInvalidoException(
+          "La vigencia de "
+              + ambito
+              + " usa un periodo cuyo estado todavía no se puede calcular: solo se admite un"
+              + " periodo de inicio de un año anterior.");
+    }
+    if (vigencia.vigenteHasta().orElse(null) instanceof Momento.EnPeriodo) {
+      throw new ArchivoDeNormativaInvalidoException(
+          "La vigencia de "
+              + ambito
+              + " usa un periodo cuyo estado todavía no se puede calcular: la «vigencia hasta»"
+              + " por periodo llega con #147.");
+    }
+  }
+
+  /**
+   * La llave {@code norma_afectada_id} exige una norma real. Mientras #182 resuelve la norma
+   * citada, solo se admite el artículo de la misma norma o de una ya guardada.
+   */
+  private void exigirQueLasNormasAfectadasExistan(NormaLeida norma, List<Regla> reglas) {
+    for (Regla regla : reglas) {
+      Optional<Fuente> articulo = regla.afectacion().flatMap(Afectacion::articuloAfectado);
+      if (articulo.isEmpty()) {
+        continue;
+      }
+      UUID normaAfectada = articulo.get().norma().valor();
+      if (!normaAfectada.equals(norma.id().valor()) && normas.findById(normaAfectada).isEmpty()) {
+        throw new ArchivoDeNormativaInvalidoException(
+            "La regla \""
+                + regla.objeto()
+                + "\" ("
+                + regla.fuente().articulo()
+                + ") afecta un artículo de una norma que no se pudo resolver.");
+      }
+    }
   }
 
   private static List<ReglaEnVersion> conSuEstado(

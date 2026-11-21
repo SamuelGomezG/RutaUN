@@ -116,22 +116,18 @@ class ReglaMapperTest {
   }
 
   @Test
-  void tt04_reglaConVigenciaPorPeriodoNoSeGuarda() {
-    Momento periodo = new Momento.EnPeriodo(new PeriodoAcademico(2026, ParteDelAnio.PRIMERO));
-    Momento fecha = new Momento.EnFecha(LocalDate.of(2026, 1, 1));
-    Regla porPeriodo = conVigencia(new Vigencia(periodo, Optional.empty()));
-    Regla finPorPeriodo = conVigencia(new Vigencia(fecha, Optional.of(periodo)));
+  void tt04_unaReglaConVigenciaPorPeriodoSeGuardaYSeLeeIgual() {
+    Regla porPeriodo =
+        conVigencia(
+            new Vigencia(
+                new Momento.EnPeriodo(new PeriodoAcademico(2026, ParteDelAnio.PRIMERO)),
+                Optional.of(new Momento.EnFecha(LocalDate.of(2026, 7, 31)))));
 
-    assertThatThrownBy(() -> ReglaMapper.aEntidad(porPeriodo))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("vigenciaPropia.aplicaDesde");
-    assertThatThrownBy(() -> ReglaMapper.aEntidad(finPorPeriodo))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("vigenciaPropia.vigenteHasta");
+    assertThat(guardarYLeer(porPeriodo)).usingRecursiveComparison().isEqualTo(porPeriodo);
   }
 
   @Test
-  void tt04_reglaQueAfectaUnArticuloNoSeGuarda() {
+  void uc07_paso5_unaAfectacionAUnArticuloSeGuardaYSeLeeIgual() {
     Regla conArticulo =
         conAfectacion(
             new Afectacion(
@@ -140,24 +136,29 @@ class ReglaMapperTest {
                 Optional.of(new Fuente(norma.id(), "art. 7")),
                 Optional.empty()));
 
-    assertThatThrownBy(() -> ReglaMapper.aEntidad(conArticulo))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("afectación a un artículo");
+    assertThat(guardarYLeer(conArticulo)).usingRecursiveComparison().isEqualTo(conArticulo);
   }
 
   @Test
-  void tt04_reglaConAfectacionDesdeUnMomentoNoSeGuarda() {
-    Regla conDesde =
+  void uc07_paso5_unaAfectacionConInicioSeGuardaYSeLeeIgual() {
+    Regla conFecha =
         conAfectacion(
             new Afectacion(
                 TipoAfectacion.DEROGA,
                 Optional.of(ReglaId.nuevo()),
                 Optional.empty(),
                 Optional.of(new Momento.EnFecha(LocalDate.of(2027, 1, 1)))));
+    Regla conPeriodo =
+        conAfectacion(
+            new Afectacion(
+                TipoAfectacion.DEROGA,
+                Optional.of(ReglaId.nuevo()),
+                Optional.empty(),
+                Optional.of(
+                    new Momento.EnPeriodo(new PeriodoAcademico(2027, ParteDelAnio.PRIMERO)))));
 
-    assertThatThrownBy(() -> ReglaMapper.aEntidad(conDesde))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("«desde»");
+    assertThat(guardarYLeer(conFecha)).usingRecursiveComparison().isEqualTo(conFecha);
+    assertThat(guardarYLeer(conPeriodo)).usingRecursiveComparison().isEqualTo(conPeriodo);
   }
 
   @Test
@@ -220,6 +221,8 @@ class ReglaMapperTest {
         null,
         null,
         "DEL_PLAN",
+        null,
+        null,
         null,
         null,
         null,

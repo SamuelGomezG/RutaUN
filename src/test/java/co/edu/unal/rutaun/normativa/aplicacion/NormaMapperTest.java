@@ -14,10 +14,12 @@ import co.edu.unal.rutaun.normativa.dominio.Alcance;
 import co.edu.unal.rutaun.normativa.dominio.IdentificacionNorma;
 import co.edu.unal.rutaun.normativa.dominio.Norma;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
+import co.edu.unal.rutaun.normativa.persistencia.ColumnasDeMomento;
 import co.edu.unal.rutaun.normativa.persistencia.NormaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.NormaRepository;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -122,22 +124,38 @@ class NormaMapperTest {
   }
 
   @Test
-  void tt04_normaConPeriodoNoSeGuarda() {
-    Norma conPeriodo =
+  void tt04_unaNormaConVigenciaPorPeriodoSeGuardaYSeLeeIgual() {
+    Norma ambosPorPeriodo =
         Norma.registrar(
             new IdentificacionNorma(TipoNorma.CIRCULAR, numeroUnico(), 2026, "Vicerrectoría"),
             TipoDeEfecto.BASE,
             LocalDate.of(2026, 1, 20),
             new Vigencia(
                 new Momento.EnPeriodo(new PeriodoAcademico(2026, ParteDelAnio.PRIMERO)),
-                Optional.empty()),
+                Optional.of(
+                    new Momento.EnPeriodo(new PeriodoAcademico(2027, ParteDelAnio.SEGUNDO)))),
+            Optional.empty(),
+            new Alcance(
+                TipoAlcance.TODOS, Set.of(), Set.of(), Set.of(), "Aplica a todos los programas."));
+    Norma mixta =
+        Norma.registrar(
+            new IdentificacionNorma(TipoNorma.RESOLUCION, numeroUnico(), 2026, "Vicerrectoría"),
+            TipoDeEfecto.BASE,
+            LocalDate.of(2026, 2, 1),
+            new Vigencia(
+                new Momento.EnPeriodo(new PeriodoAcademico(2026, ParteDelAnio.SEGUNDO)),
+                Optional.of(new Momento.EnFecha(LocalDate.of(2027, 6, 30)))),
             Optional.empty(),
             new Alcance(
                 TipoAlcance.TODOS, Set.of(), Set.of(), Set.of(), "Aplica a todos los programas."));
 
-    assertThatThrownBy(() -> NormaMapper.aEntidad(conPeriodo))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("aplicaDesde");
+    for (Norma original : List.of(ambosPorPeriodo, mixta)) {
+      normas.save(NormaMapper.aEntidad(original));
+      NormaEntity leida = normas.findById(original.id().valor()).orElseThrow();
+
+      assertThat(NormaMapper.aDominio(leida)).usingRecursiveComparison().isEqualTo(original);
+      normas.deleteById(original.id().valor());
+    }
   }
 
   private static String numeroUnico() {
@@ -153,7 +171,7 @@ class NormaMapperTest {
         "Consejo Superior Universitario",
         "BASE",
         LocalDate.of(2024, 1, 1),
-        LocalDate.of(2024, 2, 1),
+        new ColumnasDeMomento("FECHA", LocalDate.of(2024, 2, 1), null),
         null,
         null,
         tipoAlcance,

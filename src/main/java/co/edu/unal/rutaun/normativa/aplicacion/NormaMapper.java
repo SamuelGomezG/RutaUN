@@ -1,6 +1,5 @@
 package co.edu.unal.rutaun.normativa.aplicacion;
 
-import co.edu.unal.rutaun.compartido.Momento;
 import co.edu.unal.rutaun.compartido.NormaId;
 import co.edu.unal.rutaun.compartido.ProgramaId;
 import co.edu.unal.rutaun.normativa.TipoAlcance;
@@ -15,7 +14,6 @@ import co.edu.unal.rutaun.normativa.persistencia.AlcanceJson;
 import co.edu.unal.rutaun.normativa.persistencia.NormaEntity;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
 import co.edu.unal.rutaun.utilidades.JsonConfig;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -29,8 +27,7 @@ import java.util.stream.Collectors;
  * nuevo y pasa por las mismas validaciones que una norma creada. Si la base trae un dato inválido,
  * sube la {@link IllegalArgumentException} del dominio.
  *
- * <p>La tabla {@code norma} guarda la vigencia solo como fechas. Por eso {@link #aEntidad} rechaza
- * una vigencia dada por periodos académicos, y {@link #aDominio} siempre construye fechas. El
+ * <p>La vigencia se guarda como un momento, en tres columnas: su tipo, su fecha o su periodo. El
  * alcance se guarda como JSON en {@code alcance_detalle}, con las listas ordenadas para que el
  * texto sea estable.
  */
@@ -51,18 +48,13 @@ public final class NormaMapper {
         TipoDeEfecto.valueOf(entidad.getTipoDeEfecto()),
         entidad.getFechaExpedicion(),
         new Vigencia(
-            new Momento.EnFecha(entidad.getAplicaDesde()),
-            Optional.ofNullable(entidad.getVigenteHasta()).<Momento>map(Momento.EnFecha::new)),
+            MomentoEnColumnas.aMomento(entidad.getAplicaDesde()),
+            Optional.ofNullable(MomentoEnColumnas.aMomento(entidad.getVigenteHasta()))),
         Optional.ofNullable(entidad.getEnlaceRegimenLegal()),
         alcanceADominio(entidad));
   }
 
-  /**
-   * Convierte la norma en la fila que se guarda en la base.
-   *
-   * <p>Falla con {@link IllegalArgumentException} si la vigencia de la norma está dada por un
-   * periodo académico, porque la tabla solo guarda fechas.
-   */
+  /** Convierte la norma en la fila que se guarda en la base. */
   public static NormaEntity aEntidad(Norma norma) {
     ArgumentChecks.obligatorio(norma, "norma");
     return new NormaEntity(
@@ -73,8 +65,8 @@ public final class NormaMapper {
         norma.identificacion().organo(),
         norma.tipoDeEfecto().name(),
         norma.fechaExpedicion(),
-        aFecha(norma.vigencia().aplicaDesde(), "aplicaDesde"),
-        norma.vigencia().vigenteHasta().map(hasta -> aFecha(hasta, "vigenteHasta")).orElse(null),
+        MomentoEnColumnas.aColumnas(norma.vigencia().aplicaDesde()),
+        norma.vigencia().vigenteHasta().map(MomentoEnColumnas::aColumnas).orElse(null),
         norma.enlaceRegimenLegal().orElse(null),
         norma.alcance().tipo().name(),
         alcanceAJson(norma.alcance()));
@@ -108,14 +100,5 @@ public final class NormaMapper {
     return ArgumentChecks.copiaSinNulos(lista, nombre).stream()
         .map(conversion)
         .collect(Collectors.toSet());
-  }
-
-  private static LocalDate aFecha(Momento momento, String nombre) {
-    return switch (momento) {
-      case Momento.EnFecha enFecha -> enFecha.fecha();
-      case Momento.EnPeriodo enPeriodo ->
-          throw new IllegalArgumentException(
-              nombre + " debe ser una fecha: la tabla norma no guarda periodos académicos");
-    };
   }
 }

@@ -193,14 +193,23 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
             Optional.ofNullable(norma).map(n -> aFuente(n, regla.fuente().articulo())),
             estado,
             esTemporal(
-                regla.vigenciaPropia(), momentoDe(norma == null ? null : norma.getVigenteHasta())),
+                regla.vigenciaPropia(),
+                MomentoEnColumnas.aMomento(norma == null ? null : norma.getVigenteHasta())),
             regla.clasificacion(),
             Optional.ofNullable(fila.getVigenteDesde())
-                .or(() -> Optional.ofNullable(norma).map(NormaEntity::getAplicaDesde))
-                .<Momento>map(Momento.EnFecha::new),
+                .map(MomentoEnColumnas::aMomento)
+                .or(
+                    () ->
+                        Optional.ofNullable(norma)
+                            .map(NormaEntity::getAplicaDesde)
+                            .map(MomentoEnColumnas::aMomento)),
             Optional.ofNullable(fila.getVigenteHasta())
-                .or(() -> Optional.ofNullable(norma).map(NormaEntity::getVigenteHasta))
-                .<Momento>map(Momento.EnFecha::new),
+                .map(MomentoEnColumnas::aMomento)
+                .or(
+                    () ->
+                        Optional.ofNullable(norma)
+                            .map(NormaEntity::getVigenteHasta)
+                            .map(MomentoEnColumnas::aMomento)),
             Optional.ofNullable(norma).map(n -> TipoAlcance.valueOf(n.getTipoAlcance())),
             Optional.ofNullable(norma)
                 .map(NormaEntity::getAlcanceDetalle)
@@ -327,7 +336,8 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
     Regla regla = ReglaMapper.aDominio(fila);
     boolean temporal =
         esTemporal(
-            regla.vigenciaPropia(), momentoDe(norma == null ? null : norma.getVigenteHasta()));
+            regla.vigenciaPropia(),
+            MomentoEnColumnas.aMomento(norma == null ? null : norma.getVigenteHasta()));
     ReglaVista vista =
         new ReglaVista(
             regla.id(),
@@ -365,10 +375,6 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
    */
   static boolean esTemporal(Optional<Vigencia> vigenciaPropia, Momento vigenteHastaDeLaNorma) {
     return vigenciaPropia.map(Vigencia::esTemporal).orElse(false) || vigenteHastaDeLaNorma != null;
-  }
-
-  private static Momento momentoDe(LocalDate fecha) {
-    return fecha == null ? null : new Momento.EnFecha(fecha);
   }
 
   private static FuenteVista aFuente(NormaEntity norma, String articulo) {
