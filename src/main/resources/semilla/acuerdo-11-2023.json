@@ -162,7 +162,7 @@
     {
       "categoria": "PRERREQUISITO",
       "objeto": "1000004 Cálculo Diferencial",
-      "enunciado": "Prerrequisito de Cálculo Diferencial: Matemáticas Básicas.",
+      "enunciado": "Cálculo Diferencial exige una materia de nivelación solo a quien la debe por su puntaje de admisión.",
       "articulo": "art. 2",
       "vigenciaPropia": null,
       "clasificacion": "DEL_PLAN",
@@ -204,7 +204,7 @@
     {
       "categoria": "PRERREQUISITO",
       "objeto": "2016377 Cálculo Diferencial en una Variable",
-      "enunciado": "Prerrequisito de Cálculo Diferencial en una Variable: Matemáticas Básicas.",
+      "enunciado": "Cálculo Diferencial en una Variable exige una materia de nivelación solo a quien la debe por su puntaje de admisión.",
       "articulo": "art. 2",
       "vigenciaPropia": null,
       "clasificacion": "DEL_PLAN",
@@ -2512,7 +2512,7 @@
     {
       "categoria": "PRERREQUISITO",
       "objeto": "2016498 Electrónica Digital I",
-      "enunciado": "Prerrequisito de Electrónica Digital I: Electrónica Análoga I.",
+      "enunciado": "Electrónica Digital I no se puede cursar desde este programa: su prerrequisito exige una materia que los estudiantes del programa no pueden inscribir.",
       "articulo": "art. 2",
       "vigenciaPropia": null,
       "clasificacion": "DEL_PLAN",
@@ -2695,7 +2695,7 @@
     {
       "categoria": "PRERREQUISITO",
       "objeto": "2016492 Comunicaciones",
-      "enunciado": "Prerrequisito de Comunicaciones: Líneas y Antenas.",
+      "enunciado": "Comunicaciones no se puede cursar desde este programa: su prerrequisito exige una materia que los estudiantes del programa no pueden inscribir.",
       "articulo": "art. 2",
       "vigenciaPropia": null,
       "clasificacion": "DEL_PLAN",

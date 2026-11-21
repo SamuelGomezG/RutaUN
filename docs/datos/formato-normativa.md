@@ -251,6 +251,8 @@ repetido cuenta una vez: «A y A» se lee como «A».
 
 `origen` de una materia externa: `NIVELACION` u `OTRO_PROGRAMA`.
 
+El enunciado y el objeto de una regla no nombran su materia externa, porque RutaUN no la muestra en ninguna parte (S17). El nombre va solo en `datos`. El enunciado resume lo que implica: «exige una materia de nivelación solo a quien la debe» o «no se puede cursar desde este programa».
+
 #### `HABILITACION`
 
 ```jsonc
