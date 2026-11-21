@@ -19,6 +19,7 @@ import co.edu.unal.rutaun.normativa.persistencia.NormaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.NormaRepository;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -42,6 +43,7 @@ class NormaMapperTest {
   @Autowired private NormaRepository normas;
 
   private UUID normaId;
+  private final List<UUID> idsGuardados = new ArrayList<>();
 
   /** Borra lo que guardó la prueba, porque aquí sí se hizo commit. */
   @AfterEach
@@ -49,6 +51,8 @@ class NormaMapperTest {
     if (normaId != null) {
       normas.deleteById(normaId);
     }
+    normas.deleteAllById(idsGuardados);
+    idsGuardados.clear();
   }
 
   @Test
@@ -150,11 +154,11 @@ class NormaMapperTest {
                 TipoAlcance.TODOS, Set.of(), Set.of(), Set.of(), "Aplica a todos los programas."));
 
     for (Norma original : List.of(ambosPorPeriodo, mixta)) {
+      idsGuardados.add(original.id().valor());
       normas.save(NormaMapper.aEntidad(original));
       NormaEntity leida = normas.findById(original.id().valor()).orElseThrow();
 
       assertThat(NormaMapper.aDominio(leida)).usingRecursiveComparison().isEqualTo(original);
-      normas.deleteById(original.id().valor());
     }
   }
 
