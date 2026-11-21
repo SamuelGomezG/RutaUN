@@ -9,6 +9,7 @@ import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntity;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.VersionEntity;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -145,7 +146,8 @@ public final class VersionDelConsolidadoMapper {
             detalleDelMotivo(version.motivo()),
             null,
             version.versionDelPlan(),
-            null);
+            null,
+            diaAutomatico(version));
     List<ReglaEnVersionEntity> reglasEnVersion =
         version.reglas().stream()
             .map(
@@ -157,6 +159,15 @@ public final class VersionDelConsolidadoMapper {
                         enVersion.estado().name()))
             .toList();
     return new Filas(fila, reglasEnVersion);
+  }
+
+  private static LocalDate diaAutomatico(VersionDelConsolidado version) {
+    return switch (version.motivo()) {
+      case MotivoDeVersion.AutomaticoPorFecha ignored -> version.fecha();
+      case MotivoDeVersion.PorIncorporacion ignored -> null;
+      case MotivoDeVersion.PorCorreccion ignored -> null;
+      case MotivoDeVersion.AutomaticoPorPeriodo ignored -> null;
+    };
   }
 
   private static ReglaEnVersion reglaDeLaVersion(

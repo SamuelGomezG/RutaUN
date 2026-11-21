@@ -62,6 +62,7 @@ class VersionDelConsolidadoMapperTest {
 
   private Programa programa;
   private Norma norma;
+  private final List<UUID> programasGuardados = new ArrayList<>();
   private final List<UUID> reglasGuardadas = new ArrayList<>();
   private final List<UUID> versionesGuardadas = new ArrayList<>();
 
@@ -74,6 +75,7 @@ class VersionDelConsolidadoMapperTest {
             "T3-" + UUID.randomUUID().toString().substring(0, 8),
             new Facultad("Ingeniería"));
     programas.save(ProgramaMapper.aEntidad(programa));
+    programasGuardados.add(programa.id().valor());
     norma = ReglasDePrueba.normaNueva();
     normas.save(NormaMapper.aEntidad(norma));
   }
@@ -87,7 +89,7 @@ class VersionDelConsolidadoMapperTest {
     versiones.deleteAllById(versionesGuardadas);
     reglas.deleteAllById(reglasGuardadas);
     normas.deleteById(norma.id().valor());
-    programas.deleteById(programa.id().valor());
+    programasGuardados.forEach(programas::deleteById);
   }
 
   @Test
@@ -262,6 +264,93 @@ class VersionDelConsolidadoMapperTest {
         .hasMessageContaining("UQ_VERSION_PROGRAMA_NUMERO");
   }
 
+  @Test
+  void s15_dosVersionesAutomaticasDelMismoProgramaElMismoDiaFallan() {
+    guardar(version(1, new MotivoDeVersion.AutomaticoPorFecha(FECHA), List.of()));
+    VersionDelConsolidado segunda =
+        version(2, new MotivoDeVersion.AutomaticoPorFecha(FECHA), List.of());
+
+    assertThatThrownBy(
+            () -> versiones.saveAndFlush(VersionDelConsolidadoMapper.aEntidades(segunda).version()))
+        .isInstanceOf(DataIntegrityViolationException.class)
+        .hasMessageContaining("UQ_VERSION_AUTOMATICA_POR_DIA");
+  }
+
+  @Test
+  void s15_unaVersionPorFechaYOtrasPorPeriodoElMismoDiaSeAceptan() {
+    guardar(version(1, new MotivoDeVersion.AutomaticoPorFecha(FECHA), List.of()));
+    UUID segunda =
+        guardar(
+            version(
+                2,
+                new MotivoDeVersion.AutomaticoPorPeriodo(
+                    new PeriodoAcademico(2026, ParteDelAnio.SEGUNDO)),
+                List.of()));
+    UUID tercera =
+        guardar(
+            version(
+                3,
+                new MotivoDeVersion.AutomaticoPorPeriodo(
+                    new PeriodoAcademico(2026, ParteDelAnio.PRIMERO)),
+                List.of()));
+
+    assertThat(versiones.findById(segunda)).isPresent();
+    assertThat(versiones.findById(tercera)).isPresent();
+  }
+
+  @Test
+  void tt04_variasVersionesNoAutomaticasElMismoDiaSeAceptan() {
+    UUID primera = guardar(version(1, new MotivoDeVersion.PorCorreccion(ADMINISTRADOR), List.of()));
+    UUID segunda =
+        guardar(version(2, new MotivoDeVersion.PorCorreccion(ADMINISTRADOR + " 2"), List.of()));
+    UUID tercera =
+        guardar(
+            version(3, new MotivoDeVersion.PorIncorporacion(norma.id(), ADMINISTRADOR), List.of()));
+
+    assertThat(versiones.findById(primera)).isPresent();
+    assertThat(versiones.findById(segunda)).isPresent();
+    assertThat(versiones.findById(tercera)).isPresent();
+  }
+
+  @Test
+  void s15_elMismoDiaEnProgramasDistintosSeAcepta() {
+    Programa otro =
+        Programa.registrar(
+            "Otro programa",
+            "T3-" + UUID.randomUUID().toString().substring(0, 8),
+            new Facultad("Ingeniería"));
+    programas.save(ProgramaMapper.aEntidad(otro));
+    programasGuardados.add(otro.id().valor());
+    guardar(version(1, new MotivoDeVersion.AutomaticoPorFecha(FECHA), List.of()));
+    VersionDelConsolidado delOtro =
+        VersionDelConsolidado.reconstituir(
+            otro.id(), 1, FECHA, new MotivoDeVersion.AutomaticoPorFecha(FECHA), List.of(), 1);
+
+    UUID idOtro = guardar(delOtro);
+
+    assertThat(versiones.findById(idOtro)).isPresent();
+  }
+
+  @Test
+  void tt04_elMapperSoloLlenaElDiaEnLasVersionesPorFecha() {
+    List<MotivoDeVersion> motivos =
+        List.of(
+            new MotivoDeVersion.PorIncorporacion(norma.id(), ADMINISTRADOR),
+            new MotivoDeVersion.PorCorreccion(ADMINISTRADOR),
+            new MotivoDeVersion.AutomaticoPorPeriodo(
+                new PeriodoAcademico(2026, ParteDelAnio.SEGUNDO)),
+            new MotivoDeVersion.AutomaticoPorFecha(LocalDate.of(2027, 2, 1)));
+
+    for (int i = 0; i < motivos.size(); i++) {
+      MotivoDeVersion motivo = motivos.get(i);
+      VersionEntity fila =
+          VersionDelConsolidadoMapper.aEntidades(version(i + 1, motivo, List.of())).version();
+      LocalDate esperado = motivo instanceof MotivoDeVersion.AutomaticoPorFecha ? FECHA : null;
+
+      assertThat(fila.getDiaAutomatico()).as("motivo %s", motivo).isEqualTo(esperado);
+    }
+  }
+
   /** Guarda una regla de la norma de la prueba y devuelve la regla de dominio. */
   private Regla guardarRegla(DatosDeRegla datos) {
     Regla regla = ReglasDePrueba.regla(norma, datos);
@@ -296,6 +385,7 @@ class VersionDelConsolidadoMapperTest {
   }
 
   private VersionEntity versionAMano(UUID id, String motivo, String detalle) {
-    return new VersionEntity(id, programa.id().valor(), 1, FECHA, motivo, detalle, null, 1, null);
+    return new VersionEntity(
+        id, programa.id().valor(), 1, FECHA, motivo, detalle, null, 1, null, null);
   }
 }

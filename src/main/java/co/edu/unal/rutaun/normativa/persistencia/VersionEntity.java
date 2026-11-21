@@ -51,6 +51,10 @@ public class VersionEntity implements Persistable<UUID> {
   /** Cambios respecto a la versión anterior, como texto JSON. */
   @Lob private String cambios;
 
+  /** Día de la versión automática por fecha; nulo en los demás motivos. */
+  @Column(name = "dia_automatico")
+  private LocalDate diaAutomatico;
+
   /** Constructor sin argumentos que exige JPA. */
   protected VersionEntity() {}
 
@@ -64,7 +68,8 @@ public class VersionEntity implements Persistable<UUID> {
       String detalleMotivo,
       UUID administradorId,
       int numeroPlanDeEstudios,
-      String cambios) {
+      String cambios,
+      LocalDate diaAutomatico) {
     this.id = id;
     this.programaId = programaId;
     this.numero = numero;
@@ -74,6 +79,7 @@ public class VersionEntity implements Persistable<UUID> {
     this.administradorId = administradorId;
     this.numeroPlanDeEstudios = numeroPlanDeEstudios;
     this.cambios = cambios;
+    this.diaAutomatico = diaAutomatico;
   }
 
   @Override
@@ -124,5 +130,9 @@ public class VersionEntity implements Persistable<UUID> {
 
   public String getCambios() {
     return cambios;
+  }
+
+  public LocalDate getDiaAutomatico() {
+    return diaAutomatico;
   }
 }

@@ -8,7 +8,11 @@ import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
 import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.util.UUID;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 class PersistenciaNormativaTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(PersistenciaNormativaTest.class);
+  private static final LocalDate FECHA = LocalDate.of(2026, 10, 22);
 
   @Autowired private ProgramaRepository programas;
   @Autowired private MateriaRepository materias;
@@ -58,15 +63,7 @@ class PersistenciaNormativaTest {
 
   private VersionEntity nuevaVersion(UUID programaId, int numero) {
     return new VersionEntity(
-        UUID.randomUUID(),
-        programaId,
-        numero,
-        LocalDate.of(2026, 10, 22),
-        "INCORPORACION",
-        null,
-        null,
-        1,
-        "[]");
+        UUID.randomUUID(), programaId, numero, FECHA, "INCORPORACION", null, null, 1, "[]", null);
   }
 
   @Test
@@ -298,7 +295,8 @@ class PersistenciaNormativaTest {
             null,
             null,
             1,
-            "[]");
+            "[]",
+            null);
 
     Throwable error = catchThrowable(() -> versiones.saveAndFlush(repetida));
 
@@ -344,6 +342,35 @@ class PersistenciaNormativaTest {
         .get()
         .extracting(NormaEntity::getNumero)
         .isEqualTo("003-A");
+  }
+
+  @ParameterizedTest(name = "{0} con día {1}")
+  @MethodSource("diasQueNoCuadranConElMotivo")
+  void tt04_elDiaAutomaticoDebeCoincidirConElMotivo(String motivo, LocalDate diaAutomatico) {
+    ProgramaEntity programa = nuevoPrograma();
+    VersionEntity version =
+        new VersionEntity(
+            UUID.randomUUID(),
+            programa.getId(),
+            1,
+            FECHA,
+            motivo,
+            null,
+            null,
+            1,
+            "[]",
+            diaAutomatico);
+
+    assertThatThrownBy(() -> versiones.saveAndFlush(version))
+        .isInstanceOf(DataIntegrityViolationException.class)
+        .hasMessageContaining("CK_VERSION_DIA_AUTOMATICO");
+  }
+
+  static Stream<Arguments> diasQueNoCuadranConElMotivo() {
+    return Stream.of(
+        Arguments.of("AUTOMATICO_POR_FECHA", null),
+        Arguments.of("AUTOMATICO_POR_FECHA", FECHA.minusDays(1)),
+        Arguments.of("POR_CORRECCION", FECHA));
   }
 
   @Test
