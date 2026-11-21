@@ -6,7 +6,6 @@ import co.edu.unal.rutaun.compartido.EstadoRestriccion;
 import co.edu.unal.rutaun.normativa.ContextoDeEvaluacion;
 import co.edu.unal.rutaun.normativa.TipoComponente;
 import co.edu.unal.rutaun.normativa.dominio.Correquisito;
-import co.edu.unal.rutaun.normativa.dominio.EvaluadorDeRestricciones;
 import co.edu.unal.rutaun.normativa.dominio.ExpresionDeMaterias;
 import co.edu.unal.rutaun.normativa.dominio.ExpresionDeMaterias.AlgunaDe;
 import co.edu.unal.rutaun.normativa.dominio.ExpresionDeMaterias.MateriaExterna;
@@ -155,7 +154,7 @@ public final class DemostracionDeLasRestricciones {
 
   private static void mostrar(
       String avance, Prerrequisito prerrequisito, ContextoDeEvaluacion contexto) {
-    EstadoRestriccion estado = EvaluadorDeRestricciones.evaluar(prerrequisito, contexto);
+    EstadoRestriccion estado = prerrequisito.evaluar(contexto);
     System.out.println();
     System.out.println("[" + avance + "]");
     System.out.println("  certeza: " + estado.certeza());
@@ -164,7 +163,7 @@ public final class DemostracionDeLasRestricciones {
 
   private static void mostrarRestriccion(
       String etiqueta, Restriccion restriccion, ContextoDeEvaluacion contexto) {
-    EstadoRestriccion estado = EvaluadorDeRestricciones.evaluar(restriccion, contexto);
+    EstadoRestriccion estado = restriccion.evaluar(contexto);
     System.out.println(
         "  "
             + etiqueta

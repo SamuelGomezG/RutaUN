@@ -4,11 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import co.edu.unal.rutaun.compartido.CodigoMateria;
-import co.edu.unal.rutaun.compartido.Creditos;
 import co.edu.unal.rutaun.compartido.EstadoRestriccion;
 import co.edu.unal.rutaun.compartido.EstadoRestriccion.Certeza;
 import co.edu.unal.rutaun.normativa.ContextoDeEvaluacion;
-import co.edu.unal.rutaun.normativa.TipoComponente;
 import co.edu.unal.rutaun.normativa.dominio.ExpresionDeMaterias.MateriaExterna;
 import co.edu.unal.rutaun.normativa.dominio.ExpresionDeMaterias.TerminoMateria;
 import co.edu.unal.rutaun.soporte.ContextoDeEvaluacionFijo;
@@ -16,14 +14,11 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
-class EvaluadorDeRestriccionesTest {
+class PrerrequisitoTest {
 
   private static final CodigoMateria A = new CodigoMateria("A");
   private static final CodigoMateria B = new CodigoMateria("B");
   private static final CodigoMateria C = new CodigoMateria("C");
-  private static final MedidaDeCreditos PROGRAMA = MedidaDeCreditos.delPrograma();
-  private static final MedidaDeCreditos DISCIPLINAR =
-      MedidaDeCreditos.deComponente(TipoComponente.DISCIPLINAR);
 
   @Test
   void tt03_unPrerrequisitoTomaLaCertezaYLasRazonesQueDaElContexto() {
@@ -33,8 +28,7 @@ class EvaluadorDeRestriccionesTest {
               .estado(A, new EstadoRestriccion(certeza, List.of("razón de " + certeza)))
               .construir();
 
-      EstadoRestriccion estado =
-          EvaluadorDeRestricciones.evaluar(new Prerrequisito(B, new TerminoMateria(A)), contexto);
+      EstadoRestriccion estado = new Prerrequisito(B, new TerminoMateria(A)).evaluar(contexto);
 
       assertThat(estado.certeza()).isEqualTo(certeza);
       assertThat(estado.razones()).containsExactly("razón de " + certeza);
@@ -45,8 +39,7 @@ class EvaluadorDeRestriccionesTest {
   void tt03_unaMateriaQueYaNoRigeSinEquivalenciaDejaElPrerrequisitoIncierto() {
     ContextoDeEvaluacion contexto = ContextoDeEvaluacionFijo.nuevo().yaNoRige(A).construir();
 
-    EstadoRestriccion estado =
-        EvaluadorDeRestricciones.evaluar(new Prerrequisito(B, new TerminoMateria(A)), contexto);
+    EstadoRestriccion estado = new Prerrequisito(B, new TerminoMateria(A)).evaluar(contexto);
 
     assertThat(estado.certeza()).isEqualTo(Certeza.INCIERTA);
     assertThat(estado.razones()).containsExactly("A ya no rige");
@@ -58,10 +51,9 @@ class EvaluadorDeRestriccionesTest {
         ContextoDeEvaluacionFijo.nuevo().aprobada(A).enCurso(B).construir();
 
     EstadoRestriccion estado =
-        EvaluadorDeRestricciones.evaluar(
-            new Prerrequisito(
-                C, ExpresionDeMaterias.todasLas(new TerminoMateria(A), new TerminoMateria(B))),
-            contexto);
+        new Prerrequisito(
+                C, ExpresionDeMaterias.todasLas(new TerminoMateria(A), new TerminoMateria(B)))
+            .evaluar(contexto);
 
     assertThat(estado.certeza()).isEqualTo(Certeza.EN_CURSO);
     assertThat(estado.razones()).containsExactly("B está en curso");
@@ -73,10 +65,9 @@ class EvaluadorDeRestriccionesTest {
         ContextoDeEvaluacionFijo.nuevo().pendiente(A).aprobada(B).construir();
 
     EstadoRestriccion estado =
-        EvaluadorDeRestricciones.evaluar(
-            new Prerrequisito(
-                C, ExpresionDeMaterias.algunaDe(new TerminoMateria(A), new TerminoMateria(B))),
-            contexto);
+        new Prerrequisito(
+                C, ExpresionDeMaterias.algunaDe(new TerminoMateria(A), new TerminoMateria(B)))
+            .evaluar(contexto);
 
     assertThat(estado.certeza()).isEqualTo(Certeza.CUMPLIDA);
     assertThat(estado.razones()).containsExactly("B está aprobada");
@@ -88,13 +79,12 @@ class EvaluadorDeRestriccionesTest {
         ContextoDeEvaluacionFijo.nuevo().aprobada(A).pendiente(B).enCurso(C).construir();
 
     EstadoRestriccion estado =
-        EvaluadorDeRestricciones.evaluar(
-            new Prerrequisito(
+        new Prerrequisito(
                 A,
                 ExpresionDeMaterias.todasLas(
                     new TerminoMateria(A),
-                    ExpresionDeMaterias.algunaDe(new TerminoMateria(B), new TerminoMateria(C)))),
-            contexto);
+                    ExpresionDeMaterias.algunaDe(new TerminoMateria(B), new TerminoMateria(C))))
+            .evaluar(contexto);
 
     assertThat(estado.certeza()).isEqualTo(Certeza.EN_CURSO);
     assertThat(estado.razones()).containsExactly("C está en curso");
@@ -106,12 +96,11 @@ class EvaluadorDeRestriccionesTest {
         ContextoDeEvaluacionFijo.nuevo().pendiente(A).aprobada(B).aprobada(C).construir();
 
     EstadoRestriccion estado =
-        EvaluadorDeRestricciones.evaluar(
-            new Prerrequisito(
+        new Prerrequisito(
                 B,
                 ExpresionDeMaterias.algunaDe(
-                    new TerminoMateria(A), new TerminoMateria(B), new TerminoMateria(C))),
-            contexto);
+                    new TerminoMateria(A), new TerminoMateria(B), new TerminoMateria(C)))
+            .evaluar(contexto);
 
     assertThat(estado.certeza()).isEqualTo(Certeza.CUMPLIDA);
     assertThat(estado.razones()).containsExactly("B está aprobada", "C está aprobada");
@@ -145,89 +134,26 @@ class EvaluadorDeRestriccionesTest {
   }
 
   @Test
-  void tt03_unCorrequisitoPendienteSeCumpleSiElPlanLoUbica() {
-    Restriccion correquisito = new Correquisito(B, new TerminoMateria(A));
-    ContextoDeEvaluacion sinUbicacion = ContextoDeEvaluacionFijo.nuevo().pendiente(A).construir();
-    ContextoDeEvaluacion ubicado =
-        ContextoDeEvaluacionFijo.nuevo().pendiente(A).enElMismoSemestre(A).construir();
-
-    assertThat(EvaluadorDeRestricciones.evaluar(correquisito, sinUbicacion).certeza())
-        .isEqualTo(Certeza.PENDIENTE);
-    assertThat(EvaluadorDeRestricciones.evaluar(correquisito, ubicado).certeza())
-        .isEqualTo(Certeza.CUMPLIDA);
-  }
-
-  @Test
-  void tt03_unCorrequisitoQueNoEstaPendienteConservaSuCertezaAunqueElPlanLoUbique() {
-    Restriccion correquisito = new Correquisito(B, new TerminoMateria(A));
-    for (Certeza certeza : List.of(Certeza.EN_CURSO, Certeza.INCIERTA)) {
-      ContextoDeEvaluacion ubicado =
-          ContextoDeEvaluacionFijo.nuevo()
-              .estado(A, new EstadoRestriccion(certeza, List.of("razón de " + certeza)))
-              .enElMismoSemestre(A)
-              .construir();
-
-      EstadoRestriccion estado = EvaluadorDeRestricciones.evaluar(correquisito, ubicado);
-
-      assertThat(estado.certeza()).isEqualTo(certeza);
-      assertThat(estado.razones()).containsExactly("razón de " + certeza);
-    }
-  }
-
-  @Test
   void tt03_unPrerrequisitoNoSeCumpleSoloPorqueElPlanLoUbique() {
     Restriccion prerrequisito = new Prerrequisito(B, new TerminoMateria(A));
     ContextoDeEvaluacion ubicado =
         ContextoDeEvaluacionFijo.nuevo().pendiente(A).enElMismoSemestre(A).construir();
 
-    assertThat(EvaluadorDeRestricciones.evaluar(prerrequisito, ubicado).certeza())
-        .isEqualTo(Certeza.PENDIENTE);
+    assertThat(prerrequisito.evaluar(ubicado).certeza()).isEqualTo(Certeza.PENDIENTE);
   }
 
   @Test
-  void tt03_unaReglaDeHabilitacionComparaCreditosConElUmbral() {
-    Restriccion habilitacion = new ReglaDeHabilitacion(A, PROGRAMA, new Creditos(40));
-    ContextoDeEvaluacion insuficiente =
-        ContextoDeEvaluacionFijo.nuevo().creditosDelPrograma(39).construir();
-    ContextoDeEvaluacion suficiente =
-        ContextoDeEvaluacionFijo.nuevo().creditosDelPrograma(40).construir();
+  void tt03_unPrerrequisitoRechazaUnContextoNulo() {
+    Prerrequisito prerrequisito =
+        new Prerrequisito(
+            A, new MateriaExterna("Externa", Optional.empty(), TipoMateriaExterna.NIVELACION));
 
-    assertThat(EvaluadorDeRestricciones.evaluar(habilitacion, insuficiente).certeza())
-        .isEqualTo(Certeza.PENDIENTE);
-    assertThat(EvaluadorDeRestricciones.evaluar(habilitacion, suficiente).certeza())
-        .isEqualTo(Certeza.CUMPLIDA);
-  }
-
-  @Test
-  void tt03_unaReglaDeHabilitacionDeComponenteUsaSusCreditos() {
-    Restriccion habilitacion = new ReglaDeHabilitacion(A, DISCIPLINAR, new Creditos(20));
-    ContextoDeEvaluacion contexto =
-        ContextoDeEvaluacionFijo.nuevo()
-            .creditosDelComponente(TipoComponente.DISCIPLINAR, 20)
-            .creditosDelPrograma(5)
-            .construir();
-
-    EstadoRestriccion estado = EvaluadorDeRestricciones.evaluar(habilitacion, contexto);
-
-    assertThat(estado.certeza()).isEqualTo(Certeza.CUMPLIDA);
-    assertThat(estado.razones().get(0)).contains("del componente DISCIPLINAR");
-  }
-
-  @Test
-  void tt03_elEvaluadorRechazaRestriccionOContextoNulos() {
-    ContextoDeEvaluacion contexto = ContextoDeEvaluacionFijo.vacio();
-
-    assertThatThrownBy(() -> EvaluadorDeRestricciones.evaluar(null, contexto))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("restriccion no puede ser null");
-    assertThatThrownBy(
-            () ->
-                EvaluadorDeRestricciones.evaluar(new Prerrequisito(A, new TerminoMateria(B)), null))
+    assertThatThrownBy(() -> prerrequisito.evaluar(null))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("contexto no puede ser null");
   }
 
   private static EstadoRestriccion evaluarConContextoVacio(Restriccion restriccion) {
-    return EvaluadorDeRestricciones.evaluar(restriccion, ContextoDeEvaluacionFijo.vacio());
+    return restriccion.evaluar(ContextoDeEvaluacionFijo.vacio());
   }
 }
