@@ -27,9 +27,6 @@ public class VersionEntity implements Persistable<UUID> {
   /** Si la fila todavía no está en la base. JPA no lo guarda. */
   @Transient private boolean nueva = true;
 
-  @Column(name = "consolidado_id", nullable = false)
-  private UUID consolidadoId;
-
   @Column(name = "programa_id", nullable = false)
   private UUID programaId;
 
@@ -60,7 +57,6 @@ public class VersionEntity implements Persistable<UUID> {
   /** Crea una versión del consolidado. */
   public VersionEntity(
       UUID id,
-      UUID consolidadoId,
       UUID programaId,
       int numero,
       LocalDate fecha,
@@ -70,7 +66,6 @@ public class VersionEntity implements Persistable<UUID> {
       int numeroPlanDeEstudios,
       String cambios) {
     this.id = id;
-    this.consolidadoId = consolidadoId;
     this.programaId = programaId;
     this.numero = numero;
     this.fecha = fecha;
@@ -97,10 +92,6 @@ public class VersionEntity implements Persistable<UUID> {
   @PostLoad
   void marcarComoGuardada() {
     nueva = false;
-  }
-
-  public UUID getConsolidadoId() {
-    return consolidadoId;
   }
 
   public UUID getProgramaId() {

@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import co.edu.unal.rutaun.compartido.EstadoRegla;
-import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoRepository;
 import co.edu.unal.rutaun.normativa.persistencia.NormaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntity;
@@ -41,7 +40,6 @@ class ImportacionDeNormasServiceTest {
   private final ImportacionDeNormasService normas;
   private final NormaRepository normasGuardadas;
   private final ReglaRepository reglas;
-  private final ConsolidadoRepository consolidados;
   private final VersionDelConsolidadoRepository versiones;
   private final ReglaEnVersionRepository reglasEnVersion;
   private final ProgramaRepository programasGuardados;
@@ -54,7 +52,6 @@ class ImportacionDeNormasServiceTest {
       ImportacionDeNormasService normas,
       NormaRepository normasGuardadas,
       ReglaRepository reglas,
-      ConsolidadoRepository consolidados,
       VersionDelConsolidadoRepository versiones,
       ReglaEnVersionRepository reglasEnVersion,
       ProgramaRepository programasGuardados) {
@@ -62,7 +59,6 @@ class ImportacionDeNormasServiceTest {
     this.normas = normas;
     this.normasGuardadas = normasGuardadas;
     this.reglas = reglas;
-    this.consolidados = consolidados;
     this.versiones = versiones;
     this.reglasEnVersion = reglasEnVersion;
     this.programasGuardados = programasGuardados;
@@ -78,7 +74,6 @@ class ImportacionDeNormasServiceTest {
     assertThat(resultado.versionesCreadas()).isEqualTo(1);
     assertThat(normasGuardadas.findAll()).hasSize(1);
     assertThat(programasGuardados.findByCodigoSia("2879")).isPresent();
-    assertThat(consolidados.findAll()).hasSize(1);
     assertThat(reglas.findAll()).hasSize(20);
     assertThat(versiones.findAll()).hasSize(1);
     assertThat(reglasEnVersion.findAll()).hasSize(20);

@@ -18,8 +18,6 @@ import co.edu.unal.rutaun.normativa.dominio.Programa;
 import co.edu.unal.rutaun.normativa.dominio.Regla;
 import co.edu.unal.rutaun.normativa.dominio.ReglaEnVersion;
 import co.edu.unal.rutaun.normativa.dominio.VersionDelConsolidado;
-import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoEntity;
-import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoRepository;
 import co.edu.unal.rutaun.normativa.persistencia.NormaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntity;
@@ -57,19 +55,17 @@ class VersionDelConsolidadoMapperTest {
   private static final String ADMINISTRADOR = "semilla";
 
   @Autowired private ProgramaRepository programas;
-  @Autowired private ConsolidadoRepository consolidados;
   @Autowired private NormaRepository normas;
   @Autowired private ReglaRepository reglas;
   @Autowired private VersionDelConsolidadoRepository versiones;
   @Autowired private ReglaEnVersionRepository reglasEnVersion;
 
   private Programa programa;
-  private UUID consolidadoId;
   private Norma norma;
   private final List<UUID> reglasGuardadas = new ArrayList<>();
   private final List<UUID> versionesGuardadas = new ArrayList<>();
 
-  /** Guarda el programa, su consolidado y la norma de la que cuelgan las reglas. */
+  /** Guarda el programa y la norma de la que cuelgan las reglas. */
   @BeforeEach
   void guardarLoQueLaVersionNecesita() {
     programa =
@@ -78,8 +74,6 @@ class VersionDelConsolidadoMapperTest {
             "T3-" + UUID.randomUUID().toString().substring(0, 8),
             new Facultad("Ingeniería"));
     programas.save(ProgramaMapper.aEntidad(programa));
-    consolidadoId = UUID.randomUUID();
-    consolidados.save(new ConsolidadoEntity(consolidadoId, programa.id().valor()));
     norma = ReglasDePrueba.normaNueva();
     normas.save(NormaMapper.aEntidad(norma));
   }
@@ -91,7 +85,6 @@ class VersionDelConsolidadoMapperTest {
       reglasEnVersion.deleteAll(reglasEnVersion.findByVersionId(versionId));
     }
     versiones.deleteAllById(versionesGuardadas);
-    consolidados.deleteById(consolidadoId);
     reglas.deleteAllById(reglasGuardadas);
     normas.deleteById(norma.id().valor());
     programas.deleteById(programa.id().valor());
@@ -231,7 +224,7 @@ class VersionDelConsolidadoMapperTest {
     VersionDelConsolidado larga =
         version(1, new MotivoDeVersion.PorCorreccion("a".repeat(300)), List.of());
 
-    assertThatThrownBy(() -> VersionDelConsolidadoMapper.aEntidades(larga, consolidadoId))
+    assertThatThrownBy(() -> VersionDelConsolidadoMapper.aEntidades(larga))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("detalle_motivo");
   }
@@ -261,8 +254,7 @@ class VersionDelConsolidadoMapperTest {
             new MotivoDeVersion.PorIncorporacion(norma.id(), ADMINISTRADOR),
             List.of(new ReglaEnVersion(regla, EstadoRegla.VIGENTE)));
     guardar(original);
-    VersionDelConsolidadoMapper.Filas otraVez =
-        VersionDelConsolidadoMapper.aEntidades(original, consolidadoId);
+    VersionDelConsolidadoMapper.Filas otraVez = VersionDelConsolidadoMapper.aEntidades(original);
 
     // Una versión es de solo agregar: la restricción de (programa, número) rechaza la segunda.
     assertThatThrownBy(() -> versiones.saveAndFlush(otraVez.version()))
@@ -285,8 +277,7 @@ class VersionDelConsolidadoMapperTest {
 
   /** Guarda las filas de la versión y devuelve el identificador de su fila. */
   private UUID guardar(VersionDelConsolidado version) {
-    VersionDelConsolidadoMapper.Filas filas =
-        VersionDelConsolidadoMapper.aEntidades(version, consolidadoId);
+    VersionDelConsolidadoMapper.Filas filas = VersionDelConsolidadoMapper.aEntidades(version);
     versiones.save(filas.version());
     versionesGuardadas.add(filas.version().getId());
     reglasEnVersion.saveAll(filas.reglasEnVersion());
@@ -305,7 +296,6 @@ class VersionDelConsolidadoMapperTest {
   }
 
   private VersionEntity versionAMano(UUID id, String motivo, String detalle) {
-    return new VersionEntity(
-        id, consolidadoId, programa.id().valor(), 1, FECHA, motivo, detalle, null, 1, null);
+    return new VersionEntity(id, programa.id().valor(), 1, FECHA, motivo, detalle, null, 1, null);
   }
 }

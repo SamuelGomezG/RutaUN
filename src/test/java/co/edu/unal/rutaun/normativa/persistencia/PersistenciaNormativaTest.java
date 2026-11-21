@@ -25,7 +25,6 @@ class PersistenciaNormativaTest {
   @Autowired private MateriaRepository materias;
   @Autowired private NormaRepository normas;
   @Autowired private ReglaRepository reglas;
-  @Autowired private ConsolidadoRepository consolidados;
   @Autowired private VersionDelConsolidadoRepository versiones;
   @Autowired private ReglaEnVersionRepository reglasEnVersion;
   @Autowired private EntityManager em;
@@ -57,11 +56,10 @@ class PersistenciaNormativaTest {
             "{}"));
   }
 
-  private VersionEntity nuevaVersion(ConsolidadoEntity consolidado, int numero) {
+  private VersionEntity nuevaVersion(UUID programaId, int numero) {
     return new VersionEntity(
         UUID.randomUUID(),
-        consolidado.getId(),
-        consolidado.getProgramaId(),
+        programaId,
         numero,
         LocalDate.of(2026, 10, 22),
         "INCORPORACION",
@@ -213,7 +211,7 @@ class PersistenciaNormativaTest {
   }
 
   @Test
-  void tt04_guardaYLeeUnConsolidadoConSuVersionYSusReglas() {
+  void tt04_guardaYLeeUnaVersionYSusReglas() {
     ProgramaEntity programa = nuevoPrograma();
     NormaEntity norma = nuevaNorma();
     ReglaEntity regla =
@@ -232,9 +230,7 @@ class PersistenciaNormativaTest {
                 null,
                 null,
                 null));
-    ConsolidadoEntity consolidado =
-        consolidados.save(new ConsolidadoEntity(UUID.randomUUID(), programa.getId()));
-    VersionEntity version = versiones.save(nuevaVersion(consolidado, 1));
+    VersionEntity version = versiones.save(nuevaVersion(programa.getId(), 1));
     ReglaEnVersionEntity enVersion =
         reglasEnVersion.save(
             new ReglaEnVersionEntity(UUID.randomUUID(), version.getId(), regla.getId(), "VIGENTE"));
@@ -244,7 +240,6 @@ class PersistenciaNormativaTest {
         .get()
         .extracting(ReglaEnVersionEntity::getEstado)
         .isEqualTo("VIGENTE");
-    assertThat(consolidados.findById(consolidado.getId())).isPresent();
     assertThat(versiones.findById(version.getId()))
         .get()
         .extracting(VersionEntity::getNumero)
@@ -289,16 +284,13 @@ class PersistenciaNormativaTest {
   @Test
   void tt04_guardarComoNuevaUnaVersionConUnIdExistenteFalla() {
     ProgramaEntity programa = nuevoPrograma();
-    ConsolidadoEntity consolidado =
-        consolidados.save(new ConsolidadoEntity(UUID.randomUUID(), programa.getId()));
-    VersionEntity original = nuevaVersion(consolidado, 1);
+    VersionEntity original = nuevaVersion(programa.getId(), 1);
     versiones.saveAndFlush(original);
     vaciarMemoria();
 
     VersionEntity repetida =
         new VersionEntity(
             original.getId(),
-            original.getConsolidadoId(),
             original.getProgramaId(),
             7,
             original.getFecha(),
@@ -357,11 +349,9 @@ class PersistenciaNormativaTest {
   @Test
   void tt04_dosVersionesDelMismoProgramaConElMismoNumeroFallan() {
     ProgramaEntity programa = nuevoPrograma();
-    ConsolidadoEntity consolidado =
-        consolidados.save(new ConsolidadoEntity(UUID.randomUUID(), programa.getId()));
-    versiones.saveAndFlush(nuevaVersion(consolidado, 1));
+    versiones.saveAndFlush(nuevaVersion(programa.getId(), 1));
 
-    assertThatThrownBy(() -> versiones.saveAndFlush(nuevaVersion(consolidado, 1)))
+    assertThatThrownBy(() -> versiones.saveAndFlush(nuevaVersion(programa.getId(), 1)))
         .isInstanceOf(DataIntegrityViolationException.class);
   }
 }

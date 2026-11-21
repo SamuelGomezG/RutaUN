@@ -13,8 +13,6 @@ import co.edu.unal.rutaun.normativa.dominio.Regla;
 import co.edu.unal.rutaun.normativa.dominio.ReglaEnVersion;
 import co.edu.unal.rutaun.normativa.dominio.VersionDelConsolidado;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
-import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoEntity;
-import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoRepository;
 import co.edu.unal.rutaun.normativa.persistencia.NormaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaRepository;
@@ -56,7 +54,6 @@ public class ImportacionDeNormasService {
   private final ProgramaRepository programas;
   private final NormaRepository normas;
   private final ReglaRepository reglas;
-  private final ConsolidadoRepository consolidados;
   private final VersionDelConsolidadoRepository versiones;
   private final ReglaEnVersionRepository reglasEnVersion;
   private final Clock reloj;
@@ -66,14 +63,12 @@ public class ImportacionDeNormasService {
       ProgramaRepository programas,
       NormaRepository normas,
       ReglaRepository reglas,
-      ConsolidadoRepository consolidados,
       VersionDelConsolidadoRepository versiones,
       ReglaEnVersionRepository reglasEnVersion,
       Clock reloj) {
     this.programas = ArgumentChecks.obligatorio(programas, "programas");
     this.normas = ArgumentChecks.obligatorio(normas, "normas");
     this.reglas = ArgumentChecks.obligatorio(reglas, "reglas");
-    this.consolidados = ArgumentChecks.obligatorio(consolidados, "consolidados");
     this.versiones = ArgumentChecks.obligatorio(versiones, "versiones");
     this.reglasEnVersion = ArgumentChecks.obligatorio(reglasEnVersion, "reglasEnVersion");
     this.reloj = ArgumentChecks.obligatorio(reloj, "reloj");
@@ -234,12 +229,6 @@ public class ImportacionDeNormasService {
       List<ReglaEnVersion> reglas,
       MotivoDeVersion motivo,
       LocalDate fecha) {
-    ConsolidadoEntity consolidado =
-        consolidados
-            .findByProgramaId(programa.getId())
-            .orElseGet(
-                () ->
-                    consolidados.save(new ConsolidadoEntity(UUID.randomUUID(), programa.getId())));
     Optional<VersionDelConsolidado> anterior =
         versiones.findTopByProgramaIdOrderByNumeroDesc(programa.getId()).map(this::cargarVersion);
     List<ReglaEnVersion> resultantes =
@@ -250,8 +239,7 @@ public class ImportacionDeNormasService {
         anterior
             .map(v -> v.siguiente(validado, motivo, fecha))
             .orElseGet(() -> VersionDelConsolidado.primera(validado, motivo, fecha));
-    VersionDelConsolidadoMapper.Filas filas =
-        VersionDelConsolidadoMapper.aEntidades(version, consolidado.getId());
+    VersionDelConsolidadoMapper.Filas filas = VersionDelConsolidadoMapper.aEntidades(version);
     versiones.save(filas.version());
     reglasEnVersion.saveAll(filas.reglasEnVersion());
   }

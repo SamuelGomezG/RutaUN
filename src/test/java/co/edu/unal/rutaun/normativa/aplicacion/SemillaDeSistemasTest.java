@@ -10,7 +10,6 @@ import co.edu.unal.rutaun.normativa.dominio.ExpresionDeMaterias;
 import co.edu.unal.rutaun.normativa.dominio.ReglaEnVersion;
 import co.edu.unal.rutaun.normativa.dominio.TipoCargaPorPeriodo;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
-import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoRepository;
 import co.edu.unal.rutaun.normativa.persistencia.NormaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntity;
@@ -41,7 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Verifica que la semilla real de Sistemas se carga completa con el runner de desarrollo.
  *
  * <p>TT-04-T5 (#131, #100): corre {@link SemillaDeDesarrolloRunner} sobre H2 en memoria y comprueba
- * programas, normas, reglas, consolidados, versiones y reglas por versión, una y dos veces.
+ * programas, normas, reglas, versiones y reglas por versión, una y dos veces.
  *
  * <p>Las cifras son las de la semilla del 2026-11-14, con los dos archivos de datos de prueba de
  * TT-04-T4 (#133). Cambian con #178 (agrupaciones repetidas) y #146 (orden de carga): quien las
@@ -66,7 +65,6 @@ class SemillaDeSistemasTest {
   private static final int PROGRAMAS = 1;
   private static final int NORMAS = 5;
   private static final int REGLAS = 280;
-  private static final int CONSOLIDADOS = 1;
   private static final List<Integer> REGLAS_POR_VERSION = List.of(20, 27, 276, 277, 280);
   private static final int VERSIONES = REGLAS_POR_VERSION.size();
   private static final int REGLAS_EN_VERSION =
@@ -74,21 +72,13 @@ class SemillaDeSistemasTest {
   private static final int REGLAS_DE_LA_VIGENTE =
       REGLAS_POR_VERSION.get(REGLAS_POR_VERSION.size() - 1);
   private static final Cifras ESPERADAS =
-      new Cifras(
-          PROGRAMAS,
-          NORMAS,
-          REGLAS,
-          CONSOLIDADOS,
-          VERSIONES,
-          REGLAS_EN_VERSION,
-          REGLAS_POR_VERSION);
+      new Cifras(PROGRAMAS, NORMAS, REGLAS, VERSIONES, REGLAS_EN_VERSION, REGLAS_POR_VERSION);
 
   private final ImportacionDeProgramasService programas;
   private final ImportacionDeNormasService normas;
   private final ProgramaRepository programasGuardados;
   private final NormaRepository normasGuardadas;
   private final ReglaRepository reglas;
-  private final ConsolidadoRepository consolidados;
   private final VersionDelConsolidadoRepository versiones;
   private final ReglaEnVersionRepository reglasEnVersion;
 
@@ -100,7 +90,6 @@ class SemillaDeSistemasTest {
       ProgramaRepository programasGuardados,
       NormaRepository normasGuardadas,
       ReglaRepository reglas,
-      ConsolidadoRepository consolidados,
       VersionDelConsolidadoRepository versiones,
       ReglaEnVersionRepository reglasEnVersion) {
     this.programas = programas;
@@ -108,7 +97,6 @@ class SemillaDeSistemasTest {
     this.programasGuardados = programasGuardados;
     this.normasGuardadas = normasGuardadas;
     this.reglas = reglas;
-    this.consolidados = consolidados;
     this.versiones = versiones;
     this.reglasEnVersion = reglasEnVersion;
   }
@@ -231,7 +219,6 @@ class SemillaDeSistemasTest {
         programasGuardados.count(),
         normasGuardadas.count(),
         reglas.count(),
-        consolidados.count(),
         ordenadas.size(),
         reglasEnVersion.count(),
         ordenadas.stream()
@@ -325,7 +312,6 @@ class SemillaDeSistemasTest {
       long programas,
       long normas,
       long reglas,
-      long consolidados,
       long versiones,
       long reglasEnVersion,
       List<Integer> reglasPorVersion) {}
