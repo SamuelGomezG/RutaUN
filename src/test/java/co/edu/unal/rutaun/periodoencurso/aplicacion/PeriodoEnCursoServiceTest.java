@@ -17,6 +17,13 @@ class PeriodoEnCursoServiceTest {
   }
 
   @Test
+  void sop04_periodoEnCursoAceptaEspaciosAlrededor() {
+    PeriodoEnCursoService periodoEnCurso = new PeriodoEnCursoService(" 2026-2 ");
+
+    assertThat(periodoEnCurso.actual()).isEqualTo(new PeriodoAcademico(2026, ParteDelAnio.SEGUNDO));
+  }
+
+  @Test
   void sop04_periodoEnCursoRechazaUnFormatoInvalidoAlCrearse() {
     assertThatThrownBy(() -> new PeriodoEnCursoService("2026-3"))
         .isInstanceOf(IllegalArgumentException.class)

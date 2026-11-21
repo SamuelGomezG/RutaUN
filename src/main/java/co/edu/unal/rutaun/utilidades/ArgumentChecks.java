@@ -5,7 +5,7 @@ import java.util.Set;
 
 /**
  * Comprobaciones genéricas de argumentos para los constructores de valores y entidades: no nulo, no
- * vacío, no negativo y positivo. Falla con {@link IllegalArgumentException}.
+ * vacío, no negativo, positivo y en rango. Falla con {@link IllegalArgumentException}.
  */
 public final class ArgumentChecks {
 
@@ -70,6 +70,24 @@ public final class ArgumentChecks {
   public static int obligatorioPositivo(int valor, String nombre) {
     if (valor <= 0) {
       throw new IllegalArgumentException(nombre + " debe ser mayor que cero");
+    }
+    return valor;
+  }
+
+  /**
+   * Exige que el valor esté entre mínimo y máximo, ambos incluidos.
+   *
+   * @param valor valor que se valida
+   * @param minimo límite inferior permitido
+   * @param maximo límite superior permitido
+   * @param nombre nombre del argumento
+   * @return el valor validado
+   * @throws IllegalArgumentException si el valor está fuera del rango
+   */
+  public static int obligatorioEnRango(int valor, int minimo, int maximo, String nombre) {
+    if (valor < minimo || valor > maximo) {
+      throw new IllegalArgumentException(
+          nombre + " debe estar entre " + minimo + " y " + maximo + ": " + valor);
     }
     return valor;
   }

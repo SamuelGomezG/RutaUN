@@ -82,4 +82,20 @@ class ArgumentChecksTest {
   void tt02_obligatorioPositivoAceptaUno() {
     assertThat(ArgumentChecks.obligatorioPositivo(1, "version")).isEqualTo(1);
   }
+
+  @Test
+  void tt02_obligatorioEnRangoAceptaLosLimites() {
+    assertThat(ArgumentChecks.obligatorioEnRango(1000, 1000, 9999, "anio")).isEqualTo(1000);
+    assertThat(ArgumentChecks.obligatorioEnRango(9999, 1000, 9999, "anio")).isEqualTo(9999);
+  }
+
+  @Test
+  void tt02_obligatorioEnRangoRechazaFueraDelRango() {
+    assertThatThrownBy(() -> ArgumentChecks.obligatorioEnRango(999, 1000, 9999, "anio"))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("anio debe estar entre 1000 y 9999: 999");
+    assertThatThrownBy(() -> ArgumentChecks.obligatorioEnRango(10000, 1000, 9999, "anio"))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("anio debe estar entre 1000 y 9999: 10000");
+  }
 }
