@@ -37,6 +37,48 @@ class ConsultaDeReglasOrchestratorTest {
     }
   }
 
+  /**
+   * Un programa cuyo consolidado vigente no tiene reglas que rijan, pero sí una que ya no rige:
+   * solo las pide quien filtra por ese estado.
+   */
+  private static final class SoloReglasQueYaNoRigen implements ConsultaNormativaFacade {
+
+    private final ConsultaNormativaFacade base = ConsultaNormativaFalsa.conReglas();
+    private final ConsultaNormativaFacade vacia = ConsultaNormativaFalsa.sinReglas();
+
+    @Override
+    public List<ProgramaVista> programas() {
+      return base.programas();
+    }
+
+    @Override
+    public Optional<ProgramaVista> programa(ProgramaId id) {
+      return base.programa(id);
+    }
+
+    @Override
+    public Optional<ConsolidadoVista> consolidadoVigente(ProgramaId id) {
+      return vacia.consolidadoVigente(id);
+    }
+
+    @Override
+    public Optional<ConsolidadoVista> buscarReglas(ProgramaId id, BusquedaDeReglas busqueda) {
+      return busqueda.estado().filter(EstadoRegla.YA_NO_RIGE::equals).isPresent()
+          ? base.buscarReglas(id, busqueda)
+          : vacia.buscarReglas(id, busqueda);
+    }
+
+    @Override
+    public List<String> categoriasDeReglas() {
+      return base.categoriasDeReglas();
+    }
+
+    @Override
+    public Optional<ReglaCompletaVista> regla(ProgramaId programa, ReglaId regla) {
+      return Optional.empty();
+    }
+  }
+
   private final RegistroDeEventos eventos = new RegistroDeEventos();
 
   private ConsultaDeReglasOrchestrator orquestador(ConsultaNormativaFacade f) {
@@ -217,6 +259,70 @@ class ConsultaDeReglasOrchestratorTest {
             ConsultaNormativaFalsa.SISTEMAS, BusquedaDeReglas.de("no existe", null, null));
 
     assertThat(((ReglasDelPrograma.Consultadas) resultado).consolidadoSinReglas()).isFalse();
+  }
+
+  @Test
+  void uc06_ext4a_unaBusquedaPorCategoriaConElConsolidadoSinReglasPublicaElIncidente() {
+    var orquestador = orquestador(ConsultaNormativaFalsa.sinReglas());
+
+    ReglasDelPrograma resultado =
+        orquestador.reglasDelPrograma(
+            ConsultaNormativaFalsa.SISTEMAS, BusquedaDeReglas.de(null, "Materias", null));
+
+    assertThat(((ReglasDelPrograma.Consultadas) resultado).consolidadoSinReglas()).isTrue();
+    assertThat(eventos.publicados).hasSize(1);
+  }
+
+  @Test
+  void uc06_ext4a_unaBusquedaPorEstadoConElConsolidadoSinReglasPublicaElIncidente() {
+    var orquestador = orquestador(ConsultaNormativaFalsa.sinReglas());
+
+    ReglasDelPrograma resultado =
+        orquestador.reglasDelPrograma(
+            ConsultaNormativaFalsa.SISTEMAS, BusquedaDeReglas.de(null, null, EstadoRegla.VIGENTE));
+
+    assertThat(((ReglasDelPrograma.Consultadas) resultado).consolidadoSinReglas()).isTrue();
+    assertThat(eventos.publicados).hasSize(1);
+  }
+
+  @Test
+  void uc06_ext4a_pedirLasQueYaNoRigenSinQueHayaNingunaTambienEsElConsolidadoSinReglas() {
+    var orquestador = orquestador(ConsultaNormativaFalsa.sinReglas());
+
+    ReglasDelPrograma resultado =
+        orquestador.reglasDelPrograma(
+            ConsultaNormativaFalsa.SISTEMAS,
+            BusquedaDeReglas.de("zzzzzz", null, EstadoRegla.YA_NO_RIGE));
+
+    assertThat(((ReglasDelPrograma.Consultadas) resultado).consolidadoSinReglas()).isTrue();
+    assertThat(eventos.publicados).hasSize(1);
+  }
+
+  @Test
+  void uc06_ext5a_conSoloReglasQueYaNoRigenUnaBusquedaPorEseEstadoSinResultadosNoEsUnIncidente() {
+    var orquestador = orquestador(new SoloReglasQueYaNoRigen());
+
+    ReglasDelPrograma resultado =
+        orquestador.reglasDelPrograma(
+            ConsultaNormativaFalsa.SISTEMAS,
+            BusquedaDeReglas.de("zzzzzz", null, EstadoRegla.YA_NO_RIGE));
+
+    var consultadas = (ReglasDelPrograma.Consultadas) resultado;
+    assertThat(consultadas.consolidado().sinReglas()).isTrue();
+    assertThat(consultadas.consolidadoSinReglas()).isFalse();
+    assertThat(eventos.publicados).isEmpty();
+  }
+
+  @Test
+  void uc06_ext4a_conSoloReglasQueYaNoRigenSinElEstadoSigueSiendoElConsolidadoSinReglas() {
+    var orquestador = orquestador(new SoloReglasQueYaNoRigen());
+
+    ReglasDelPrograma resultado =
+        orquestador.reglasDelPrograma(
+            ConsultaNormativaFalsa.SISTEMAS, BusquedaDeReglas.de("zzzzzz", null, null));
+
+    assertThat(((ReglasDelPrograma.Consultadas) resultado).consolidadoSinReglas()).isTrue();
+    assertThat(eventos.publicados).hasSize(1);
   }
 
   @Test

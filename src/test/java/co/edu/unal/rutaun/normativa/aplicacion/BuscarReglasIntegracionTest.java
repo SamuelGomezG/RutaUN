@@ -373,4 +373,55 @@ class BuscarReglasIntegracionTest {
         .doesNotContain("No se encontraron reglas");
     assertThat(incidentes.count()).isEqualTo(antes + 1);
   }
+
+  @Test
+  void uc06_ext4a_unaBusquedaPorCategoriaConElConsolidadoSinReglasRegistraElIncidente()
+      throws Exception {
+    todasLasReglasYaNoRigen();
+    long antes = incidentes.count();
+
+    String pagina = paginaDeReglas("categoria=Materias");
+
+    assertThat(pagina)
+        .contains("tiene un problema que ya se informó al administrador de normativa")
+        .doesNotContain("No se encontraron reglas");
+    assertThat(incidentes.count()).isEqualTo(antes + 1);
+  }
+
+  @Test
+  void uc06_ext4a_unaBusquedaPorEstadoConElConsolidadoSinReglasRegistraElIncidente()
+      throws Exception {
+    todasLasReglasYaNoRigen();
+    long antes = incidentes.count();
+
+    String pagina = paginaDeReglas("estado=VIGENTE");
+
+    assertThat(pagina)
+        .contains("tiene un problema que ya se informó al administrador de normativa")
+        .doesNotContain("No se encontraron reglas");
+    assertThat(incidentes.count()).isEqualTo(antes + 1);
+  }
+
+  @Test
+  void uc06_ext5a_pedirLasQueYaNoRigenSinCoincidenciasNoDiceQueElConsolidadoTieneUnProblema()
+      throws Exception {
+    todasLasReglasYaNoRigen();
+    long antes = incidentes.count();
+
+    String pagina = paginaDeReglas("estado=YA_NO_RIGE&texto=zzzzzz");
+
+    assertThat(pagina)
+        .contains("No se encontraron reglas")
+        .doesNotContain("tiene un problema que ya se informó al administrador de normativa");
+    assertThat(incidentes.count()).isEqualTo(antes);
+  }
+
+  private String paginaDeReglas(String consulta) throws Exception {
+    return mockMvc
+        .perform(get("/programas/" + sistemas().valor() + "/reglas?" + consulta))
+        .andExpect(status().isOk())
+        .andReturn()
+        .getResponse()
+        .getContentAsString();
+  }
 }

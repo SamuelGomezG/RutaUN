@@ -12,8 +12,8 @@ public sealed interface ReglasDelPrograma {
 
   /**
    * El programa y su consolidado vigente. El consolidado puede no tener reglas porque la búsqueda
-   * no encontró ninguna (UC06 ext. 5a) o porque el consolidado vigente no las tiene (ext. 4a); en
-   * ese caso el incidente ya se publicó.
+   * no encontró ninguna (UC06 ext. 5a) o porque el consolidado vigente no las tiene (ext. 4a). Solo
+   * en la ext. 4a el incidente ya se publicó; la ext. 5a no publica ninguno.
    *
    * @param programa el programa consultado
    * @param consolidado su consolidado vigente, con las reglas que cumplen la búsqueda

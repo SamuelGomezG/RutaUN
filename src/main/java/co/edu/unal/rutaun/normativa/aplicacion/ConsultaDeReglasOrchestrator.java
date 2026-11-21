@@ -65,10 +65,11 @@ public class ConsultaDeReglasOrchestrator {
 
   /**
    * Las reglas del programa que cumplen la búsqueda (UC06 paso 6). Si ninguna la cumple, mira el
-   * consolidado sin filtrar: si tiene reglas, la búsqueda no encontró nada (ext. 5a) y no publica
-   * ningún incidente; si tampoco las tiene, el problema es del consolidado (ext. 4a) y publica el
-   * incidente, lo mismo que sin búsqueda. En ambos casos devuelve el consolidado sin reglas y dice
-   * cuál de las dos situaciones es, para que la página lo diga.
+   * consolidado sin el texto ni la categoría, pero con el mismo estado: si tiene reglas, la
+   * búsqueda no encontró nada (ext. 5a) y no publica ningún incidente; si tampoco las tiene, el
+   * problema es del consolidado (ext. 4a) y publica el incidente, lo mismo que sin búsqueda. En
+   * ambos casos devuelve el consolidado sin reglas y dice cuál de las dos situaciones es, para que
+   * la página lo diga.
    *
    * @param id identificador del programa
    * @param busqueda texto y filtros; {@link BusquedaDeReglas#TODAS} para el listado normal
@@ -95,9 +96,25 @@ public class ConsultaDeReglasOrchestrator {
         programa.get(), consolidado.get(), consolidadoSinReglas);
   }
 
+  /**
+   * Si el consolidado vigente no tiene reglas aunque no se filtre por texto ni por categoría. Se
+   * mantiene el estado pedido: quien pide las que ya no rigen no recibe el aviso de ext. 4a si el
+   * consolidado las tiene, aunque no tenga ninguna vigente.
+   */
   private boolean esVacioSinFiltrar(ProgramaId id, BusquedaDeReglas busqueda) {
-    return busqueda.esVacia()
-        || consulta.consolidadoVigente(id).map(ConsolidadoVista::sinReglas).orElse(false);
+    if (busqueda.esVacia()) {
+      return true;
+    }
+    return sinReglas(consulta.consolidadoVigente(id))
+        && (busqueda.estado().isEmpty()
+            || sinReglas(
+                consulta.buscarReglas(
+                    id,
+                    new BusquedaDeReglas(Optional.empty(), Optional.empty(), busqueda.estado()))));
+  }
+
+  private static boolean sinReglas(Optional<ConsolidadoVista> consolidado) {
+    return consolidado.map(ConsolidadoVista::sinReglas).orElse(false);
   }
 
   /**
