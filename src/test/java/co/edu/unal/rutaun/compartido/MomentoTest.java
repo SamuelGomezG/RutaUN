@@ -41,6 +41,13 @@ class MomentoTest {
   }
 
   @Test
+  void tt04_unMomentoSeEscribeComoSuPeriodoOSuFecha() {
+    assertThat(new Momento.EnPeriodo(new PeriodoAcademico(2009, ParteDelAnio.PRIMERO)))
+        .hasToString("2009-1");
+    assertThat(new Momento.EnFecha(LocalDate.of(2023, 1, 11))).hasToString("2023-01-11");
+  }
+
+  @Test
   void tt02_momentoSeAnalizaConUnSwitchExhaustivo() {
     Momento deFecha = new Momento.EnFecha(LocalDate.of(2027, 3, 15));
     Momento dePeriodo = new Momento.EnPeriodo(new PeriodoAcademico(2027, ParteDelAnio.SEGUNDO));
