@@ -7,6 +7,7 @@ import co.edu.unal.rutaun.compartido.CodigoMateria;
 import co.edu.unal.rutaun.compartido.Creditos;
 import co.edu.unal.rutaun.compartido.EstadoRestriccion;
 import co.edu.unal.rutaun.compartido.EstadoRestriccion.Certeza;
+import co.edu.unal.rutaun.compartido.Razon;
 import co.edu.unal.rutaun.normativa.ContextoDeEvaluacion;
 import co.edu.unal.rutaun.normativa.TipoComponente;
 import co.edu.unal.rutaun.soporte.ContextoDeEvaluacionFijo;
@@ -32,6 +33,18 @@ class ReglaDeHabilitacionTest {
   }
 
   @Test
+  void tt03_laRazonDeUnaHabilitacionLlevaAprobadosYUmbral() {
+    Restriccion habilitacion = new ReglaDeHabilitacion(A, PROGRAMA, new Creditos(40));
+
+    EstadoRestriccion estado =
+        habilitacion.evaluar(ContextoDeEvaluacionFijo.nuevo().creditosDelPrograma(39).construir());
+
+    assertThat(estado.certeza()).isEqualTo(Certeza.PENDIENTE);
+    assertThat(estado.razones())
+        .containsExactly(new Razon.CreditosDeHabilitacion(new Creditos(39), new Creditos(40)));
+  }
+
+  @Test
   void tt03_unaReglaDeHabilitacionDeComponenteUsaSusCreditos() {
     Restriccion habilitacion = new ReglaDeHabilitacion(A, DISCIPLINAR, new Creditos(20));
     ContextoDeEvaluacion contexto =
@@ -43,7 +56,8 @@ class ReglaDeHabilitacionTest {
     EstadoRestriccion estado = habilitacion.evaluar(contexto);
 
     assertThat(estado.certeza()).isEqualTo(Certeza.CUMPLIDA);
-    assertThat(estado.razones().get(0)).contains("del componente DISCIPLINAR");
+    assertThat(estado.razones())
+        .containsExactly(new Razon.CreditosDeHabilitacion(new Creditos(20), new Creditos(20)));
   }
 
   @Test

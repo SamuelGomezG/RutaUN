@@ -2,6 +2,7 @@ package co.edu.unal.rutaun.normativa.dominio;
 
 import co.edu.unal.rutaun.compartido.CodigoMateria;
 import co.edu.unal.rutaun.compartido.EstadoRestriccion;
+import co.edu.unal.rutaun.compartido.Razon;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
 import java.util.Arrays;
 import java.util.Collection;
@@ -68,14 +69,8 @@ public sealed interface ExpresionDeMaterias
     public EstadoRestriccion evaluar(Function<CodigoMateria, EstadoRestriccion> estadoDe) {
       ArgumentChecks.obligatorio(estadoDe, "estadoDe");
       return switch (tipo()) {
-        case NIVELACION ->
-            EstadoRestriccion.cumplida(
-                "la materia de nivelación " + nombre() + " se da por cumplida");
-        case OTRO_PROGRAMA ->
-            EstadoRestriccion.pendiente(
-                "la materia de otro programa "
-                    + nombre()
-                    + " no se puede cursar desde este programa");
+        case NIVELACION -> EstadoRestriccion.cumplida();
+        case OTRO_PROGRAMA -> EstadoRestriccion.pendiente(new Razon.NoCursableDesdeElPrograma());
       };
     }
   }

@@ -12,7 +12,7 @@ import java.util.List;
  * @param certeza estado de la restricción
  * @param razones explicaciones del estado
  */
-public record EstadoRestriccion(Certeza certeza, List<String> razones) {
+public record EstadoRestriccion(Certeza certeza, List<Razon> razones) {
 
   /** Estados de una restricción, del más al menos cierto (S18). */
   public enum Certeza {
@@ -37,7 +37,7 @@ public record EstadoRestriccion(Certeza certeza, List<String> razones) {
    */
   public EstadoRestriccion y(EstadoRestriccion otro) {
     ArgumentChecks.obligatorio(otro, "otro");
-    List<String> razonesCombinadas = new ArrayList<>();
+    List<Razon> razonesCombinadas = new ArrayList<>();
     if (certeza() != Certeza.CUMPLIDA) {
       razonesCombinadas.addAll(razones());
     }
@@ -57,7 +57,7 @@ public record EstadoRestriccion(Certeza certeza, List<String> razones) {
   public EstadoRestriccion o(EstadoRestriccion otro) {
     ArgumentChecks.obligatorio(otro, "otro");
     Certeza laMejor = mejor(certeza(), otro.certeza());
-    List<String> razonesCombinadas = new ArrayList<>();
+    List<Razon> razonesCombinadas = new ArrayList<>();
     if (certeza() == laMejor) {
       razonesCombinadas.addAll(razones());
     }
@@ -68,22 +68,22 @@ public record EstadoRestriccion(Certeza certeza, List<String> razones) {
   }
 
   /** Estado cumplido con sus razones. */
-  public static EstadoRestriccion cumplida(String... razones) {
+  public static EstadoRestriccion cumplida(Razon... razones) {
     return new EstadoRestriccion(Certeza.CUMPLIDA, List.of(razones));
   }
 
   /** Estado en curso con sus razones. */
-  public static EstadoRestriccion enCurso(String... razones) {
+  public static EstadoRestriccion enCurso(Razon... razones) {
     return new EstadoRestriccion(Certeza.EN_CURSO, List.of(razones));
   }
 
   /** Estado incierto con sus razones. */
-  public static EstadoRestriccion incierta(String... razones) {
+  public static EstadoRestriccion incierta(Razon... razones) {
     return new EstadoRestriccion(Certeza.INCIERTA, List.of(razones));
   }
 
   /** Estado pendiente con sus razones. */
-  public static EstadoRestriccion pendiente(String... razones) {
+  public static EstadoRestriccion pendiente(Razon... razones) {
     return new EstadoRestriccion(Certeza.PENDIENTE, List.of(razones));
   }
 

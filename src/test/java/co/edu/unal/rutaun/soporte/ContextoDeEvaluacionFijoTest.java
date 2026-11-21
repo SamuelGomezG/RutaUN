@@ -7,6 +7,7 @@ import co.edu.unal.rutaun.compartido.CodigoMateria;
 import co.edu.unal.rutaun.compartido.Creditos;
 import co.edu.unal.rutaun.compartido.EstadoRestriccion;
 import co.edu.unal.rutaun.compartido.EstadoRestriccion.Certeza;
+import co.edu.unal.rutaun.compartido.Razon;
 import co.edu.unal.rutaun.normativa.ContextoDeEvaluacion;
 import co.edu.unal.rutaun.normativa.TipoComponente;
 import java.util.HashMap;
@@ -33,13 +34,19 @@ class ContextoDeEvaluacionFijoTest {
   void tt03_elConstructorDeMapasGuardaEstadosCreditosYMateriasDelMismoSemestre() {
     ContextoDeEvaluacion contexto =
         new ContextoDeEvaluacionFijo(
-            Map.of(A, EstadoRestriccion.cumplida("A ok"), B, EstadoRestriccion.enCurso("B ok")),
+            Map.of(
+                A,
+                EstadoRestriccion.cumplida(new Razon.TerminoAprobado(A)),
+                B,
+                EstadoRestriccion.enCurso(new Razon.TerminoEnCurso(B))),
             Map.of(TipoComponente.DISCIPLINAR, new Creditos(12)),
             new Creditos(40),
             Set.of(C));
 
-    assertThat(contexto.estadoDe(A)).isEqualTo(EstadoRestriccion.cumplida("A ok"));
-    assertThat(contexto.estadoDe(B)).isEqualTo(EstadoRestriccion.enCurso("B ok"));
+    assertThat(contexto.estadoDe(A))
+        .isEqualTo(EstadoRestriccion.cumplida(new Razon.TerminoAprobado(A)));
+    assertThat(contexto.estadoDe(B))
+        .isEqualTo(EstadoRestriccion.enCurso(new Razon.TerminoEnCurso(B)));
     assertThat(contexto.creditosAprobadosDelComponente(TipoComponente.DISCIPLINAR))
         .isEqualTo(new Creditos(12));
     assertThat(contexto.creditosAprobadosDelPrograma()).isEqualTo(new Creditos(40));
@@ -56,10 +63,14 @@ class ContextoDeEvaluacionFijoTest {
             .pendiente(D)
             .construir();
 
-    assertThat(contexto.estadoDe(A)).isEqualTo(EstadoRestriccion.cumplida("A está aprobada"));
-    assertThat(contexto.estadoDe(B)).isEqualTo(EstadoRestriccion.enCurso("B está en curso"));
-    assertThat(contexto.estadoDe(C)).isEqualTo(EstadoRestriccion.incierta("C ya no rige"));
-    assertThat(contexto.estadoDe(D)).isEqualTo(EstadoRestriccion.pendiente("D está pendiente"));
+    assertThat(contexto.estadoDe(A))
+        .isEqualTo(EstadoRestriccion.cumplida(new Razon.TerminoAprobado(A)));
+    assertThat(contexto.estadoDe(B))
+        .isEqualTo(EstadoRestriccion.enCurso(new Razon.TerminoEnCurso(B)));
+    assertThat(contexto.estadoDe(C))
+        .isEqualTo(EstadoRestriccion.incierta(new Razon.TerminoQueYaNoRige(C)));
+    assertThat(contexto.estadoDe(D))
+        .isEqualTo(EstadoRestriccion.pendiente(new Razon.TerminoPendiente(D)));
   }
 
   @Test
@@ -83,7 +94,7 @@ class ContextoDeEvaluacionFijoTest {
     ContextoDeEvaluacion contexto = ContextoDeEvaluacionFijo.vacio();
 
     assertThat(contexto.estadoDe(A).certeza()).isEqualTo(Certeza.PENDIENTE);
-    assertThat(contexto.estadoDe(A).razones()).containsExactly("A está pendiente");
+    assertThat(contexto.estadoDe(A).razones()).containsExactly(new Razon.TerminoPendiente(A));
     assertThat(contexto.creditosAprobadosDelPrograma()).isEqualTo(new Creditos(0));
     assertThat(contexto.creditosAprobadosDelComponente(TipoComponente.DISCIPLINAR))
         .isEqualTo(new Creditos(0));
@@ -93,12 +104,12 @@ class ContextoDeEvaluacionFijoTest {
   @Test
   void tt03_elContextoNoCambiaSiSeModificanLosMapasConLosQueSeArmo() {
     Map<CodigoMateria, EstadoRestriccion> estados = new HashMap<>();
-    estados.put(A, EstadoRestriccion.cumplida("A ok"));
+    estados.put(A, EstadoRestriccion.cumplida(new Razon.TerminoAprobado(A)));
     Set<CodigoMateria> mismoSemestre = new HashSet<>();
     ContextoDeEvaluacion contexto =
         new ContextoDeEvaluacionFijo(estados, Map.of(), new Creditos(0), mismoSemestre);
 
-    estados.put(B, EstadoRestriccion.cumplida("B ok"));
+    estados.put(B, EstadoRestriccion.cumplida(new Razon.TerminoAprobado(B)));
     mismoSemestre.add(C);
 
     assertThat(contexto.estadoDe(B).certeza()).isEqualTo(Certeza.PENDIENTE);
