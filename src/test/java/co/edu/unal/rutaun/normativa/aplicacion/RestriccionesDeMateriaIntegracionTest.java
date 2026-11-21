@@ -50,6 +50,8 @@ class RestriccionesDeMateriaIntegracionTest {
   private static final CodigoMateria CALCULO_INTEGRAL = new CodigoMateria("1000005");
   private static final CodigoMateria ELECTRICIDAD_Y_MAGNETISMO = new CodigoMateria("1000017");
   private static final CodigoMateria CALCULO_DIFERENCIAL = new CodigoMateria("1000004");
+  private static final CodigoMateria COMUNICACIONES = new CodigoMateria("2016492");
+  private static final CodigoMateria ELECTRONICA_DIGITAL_I = new CodigoMateria("2016498");
   private static final CodigoMateria TRABAJO_DE_GRADO = new CodigoMateria("2025974");
   private static final CodigoMateria PROGRAMACION_DE_COMPUTADORES = new CodigoMateria("2015734");
 
@@ -119,6 +121,24 @@ class RestriccionesDeMateriaIntegracionTest {
     assertThat(restriccion.fuente()).isPresent();
     assertThat(restriccion.fuente().get().articulo()).isEqualTo("art. 2");
     assertThat(restriccion.aplicaDesde()).contains(LocalDate.of(2023, 12, 12));
+  }
+
+  @Test
+  void uc05_ext4k_unaMateriaCuyoPrerrequisitoEsDeOtroProgramaNoSeDaPorSinRestricciones() {
+    for (CodigoMateria materia : List.of(COMUNICACIONES, ELECTRONICA_DIGITAL_I)) {
+      RestriccionesDeMateriaVista vista = restriccionesDe(materia);
+
+      assertThat(vista.noCursable()).as(materia.valor()).isTrue();
+      assertThat(vista.sinRestricciones()).as(materia.valor()).isFalse();
+    }
+  }
+
+  @Test
+  void uc05_ext4k_unaMateriaCuyoPrerrequisitoEsDeNivelacionSeCursaYNoExigeNada() {
+    RestriccionesDeMateriaVista vista = restriccionesDe(CALCULO_DIFERENCIAL);
+
+    assertThat(vista.noCursable()).isFalse();
+    assertThat(vista.sinRestricciones()).isTrue();
   }
 
   @Test

@@ -19,6 +19,8 @@ import java.util.List;
  * @param restricciones sus prerrequisitos y correquisitos: primero los prerrequisitos y, dentro de
  *     cada clase, por fecha de expedición de su norma, artículo e identificador; el mismo dato
  *     produce siempre la misma vista. Vacía si la materia no exige nada (ext. 3a)
+ * @param noCursable si el prerrequisito de la materia solo se cumple con una materia de otro
+ *     programa, así que no se puede cursar desde el programa (ext. 4k)
  */
 public record RestriccionesDeMateriaVista(
     ProgramaId programa,
@@ -26,7 +28,19 @@ public record RestriccionesDeMateriaVista(
     LocalDate fecha,
     CodigoMateria materia,
     String nombre,
-    List<RestriccionVista> restricciones) {
+    List<RestriccionVista> restricciones,
+    boolean noCursable) {
+
+  /** Una materia que sí se puede cursar desde el programa. */
+  public RestriccionesDeMateriaVista(
+      ProgramaId programa,
+      int version,
+      LocalDate fecha,
+      CodigoMateria materia,
+      String nombre,
+      List<RestriccionVista> restricciones) {
+    this(programa, version, fecha, materia, nombre, restricciones, false);
+  }
 
   /** Exige todos los datos y deja la lista inmutable. */
   public RestriccionesDeMateriaVista {
@@ -38,8 +52,11 @@ public record RestriccionesDeMateriaVista(
     restricciones = ArgumentChecks.copiaSinNulos(restricciones, "restricciones");
   }
 
-  /** Si la materia no tiene restricciones que mostrar (UC05 ext. 3a). */
+  /**
+   * Si la materia no tiene restricciones que mostrar (UC05 ext. 3a). Una materia que no se puede
+   * cursar desde el programa sí tiene una, aunque no se muestre: la de la materia externa.
+   */
   public boolean sinRestricciones() {
-    return restricciones.isEmpty();
+    return restricciones.isEmpty() && !noCursable;
   }
 }

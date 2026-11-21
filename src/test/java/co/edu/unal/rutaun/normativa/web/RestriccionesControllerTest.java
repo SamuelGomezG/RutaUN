@@ -139,6 +139,25 @@ class RestriccionesControllerTest {
   }
 
   @Test
+  void uc05_ext4k_unaMateriaNoCursableLoDiceYRecuerdaQueElPlanNoLaUbica() throws Exception {
+    mockMvc
+        .perform(get(ruta(ConsultaNormativaFalsa.MATERIA_NO_CURSABLE)))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("No se puede cursar desde este programa")))
+        .andExpect(content().string(containsString("no pueden inscribir")))
+        .andExpect(content().string(containsString("El plan de carrera no la ubica")))
+        .andExpect(content().string(not(containsString("no tiene restricciones"))))
+        .andExpect(content().string(not(containsString("Qué la satisface"))));
+  }
+
+  @Test
+  void uc05_ext4k_unaMateriaQueSeCursaNoLlevaLaSenal() throws Exception {
+    mockMvc
+        .perform(get(ruta(ConsultaNormativaFalsa.MATERIA_CON_RESTRICCIONES)))
+        .andExpect(content().string(not(containsString("No se puede cursar desde este programa"))));
+  }
+
+  @Test
   void uc05_gm3_laExplicacionNuncaAfirmaQueAlguienPuedaONoInscribirLaMateria() throws Exception {
     for (CodigoMateria materia :
         new CodigoMateria[] {

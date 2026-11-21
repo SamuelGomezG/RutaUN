@@ -68,6 +68,9 @@ public final class ConsultaNormativaFalsa implements ConsultaNormativaFacade {
   /** Materia de la fachada falsa cuya única restricción es una regla de habilitación. */
   public static final CodigoMateria MATERIA_CON_HABILITACION = new CodigoMateria("2000005");
 
+  /** Materia de la fachada falsa que no se puede cursar desde el programa (UC05 ext. 4k). */
+  public static final CodigoMateria MATERIA_NO_CURSABLE = new CodigoMateria("2000006");
+
   /** Regla de habilitación de {@link #MATERIA_CON_HABILITACION}. */
   public static final ReglaId ID_HABILITACION = new ReglaId(new UUID(0, 17));
 
@@ -316,6 +319,11 @@ public final class ConsultaNormativaFalsa implements ConsultaNormativaFacade {
                       "Regla de prueba: la materia B se cursa con la materia A o después.",
                       materiaA,
                       Optional.of(fuente("1", "art. 3"))))));
+    }
+    if (MATERIA_NO_CURSABLE.equals(materia)) {
+      return Optional.of(
+          new RestriccionesDeMateriaVista(
+              SISTEMAS, 1, LocalDate.of(2026, 10, 1), materia, "Materia F", List.of(), true));
     }
     if (MATERIA_CON_HABILITACION.equals(materia)) {
       return Optional.of(
