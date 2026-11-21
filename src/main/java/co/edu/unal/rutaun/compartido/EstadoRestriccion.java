@@ -1,12 +1,13 @@
 package co.edu.unal.rutaun.compartido;
 
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Resultado de evaluar una restricción por certeza (S18): cumplida, en curso, incierta o pendiente,
- * con las razones que lo explican. Una «y» toma el peor estado de sus términos y una «o», el mejor;
- * esa combinación es TT-03-T4.
+ * con las razones que lo explican. Se combinan con {@link #y}, que toma el peor estado de sus
+ * términos, y con {@link #o}, que toma el mejor.
  *
  * @param certeza estado de la restricción
  * @param razones explicaciones del estado
@@ -31,6 +32,41 @@ public record EstadoRestriccion(Certeza certeza, List<String> razones) {
     razones = ArgumentChecks.copiaSinNulos(razones, "razones");
   }
 
+  /**
+   * «y» con otro estado: toma el peor de los dos y las razones de los términos no cumplidos (S18).
+   */
+  public EstadoRestriccion y(EstadoRestriccion otro) {
+    ArgumentChecks.obligatorio(otro, "otro");
+    List<String> razonesCombinadas = new ArrayList<>();
+    if (certeza() != Certeza.CUMPLIDA) {
+      razonesCombinadas.addAll(razones());
+    }
+    if (otro.certeza() != Certeza.CUMPLIDA) {
+      razonesCombinadas.addAll(otro.razones());
+    }
+    if (razonesCombinadas.isEmpty()) {
+      razonesCombinadas.addAll(razones());
+      razonesCombinadas.addAll(otro.razones());
+    }
+    return new EstadoRestriccion(peor(certeza(), otro.certeza()), razonesCombinadas);
+  }
+
+  /**
+   * «o» con otro estado: toma el mejor de los dos y las razones de las ramas que lo tienen (S18).
+   */
+  public EstadoRestriccion o(EstadoRestriccion otro) {
+    ArgumentChecks.obligatorio(otro, "otro");
+    Certeza laMejor = mejor(certeza(), otro.certeza());
+    List<String> razonesCombinadas = new ArrayList<>();
+    if (certeza() == laMejor) {
+      razonesCombinadas.addAll(razones());
+    }
+    if (otro.certeza() == laMejor) {
+      razonesCombinadas.addAll(otro.razones());
+    }
+    return new EstadoRestriccion(laMejor, razonesCombinadas);
+  }
+
   /** Estado cumplido con sus razones. */
   public static EstadoRestriccion cumplida(String... razones) {
     return new EstadoRestriccion(Certeza.CUMPLIDA, List.of(razones));
@@ -49,5 +85,13 @@ public record EstadoRestriccion(Certeza certeza, List<String> razones) {
   /** Estado pendiente con sus razones. */
   public static EstadoRestriccion pendiente(String... razones) {
     return new EstadoRestriccion(Certeza.PENDIENTE, List.of(razones));
+  }
+
+  private static Certeza peor(Certeza izquierda, Certeza derecha) {
+    return izquierda.ordinal() >= derecha.ordinal() ? izquierda : derecha;
+  }
+
+  private static Certeza mejor(Certeza izquierda, Certeza derecha) {
+    return izquierda.ordinal() <= derecha.ordinal() ? izquierda : derecha;
   }
 }
