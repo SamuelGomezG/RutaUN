@@ -17,8 +17,8 @@ UPDATE norma SET vigente_hasta_tipo = 'FECHA', vigente_hasta_fecha = vigente_has
 ALTER TABLE norma DROP COLUMN vigente_hasta;
 ALTER TABLE norma ADD CONSTRAINT ck_norma_vigente_hasta CHECK (
     (vigente_hasta_tipo IS NULL AND vigente_hasta_fecha IS NULL AND vigente_hasta_periodo IS NULL)
-    OR (vigente_hasta_tipo = 'FECHA' AND vigente_hasta_fecha IS NOT NULL AND vigente_hasta_periodo IS NULL)
-    OR (vigente_hasta_tipo = 'PERIODO' AND vigente_hasta_periodo IS NOT NULL AND vigente_hasta_fecha IS NULL)
+    OR (vigente_hasta_tipo IS NOT NULL AND vigente_hasta_tipo = 'FECHA' AND vigente_hasta_fecha IS NOT NULL AND vigente_hasta_periodo IS NULL)
+    OR (vigente_hasta_tipo IS NOT NULL AND vigente_hasta_tipo = 'PERIODO' AND vigente_hasta_periodo IS NOT NULL AND vigente_hasta_fecha IS NULL)
 );
 
 ALTER TABLE regla ADD COLUMN vigente_desde_tipo VARCHAR(7);
@@ -29,8 +29,8 @@ UPDATE regla SET vigente_desde_tipo = 'FECHA', vigente_desde_fecha = vigente_des
 ALTER TABLE regla DROP COLUMN vigente_desde;
 ALTER TABLE regla ADD CONSTRAINT ck_regla_vigente_desde CHECK (
     (vigente_desde_tipo IS NULL AND vigente_desde_fecha IS NULL AND vigente_desde_periodo IS NULL)
-    OR (vigente_desde_tipo = 'FECHA' AND vigente_desde_fecha IS NOT NULL AND vigente_desde_periodo IS NULL)
-    OR (vigente_desde_tipo = 'PERIODO' AND vigente_desde_periodo IS NOT NULL AND vigente_desde_fecha IS NULL)
+    OR (vigente_desde_tipo IS NOT NULL AND vigente_desde_tipo = 'FECHA' AND vigente_desde_fecha IS NOT NULL AND vigente_desde_periodo IS NULL)
+    OR (vigente_desde_tipo IS NOT NULL AND vigente_desde_tipo = 'PERIODO' AND vigente_desde_periodo IS NOT NULL AND vigente_desde_fecha IS NULL)
 );
 
 ALTER TABLE regla ADD COLUMN vigente_hasta_tipo VARCHAR(7);
@@ -41,8 +41,8 @@ UPDATE regla SET vigente_hasta_tipo = 'FECHA', vigente_hasta_fecha = vigente_has
 ALTER TABLE regla DROP COLUMN vigente_hasta;
 ALTER TABLE regla ADD CONSTRAINT ck_regla_vigente_hasta CHECK (
     (vigente_hasta_tipo IS NULL AND vigente_hasta_fecha IS NULL AND vigente_hasta_periodo IS NULL)
-    OR (vigente_hasta_tipo = 'FECHA' AND vigente_hasta_fecha IS NOT NULL AND vigente_hasta_periodo IS NULL)
-    OR (vigente_hasta_tipo = 'PERIODO' AND vigente_hasta_periodo IS NOT NULL AND vigente_hasta_fecha IS NULL)
+    OR (vigente_hasta_tipo IS NOT NULL AND vigente_hasta_tipo = 'FECHA' AND vigente_hasta_fecha IS NOT NULL AND vigente_hasta_periodo IS NULL)
+    OR (vigente_hasta_tipo IS NOT NULL AND vigente_hasta_tipo = 'PERIODO' AND vigente_hasta_periodo IS NOT NULL AND vigente_hasta_fecha IS NULL)
 );
 
 ALTER TABLE regla ADD COLUMN afectacion_desde_tipo VARCHAR(7);
@@ -50,8 +50,8 @@ ALTER TABLE regla ADD COLUMN afectacion_desde_fecha DATE;
 ALTER TABLE regla ADD COLUMN afectacion_desde_periodo VARCHAR(6);
 ALTER TABLE regla ADD CONSTRAINT ck_regla_afectacion_desde CHECK (
     (afectacion_desde_tipo IS NULL AND afectacion_desde_fecha IS NULL AND afectacion_desde_periodo IS NULL)
-    OR (afectacion_desde_tipo = 'FECHA' AND afectacion_desde_fecha IS NOT NULL AND afectacion_desde_periodo IS NULL)
-    OR (afectacion_desde_tipo = 'PERIODO' AND afectacion_desde_periodo IS NOT NULL AND afectacion_desde_fecha IS NULL)
+    OR (afectacion_desde_tipo IS NOT NULL AND afectacion_desde_tipo = 'FECHA' AND afectacion_desde_fecha IS NOT NULL AND afectacion_desde_periodo IS NULL)
+    OR (afectacion_desde_tipo IS NOT NULL AND afectacion_desde_tipo = 'PERIODO' AND afectacion_desde_periodo IS NOT NULL AND afectacion_desde_fecha IS NULL)
 );
 
 ALTER TABLE regla ADD COLUMN norma_afectada_id UUID;

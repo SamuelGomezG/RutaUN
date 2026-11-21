@@ -282,6 +282,19 @@ class ImportacionDeNormasServiceTest {
     assertThat(normasGuardadas.count()).isEqualTo(1);
   }
 
+  @Test
+  void uc07_paso5_unaAfectacionAUnArticuloDeLaMismaNormaSeImporta() throws IOException {
+    cargarProgramas();
+
+    ResultadoDeImportacionDeNormas resultado = importarTexto(afectacionAUnArticuloDeLaMismaNorma());
+
+    assertThat(resultado.creada()).isTrue();
+    NormaEntity guardada = normasGuardadas.findAll().getFirst();
+    List<ReglaEntity> reglasGuardadas = reglas.findAll();
+    assertThat(reglasGuardadas).hasSize(1);
+    assertThat(reglasGuardadas.getFirst().getNormaAfectadaId()).isEqualTo(guardada.getId());
+  }
+
   private ResultadoDeImportacionDeNormas importarTexto(String json) {
     return normas.importar(new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8)));
   }
@@ -342,6 +355,32 @@ class ImportacionDeNormasServiceTest {
   }
 
   private static String afectacionAUnArticuloDelAcuerdo003A() {
+    return afectacionAUnArticulo(
+        "ACUERDO",
+        "003-A",
+        2022,
+        "Consejo Académico",
+        "Afecta un artículo de otra norma (datos de prueba)",
+        "Regla ficticia que afecta el artículo 7 del Acuerdo 003-A (datos de prueba).");
+  }
+
+  private static String afectacionAUnArticuloDeLaMismaNorma() {
+    return afectacionAUnArticulo(
+        "CIRCULAR",
+        "98",
+        2026,
+        "Vicerrectoría Académica (datos de prueba)",
+        "Afecta un artículo de la misma norma (datos de prueba)",
+        "Regla ficticia que afecta el artículo 7 de su propia norma (datos de prueba).");
+  }
+
+  private static String afectacionAUnArticulo(
+      String tipoNorma,
+      String numeroNorma,
+      int anioNorma,
+      String organoNorma,
+      String objeto,
+      String enunciado) {
     String json =
         """
         {
@@ -374,8 +413,8 @@ class ImportacionDeNormasServiceTest {
           "reglas": [
             {
               "categoria": "OTRA",
-              "objeto": "Afecta un artículo de otra norma (datos de prueba)",
-              "enunciado": "Regla ficticia que afecta el artículo 7 del Acuerdo 003-A (datos de prueba).",
+              "objeto": "%s",
+              "enunciado": "%s",
               "articulo": "art. 1",
               "vigenciaPropia": null,
               "clasificacion": "INFORMATIVA",
@@ -384,10 +423,10 @@ class ImportacionDeNormasServiceTest {
                 "destino": {
                   "tipo": "ARTICULO",
                   "norma": {
-                    "tipo": "ACUERDO",
-                    "numero": "003-A",
-                    "anio": 2022,
-                    "organo": "Consejo Académico"
+                    "tipo": "%s",
+                    "numero": "%s",
+                    "anio": %d,
+                    "organo": "%s"
                   },
                   "articulo": "art. 7"
                 },
@@ -398,7 +437,7 @@ class ImportacionDeNormasServiceTest {
           ]
         }
         """;
-    return json;
+    return json.formatted(objeto, enunciado, tipoNorma, numeroNorma, anioNorma, organoNorma);
   }
 
   private enum CasoDePeriodo {

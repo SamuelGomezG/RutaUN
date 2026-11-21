@@ -334,6 +334,20 @@ class PersistenciaNormativaTest {
                         + " '2020-01-01' WHERE id = ?",
                     regla.getId()))
         .isInstanceOf(DataIntegrityViolationException.class);
+    assertThatThrownBy(
+            () ->
+                jdbc.update(
+                    "UPDATE norma SET vigente_hasta_tipo = NULL, vigente_hasta_fecha = DATE"
+                        + " '2030-01-01' WHERE id = ?",
+                    norma.getId()))
+        .isInstanceOf(DataIntegrityViolationException.class);
+    assertThatThrownBy(
+            () ->
+                jdbc.update(
+                    "UPDATE regla SET afectacion_desde_tipo = NULL, afectacion_desde_fecha = DATE"
+                        + " '2030-01-01' WHERE id = ?",
+                    regla.getId()))
+        .isInstanceOf(DataIntegrityViolationException.class);
   }
 
   @Test
