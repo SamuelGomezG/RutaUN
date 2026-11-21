@@ -65,6 +65,12 @@ public final class ConsultaNormativaFalsa implements ConsultaNormativaFacade {
   /** Materia de prueba con dos prerrequisitos, uno de ellos sin fuente, y un correquisito. */
   public static final CodigoMateria MATERIA_CON_RESTRICCIONES = new CodigoMateria("2000002");
 
+  /** Materia de la fachada falsa cuya única restricción es una regla de habilitación. */
+  public static final CodigoMateria MATERIA_CON_HABILITACION = new CodigoMateria("2000005");
+
+  /** Regla de habilitación de {@link #MATERIA_CON_HABILITACION}. */
+  public static final ReglaId ID_HABILITACION = new ReglaId(new UUID(0, 17));
+
   /** Enlace de prueba a Régimen Legal. */
   public static final String ENLACE = "https://regimen-legal.example.org/prueba-regla-12";
 
@@ -310,6 +316,22 @@ public final class ConsultaNormativaFalsa implements ConsultaNormativaFacade {
                       "Regla de prueba: la materia B se cursa con la materia A o después.",
                       materiaA,
                       Optional.of(fuente("1", "art. 3"))))));
+    }
+    if (MATERIA_CON_HABILITACION.equals(materia)) {
+      return Optional.of(
+          restriccionesDeLaMateria(
+              materia,
+              "Materia E",
+              List.of(
+                  restriccion(
+                      ID_HABILITACION,
+                      TipoDeRestriccion.HABILITACION,
+                      "Materia E: haber aprobado 40 créditos del Componente de Formación"
+                          + " Disciplinar o Profesional.",
+                      new ExpresionVista.Condicion(
+                          "Materia E: haber aprobado 40 créditos del Componente de Formación"
+                              + " Disciplinar o Profesional."),
+                      Optional.of(fuente("1", "art. 2"))))));
     }
     return Optional.empty();
   }

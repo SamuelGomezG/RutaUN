@@ -11,9 +11,9 @@ import java.util.Optional;
  * y GE 2): qué exige, su fuente, su fecha de aplicación y su vigencia.
  *
  * @param regla regla del consolidado que la expresa; con ella se abre la regla completa
- * @param tipo si es un prerrequisito o un correquisito
+ * @param tipo si es un prerrequisito, un correquisito o una regla de habilitación
  * @param enunciado texto de la regla
- * @param exige materias que la satisfacen
+ * @param exige materias que la satisfacen o, en una habilitación, la condición que exige
  * @param fuente fuente de la regla; vacía si quedó «sin fuente registrada» (ext. 4d)
  * @param estado estado de la regla en el consolidado vigente
  * @param temporal si la regla es temporal por su norma o por una vigencia propia (ext. 4e)

@@ -8,6 +8,7 @@ import co.edu.unal.rutaun.normativa.BusquedaDeReglas;
 import co.edu.unal.rutaun.normativa.ConsolidadoVista;
 import co.edu.unal.rutaun.normativa.ConsultaNormativaFacade;
 import co.edu.unal.rutaun.normativa.EslabonVista;
+import co.edu.unal.rutaun.normativa.ExpresionVista;
 import co.edu.unal.rutaun.normativa.FuenteVista;
 import co.edu.unal.rutaun.normativa.NormaVista;
 import co.edu.unal.rutaun.normativa.ProgramaVista;
@@ -282,6 +283,16 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
                     regla,
                     estados.get(fila.getId()),
                     normasPorId.get(fila.getNormaId())));
+        case DatosDeRegla.DeHabilitacion d ->
+            candidatas.add(
+                new RestriccionDeLaMateria(
+                    TipoDeRestriccion.HABILITACION,
+                    d.regla().materia(),
+                    null,
+                    fila,
+                    regla,
+                    estados.get(fila.getId()),
+                    normasPorId.get(fila.getNormaId())));
         default -> {}
       }
     }
@@ -308,7 +319,11 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
             restricciones));
   }
 
-  /** Un prerrequisito o un correquisito del consolidado, con lo que hace falta para mostrarlo. */
+  /**
+   * Un prerrequisito, un correquisito o una regla de habilitación del consolidado, con lo que hace
+   * falta para mostrarlo. La habilitación no tiene expresión de materias: va con {@code null} y se
+   * muestra con el enunciado de la regla.
+   */
   private record RestriccionDeLaMateria(
       TipoDeRestriccion tipo,
       CodigoMateria materia,
@@ -332,20 +347,23 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
 
     /** La vista de la restricción; vacía si solo menciona materias externas (ext. 4k). */
     Optional<RestriccionVista> aVista(Function<CodigoMateria, String> nombre) {
-      return ExpresionAVista.aVista(expresion, nombre)
-          .map(
-              exige ->
-                  new RestriccionVista(
-                      regla.id(),
-                      tipo,
-                      regla.enunciado(),
-                      exige,
-                      Optional.ofNullable(norma).map(n -> aFuente(n, regla.fuente().articulo())),
-                      estado,
-                      esTemporal(
-                          regla.vigenciaPropia(), norma == null ? null : norma.getVigenteHasta()),
-                      aplicaDesde(fila, norma),
-                      vigenteHasta(fila, norma)));
+      Optional<ExpresionVista> exigencia =
+          expresion == null
+              ? Optional.of(new ExpresionVista.Condicion(regla.enunciado()))
+              : ExpresionAVista.aVista(expresion, nombre);
+      return exigencia.map(
+          exige ->
+              new RestriccionVista(
+                  regla.id(),
+                  tipo,
+                  regla.enunciado(),
+                  exige,
+                  Optional.ofNullable(norma).map(n -> aFuente(n, regla.fuente().articulo())),
+                  estado,
+                  esTemporal(
+                      regla.vigenciaPropia(), norma == null ? null : norma.getVigenteHasta()),
+                  aplicaDesde(fila, norma),
+                  vigenteHasta(fila, norma)));
     }
   }
 

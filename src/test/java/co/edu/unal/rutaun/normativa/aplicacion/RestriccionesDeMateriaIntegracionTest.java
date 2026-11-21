@@ -50,6 +50,7 @@ class RestriccionesDeMateriaIntegracionTest {
   private static final CodigoMateria CALCULO_INTEGRAL = new CodigoMateria("1000005");
   private static final CodigoMateria ELECTRICIDAD_Y_MAGNETISMO = new CodigoMateria("1000017");
   private static final CodigoMateria CALCULO_DIFERENCIAL = new CodigoMateria("1000004");
+  private static final CodigoMateria TRABAJO_DE_GRADO = new CodigoMateria("2025974");
   private static final CodigoMateria PROGRAMACION_DE_COMPUTADORES = new CodigoMateria("2015734");
 
   @Autowired private ImportacionDeProgramasService importacionDeProgramas;
@@ -103,6 +104,21 @@ class RestriccionesDeMateriaIntegracionTest {
     assertThat(restriccion.fuente().get().norma().tipo()).isEqualTo(TipoNorma.ACUERDO);
     assertThat(restriccion.fuente().get().norma().numero()).isEqualTo("11");
     assertThat(restriccion.fuente().get().norma().anio()).isEqualTo(2023);
+  }
+
+  @Test
+  void uc05_ext4c_unaMateriaConReglaDeHabilitacionLaMuestraYNoDiceQueNoTieneRestricciones() {
+    RestriccionesDeMateriaVista vista = restriccionesDe(TRABAJO_DE_GRADO);
+
+    assertThat(vista.sinRestricciones()).isFalse();
+    assertThat(vista.restricciones()).hasSize(1);
+    RestriccionVista restriccion = vista.restricciones().getFirst();
+    assertThat(restriccion.tipo()).isEqualTo(TipoDeRestriccion.HABILITACION);
+    assertThat(restriccion.exige().redaccion()).contains("haber aprobado 60 créditos");
+    assertThat(restriccion.estado()).isEqualTo(EstadoRegla.VIGENTE);
+    assertThat(restriccion.fuente()).isPresent();
+    assertThat(restriccion.fuente().get().articulo()).isEqualTo("art. 2");
+    assertThat(restriccion.aplicaDesde()).contains(LocalDate.of(2023, 12, 12));
   }
 
   @Test
