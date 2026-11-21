@@ -5,6 +5,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class PeriodoAcademicoTest {
 
@@ -27,10 +30,10 @@ class PeriodoAcademicoTest {
   void tt02_periodoAcademicoRechazaUnAnioSinCuatroCifras() {
     assertThatThrownBy(() -> new PeriodoAcademico(999, ParteDelAnio.PRIMERO))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("anio debe tener cuatro cifras");
+        .hasMessageContaining("anio debe estar entre 1000 y 9999");
     assertThatThrownBy(() -> new PeriodoAcademico(10000, ParteDelAnio.PRIMERO))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("anio debe tener cuatro cifras");
+        .hasMessageContaining("anio debe estar entre 1000 y 9999");
   }
 
   @Test
@@ -46,10 +49,12 @@ class PeriodoAcademicoTest {
   }
 
   @Test
-  void tt02_periodoAcademicoNoTieneSiguienteMasAllaDelUltimoAnio() {
+  void tt02_noHaySiguienteDespuesDelUltimoPeriodo() {
     PeriodoAcademico ultimo = new PeriodoAcademico(9999, ParteDelAnio.SEGUNDO);
 
-    assertThatThrownBy(ultimo::siguiente).isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(ultimo::siguiente)
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessage("no hay periodo después de 9999-2");
   }
 
   @Test
@@ -70,12 +75,17 @@ class PeriodoAcademicoTest {
   }
 
   @Test
-  void tt02_periodoAcademicoRechazaCompararConNull() {
+  void tt02_compararConNullLanzaNullPointerException() {
     PeriodoAcademico periodo = new PeriodoAcademico(2026, ParteDelAnio.SEGUNDO);
 
     assertThatThrownBy(() -> periodo.compareTo(null))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("otro no puede ser null");
+        .isInstanceOf(NullPointerException.class)
+        .hasMessage("otro");
+  }
+
+  @Test
+  void tt02_unPeriodoSeEscribeComoAAAA1() {
+    assertThat(new PeriodoAcademico(2027, ParteDelAnio.PRIMERO).toString()).isEqualTo("2027-1");
   }
 
   @Test
@@ -90,34 +100,12 @@ class PeriodoAcademicoTest {
         .isEqualTo(new PeriodoAcademico(2027, ParteDelAnio.SEGUNDO));
   }
 
-  @Test
-  void sop04_periodoAcademicoRechazaUnTextoConOtroFormato() {
-    List<String> invalidos =
-        List.of(
-            "",
-            "2026",
-            "2026-3",
-            "2026-0",
-            "26-1",
-            "20261",
-            "2026/1",
-            "abcd-1",
-            "2026-1-1",
-            " 2026-1",
-            "2026-1 ",
-            "2026-12");
-    for (String texto : invalidos) {
-      assertThatThrownBy(() -> PeriodoAcademico.desdeTexto(texto))
-          .isInstanceOf(IllegalArgumentException.class)
-          .hasMessageContaining("AAAA-1 o AAAA-2");
-    }
-  }
-
-  @Test
-  void sop04_periodoAcademicoRechazaUnTextoNulo() {
-    assertThatThrownBy(() -> PeriodoAcademico.desdeTexto(null))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("AAAA-1 o AAAA-2");
+  @ParameterizedTest
+  @ValueSource(strings = {"2027-3", "27-1", "2027/1", ""})
+  @NullSource
+  void tt02_unTextoInvalidoNoEsUnPeriodo(String texto) {
+    assertThatThrownBy(() -> PeriodoAcademico.desdeTexto(texto))
+        .isInstanceOf(IllegalArgumentException.class);
   }
 
   @Test

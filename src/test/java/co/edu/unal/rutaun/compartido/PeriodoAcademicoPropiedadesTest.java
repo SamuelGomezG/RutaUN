@@ -20,4 +20,12 @@ class PeriodoAcademicoPropiedadesTest {
     semestres += siguiente.parte().numero() - periodo.parte().numero();
     assertThat(semestres).isEqualTo(1);
   }
+
+  @Property
+  void tt02_leerElTextoDeUnPeriodoDevuelveElMismoPeriodo(
+      @ForAll @IntRange(min = 1000, max = 9999) int anio, @ForAll ParteDelAnio parte) {
+    PeriodoAcademico periodo = new PeriodoAcademico(anio, parte);
+
+    assertThat(PeriodoAcademico.desdeTexto(periodo.toString())).isEqualTo(periodo);
+  }
 }

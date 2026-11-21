@@ -73,4 +73,22 @@ public final class ArgumentChecks {
     }
     return valor;
   }
+
+  /**
+   * Exige que el valor esté entre mínimo y máximo, ambos incluidos.
+   *
+   * @param valor valor que se valida
+   * @param minimo límite inferior permitido
+   * @param maximo límite superior permitido
+   * @param nombre nombre del argumento
+   * @return el valor validado
+   * @throws IllegalArgumentException si el valor está fuera del rango
+   */
+  public static int obligatorioEnRango(int valor, int minimo, int maximo, String nombre) {
+    if (valor < minimo || valor > maximo) {
+      throw new IllegalArgumentException(
+          nombre + " debe estar entre " + minimo + " y " + maximo + ": " + valor);
+    }
+    return valor;
+  }
 }
