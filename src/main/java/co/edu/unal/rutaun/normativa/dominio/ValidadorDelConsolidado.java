@@ -15,9 +15,10 @@ import java.util.Set;
  * del programa (diseño de clases, «ValidadorDelConsolidado»). Es el único camino para obtener uno.
  *
  * <p>UC07 ext. 6f: una regla clasificada como {@code DEL_PLAN} cuya norma es temporal se rechaza,
- * porque debe ser {@code INFORMATIVA}. También se rechaza una regla que ya está en la versión
- * anterior o repetida entre las nuevas. Las reglas de la versión anterior no se vuelven a validar:
- * ya pasaron cuando se incorporaron (supuesto del equipo, #154).
+ * porque debe ser {@code INFORMATIVA}. La vigencia propia temporal ya la impide {@link Regla} al
+ * construir la regla, así que aquí solo se mira la vigencia de la norma. También se rechaza una
+ * regla que ya está en la versión anterior o repetida entre las nuevas. Las reglas de la versión
+ * anterior no se vuelven a validar: ya pasaron cuando se incorporaron (supuesto del equipo, #154).
  *
  * <p>#42 (UC07-HU04) agregará aquí las demás verificaciones de coherencia.
  */
@@ -27,7 +28,7 @@ public final class ValidadorDelConsolidado {
 
   /**
    * Valida las reglas nuevas y arma las resultantes: las de la versión anterior, con su estado, más
-   * las nuevas, como R-32 (#130).
+   * las nuevas, según UC07-HU03-T4 (#130).
    *
    * @param programa programa al que pertenecen las reglas
    * @param anterior versión anterior del programa, si la hay

@@ -230,6 +230,20 @@ class ImportacionDeNormasServiceTest {
   }
 
   @Test
+  void uc07_ext6f_importarUnaReglaConVigenciaPropiaTemporalClasificadaComoDelPlanNoGuardaNada()
+      throws IOException {
+    cargarProgramas();
+
+    assertThatThrownBy(() -> importarNorma("json/invalidos/temporal-del-plan.json"))
+        .isInstanceOf(ArchivoDeNormativaInvalidoException.class)
+        .hasMessageContaining("una regla temporal no puede ser regla del plan");
+
+    assertThat(normasGuardadas.findAll()).isEmpty();
+    assertThat(reglas.findAll()).isEmpty();
+    assertThat(versiones.findAll()).isEmpty();
+  }
+
+  @Test
   void uc07_ext4c_unaNormaYaRegistradaSeOmiteSinValidarSusReglas() throws IOException {
     cargarProgramas();
     String archivo = "json/invalidos/norma-temporal-con-regla-del-plan.json";
