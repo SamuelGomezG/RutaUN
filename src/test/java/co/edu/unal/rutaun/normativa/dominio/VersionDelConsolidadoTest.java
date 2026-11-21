@@ -3,9 +3,11 @@ package co.edu.unal.rutaun.normativa.dominio;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import co.edu.unal.rutaun.compartido.CodigoMateria;
 import co.edu.unal.rutaun.compartido.Creditos;
 import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.NormaId;
+import co.edu.unal.rutaun.compartido.PeriodoAcademico;
 import co.edu.unal.rutaun.compartido.ProgramaId;
 import co.edu.unal.rutaun.compartido.ReglaId;
 import co.edu.unal.rutaun.normativa.ClasificacionRegla;
@@ -13,6 +15,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 class VersionDelConsolidadoTest {
@@ -118,9 +121,10 @@ class VersionDelConsolidadoTest {
   }
 
   @Test
-  void tt02_unaReformaProgramadaYSuVersionAutomaticaSubenElPlanUnaSolaVez() {
+  void s19_unaVersionAutomaticaNoSubeLaVersionDelPlan() {
     ReglaEnVersion base = estructural(ReglaId.nuevo(), EstadoRegla.VIGENTE);
     Regla reforma = regla(ReglaId.nuevo(), new DatosDeRegla.DePrograma(new Creditos(160)));
+    ReglaEnVersion otra = estructural(ReglaId.nuevo(), EstadoRegla.VIGENTE);
     VersionDelConsolidado v1 = VersionDelConsolidado.primera(validado(base), MOTIVO, FECHA);
 
     VersionDelConsolidado v2 =
@@ -131,11 +135,74 @@ class VersionDelConsolidadoTest {
             validado(base, new ReglaEnVersion(reforma, EstadoRegla.VIGENTE)),
             new MotivoDeVersion.AutomaticoPorFecha(FECHA),
             FECHA);
+    VersionDelConsolidado v4 =
+        v3.siguiente(
+            validado(base, new ReglaEnVersion(reforma, EstadoRegla.VIGENTE), otra),
+            new MotivoDeVersion.AutomaticoPorPeriodo(PeriodoAcademico.desdeTexto("2027-1")),
+            FECHA);
+    VersionDelConsolidado v5 =
+        v4.siguiente(
+            validado(base, new ReglaEnVersion(reforma, EstadoRegla.VIGENTE)),
+            new MotivoDeVersion.AutomaticoPorFecha(FECHA),
+            FECHA);
 
     assertThat(v1.versionDelPlan()).isEqualTo(1);
     assertThat(v2.versionDelPlan()).isEqualTo(2);
     assertThat(v3.versionDelPlan()).isEqualTo(2);
-    assertThat(v3.numero()).isEqualTo(3);
+    assertThat(v4.versionDelPlan()).isEqualTo(2);
+    assertThat(v5.versionDelPlan()).isEqualTo(2);
+    assertThat(v5.numero()).isEqualTo(5);
+  }
+
+  @Test
+  void s19_unaCorreccionNoSubeLaVersionDelPlan() {
+    ReglaEnVersion base = estructural(ReglaId.nuevo(), EstadoRegla.VIGENTE);
+    ReglaEnVersion reemplazo = estructural(ReglaId.nuevo(), EstadoRegla.VIGENTE);
+    VersionDelConsolidado v1 = VersionDelConsolidado.primera(validado(base), MOTIVO, FECHA);
+
+    VersionDelConsolidado v2 = v1.siguiente(validado(reemplazo), CORRECCION, FECHA);
+
+    assertThat(v2.versionDelPlan()).isEqualTo(1);
+  }
+
+  @Test
+  void s19_unaReformaProgramadaSubeLaVersionDelPlanAlIncorporarse() {
+    ReglaEnVersion base = estructural(ReglaId.nuevo(), EstadoRegla.VIGENTE);
+    ReglaEnVersion reforma = estructural(ReglaId.nuevo(), EstadoRegla.PROGRAMADA);
+    VersionDelConsolidado v1 = VersionDelConsolidado.primera(validado(base), MOTIVO, FECHA);
+
+    VersionDelConsolidado v2 = v1.siguiente(validado(base, reforma), MOTIVO, FECHA);
+
+    assertThat(v2.versionDelPlan()).isEqualTo(2);
+  }
+
+  @Test
+  void s19_unaEquivalenciaNuevaNoSubeLaVersionDelPlan() {
+    ReglaEnVersion base = estructural(ReglaId.nuevo(), EstadoRegla.VIGENTE);
+    ReglaEnVersion equivalencia =
+        new ReglaEnVersion(
+            regla(
+                ReglaId.nuevo(),
+                new DatosDeRegla.DeEquivalencia(
+                    Set.of(new CodigoMateria("MAT-1")), new CodigoMateria("MAT-2"))),
+            EstadoRegla.VIGENTE);
+    VersionDelConsolidado v1 = VersionDelConsolidado.primera(validado(base), MOTIVO, FECHA);
+
+    VersionDelConsolidado v2 = v1.siguiente(validado(base, equivalencia), MOTIVO, FECHA);
+
+    assertThat(v2.versionDelPlan()).isEqualTo(1);
+  }
+
+  @Test
+  void tt02_siguienteRechazaMotivoYFechaNull() {
+    VersionDelConsolidado primera = VersionDelConsolidado.primera(validado(), MOTIVO, FECHA);
+
+    assertThatThrownBy(() -> primera.siguiente(validado(), null, FECHA))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("motivo no puede ser null");
+    assertThatThrownBy(() -> primera.siguiente(validado(), MOTIVO, null))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("fecha no puede ser null");
   }
 
   @Test
