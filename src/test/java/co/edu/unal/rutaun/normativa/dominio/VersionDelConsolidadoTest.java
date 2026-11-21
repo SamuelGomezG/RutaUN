@@ -35,15 +35,30 @@ class VersionDelConsolidadoTest {
   }
 
   private static Regla regla(ReglaId id, DatosDeRegla datos) {
+    return regla(id, datos, new Fuente(NORMA, "art. 1"), Optional.empty());
+  }
+
+  private static Regla regla(
+      ReglaId id, DatosDeRegla datos, Fuente fuente, Optional<Afectacion> afectacion) {
     return Regla.reconstituir(
         id,
         "Objeto",
         "Enunciado",
-        new Fuente(NORMA, "art. 1"),
+        fuente,
         Optional.empty(),
         ClasificacionRegla.DEL_PLAN,
-        Optional.empty(),
+        afectacion,
         datos);
+  }
+
+  private static Afectacion excepcionSobre(ReglaId reglaAfectada) {
+    return new Afectacion(
+        TipoAfectacion.EXCEPTUA, Optional.of(reglaAfectada), Optional.empty(), Optional.empty());
+  }
+
+  private static Afectacion excepcionSobre(Fuente articuloAfectado) {
+    return new Afectacion(
+        TipoAfectacion.EXCEPTUA, Optional.empty(), Optional.of(articuloAfectado), Optional.empty());
   }
 
   private static ConsolidadoValidado validado(ReglaEnVersion... reglas) {
@@ -189,6 +204,94 @@ class VersionDelConsolidadoTest {
     VersionDelConsolidado v1 = VersionDelConsolidado.primera(validado(base), MOTIVO, FECHA);
 
     VersionDelConsolidado v2 = v1.siguiente(validado(base, equivalencia), MOTIVO, FECHA);
+
+    assertThat(v2.versionDelPlan()).isEqualTo(1);
+  }
+
+  @Test
+  void s19_unaExcepcionSobreUnaReglaDeEstructuraSubeLaVersionDelPlan() {
+    Regla estructural = regla(ReglaId.nuevo(), new DatosDeRegla.DePrograma(new Creditos(160)));
+    ReglaEnVersion base = new ReglaEnVersion(estructural, EstadoRegla.VIGENTE);
+    ReglaEnVersion excepcion =
+        new ReglaEnVersion(
+            regla(
+                ReglaId.nuevo(),
+                new DatosDeRegla.DeOtraCategoria(),
+                new Fuente(NORMA, "art. 9"),
+                Optional.of(excepcionSobre(estructural.id()))),
+            EstadoRegla.VIGENTE);
+    VersionDelConsolidado v1 = VersionDelConsolidado.primera(validado(base), MOTIVO, FECHA);
+
+    VersionDelConsolidado v2 = v1.siguiente(validado(base, excepcion), MOTIVO, FECHA);
+
+    assertThat(v2.versionDelPlan()).isEqualTo(2);
+  }
+
+  @Test
+  void s19_unaAfectacionAUnArticuloConReglasDeEstructuraSubeLaVersionDelPlan() {
+    Fuente articulo = new Fuente(NORMA, "art. 7");
+    ReglaEnVersion base =
+        new ReglaEnVersion(
+            regla(
+                ReglaId.nuevo(),
+                new DatosDeRegla.DePrograma(new Creditos(160)),
+                articulo,
+                Optional.empty()),
+            EstadoRegla.VIGENTE);
+    ReglaEnVersion excepcion =
+        new ReglaEnVersion(
+            regla(
+                ReglaId.nuevo(),
+                new DatosDeRegla.DeOtraCategoria(),
+                new Fuente(NORMA, "art. 9"),
+                Optional.of(excepcionSobre(articulo))),
+            EstadoRegla.VIGENTE);
+    VersionDelConsolidado v1 = VersionDelConsolidado.primera(validado(base), MOTIVO, FECHA);
+
+    VersionDelConsolidado v2 = v1.siguiente(validado(base, excepcion), MOTIVO, FECHA);
+
+    assertThat(v2.versionDelPlan()).isEqualTo(2);
+  }
+
+  @Test
+  void s19_unaAfectacionHeredadaNoVuelveASubirLaVersionDelPlan() {
+    Regla estructural = regla(ReglaId.nuevo(), new DatosDeRegla.DePrograma(new Creditos(160)));
+    ReglaEnVersion base = new ReglaEnVersion(estructural, EstadoRegla.VIGENTE);
+    ReglaEnVersion excepcion =
+        new ReglaEnVersion(
+            regla(
+                ReglaId.nuevo(),
+                new DatosDeRegla.DeOtraCategoria(),
+                new Fuente(NORMA, "art. 9"),
+                Optional.of(excepcionSobre(estructural.id()))),
+            EstadoRegla.VIGENTE);
+    VersionDelConsolidado v1 =
+        VersionDelConsolidado.primera(validado(base, excepcion), MOTIVO, FECHA);
+    ReglaEnVersion otra = noEstructural(ReglaId.nuevo(), EstadoRegla.VIGENTE);
+
+    VersionDelConsolidado v2 = v1.siguiente(validado(base, excepcion, otra), MOTIVO, FECHA);
+
+    assertThat(v2.versionDelPlan()).isEqualTo(1);
+  }
+
+  @Test
+  void s19_unaExcepcionSobreUnaReglaQueNoEsDeEstructuraNoSubeLaVersionDelPlan() {
+    ReglaEnVersion base = estructural(ReglaId.nuevo(), EstadoRegla.VIGENTE);
+    Regla noEstructural = regla(ReglaId.nuevo(), new DatosDeRegla.DeOtraCategoria());
+    ReglaEnVersion baseNoEstructural = new ReglaEnVersion(noEstructural, EstadoRegla.VIGENTE);
+    ReglaEnVersion excepcion =
+        new ReglaEnVersion(
+            regla(
+                ReglaId.nuevo(),
+                new DatosDeRegla.DeOtraCategoria(),
+                new Fuente(NORMA, "art. 9"),
+                Optional.of(excepcionSobre(noEstructural.id()))),
+            EstadoRegla.VIGENTE);
+    VersionDelConsolidado v1 =
+        VersionDelConsolidado.primera(validado(base, baseNoEstructural), MOTIVO, FECHA);
+
+    VersionDelConsolidado v2 =
+        v1.siguiente(validado(base, baseNoEstructural, excepcion), MOTIVO, FECHA);
 
     assertThat(v2.versionDelPlan()).isEqualTo(1);
   }
