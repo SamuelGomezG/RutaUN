@@ -72,16 +72,13 @@ public final class DemostracionDeLasRestricciones {
   }
 
   private static ExpresionDeMaterias expresion() {
-    return new ExpresionDeMaterias.Y(
+    return ExpresionDeMaterias.todasLas(
         new TerminoMateria(ESTRUCTURAS_DE_DATOS),
-        new ExpresionDeMaterias.Y(
-            new ExpresionDeMaterias.O(
-                new TerminoMateria(MATEMATICAS_DISCRETAS_II),
-                new TerminoMateria(SISTEMAS_NUMERICOS)),
-            new ExpresionDeMaterias.O(
-                new TerminoMateria(PROBABILIDAD_Y_ESTADISTICA),
-                new ExpresionDeMaterias.O(
-                    new TerminoMateria(PROBABILIDAD_FUNDAMENTAL),
-                    new TerminoMateria(PROBABILIDAD)))));
+        ExpresionDeMaterias.algunaDe(
+            new TerminoMateria(MATEMATICAS_DISCRETAS_II), new TerminoMateria(SISTEMAS_NUMERICOS)),
+        ExpresionDeMaterias.algunaDe(
+            new TerminoMateria(PROBABILIDAD_Y_ESTADISTICA),
+            new TerminoMateria(PROBABILIDAD_FUNDAMENTAL),
+            new TerminoMateria(PROBABILIDAD)));
   }
 }

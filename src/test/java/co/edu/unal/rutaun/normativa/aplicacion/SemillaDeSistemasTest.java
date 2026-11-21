@@ -307,16 +307,17 @@ class SemillaDeSistemasTest {
     return switch (expresion) {
       case ExpresionDeMaterias.TerminoMateria materia -> Set.of(materia.codigo());
       case ExpresionDeMaterias.MateriaExterna ignored -> Set.of();
-      case ExpresionDeMaterias.Y y -> union(codigosDe(y.izquierda()), codigosDe(y.derecha()));
-      case ExpresionDeMaterias.O o -> union(codigosDe(o.izquierda()), codigosDe(o.derecha()));
+      case ExpresionDeMaterias.TodasLas todas -> codigosDe(todas.terminos());
+      case ExpresionDeMaterias.AlgunaDe alguna -> codigosDe(alguna.terminos());
     };
   }
 
-  private static Set<CodigoMateria> union(
-      Set<CodigoMateria> izquierda, Set<CodigoMateria> derecha) {
-    Set<CodigoMateria> todos = new HashSet<>(izquierda);
-    todos.addAll(derecha);
-    return todos;
+  private static Set<CodigoMateria> codigosDe(Set<ExpresionDeMaterias> terminos) {
+    Set<CodigoMateria> codigos = new HashSet<>();
+    for (ExpresionDeMaterias termino : terminos) {
+      codigos.addAll(codigosDe(termino));
+    }
+    return codigos;
   }
 
   private static void registrar(Cifras cifras) {
