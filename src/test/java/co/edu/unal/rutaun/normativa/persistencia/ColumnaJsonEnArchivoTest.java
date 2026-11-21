@@ -23,7 +23,13 @@ class ColumnaJsonEnArchivoTest extends ColumnaJsonIdaYVueltaBase {
       Path carpeta = Path.of("target", "h2-columna-json");
       if (Files.exists(carpeta)) {
         try (Stream<Path> archivos = Files.walk(carpeta)) {
-          archivos.sorted(Comparator.reverseOrder()).forEach(archivo -> archivo.toFile().delete());
+          for (Path archivo : archivos.sorted(Comparator.reverseOrder()).toList()) {
+            Files.deleteIfExists(archivo);
+            if (Files.exists(archivo)) {
+              throw new IOException(
+                  "no se pudo vaciar la carpeta de la base: " + archivo.toAbsolutePath());
+            }
+          }
         }
       }
       Files.createDirectories(carpeta);
