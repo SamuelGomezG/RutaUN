@@ -44,6 +44,7 @@ public final class VersionDelConsolidado {
     this.fecha = ArgumentChecks.obligatorio(fecha, "fecha");
     this.motivo = ArgumentChecks.obligatorio(motivo, "motivo");
     this.reglas = ArgumentChecks.copiaSinNulos(reglas, "reglas");
+    exigirReglasSinRepetir(this.reglas);
     this.versionDelPlan = ArgumentChecks.obligatorioPositivo(versionDelPlan, "versionDelPlan");
     if (versionDelPlan > numero) {
       throw new IllegalArgumentException(
@@ -51,7 +52,21 @@ public final class VersionDelConsolidado {
     }
   }
 
-  /** Registra la primera versión del consolidado de un programa: la 1, con la 1 del plan. */
+  /** Rechaza una versión que traiga dos veces la misma regla, aunque con estados distintos. */
+  private static void exigirReglasSinRepetir(List<ReglaEnVersion> reglas) {
+    Set<ReglaId> ids = new HashSet<>();
+    for (ReglaEnVersion enVersion : reglas) {
+      ReglaId id = enVersion.regla().id();
+      if (!ids.add(id)) {
+        throw new IllegalArgumentException("la versión trae dos veces la regla " + id.valor());
+      }
+    }
+  }
+
+  /**
+   * Registra la primera versión del consolidado de un programa: la 1, con la 1 del plan. Rechaza
+   * reglas repetidas.
+   */
   public static VersionDelConsolidado primera(
       ConsolidadoValidado resultante, MotivoDeVersion motivo, LocalDate fecha) {
     ArgumentChecks.obligatorio(resultante, "resultante");
@@ -59,7 +74,10 @@ public final class VersionDelConsolidado {
         resultante.programa(), 1, fecha, motivo, resultante.reglas(), 1);
   }
 
-  /** Reconstruye una versión ya guardada. No calcula nada: valida y conserva lo que recibe. */
+  /**
+   * Reconstruye una versión ya guardada. No calcula nada: valida y conserva lo que recibe, y
+   * rechaza reglas repetidas.
+   */
   public static VersionDelConsolidado reconstituir(
       ProgramaId programa,
       int numero,
@@ -77,8 +95,9 @@ public final class VersionDelConsolidado {
    * versión automática, que solo cambia el estado de las reglas (glosario, «Versión del
    * consolidado»).
    *
-   * @throws IllegalArgumentException si el motivo o la fecha son nulos, o si las reglas validadas
-   *     son de otro programa
+   * @throws IllegalArgumentException si el motivo o la fecha son nulos, si las reglas validadas son
+   *     de otro programa, si la fecha es anterior a la de esta versión o si la versión trae dos
+   *     veces una regla
    */
   public VersionDelConsolidado siguiente(
       ConsolidadoValidado resultante, MotivoDeVersion motivo, LocalDate fecha) {
@@ -88,16 +107,32 @@ public final class VersionDelConsolidado {
     if (!resultante.programa().equals(programa)) {
       throw new IllegalArgumentException("las reglas validadas son de otro programa");
     }
+    if (fecha.isBefore(this.fecha)) {
+      throw new IllegalArgumentException(
+          "la fecha de la versión no puede ser anterior a la de la versión previa");
+    }
     boolean sube = incorporaUnaNorma(motivo) && tocaLaEstructura(reglas, resultante.reglas());
     int plan = sube ? versionDelPlan + 1 : versionDelPlan;
     return new VersionDelConsolidado(
         programa, numero + 1, fecha, motivo, resultante.reglas(), plan);
   }
 
-  /** La versión vigente es la de mayor número; vacío si no hay ninguna. */
+  /**
+   * La versión vigente es la de mayor número; vacío si no hay ninguna. Las versiones deben ser del
+   * mismo programa.
+   *
+   * @throws IllegalArgumentException si las versiones son de programas distintos
+   */
   public static Optional<VersionDelConsolidado> vigenteEntre(
       Collection<VersionDelConsolidado> versiones) {
     ArgumentChecks.obligatorio(versiones, "versiones");
+    Set<ProgramaId> programas = new HashSet<>();
+    for (VersionDelConsolidado version : versiones) {
+      programas.add(version.programa());
+    }
+    if (programas.size() > 1) {
+      throw new IllegalArgumentException("las versiones son de programas distintos");
+    }
     return versiones.stream().max(Comparator.comparingInt(VersionDelConsolidado::numero));
   }
 

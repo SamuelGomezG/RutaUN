@@ -362,6 +362,65 @@ class VersionDelConsolidadoTest {
   }
 
   @Test
+  void tt02_siguienteRechazaReglasRepetidas() {
+    Regla regla = regla(ReglaId.nuevo(), new DatosDeRegla.DePrograma(new Creditos(160)));
+    VersionDelConsolidado primera = VersionDelConsolidado.primera(validado(), MOTIVO, FECHA);
+
+    assertThatThrownBy(
+            () ->
+                primera.siguiente(
+                    validado(
+                        new ReglaEnVersion(regla, EstadoRegla.PROGRAMADA),
+                        new ReglaEnVersion(regla, EstadoRegla.VIGENTE)),
+                    MOTIVO,
+                    FECHA))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("la versión trae dos veces la regla " + regla.id().valor());
+  }
+
+  @Test
+  void tt02_primeraYReconstituirRechazanReglasRepetidas() {
+    Regla regla = regla(ReglaId.nuevo(), new DatosDeRegla.DePrograma(new Creditos(160)));
+    List<ReglaEnVersion> repetidas =
+        List.of(
+            new ReglaEnVersion(regla, EstadoRegla.PROGRAMADA),
+            new ReglaEnVersion(regla, EstadoRegla.VIGENTE));
+
+    assertThatThrownBy(
+            () ->
+                VersionDelConsolidado.primera(
+                    new ConsolidadoValidado(PROGRAMA, repetidas), MOTIVO, FECHA))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("la versión trae dos veces la regla " + regla.id().valor());
+    assertThatThrownBy(
+            () -> VersionDelConsolidado.reconstituir(PROGRAMA, 1, FECHA, MOTIVO, repetidas, 1))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("la versión trae dos veces la regla " + regla.id().valor());
+  }
+
+  @Test
+  void tt02_siguienteRechazaUnaFechaAnterior() {
+    VersionDelConsolidado primera = VersionDelConsolidado.primera(validado(), MOTIVO, FECHA);
+
+    assertThatThrownBy(() -> primera.siguiente(validado(), MOTIVO, FECHA.minusDays(1)))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("la fecha de la versión no puede ser anterior a la de la versión previa");
+    assertThat(primera.siguiente(validado(), MOTIVO, FECHA).fecha()).isEqualTo(FECHA);
+  }
+
+  @Test
+  void tt02_vigenteEntreRechazaVersionesDeOtroPrograma() {
+    VersionDelConsolidado una = VersionDelConsolidado.primera(validado(), MOTIVO, FECHA);
+    VersionDelConsolidado otra =
+        VersionDelConsolidado.primera(
+            new ConsolidadoValidado(ProgramaId.nuevo(), List.of()), MOTIVO, FECHA);
+
+    assertThatThrownBy(() -> VersionDelConsolidado.vigenteEntre(List.of(una, otra)))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("las versiones son de programas distintos");
+  }
+
+  @Test
   void tt02_laVersionVigenteEsLaDeMayorNumero() {
     VersionDelConsolidado v1 = VersionDelConsolidado.primera(validado(), MOTIVO, FECHA);
     VersionDelConsolidado v2 = v1.siguiente(validado(), MOTIVO, FECHA);
