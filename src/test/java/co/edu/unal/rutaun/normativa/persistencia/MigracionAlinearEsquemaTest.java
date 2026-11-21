@@ -1,6 +1,7 @@
 package co.edu.unal.rutaun.normativa.persistencia;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -9,8 +10,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 import org.flywaydb.core.Flyway;
+import org.flywaydb.core.api.FlywayException;
 import org.flywaydb.core.api.MigrationInfo;
 import org.flywaydb.core.api.MigrationVersion;
 import org.junit.jupiter.api.Test;
@@ -21,7 +24,7 @@ import org.junit.jupiter.api.Test;
  */
 class MigracionAlinearEsquemaTest {
 
-  private static final String URL =
+  private final String url =
       "jdbc:h2:mem:migracion_"
           + UUID.randomUUID().toString().replace("-", "")
           + ";DB_CLOSE_DELAY=-1";
@@ -33,16 +36,16 @@ class MigracionAlinearEsquemaTest {
     String anterior = versionAnterior(flyway());
 
     Flyway.configure()
-        .dataSource(URL, USUARIO, CLAVE)
+        .dataSource(url, USUARIO, CLAVE)
         .locations("classpath:db/migration")
         .target(MigrationVersion.fromVersion(anterior))
         .load()
         .migrate();
-    insertarDatos();
+    insertarDatos(List.of("POR_INCORPORACION", "AUTOMATICO_POR_FECHA", "AUTOMATICO_POR_PERIODO"));
 
     flyway().migrate();
 
-    try (Connection conexion = DriverManager.getConnection(URL, USUARIO, CLAVE);
+    try (Connection conexion = DriverManager.getConnection(url, USUARIO, CLAVE);
         Statement sentencia = conexion.createStatement()) {
       assertThat(cuenta(sentencia, "SELECT COUNT(*) FROM version_consolidado")).isEqualTo(3);
       assertThat(
@@ -70,9 +73,26 @@ class MigracionAlinearEsquemaTest {
     }
   }
 
-  private static Flyway flyway() {
+  @Test
+  void tt04_laMigracionRechazaDosVersionesAutomaticasPorFechaDelMismoDia() throws SQLException {
+    String anterior = versionAnterior(flyway());
+
+    Flyway.configure()
+        .dataSource(url, USUARIO, CLAVE)
+        .locations("classpath:db/migration")
+        .target(MigrationVersion.fromVersion(anterior))
+        .load()
+        .migrate();
+    insertarDatos(List.of("AUTOMATICO_POR_FECHA", "AUTOMATICO_POR_FECHA"));
+
+    assertThatThrownBy(() -> flyway().migrate())
+        .isInstanceOf(FlywayException.class)
+        .hasMessageContaining("UQ_VERSION_AUTOMATICA_POR_DIA");
+  }
+
+  private Flyway flyway() {
     return Flyway.configure()
-        .dataSource(URL, USUARIO, CLAVE)
+        .dataSource(url, USUARIO, CLAVE)
         .locations("classpath:db/migration")
         .load();
   }
@@ -88,10 +108,10 @@ class MigracionAlinearEsquemaTest {
     throw new IllegalStateException("no encontré V*__alinear_con_el_diseno.sql");
   }
 
-  private static void insertarDatos() throws SQLException {
+  private void insertarDatos(List<String> motivos) throws SQLException {
     UUID programaId = UUID.randomUUID();
     UUID consolidadoId = UUID.randomUUID();
-    try (Connection conexion = DriverManager.getConnection(URL, USUARIO, CLAVE)) {
+    try (Connection conexion = DriverManager.getConnection(url, USUARIO, CLAVE)) {
       try (PreparedStatement sentencia =
           conexion.prepareStatement(
               "INSERT INTO programa (id, nombre, codigo_sia, facultad) VALUES (?, ?, ?, ?)")) {
@@ -108,9 +128,9 @@ class MigracionAlinearEsquemaTest {
         sentencia.setObject(2, programaId);
         sentencia.executeUpdate();
       }
-      insertarVersion(conexion, consolidadoId, programaId, 1, "POR_INCORPORACION");
-      insertarVersion(conexion, consolidadoId, programaId, 2, "AUTOMATICO_POR_FECHA");
-      insertarVersion(conexion, consolidadoId, programaId, 3, "AUTOMATICO_POR_PERIODO");
+      for (int i = 0; i < motivos.size(); i++) {
+        insertarVersion(conexion, consolidadoId, programaId, i + 1, motivos.get(i));
+      }
     }
   }
 
