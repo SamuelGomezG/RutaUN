@@ -83,6 +83,18 @@ class PersistenciaNormativaTest {
   }
 
   @Test
+  void sop03_dosProgramasConElMismoCodigoSiaFallan() {
+    nuevoPrograma();
+
+    assertThatThrownBy(
+            () ->
+                programas.saveAndFlush(
+                    new ProgramaEntity(UUID.randomUUID(), "Otro nombre", "2879", "Ingenieria")))
+        .isInstanceOf(DataIntegrityViolationException.class)
+        .hasMessageContaining("UQ_PROGRAMA_CODIGO_SIA");
+  }
+
+  @Test
   void tt04_guardaYLeeUnaMateria() {
     materias.save(new MateriaEntity("2015714", 3));
     vaciarMemoria();
