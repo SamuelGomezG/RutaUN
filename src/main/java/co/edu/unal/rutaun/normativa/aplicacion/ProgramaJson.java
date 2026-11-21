@@ -9,5 +9,7 @@ package co.edu.unal.rutaun.normativa.aplicacion;
  * @param nombre nombre del programa
  * @param codigoSia código SIA del programa
  * @param facultad nombre de la facultad
+ * @param codigoFacultad código estable de la facultad
  */
-public record ProgramaJson(String nombre, String codigoSia, String facultad) {}
+public record ProgramaJson(
+    String nombre, String codigoSia, String facultad, String codigoFacultad) {}

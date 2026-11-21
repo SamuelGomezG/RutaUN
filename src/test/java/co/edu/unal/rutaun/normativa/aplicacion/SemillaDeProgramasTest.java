@@ -42,5 +42,6 @@ class SemillaDeProgramasTest {
     ProgramaEntity sistemas = programas.findByCodigoSia("2879").orElseThrow();
     assertThat(sistemas.getNombre()).isEqualTo("Ingeniería de Sistemas y Computación");
     assertThat(sistemas.getFacultad()).isEqualTo("Ingeniería");
+    assertThat(sistemas.getFacultadCodigo()).isEqualTo("ING");
   }
 }

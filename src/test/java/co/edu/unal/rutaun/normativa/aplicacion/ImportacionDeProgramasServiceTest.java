@@ -22,8 +22,8 @@ class ImportacionDeProgramasServiceTest {
   private static final String DOS_PROGRAMAS =
       """
       {"programas": [
-        {"nombre": "Programa uno", "codigoSia": "T-001", "facultad": "Ingeniería"},
-        {"nombre": "Programa dos", "codigoSia": "T-002", "facultad": "Ingeniería"}
+        {"nombre": "Programa uno", "codigoSia": "T-001", "facultad": "Ingeniería", "codigoFacultad": "ING"},
+        {"nombre": "Programa dos", "codigoSia": "T-002", "facultad": "Ingeniería", "codigoFacultad": "ING"}
       ]}
       """;
 
@@ -63,8 +63,8 @@ class ImportacionDeProgramasServiceTest {
     String json =
         """
         {"programas": [
-          {"nombre": "Programa uno", "codigoSia": "T-001", "facultad": "Ingeniería"},
-          {"nombre": "", "codigoSia": "T-002", "facultad": "Ingeniería"}
+          {"nombre": "Programa uno", "codigoSia": "T-001", "facultad": "Ingeniería", "codigoFacultad": "ING"},
+          {"nombre": "", "codigoSia": "T-002", "facultad": "Ingeniería", "codigoFacultad": "ING"}
         ]}
         """;
     long antes = programas.count();
@@ -81,8 +81,8 @@ class ImportacionDeProgramasServiceTest {
     String json =
         """
         {"programas": [
-          {"nombre": "Programa uno", "codigoSia": "T-001", "facultad": "Ingeniería"},
-          {"nombre": "Programa dos", "codigoSia": "T-001", "facultad": "Ingeniería"}
+          {"nombre": "Programa uno", "codigoSia": "T-001", "facultad": "Ingeniería", "codigoFacultad": "ING"},
+          {"nombre": "Programa dos", "codigoSia": "T-001", "facultad": "Ingeniería", "codigoFacultad": "ING"}
         ]}
         """;
 
@@ -90,6 +90,20 @@ class ImportacionDeProgramasServiceTest {
         .isInstanceOf(ArchivoDeProgramasInvalidoException.class)
         .hasMessageContaining("T-001")
         .hasMessageContaining("repetido");
+  }
+
+  @Test
+  void sop03_unProgramaSinCodigoDeFacultadSeRechaza() {
+    String json =
+        """
+        {"programas": [
+          {"nombre": "Programa uno", "codigoSia": "T-003", "facultad": "Ingeniería"}
+        ]}
+        """;
+
+    assertThatThrownBy(() -> servicio.importar(json))
+        .isInstanceOf(ArchivoDeProgramasInvalidoException.class)
+        .hasMessageContaining("codigo");
   }
 
   @Test

@@ -8,7 +8,7 @@ import java.util.UUID;
  * JSON. El tipo del alcance no va aquí: tiene su propia columna, {@code tipo_alcance}. Usa solo
  * tipos básicos, porque la persistencia no puede importar el dominio.
  *
- * @param facultades nombres de las facultades comprendidas
+ * @param facultades códigos de las facultades comprendidas
  * @param programas identificadores de los programas comprendidos
  * @param exclusiones identificadores de los programas excluidos
  * @param texto texto con el que la norma fija el alcance

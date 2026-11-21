@@ -34,15 +34,20 @@ public class ProgramaEntity implements Persistable<UUID> {
   @Column(nullable = false)
   private String facultad;
 
+  @Column(name = "facultad_codigo", nullable = false)
+  private String facultadCodigo;
+
   /** Constructor sin argumentos que exige JPA. */
   protected ProgramaEntity() {}
 
   /** Crea un programa. */
-  public ProgramaEntity(UUID id, String nombre, String codigoSia, String facultad) {
+  public ProgramaEntity(
+      UUID id, String nombre, String codigoSia, String facultad, String facultadCodigo) {
     this.id = id;
     this.nombre = nombre;
     this.codigoSia = codigoSia;
     this.facultad = facultad;
+    this.facultadCodigo = facultadCodigo;
   }
 
   @Override
@@ -73,5 +78,9 @@ public class ProgramaEntity implements Persistable<UUID> {
 
   public String getFacultad() {
     return facultad;
+  }
+
+  public String getFacultadCodigo() {
+    return facultadCodigo;
   }
 }

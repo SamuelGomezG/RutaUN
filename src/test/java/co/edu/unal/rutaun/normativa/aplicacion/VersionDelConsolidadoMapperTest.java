@@ -73,7 +73,8 @@ class VersionDelConsolidadoMapperTest {
         Programa.registrar(
             "Programa de prueba",
             "T3-" + UUID.randomUUID().toString().substring(0, 8),
-            new Facultad("Ingeniería"));
+            new Facultad("ING"),
+            "Ingeniería");
     programas.save(ProgramaMapper.aEntidad(programa));
     programasGuardados.add(programa.id().valor());
     norma = ReglasDePrueba.normaNueva();
@@ -318,7 +319,8 @@ class VersionDelConsolidadoMapperTest {
         Programa.registrar(
             "Otro programa",
             "T3-" + UUID.randomUUID().toString().substring(0, 8),
-            new Facultad("Ingeniería"));
+            new Facultad("ING"),
+            "Ingeniería");
     programas.save(ProgramaMapper.aEntidad(otro));
     programasGuardados.add(otro.id().valor());
     guardar(version(1, new MotivoDeVersion.AutomaticoPorFecha(FECHA), List.of()));
