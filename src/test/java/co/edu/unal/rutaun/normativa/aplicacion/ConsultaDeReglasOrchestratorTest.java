@@ -180,6 +180,46 @@ class ConsultaDeReglasOrchestratorTest {
   }
 
   @Test
+  void uc06_ext4a_unaBusquedaConElConsolidadoSinReglasPublicaElIncidente() {
+    var orquestador = orquestador(ConsultaNormativaFalsa.sinReglas());
+
+    ReglasDelPrograma resultado =
+        orquestador.reglasDelPrograma(
+            ConsultaNormativaFalsa.SISTEMAS, BusquedaDeReglas.de("créditos", null, null));
+
+    assertThat(((ReglasDelPrograma.Consultadas) resultado).consolidadoSinReglas()).isTrue();
+    assertThat(eventos.publicados)
+        .containsExactly(
+            new IncidenteDePrograma(
+                "UC06",
+                "ext. 4a",
+                ConsultaNormativaFalsa.SISTEMAS,
+                1,
+                "El consolidado vigente no tiene reglas cargadas para el programa",
+                List.of()));
+  }
+
+  @Test
+  void uc06_ext4a_sinBusquedaElConsolidadoSinReglasSeMarcaComoTal() {
+    var orquestador = orquestador(ConsultaNormativaFalsa.sinReglas());
+
+    ReglasDelPrograma resultado = orquestador.reglasDelPrograma(ConsultaNormativaFalsa.SISTEMAS);
+
+    assertThat(((ReglasDelPrograma.Consultadas) resultado).consolidadoSinReglas()).isTrue();
+  }
+
+  @Test
+  void uc06_ext5a_conReglasUnaBusquedaSinResultadosNoMarcaElConsolidadoSinReglas() {
+    var orquestador = orquestador(ConsultaNormativaFalsa.conReglas());
+
+    ReglasDelPrograma resultado =
+        orquestador.reglasDelPrograma(
+            ConsultaNormativaFalsa.SISTEMAS, BusquedaDeReglas.de("no existe", null, null));
+
+    assertThat(((ReglasDelPrograma.Consultadas) resultado).consolidadoSinReglas()).isFalse();
+  }
+
+  @Test
   void uc06_paso6_ofreceLasCategoriasParaFiltrar() {
     var orquestador = orquestador(ConsultaNormativaFalsa.conReglas());
 

@@ -248,6 +248,22 @@ class ReglasDelProgramaEstadosTest {
   }
 
   @Test
+  void uc06_ext4a_unaBusquedaConLaVersionSinReglasDiceElProblemaDelConsolidado() throws Exception {
+    String pagina =
+        mockMvc
+            .perform(get(ruta(SIN_REGLAS) + "?texto=creditos"))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+    assertThat(pagina)
+        .contains("No hay reglas para mostrar.")
+        .contains("tiene un problema que ya se informó al administrador de normativa")
+        .doesNotContain("No se encontraron reglas");
+  }
+
+  @Test
   void uc06_paso4_unProgramaSinVersionVigenteNoSeEncuentra() throws Exception {
     mockMvc.perform(get(ruta(SIN_VERSION))).andExpect(status().isNotFound());
   }

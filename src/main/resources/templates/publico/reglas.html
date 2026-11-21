@@ -43,11 +43,11 @@
         <a th:unless="${busqueda.esVacia()}" th:href="@{/programas/{programa}/reglas(programa=${programa.id().valor()})}">Quitar la búsqueda y los filtros</a>
       </p>
     </form>
-    <div th:if="${consolidado.sinReglas() and busqueda.esVacia()}">
+    <div th:if="${consolidadoSinReglas}">
       <p>No hay reglas para mostrar.</p>
       <p>El consolidado normativo del programa tiene un problema que ya se informó al administrador de normativa.</p>
     </div>
-    <div th:if="${consolidado.sinReglas() and !busqueda.esVacia()}">
+    <div th:if="${consolidado.sinReglas() and !consolidadoSinReglas}">
       <p>No se encontraron reglas con esa búsqueda.</p>
       <p>Revisa el texto o quita algún filtro. RutaUN no puede confirmar que la regla no exista: debe consultarse Régimen Legal.</p>
     </div>
