@@ -4,7 +4,6 @@ import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.Momento;
 import co.edu.unal.rutaun.compartido.ProgramaId;
 import co.edu.unal.rutaun.compartido.ReglaId;
-import co.edu.unal.rutaun.normativa.dominio.Afectacion;
 import co.edu.unal.rutaun.normativa.dominio.Alcance;
 import co.edu.unal.rutaun.normativa.dominio.ConsolidadoValidado;
 import co.edu.unal.rutaun.normativa.dominio.MotivoDeVersion;
@@ -84,11 +83,20 @@ public class ImportacionDeNormasService {
    */
   @Transactional
   public ResultadoDeImportacionDeNormas importar(InputStream entrada) {
-    var lectura = ValidadorDeIncorporacion.validar(IncorporacionJsonReader.leer(entrada));
-    if (lectura instanceof ValidadorDeIncorporacion.ResultadoDeValidacion.Invalida invalida) {
-      throw new ArchivoDeNormativaInvalidoException(String.join(" ", invalida.motivos()));
-    }
-    var valida = (ValidadorDeIncorporacion.ResultadoDeValidacion.Valida) lectura;
+    var valida =
+        switch (exigirReglasAfectadasRegistradas(IncorporacionJsonReader.leer(entrada))) {
+          case ValidadorDeIncorporacion.ResultadoDeValidacion.Invalida invalida ->
+              throw new ArchivoDeNormativaInvalidoException(String.join(" ", invalida.motivos()));
+          case ValidadorDeIncorporacion.ResultadoDeValidacion.ReglaAfectadaNoRegistrada
+                  noRegistrada ->
+              throw new ArchivoDeNormativaInvalidoException(
+                  "La regla \""
+                      + noRegistrada.objeto()
+                      + "\" ("
+                      + noRegistrada.articulo()
+                      + ") afecta una regla que no está registrada.");
+          case ValidadorDeIncorporacion.ResultadoDeValidacion.Valida v -> v;
+        };
     IncorporacionLeida incorporacion = valida.incorporacion();
     NormaLeida normaLeida = incorporacion.norma();
     String identificacion = identificacion(normaLeida);
@@ -119,7 +127,6 @@ public class ImportacionDeNormasService {
     }
 
     LocalDate fecha = LocalDate.now(reloj);
-    exigirReglasAfectadasRegistradas(incorporacion.reglas());
     List<ReglaEnVersion> reglasIncorporadas =
         conSuEstado(incorporacion.reglas(), normaLeida, fecha);
     normas.save(NormaMapper.aEntidad(norma));
@@ -137,25 +144,16 @@ public class ImportacionDeNormasService {
   }
 
   /**
-   * Exige que toda regla afectada por otra ya esté registrada.
+   * Valida la incorporación y exige que toda regla afectada por otra ya esté registrada.
    *
    * <p>UC07 ext. 6b. Mientras el lector no resuelva la regla real (#182), deriva el identificador
    * de la regla afectada de su norma, su artículo y su objeto, y ese identificador no coincide con
-   * una regla guardada; por eso toda afectación de destino {@code REGLA} se rechaza con un mensaje
-   * que nombra la regla.
+   * una regla guardada; por eso toda afectación de destino {@code REGLA} produce {@link
+   * ValidadorDeIncorporacion.ResultadoDeValidacion.ReglaAfectadaNoRegistrada}.
    */
-  private void exigirReglasAfectadasRegistradas(List<Regla> reglasDeLaIncorporacion) {
-    for (Regla regla : reglasDeLaIncorporacion) {
-      ReglaId afectada = regla.afectacion().flatMap(Afectacion::reglaAfectada).orElse(null);
-      if (afectada != null && !reglas.existsById(afectada.valor())) {
-        throw new ArchivoDeNormativaInvalidoException(
-            "La regla \""
-                + regla.objeto()
-                + "\" ("
-                + regla.fuente().articulo()
-                + ") afecta una regla que no está registrada.");
-      }
-    }
+  private ValidadorDeIncorporacion.ResultadoDeValidacion exigirReglasAfectadasRegistradas(
+      IncorporacionJsonReader.ResultadoDeLectura lectura) {
+    return ValidadorDeIncorporacion.validar(lectura, id -> reglas.existsById(id.valor()));
   }
 
   private static List<ReglaEnVersion> conSuEstado(
