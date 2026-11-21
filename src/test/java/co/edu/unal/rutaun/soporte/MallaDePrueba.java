@@ -14,6 +14,7 @@ import co.edu.unal.rutaun.normativa.dominio.NodoDeMalla;
 import co.edu.unal.rutaun.normativa.dominio.Obligatoriedad;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -25,7 +26,7 @@ import java.util.TreeMap;
  * Fundamentación (10 = 4 obligatorios + 6 optativos)
  *   Cálculo diferencial (obligatoria, 4)
  *   Ciencias básicas (6; sugeridos: s1 = 3): Física I (3), Química básica (3)
- *     Cómputo (3): Programación I (3), Programación II (3)
+ *     Cómputo (3): Programación I (3), Programación II (3; no cursable desde el programa)
  * Disciplinar (9 = 6 obligatorios + 3 optativos)
  *   Estructuras de datos (obligatoria, 3), Algoritmos (obligatoria, 3)
  *   Profundización (3): Redes (3), Bases de datos (3)
@@ -45,7 +46,7 @@ public final class MallaDePrueba {
             ExigenciaCreditos.de(new Creditos(3)),
             List.of(
                 optativa("9000004", "Programación I", 3, 2),
-                optativa("9000005", "Programación II", 3, 3)),
+                noCursable("9000005", "Programación II", 3, 3)),
             List.of());
     Agrupacion cienciasBasicas =
         agrupacion(
@@ -145,5 +146,16 @@ public final class MallaDePrueba {
         new Creditos(creditos),
         Obligatoriedad.OPTATIVA,
         semestre);
+  }
+
+  private static MateriaEnMalla noCursable(
+      String codigo, String nombre, int creditos, int semestre) {
+    return new MateriaEnMalla(
+        new CodigoMateria(codigo),
+        nombre,
+        new Creditos(creditos),
+        Obligatoriedad.OPTATIVA,
+        Optional.of(semestre),
+        false);
   }
 }
