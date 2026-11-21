@@ -1,5 +1,6 @@
 package co.edu.unal.rutaun.normativa;
 
+import co.edu.unal.rutaun.compartido.CodigoMateria;
 import co.edu.unal.rutaun.compartido.ProgramaId;
 import co.edu.unal.rutaun.compartido.ReglaId;
 import java.util.List;
@@ -45,4 +46,15 @@ public interface ConsultaNormativaFacade {
    * si el programa no tiene una versión vigente o si la regla no está en ella.
    */
   Optional<ReglaCompletaVista> regla(ProgramaId programa, ReglaId regla);
+
+  /**
+   * Lo que la materia exige para cursarla en el consolidado vigente del programa (UC05 pasos 2 a
+   * 4): sus prerrequisitos y correquisitos, cada uno con lo que exige, su fuente, su fecha de
+   * aplicación y su vigencia. Incluye las reglas vigentes, programadas y en revisión, y deja fuera
+   * las que ya no rigen. No muestra las materias externas (ext. 4k). Una materia que no exige nada
+   * (ext. 3a) devuelve la vista con {@link RestriccionesDeMateriaVista#restricciones()} vacía.
+   * Vacío si el programa no está cargado, no tiene una versión vigente del consolidado o la materia
+   * no figura en ella.
+   */
+  Optional<RestriccionesDeMateriaVista> restriccionesDe(ProgramaId programa, CodigoMateria materia);
 }

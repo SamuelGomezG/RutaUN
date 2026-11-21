@@ -1,5 +1,6 @@
 package co.edu.unal.rutaun.normativa.aplicacion;
 
+import co.edu.unal.rutaun.compartido.CodigoMateria;
 import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.ProgramaId;
 import co.edu.unal.rutaun.compartido.ReglaId;
@@ -12,11 +13,15 @@ import co.edu.unal.rutaun.normativa.NormaVista;
 import co.edu.unal.rutaun.normativa.ProgramaVista;
 import co.edu.unal.rutaun.normativa.ReglaCompletaVista;
 import co.edu.unal.rutaun.normativa.ReglaVista;
+import co.edu.unal.rutaun.normativa.RestriccionVista;
+import co.edu.unal.rutaun.normativa.RestriccionesDeMateriaVista;
 import co.edu.unal.rutaun.normativa.TipoAlcance;
 import co.edu.unal.rutaun.normativa.TipoDeCambio;
+import co.edu.unal.rutaun.normativa.TipoDeRestriccion;
 import co.edu.unal.rutaun.normativa.TipoNorma;
 import co.edu.unal.rutaun.normativa.dominio.ComponenteDeLibreEleccion;
 import co.edu.unal.rutaun.normativa.dominio.DatosDeRegla;
+import co.edu.unal.rutaun.normativa.dominio.ExpresionDeMaterias;
 import co.edu.unal.rutaun.normativa.dominio.Regla;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
 import co.edu.unal.rutaun.normativa.persistencia.AlcanceJson;
@@ -45,6 +50,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -216,6 +222,134 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
                 .flatMap(ConsultaNormativaService::textoDelAlcance),
             cadenaDeNormas(deLaVersion, estados, normasPorId)));
   }
+
+  @Override
+  public Optional<RestriccionesDeMateriaVista> restriccionesDe(
+      ProgramaId programa, CodigoMateria materia) {
+    ArgumentChecks.obligatorio(programa, "programa");
+    ArgumentChecks.obligatorio(materia, "materia");
+    Optional<VersionEntity> encontrada =
+        versiones.findTopByProgramaIdOrderByNumeroDesc(programa.valor());
+    if (encontrada.isEmpty()) {
+      return Optional.empty();
+    }
+    VersionEntity version = encontrada.get();
+    Map<UUID, EstadoRegla> estados = new HashMap<>();
+    for (ReglaEnVersionEntity fila : reglasEnVersion.findByVersionId(version.getId())) {
+      EstadoRegla estado = EstadoRegla.valueOf(fila.getEstado());
+      if (seMuestra(estado)) {
+        estados.put(fila.getReglaId(), estado);
+      }
+    }
+    Map<UUID, NormaEntity> normasPorId = new HashMap<>();
+    List<ReglaEntity> filas = reglas.findAllById(estados.keySet());
+    normas
+        .findAllById(filas.stream().map(ReglaEntity::getNormaId).distinct().toList())
+        .forEach(norma -> normasPorId.put(norma.getId(), norma));
+
+    Map<CodigoMateria, String> nombres = new HashMap<>();
+    List<RestriccionDeLaMateria> candidatas = new ArrayList<>();
+    for (ReglaEntity fila : filas) {
+      Regla regla = ReglaMapper.aDominio(fila);
+      switch (regla.datos()) {
+        case DatosDeRegla.DeMateria d -> nombres.put(d.materia().codigo(), d.materia().nombre());
+        case DatosDeRegla.DePrerrequisito d ->
+            candidatas.add(
+                new RestriccionDeLaMateria(
+                    TipoDeRestriccion.PRERREQUISITO,
+                    d.prerrequisito().materia(),
+                    d.prerrequisito().expresion(),
+                    fila,
+                    regla,
+                    estados.get(fila.getId()),
+                    normasPorId.get(fila.getNormaId())));
+        case DatosDeRegla.DeCorrequisito d ->
+            candidatas.add(
+                new RestriccionDeLaMateria(
+                    TipoDeRestriccion.CORREQUISITO,
+                    d.correquisito().materia(),
+                    d.correquisito().expresion(),
+                    fila,
+                    regla,
+                    estados.get(fila.getId()),
+                    normasPorId.get(fila.getNormaId())));
+        default -> {}
+      }
+    }
+    if (!nombres.containsKey(materia)) {
+      return Optional.empty();
+    }
+    // Una materia que la malla no nombra (un prerrequisito que apunta a otra que no rige, UC05
+    // ext. 3b) se muestra con su código: el incidente de ese caso es de otra historia.
+    Function<CodigoMateria, String> nombre = codigo -> nombres.getOrDefault(codigo, codigo.valor());
+    List<RestriccionVista> restricciones =
+        candidatas.stream()
+            .filter(candidata -> candidata.materia().equals(materia))
+            .sorted(ORDEN_DE_RESTRICCIONES)
+            .flatMap(candidata -> candidata.aVista(nombre).stream())
+            .toList();
+    return Optional.of(
+        new RestriccionesDeMateriaVista(
+            programa,
+            version.getNumero(),
+            version.getFecha(),
+            materia,
+            nombres.get(materia),
+            restricciones));
+  }
+
+  /** Un prerrequisito o un correquisito del consolidado, con lo que hace falta para mostrarlo. */
+  private record RestriccionDeLaMateria(
+      TipoDeRestriccion tipo,
+      CodigoMateria materia,
+      ExpresionDeMaterias expresion,
+      ReglaEntity fila,
+      Regla regla,
+      EstadoRegla estado,
+      NormaEntity norma) {
+
+    LocalDate expedicion() {
+      return norma == null ? null : norma.getFechaExpedicion();
+    }
+
+    String articulo() {
+      return regla.fuente().articulo();
+    }
+
+    UUID id() {
+      return fila.getId();
+    }
+
+    /** La vista de la restricción; vacía si solo menciona materias externas (ext. 4k). */
+    Optional<RestriccionVista> aVista(Function<CodigoMateria, String> nombre) {
+      return ExpresionAVista.aVista(expresion, nombre)
+          .map(
+              exige ->
+                  new RestriccionVista(
+                      regla.id(),
+                      tipo,
+                      regla.enunciado(),
+                      exige,
+                      Optional.ofNullable(norma).map(n -> aFuente(n, regla.fuente().articulo())),
+                      estado,
+                      esTemporal(
+                          regla.vigenciaPropia(), norma == null ? null : norma.getVigenteHasta()),
+                      aplicaDesde(fila, norma),
+                      vigenteHasta(fila, norma)));
+    }
+  }
+
+  /**
+   * Orden de las restricciones de una materia: primero los prerrequisitos, y dentro de cada clase
+   * por fecha de expedición de la norma (la más antigua primero; sin norma, al final), artículo e
+   * identificador.
+   */
+  private static final Comparator<RestriccionDeLaMateria> ORDEN_DE_RESTRICCIONES =
+      Comparator.comparing(RestriccionDeLaMateria::tipo)
+          .thenComparing(
+              RestriccionDeLaMateria::expedicion, Comparator.nullsLast(Comparator.naturalOrder()))
+          .thenComparing(RestriccionDeLaMateria::articulo, OrdenDeArticulos.INSTANCIA)
+          .thenComparing(RestriccionDeLaMateria::id);
 
   /**
    * La regla y todas las que la rodean por afectaciones: las que ella afecta, hacia arriba hasta la
