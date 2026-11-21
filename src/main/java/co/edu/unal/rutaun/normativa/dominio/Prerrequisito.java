@@ -1,6 +1,8 @@
 package co.edu.unal.rutaun.normativa.dominio;
 
 import co.edu.unal.rutaun.compartido.CodigoMateria;
+import co.edu.unal.rutaun.compartido.EstadoRestriccion;
+import co.edu.unal.rutaun.normativa.ContextoDeEvaluacion;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
 
 /**
@@ -17,5 +19,11 @@ public record Prerrequisito(CodigoMateria materia, ExpresionDeMaterias expresion
   public Prerrequisito {
     ArgumentChecks.obligatorio(materia, "materia");
     ArgumentChecks.obligatorio(expresion, "expresion");
+  }
+
+  @Override
+  public EstadoRestriccion evaluar(ContextoDeEvaluacion contexto) {
+    ArgumentChecks.obligatorio(contexto, "contexto");
+    return expresion.evaluar(contexto::estadoDe);
   }
 }
