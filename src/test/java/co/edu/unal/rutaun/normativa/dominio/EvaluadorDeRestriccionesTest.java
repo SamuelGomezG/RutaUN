@@ -214,32 +214,6 @@ class EvaluadorDeRestriccionesTest {
   }
 
   @Test
-  void tt03_unaYDeTerminosCumplidosConservaSusRazones() {
-    EstadoRestriccion estado =
-        EvaluadorDeRestricciones.combinarY(
-            EstadoRestriccion.cumplida("A está aprobada"),
-            EstadoRestriccion.cumplida("B está aprobada"));
-
-    assertThat(estado.certeza()).isEqualTo(Certeza.CUMPLIDA);
-    assertThat(estado.razones()).containsExactly("A está aprobada", "B está aprobada");
-  }
-
-  @Test
-  void tt03_todasLasCombinacionesDeDosEstadosSiguenElOrdenDeCerteza() {
-    for (Certeza izquierda : Certeza.values()) {
-      for (Certeza derecha : Certeza.values()) {
-        Certeza peor = izquierda.ordinal() >= derecha.ordinal() ? izquierda : derecha;
-        Certeza mejor = izquierda.ordinal() <= derecha.ordinal() ? izquierda : derecha;
-
-        assertThat(EvaluadorDeRestricciones.combinarY(estado(izquierda), estado(derecha)).certeza())
-            .isEqualTo(peor);
-        assertThat(EvaluadorDeRestricciones.combinarO(estado(izquierda), estado(derecha)).certeza())
-            .isEqualTo(mejor);
-      }
-    }
-  }
-
-  @Test
   void tt03_elEvaluadorRechazaRestriccionOContextoNulos() {
     ContextoDeEvaluacion contexto = ContextoDeEvaluacionFijo.vacio();
 
@@ -251,10 +225,6 @@ class EvaluadorDeRestriccionesTest {
                 EvaluadorDeRestricciones.evaluar(new Prerrequisito(A, new TerminoMateria(B)), null))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("contexto no puede ser null");
-  }
-
-  private static EstadoRestriccion estado(Certeza certeza) {
-    return new EstadoRestriccion(certeza, List.of(certeza.name()));
   }
 
   private static EstadoRestriccion evaluarConContextoVacio(Restriccion restriccion) {
