@@ -318,7 +318,7 @@ class RestriccionesDeMateriaIntegracionTest {
   }
 
   @Test
-  void uc05_ext4_unaRestriccionQueYaNoRigeNoSeMuestra() {
+  void uc05_ext3a_unaRestriccionQueYaNoRigeNoSeMuestra() {
     laReglaPasaAEstado(prerrequisitoDe(ESTRUCTURAS_DE_DATOS), EstadoRegla.YA_NO_RIGE);
 
     assertThat(restriccionesDe(ESTRUCTURAS_DE_DATOS).restricciones()).isEmpty();
