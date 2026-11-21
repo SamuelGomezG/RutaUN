@@ -126,7 +126,7 @@ Cada prueba lleva en su nombre el ID del requisito que verifica, por ejemplo `uc
 | [`docs/datos/esquema-de-la-base.md`](docs/datos/esquema-de-la-base.md) | Las tablas, qué deja la semilla y cómo consultar la base |
 | [`docs/proceso/entorno-y-configuracion.md`](docs/proceso/entorno-y-configuracion.md) | Perfiles, propiedades, qué corre `./mvnw verify` y la integración continua |
 | [`docs/proceso/solucion-de-problemas.md`](docs/proceso/solucion-de-problemas.md) | Fallos frecuentes del build, del arranque y de la CI, con su arreglo |
-| [`docs/proceso/recetas.md`](docs/proceso/recetas.md) | Pasos para crear un módulo, una migración, una norma de la semilla o un incidente |
+| [`docs/proceso/recetas.md`](docs/proceso/recetas.md) | Pasos para crear un módulo, una migración, una norma de la semilla, un incidente o conectar la comprobación de versión de un caso que guarda |
 | [`docs/README.md`](docs/README.md) | Mapa de toda la documentación y cómo se escribe |
 
 ## Estructura del repositorio

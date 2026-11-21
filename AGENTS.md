@@ -16,7 +16,7 @@
 | Tablas de la base y consultas de inspección | `docs/datos/esquema-de-la-base.md` |
 | Perfiles, propiedades, pasos de `verify` y CI | `docs/proceso/entorno-y-configuracion.md` |
 | Un fallo del build, del arranque o de la CI | `docs/proceso/solucion-de-problemas.md` |
-| Pasos para un módulo, una migración, una norma de la semilla o un incidente | `docs/proceso/recetas.md` |
+| Pasos para un módulo, una migración, una norma de la semilla, un incidente o conectar la comprobación de versión de un caso que guarda | `docs/proceso/recetas.md` |
 | Mapa de `docs/` y cómo se escribe un documento | `docs/README.md` |
 | Flujo de ramas, commits y solicitudes de integración | `CONTRIBUTING.md` |
 | Índice de IDs (derivado): dueño de un ID, qué cita y quién lo menciona | `herramientas/indice_ids.py`; uso en `docs/requisitos/README.md` |
