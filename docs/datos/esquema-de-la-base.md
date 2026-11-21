@@ -12,7 +12,7 @@ depends_on:
 
 Antes de escribir una migración o una consulta, al revisar qué dejó guardado una carga de normativa y al demostrar un cambio con una consulta sobre la base. Para la forma del archivo que **entra**, ve a [`formato-normativa.md`](formato-normativa.md).
 
-Este documento es **derivado**: la fuente del esquema son las migraciones de `src/main/resources/db/migration/`. Describe las tablas como están hoy, tras `V4`; si difiere de las migraciones, mandan ellas. Las cifras y las consultas se ejecutaron el 12 de noviembre de 2026 sobre una base nueva cargada con la semilla.
+Este documento es **derivado**: la fuente del esquema son las migraciones de `src/main/resources/db/migration/`. Describe las tablas como están hoy, tras `V5`; si difiere de las migraciones, mandan ellas. Las cifras y las consultas se ejecutaron el 12 de noviembre de 2026 sobre una base nueva cargada con la semilla.
 
 ## Tablas y relaciones
 
@@ -28,13 +28,17 @@ erDiagram
         VARCHAR nombre
         VARCHAR codigo_sia
         VARCHAR facultad
+        VARCHAR facultad_codigo
     }
     norma {
         UUID id PK
         VARCHAR tipo
         VARCHAR numero
         INT anio
-        VARCHAR organo
+        VARCHAR organo_nombre
+        VARCHAR organo_nivel
+        VARCHAR organo_facultad_codigo
+        VARCHAR organo_clave
         VARCHAR tipo_de_efecto
         DATE fecha_expedicion
         DATE aplica_desde
@@ -86,12 +90,14 @@ El diagrama muestra las columnas principales; la lista completa está en las mig
 | Tabla | Una fila es | Lo que la base garantiza | Notas |
 | --- | --- | --- | --- |
 | `programa` | Un programa cargado | Único por `codigo_sia` | `ImportacionDeProgramasService` omite los que ya existen, así que repetir la carga no choca con la restricción |
-| `norma` | Una norma incorporada | Única por `tipo`, `numero`, `anio` y `organo` | Por esa identificación, la importación omite una norma ya registrada (UC07 ext. 4c) |
+| `norma` | Una norma incorporada | Única por `tipo`, `numero`, `anio` y `organo_clave`; `organo_facultad_codigo` existe solo si `organo_nivel` es `FACULTAD` | Por esa identificación, la importación omite una norma ya registrada (UC07 ext. 4c). `organo_clave` es el nombre sin tildes, en mayúsculas, más el código de la facultad |
 | `regla` | Una regla de una norma | `norma_id` existe; `regla_afectada_id`, si lo hay, también | Las columnas comunes a toda regla, y en `datos` lo propio de su categoría |
 | `version_consolidado` | Una versión del consolidado de un programa | Única por `programa_id` y `numero`; una sola `AUTOMATICO_POR_FECHA` por programa y día (S15) | Solo se agregan filas. `motivo` es `POR_INCORPORACION`, `POR_CORRECCION`, `AUTOMATICO_POR_PERIODO` o `AUTOMATICO_POR_FECHA`. `dia_automatico` repite `fecha` solo en las versiones por fecha, y queda nulo en las demás |
 | `regla_en_version` | Que una regla está en una versión, y con qué estado | Única por `version_id` y `regla_id` | `estado` es `VIGENTE`, `PROGRAMADA` o `YA_NO_RIGE`. Una versión lleva las reglas de la anterior más las de la norma incorporada, así que una misma regla tiene una fila por cada versión en que está |
 | `materia` | Una materia del catálogo: código y créditos | Solo la llave primaria | Hoy queda vacía: la importación todavía no la llena ([#155](https://github.com/SamuelGomezG/RutaUN/issues/155)) |
 | `incidente` | Un grupo de incidentes iguales sin atender | Solo la llave primaria | `conteo`, `primera_fecha` y `ultima_fecha` resumen las ocurrencias. `programa_id` y `version_consolidado` son nulos en un incidente interno |
+
+Una base de desarrollo creada antes de #149 no se puede migrar: el nivel del órgano y el código de la facultad no se deducen de sus datos. Hay que borrar `data/` y volver a arrancar con el perfil `dev`.
 
 ## Columnas que guardan JSON como texto
 
@@ -100,7 +106,7 @@ No se usan columnas de tipo JSON: son `CLOB` con texto que escriben y leen los m
 | Columna | Qué guarda | Ejemplo |
 | --- | --- | --- |
 | `regla.datos` | Los datos propios de la categoría de la regla. La categoría la dice la columna `categoria`, no el JSON | `{"creditos":{"valor":10},"tipo":"MINIMO"}` en una regla `CARGA_POR_PERIODO` |
-| `norma.alcance_detalle` | Facultades, programas, exclusiones y texto del alcance. Los programas van por su `id`, no por el código SIA del archivo | `{"facultades":[],"programas":["6c6d…"],"exclusiones":[],"texto":"…"}` |
+| `norma.alcance_detalle` | Facultades (por código), programas, exclusiones y texto del alcance. Los programas van por su `id`, no por el código SIA del archivo | `{"facultades":["ING"],"programas":["6c6d…"],"exclusiones":[],"texto":"…"}` |
 | `version_consolidado.detalle_motivo` | Los datos del motivo de la versión. Excepción a la convención: es `VARCHAR(300)`, no `CLOB`; el mapper limita el detalle a 300 caracteres | `{"norma":{"valor":"205c…"},"administrador":"Semilla de desarrollo"}` |
 | `version_consolidado.cambios` | Los cambios respecto a la versión anterior | Hoy `null` |
 | `incidente.elementos` | Los elementos involucrados. No es JSON: es una lista ordenada y separada por comas | — |
@@ -118,6 +124,7 @@ Tres cosas que no se deducen del esquema:
 | `db/migration/V1__esquema.sql` | Las siete tablas de Normativa |
 | `db/migration/V2__incidente.sql` | `incidente` |
 | `db/migration/V4__alinear_con_el_diseno.sql` | Restricciones de unicidad y llaves foráneas, el día de la versión automática y el retiro de `consolidado` |
+| `db/migration/V5__organo_y_facultad.sql` | El código de la facultad del programa; el órgano de la norma por nombre, nivel, facultad y clave; las restricciones del órgano |
 | `src/test/resources/db/humo/V0__humo.sql` | La tabla `humo`. Solo existe con el perfil `test` |
 
 Flyway registra lo aplicado en la tabla `flyway_schema_history`. Cómo agregar una migración está en [`recetas.md`](../proceso/recetas.md).
@@ -204,10 +211,10 @@ ORDER BY v.programa_id, v.numero;
 Normas incorporadas y cuántas reglas trajo cada una:
 
 ```sql
-SELECT n.tipo, n.numero, n.anio, n.organo, n.aplica_desde, COUNT(r.id) AS reglas
+SELECT n.tipo, n.numero, n.anio, n.organo_nombre, n.aplica_desde, COUNT(r.id) AS reglas
 FROM norma n
 LEFT JOIN regla r ON r.norma_id = n.id
-GROUP BY n.tipo, n.numero, n.anio, n.organo, n.aplica_desde
+GROUP BY n.tipo, n.numero, n.anio, n.organo_nombre, n.aplica_desde
 ORDER BY n.anio;
 ```
 

@@ -30,13 +30,14 @@ de prueba de `src/test/resources/json/`.
   "programa": {           // el programa al que se incorpora la norma
     "codigoSia": "2541",
     "nombre": "Ingeniería de Sistemas y Computación",
-    "facultad": "Facultad de Ingeniería"
+    "facultad": "Facultad de Ingeniería",
+    "codigoFacultad": "ING"
   },
   "norma": {
     "tipo": "ACUERDO",
     "numero": "003-A",
     "anio": 2022,
-    "organo": "Consejo Académico",
+    "organo": { "nombre": "Consejo Académico", "nivel": "NACIONAL", "facultad": null },
     "tipoDeEfecto": "BASE", // BASE, MODIFICATORIA o EXCEPCION_O_MEDIDA_TEMPORAL
     "fechaExpedicion": "2022-05-25",
     "vigencia": {
@@ -96,6 +97,7 @@ de prueba de `src/test/resources/json/`.
 | `codigoSia` | texto | Sí | Código SIA del programa; identifica el programa en el archivo. |
 | `nombre` | texto | Sí | Nombre del programa. |
 | `facultad` | texto | Sí | Nombre de la facultad a la que pertenece. |
+| `codigoFacultad` | texto | Sí | Código estable de la facultad, por ejemplo `ING`. Es el que citan el órgano y el alcance de una norma. |
 
 La importación resuelve el programa por `codigoSia` contra los programas ya cargados. El lector no
 crea programas ni identificadores internos: el archivo no lleva UUID y los identificadores los
@@ -106,14 +108,27 @@ genera o resuelve RutaUN en pasos posteriores.
 | Campo | Tipo | Obligatorio | Regla |
 |---|---|---|---|
 | `tipo` | texto | Sí | `ACUERDO`, `RESOLUCION` o `CIRCULAR`. |
-| `numero` | texto | Sí | Número tal como lo rotula la norma. |
+| `numero` | texto | Sí | Número de la norma. Se guarda sin espacios y en mayúsculas; si son dígitos seguidos de letras, con un guion entre ellos: `003A`, `003 a` y `003-a` quedan como `003-A`. |
 | `anio` | entero | Sí | Año positivo de expedición. |
-| `organo` | texto | Sí | Órgano que la expide. |
+| `organo` | objeto | Sí | Órgano que la expide; ver «`organo`». |
 | `tipoDeEfecto` | texto | Sí | `BASE`, `MODIFICATORIA` o `EXCEPCION_O_MEDIDA_TEMPORAL`. |
 | `fechaExpedicion` | fecha | Sí | Formato `AAAA-MM-DD`. |
 | `vigencia` | objeto | Sí | Vigencia de la norma. |
 | `enlaceRegimenLegal` | texto o `null` | No | Enlace a Régimen Legal, si existe. |
 | `alcance` | objeto | Sí | Programas a los que aplica la norma. |
+
+### `organo`
+
+| Campo | Tipo | Obligatorio | Regla |
+|---|---|---|---|
+| `nombre` | texto | Sí | Nombre del órgano, completo, tal como lo escribe la norma. |
+| `nivel` | texto | Sí | `NACIONAL`, `SEDE` o `FACULTAD`. |
+| `facultad` | texto o `null` | Solo si `nivel` es `FACULTAD` | Código de la facultad. |
+
+Dos órganos son el mismo si coinciden su nombre, sin contar tildes, mayúsculas ni espacios de más, y
+su facultad (UC07 ext. 4c). Un sinónimo es otro órgano: «Consejo Superior» no es «Consejo Superior
+Universitario», así que se escribe siempre el nombre completo. El órgano propone el alcance cuando la
+norma no lo dice (UC07 ext. 4h; S11).
 
 ### `vigencia` y `momento`
 
@@ -137,7 +152,7 @@ su norma.
 | Campo | Tipo | Regla |
 |---|---|---|
 | `tipo` | texto | `TODOS`, `FACULTADES` o `PROGRAMAS`. |
-| `facultades` | arreglo de textos | Nombres de facultades; solo si `tipo` es `FACULTADES`. |
+| `facultades` | arreglo de textos | Códigos de facultades; solo si `tipo` es `FACULTADES`. |
 | `programas` | arreglo de textos | Códigos SIA; solo si `tipo` es `PROGRAMAS`. |
 | `exclusiones` | arreglo de textos | Códigos SIA excluidos; deben ser programas del alcance. |
 | `texto` | texto | Texto con el que la norma fija el alcance. |
@@ -174,7 +189,7 @@ periodo en curso. En el archivo no se escribe `estado`.
       "tipo": "ACUERDO",
       "numero": "008",
       "anio": 2008,
-      "organo": "Consejo Superior Universitario"
+      "organo": { "nombre": "Consejo Superior Universitario", "nivel": "NACIONAL", "facultad": null }
     },
     "articulo": "art. 10"
   },
