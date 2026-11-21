@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import co.edu.unal.rutaun.compartido.EstadoRegla;
+import co.edu.unal.rutaun.compartido.Momento;
 import co.edu.unal.rutaun.compartido.ProgramaId;
 import co.edu.unal.rutaun.compartido.ReglaId;
 import co.edu.unal.rutaun.normativa.ConsultaNormativaFacade;
@@ -305,7 +306,7 @@ class ReglaCompletaIntegracionTest {
   void uc06_paso8_laVigenciaHastaPropiaDeLaReglaGanaALaDeSuNorma() throws IOException {
     ReglaCompletaVista regla = consulta.regla(sistemas(), idDeLaReglaDeAjustes()).orElseThrow();
 
-    assertThat(regla.vigenteHasta()).contains(LocalDate.of(2099, 12, 31));
+    assertThat(regla.vigenteHasta()).contains(new Momento.EnFecha(LocalDate.of(2099, 12, 31)));
     assertThat(regla.temporal()).isTrue();
   }
 
@@ -318,7 +319,7 @@ class ReglaCompletaIntegracionTest {
 
     ReglaCompletaVista regla = consulta.regla(sistemas(), ajustes).orElseThrow();
 
-    assertThat(regla.aplicaDesde()).contains(LocalDate.of(2026, 3, 1));
+    assertThat(regla.aplicaDesde()).contains(new Momento.EnFecha(LocalDate.of(2026, 3, 1)));
   }
 
   @Test

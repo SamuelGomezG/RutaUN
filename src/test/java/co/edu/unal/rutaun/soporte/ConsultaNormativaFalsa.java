@@ -1,6 +1,9 @@
 package co.edu.unal.rutaun.soporte;
 
 import co.edu.unal.rutaun.compartido.EstadoRegla;
+import co.edu.unal.rutaun.compartido.Momento;
+import co.edu.unal.rutaun.compartido.ParteDelAnio;
+import co.edu.unal.rutaun.compartido.PeriodoAcademico;
 import co.edu.unal.rutaun.compartido.ProgramaId;
 import co.edu.unal.rutaun.compartido.ReglaId;
 import co.edu.unal.rutaun.normativa.ClasificacionRegla;
@@ -104,8 +107,12 @@ public final class ConsultaNormativaFalsa implements ConsultaNormativaFacade {
         regla.estado(),
         regla.temporal(),
         regla.clasificacion(),
-        Optional.of(LocalDate.of(2026, 1, 15)),
-        regla.temporal() ? Optional.of(LocalDate.of(2026, 12, 31)) : Optional.empty(),
+        ID_CARGA.equals(regla.id())
+            ? Optional.of(new Momento.EnPeriodo(new PeriodoAcademico(2026, ParteDelAnio.PRIMERO)))
+            : Optional.of(new Momento.EnFecha(LocalDate.of(2026, 1, 15))),
+        regla.temporal()
+            ? Optional.of(new Momento.EnFecha(LocalDate.of(2026, 12, 31)))
+            : Optional.empty(),
         Optional.of(TipoAlcance.PROGRAMAS),
         Optional.of("Ingeniería de Sistemas y Computación (de prueba)"),
         cadena);
