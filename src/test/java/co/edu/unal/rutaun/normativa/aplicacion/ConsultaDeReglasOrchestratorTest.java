@@ -2,10 +2,12 @@ package co.edu.unal.rutaun.normativa.aplicacion;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.EventoDeDominio;
 import co.edu.unal.rutaun.compartido.ProgramaId;
 import co.edu.unal.rutaun.compartido.ReglaId;
 import co.edu.unal.rutaun.incidentes.IncidenteDePrograma;
+import co.edu.unal.rutaun.normativa.BusquedaDeReglas;
 import co.edu.unal.rutaun.normativa.ConsolidadoVista;
 import co.edu.unal.rutaun.normativa.ConsultaNormativaFacade;
 import co.edu.unal.rutaun.normativa.ProgramaVista;
@@ -103,6 +105,16 @@ class ConsultaDeReglasOrchestratorTest {
           }
 
           @Override
+          public Optional<ConsolidadoVista> buscarReglas(ProgramaId id, BusquedaDeReglas busqueda) {
+            return consolidadoVigente(id);
+          }
+
+          @Override
+          public List<String> categoriasDeReglas() {
+            return List.of();
+          }
+
+          @Override
           public Optional<ConsolidadoVista> consolidadoVigente(ProgramaId id) {
             return Optional.empty();
           }
@@ -118,5 +130,60 @@ class ConsultaDeReglasOrchestratorTest {
 
     assertThat(resultado).isInstanceOf(ReglasDelPrograma.SinVersionVigente.class);
     assertThat(eventos.publicados).isEmpty();
+  }
+
+  @Test
+  void uc06_paso6_laBusquedaPideAlaFachadaSoloLasReglasQueLaCumplen() {
+    var orquestador = orquestador(ConsultaNormativaFalsa.conReglas());
+
+    ReglasDelPrograma resultado =
+        orquestador.reglasDelPrograma(
+            ConsultaNormativaFalsa.SISTEMAS, BusquedaDeReglas.de("mínimo", null, null));
+
+    ConsolidadoVista consolidado = ((ReglasDelPrograma.Consultadas) resultado).consolidado();
+    assertThat(consolidado.reglasPorCategoria().values())
+        .singleElement()
+        .satisfies(
+            reglas ->
+                assertThat(reglas)
+                    .singleElement()
+                    .extracting(regla -> regla.id())
+                    .isEqualTo(ConsultaNormativaFalsa.ID_CARGA));
+  }
+
+  @Test
+  void uc06_ext5b_conElEstadoYaNoRigeSoloDevuelveLasQueYaNoRigen() {
+    var orquestador = orquestador(ConsultaNormativaFalsa.conReglas());
+
+    ReglasDelPrograma resultado =
+        orquestador.reglasDelPrograma(
+            ConsultaNormativaFalsa.SISTEMAS,
+            BusquedaDeReglas.de(null, null, EstadoRegla.YA_NO_RIGE));
+
+    ConsolidadoVista consolidado = ((ReglasDelPrograma.Consultadas) resultado).consolidado();
+    assertThat(consolidado.reglasPorCategoria().values().stream().flatMap(List::stream))
+        .extracting(regla -> regla.estado())
+        .containsOnly(EstadoRegla.YA_NO_RIGE);
+  }
+
+  @Test
+  void uc06_ext5a_unaBusquedaSinResultadosNoPublicaNingunIncidente() {
+    var orquestador = orquestador(ConsultaNormativaFalsa.conReglas());
+
+    ReglasDelPrograma resultado =
+        orquestador.reglasDelPrograma(
+            ConsultaNormativaFalsa.SISTEMAS, BusquedaDeReglas.de("no existe", null, null));
+
+    assertThat(resultado).isInstanceOf(ReglasDelPrograma.Consultadas.class);
+    assertThat(((ReglasDelPrograma.Consultadas) resultado).consolidado().sinReglas()).isTrue();
+    assertThat(eventos.publicados).isEmpty();
+  }
+
+  @Test
+  void uc06_paso6_ofreceLasCategoriasParaFiltrar() {
+    var orquestador = orquestador(ConsultaNormativaFalsa.conReglas());
+
+    assertThat(orquestador.categoriasDeReglas())
+        .contains("Materias", "Prerrequisitos y habilitación", "Otra");
   }
 }

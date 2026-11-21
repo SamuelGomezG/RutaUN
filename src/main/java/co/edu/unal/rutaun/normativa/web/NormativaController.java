@@ -1,15 +1,19 @@
 package co.edu.unal.rutaun.normativa.web;
 
+import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.ProgramaId;
 import co.edu.unal.rutaun.compartido.ReglaId;
+import co.edu.unal.rutaun.normativa.BusquedaDeReglas;
 import co.edu.unal.rutaun.normativa.aplicacion.ConsultaDeReglasOrchestrator;
 import co.edu.unal.rutaun.normativa.aplicacion.ReglaDelPrograma;
 import co.edu.unal.rutaun.normativa.aplicacion.ReglasDelPrograma;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -20,6 +24,13 @@ import org.springframework.web.servlet.ModelAndView;
  */
 @Controller
 class NormativaController {
+
+  /**
+   * Estados que el visitante puede elegir al filtrar: los tres que nombra UC06 paso 5. «En
+   * revisión» es una señal que el listado normal ya incluye, no un filtro.
+   */
+  private static final List<EstadoRegla> ESTADOS_QUE_SE_FILTRAN =
+      List.of(EstadoRegla.VIGENTE, EstadoRegla.PROGRAMADA, EstadoRegla.YA_NO_RIGE);
 
   private final ConsultaDeReglasOrchestrator orquestador;
 
@@ -35,16 +46,27 @@ class NormativaController {
 
   /**
    * Página de las reglas del programa elegido, agrupadas por categoría, con la versión del
-   * consolidado y su fecha (UC06 paso 4). Si el consolidado no tiene reglas, lo dice (ext. 4a).
-   * Responde 404 si el programa no está cargado o no tiene una versión vigente del consolidado.
+   * consolidado y su fecha (UC06 paso 4). Si el consolidado no tiene reglas, lo dice (ext. 4a). Con
+   * {@code texto}, {@code categoria} o {@code estado} muestra solo las reglas que los cumplen (paso
+   * 6): las que ya no rigen salen solo al pedir ese estado (ext. 5b) y, si ninguna cumple la
+   * búsqueda, la página lo dice y recuerda que debe consultarse Régimen Legal (ext. 5a). Responde
+   * 404 si el programa no está cargado o no tiene una versión vigente del consolidado.
    */
   @GetMapping("/programas/{id}/reglas")
-  ModelAndView reglas(@PathVariable UUID id) {
-    return switch (orquestador.reglasDelPrograma(new ProgramaId(id))) {
+  ModelAndView reglas(
+      @PathVariable UUID id,
+      @RequestParam(required = false) String texto,
+      @RequestParam(required = false) String categoria,
+      @RequestParam(required = false) EstadoRegla estado) {
+    BusquedaDeReglas busqueda = BusquedaDeReglas.de(texto, categoria, estado);
+    return switch (orquestador.reglasDelPrograma(new ProgramaId(id), busqueda)) {
       case ReglasDelPrograma.Consultadas consultadas -> {
         ModelAndView vista = new ModelAndView("publico/reglas");
         vista.addObject("programa", consultadas.programa());
         vista.addObject("consolidado", consultadas.consolidado());
+        vista.addObject("busqueda", busqueda);
+        vista.addObject("categorias", orquestador.categoriasDeReglas());
+        vista.addObject("estados", ESTADOS_QUE_SE_FILTRAN);
         yield vista;
       }
       case ReglasDelPrograma.ProgramaNoCargado noCargado ->

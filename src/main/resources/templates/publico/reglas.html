@@ -10,9 +10,46 @@
     <p th:text="${programa.facultad()}">Facultad</p>
     <p th:text="'Versión del consolidado: ' + ${consolidado.version()}">Versión del consolidado: 1</p>
     <p th:text="'Fecha de actualización: ' + ${consolidado.fecha()}">Fecha de actualización: 2026-01-01</p>
-    <div th:if="${consolidado.sinReglas()}">
+    <form method="get" role="search" th:action="@{/programas/{programa}/reglas(programa=${programa.id().valor()})}">
+      <p>
+        <label>Buscar por texto
+          <input type="search" name="texto" th:value="${busqueda.texto().orElse('')}"/>
+        </label>
+      </p>
+      <p>
+        <label>Categoría
+          <select name="categoria">
+            <option value="">Todas</option>
+            <option th:each="nombre : ${categorias}"
+                    th:value="${nombre}"
+                    th:text="${nombre}"
+                    th:selected="${busqueda.categoria().isPresent() and busqueda.categoria().get() == nombre}">Categoría</option>
+          </select>
+        </label>
+      </p>
+      <p>
+        <label>Estado
+          <select name="estado">
+            <option value="">Las que rigen, las programadas y las que están en revisión</option>
+            <option th:each="posible : ${estados}"
+                    th:value="${posible.name()}"
+                    th:text="${posible.name() == 'VIGENTE' ? 'Vigente' : (posible.name() == 'PROGRAMADA' ? 'Programada' : (posible.name() == 'YA_NO_RIGE' ? 'Ya no rige' : posible.name()))}"
+                    th:selected="${busqueda.estado().isPresent() and busqueda.estado().get() == posible}">Estado</option>
+          </select>
+        </label>
+      </p>
+      <p>
+        <button type="submit">Buscar</button>
+        <a th:unless="${busqueda.esVacia()}" th:href="@{/programas/{programa}/reglas(programa=${programa.id().valor()})}">Quitar la búsqueda y los filtros</a>
+      </p>
+    </form>
+    <div th:if="${consolidado.sinReglas() and busqueda.esVacia()}">
       <p>No hay reglas para mostrar.</p>
       <p>El consolidado normativo del programa tiene un problema que ya se informó al administrador de normativa.</p>
+    </div>
+    <div th:if="${consolidado.sinReglas() and !busqueda.esVacia()}">
+      <p>No se encontraron reglas con esa búsqueda.</p>
+      <p>Revisa el texto o quita algún filtro. RutaUN no puede confirmar que la regla no exista: debe consultarse Régimen Legal.</p>
     </div>
     <section th:each="categoria : ${consolidado.reglasPorCategoria()}">
       <h2 th:text="${categoria.key}">Categoría</h2>
@@ -27,6 +64,13 @@
             <em th:case="'EN_REVISION'">en revisión</em>
           </span>
           <strong th:if="${regla.temporal()}">temporal</strong>
+          <strong th:if="${regla.clasificacion().name() == 'INFORMATIVA'}">solo informativa: el plan no la aplica</strong>
+          <small th:if="${regla.estado().name() == 'YA_NO_RIGE'}">
+            Vigencia:
+            <span th:if="${regla.aplicaDesde().isPresent()}" th:text="'desde ' + ${regla.aplicaDesde().get()}">desde 2009-01-01</span>
+            <span th:if="${regla.vigenteHasta().isPresent()}" th:text="'hasta ' + ${regla.vigenteHasta().get()}">hasta 2026-01-01</span>
+            <span th:if="${regla.aplicaDesde().isEmpty() and regla.vigenteHasta().isEmpty()}">sin fechas registradas</span>
+          </small>
           <small th:if="${regla.fuente().isPresent()}"
                  th:with="norma=${regla.fuente().get().norma()}">
             <span th:switch="${norma.tipo().name()}">
