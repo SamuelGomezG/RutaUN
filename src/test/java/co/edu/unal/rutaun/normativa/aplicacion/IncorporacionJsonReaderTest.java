@@ -3,12 +3,14 @@ package co.edu.unal.rutaun.normativa.aplicacion;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import co.edu.unal.rutaun.compartido.CodigoMateria;
 import co.edu.unal.rutaun.compartido.Momento;
 import co.edu.unal.rutaun.normativa.TipoComponente;
 import co.edu.unal.rutaun.normativa.dominio.Agrupacion;
 import co.edu.unal.rutaun.normativa.dominio.ComponenteDeLibreEleccion;
 import co.edu.unal.rutaun.normativa.dominio.DatosDeRegla;
 import co.edu.unal.rutaun.normativa.dominio.ExpresionDeMaterias;
+import co.edu.unal.rutaun.normativa.dominio.ExpresionDeMaterias.TerminoMateria;
 import co.edu.unal.rutaun.normativa.dominio.MedidaDeCreditos;
 import co.edu.unal.rutaun.normativa.dominio.Regla;
 import java.io.ByteArrayInputStream;
@@ -104,6 +106,24 @@ class IncorporacionJsonReaderTest {
         }
       """;
 
+  private static final String REGLA_PRERREQUISITO =
+      """
+        {
+          "categoria": "PRERREQUISITO",
+          "objeto": "2024043 Cálculo integral",
+          "enunciado": "Cálculo integral exige lo que diga la expresión.",
+          "articulo": "art. 2",
+          "vigenciaPropia": null,
+          "clasificacion": "DEL_PLAN",
+          "afectacion": null,
+          "datos": {
+            "tipo": "PRERREQUISITO",
+            "materia": "2024043",
+            "expresion": %s
+          }
+        }
+      """;
+
   private static final String CIERRE =
       """
         ]
@@ -113,6 +133,8 @@ class IncorporacionJsonReaderTest {
   private static final String COMPONENTE_LIBRE = CABECERA + REGLA_COMPONENTE_LIBRE + CIERRE;
 
   private static final String HABILITACION = CABECERA + REGLA_HABILITACION + CIERRE;
+
+  private static final String PRERREQUISITO = CABECERA + REGLA_PRERREQUISITO + CIERRE;
 
   @Test
   void uc07_hu03_t2_elArchivoValidoSeLeeCompleto() {
@@ -154,10 +176,12 @@ class IncorporacionJsonReaderTest {
 
     DatosDeRegla.DePrerrequisito prerrequisito =
         (DatosDeRegla.DePrerrequisito) incorporacion.reglas().get(1).datos();
-    assertThat(prerrequisito.prerrequisito().expresion()).isInstanceOf(ExpresionDeMaterias.Y.class);
-    ExpresionDeMaterias.Y expresion =
-        (ExpresionDeMaterias.Y) prerrequisito.prerrequisito().expresion();
-    assertThat(expresion.derecha()).isInstanceOf(ExpresionDeMaterias.MateriaExterna.class);
+    assertThat(prerrequisito.prerrequisito().expresion())
+        .isInstanceOf(ExpresionDeMaterias.TodasLas.class);
+    ExpresionDeMaterias.TodasLas expresion =
+        (ExpresionDeMaterias.TodasLas) prerrequisito.prerrequisito().expresion();
+    assertThat(expresion.terminos())
+        .anyMatch(termino -> termino instanceof ExpresionDeMaterias.MateriaExterna);
 
     DatosDeRegla.DeAgrupacion agrupacion =
         (DatosDeRegla.DeAgrupacion) incorporacion.reglas().get(4).datos();
@@ -167,6 +191,39 @@ class IncorporacionJsonReaderTest {
     DatosDeRegla.DeComponente componente =
         (DatosDeRegla.DeComponente) incorporacion.reglas().get(5).datos();
     assertThat(componente.componente()).isNotNull();
+  }
+
+  @Test
+  void uc07_hu03_t2_lasYDelArchivoSeLeenAplanadas() {
+    String anidadas =
+        """
+        {
+          "tipo": "Y",
+          "izquierda": { "tipo": "MATERIA_DEL_PROGRAMA", "codigo": "A" },
+          "derecha": {
+            "tipo": "Y",
+            "izquierda": { "tipo": "MATERIA_DEL_PROGRAMA", "codigo": "B" },
+            "derecha": { "tipo": "MATERIA_DEL_PROGRAMA", "codigo": "C" }
+          }
+        }
+        """;
+    String repetidas =
+        """
+        {
+          "tipo": "Y",
+          "izquierda": { "tipo": "MATERIA_DEL_PROGRAMA", "codigo": "A" },
+          "derecha": { "tipo": "MATERIA_DEL_PROGRAMA", "codigo": "A" }
+        }
+        """;
+
+    assertThat(expresionLeida(PRERREQUISITO.formatted(anidadas)))
+        .isEqualTo(
+            ExpresionDeMaterias.todasLas(
+                new TerminoMateria(new CodigoMateria("A")),
+                new TerminoMateria(new CodigoMateria("B")),
+                new TerminoMateria(new CodigoMateria("C"))));
+    assertThat(expresionLeida(PRERREQUISITO.formatted(repetidas)))
+        .isEqualTo(new TerminoMateria(new CodigoMateria("A")));
   }
 
   @Test
@@ -295,6 +352,16 @@ class IncorporacionJsonReaderTest {
   private static IncorporacionLeida incorporacionValida() {
     var resultado = leer(VALIDO);
     return ((IncorporacionJsonReader.ResultadoDeLectura.Leida) resultado).incorporacion();
+  }
+
+  private static ExpresionDeMaterias expresionLeida(String json) {
+    var resultado = leerTexto(json);
+    assertThat(resultado).isInstanceOf(IncorporacionJsonReader.ResultadoDeLectura.Leida.class);
+    IncorporacionLeida incorporacion =
+        ((IncorporacionJsonReader.ResultadoDeLectura.Leida) resultado).incorporacion();
+    return ((DatosDeRegla.DePrerrequisito) incorporacion.reglas().get(0).datos())
+        .prerrequisito()
+        .expresion();
   }
 
   private static IncorporacionJsonReader.ResultadoDeLectura leerTexto(String json) {

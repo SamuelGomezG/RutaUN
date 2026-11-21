@@ -14,9 +14,9 @@ class RestriccionTest {
   private static final CodigoMateria B = new CodigoMateria("B");
   private static final CodigoMateria C = new CodigoMateria("C");
   private static final ExpresionDeMaterias A_Y_B_O_C =
-      new ExpresionDeMaterias.Y(
+      ExpresionDeMaterias.todasLas(
           new ExpresionDeMaterias.TerminoMateria(A),
-          new ExpresionDeMaterias.O(
+          ExpresionDeMaterias.algunaDe(
               new ExpresionDeMaterias.TerminoMateria(B),
               new ExpresionDeMaterias.TerminoMateria(C)));
 
