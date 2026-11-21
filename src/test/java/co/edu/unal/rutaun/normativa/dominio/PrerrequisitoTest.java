@@ -135,6 +135,24 @@ class PrerrequisitoTest {
   }
 
   @Test
+  void uc05_ext4k_unaRamaODeOtroProgramaNoAparece() {
+    ContextoDeEvaluacion contexto = ContextoDeEvaluacionFijo.nuevo().pendiente(A).construir();
+    MateriaExterna electronica =
+        new MateriaExterna(
+            "Electrónica Análoga I",
+            Optional.of(new CodigoMateria("2016695")),
+            TipoMateriaExterna.OTRO_PROGRAMA);
+
+    EstadoRestriccion estado =
+        new Prerrequisito(A, ExpresionDeMaterias.algunaDe(new TerminoMateria(A), electronica))
+            .evaluar(contexto);
+
+    assertThat(estado.certeza()).isEqualTo(Certeza.PENDIENTE);
+    assertThat(estado.razones()).containsExactly(new Razon.TerminoPendiente(A));
+    assertThat(estado.razones().toString()).doesNotContain("Electrónica").doesNotContain("2016695");
+  }
+
+  @Test
   void tt03_unaMateriaDeOtroProgramaNoSePuedeCumplir() {
     EstadoRestriccion estado =
         evaluarConContextoVacio(
@@ -167,6 +185,74 @@ class PrerrequisitoTest {
     assertThatThrownBy(() -> prerrequisito.evaluar(null))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("contexto no puede ser null");
+  }
+
+  @Test
+  void uc05_ext4k_siSoloQuedaUnaMateriaDeOtroProgramaLaMateriaNoEsCursable() {
+    MateriaExterna externaX = materiaDeOtroPrograma("Externa X", "8000011");
+    MateriaExterna externaY = materiaDeOtroPrograma("Externa Y", "8000012");
+
+    EstadoRestriccion sola = evaluarConContextoVacio(new Prerrequisito(A, externaX));
+
+    assertThat(sola.certeza()).isEqualTo(Certeza.PENDIENTE);
+    assertThat(sola.razones()).containsExactly(new Razon.NoCursableDesdeElPrograma());
+
+    EstadoRestriccion alguna =
+        evaluarConContextoVacio(
+            new Prerrequisito(A, ExpresionDeMaterias.algunaDe(externaX, externaY)));
+
+    assertThat(alguna.certeza()).isEqualTo(Certeza.PENDIENTE);
+    assertThat(alguna.razones()).containsExactly(new Razon.NoCursableDesdeElPrograma());
+  }
+
+  @Test
+  void uc05_ext4k_unaRamaYConUnaMateriaDeOtroProgramaNoAparece() {
+    MateriaExterna externa = materiaDeOtroPrograma("Externa X", "8000011");
+    ContextoDeEvaluacion contexto =
+        ContextoDeEvaluacionFijo.nuevo().aprobada(A).pendiente(B).construir();
+
+    EstadoRestriccion estado =
+        new Prerrequisito(
+                A,
+                ExpresionDeMaterias.algunaDe(
+                    ExpresionDeMaterias.todasLas(new TerminoMateria(A), externa),
+                    new TerminoMateria(B)))
+            .evaluar(contexto);
+
+    assertThat(estado.certeza()).isEqualTo(Certeza.PENDIENTE);
+    assertThat(estado.razones()).containsExactly(new Razon.TerminoPendiente(B));
+  }
+
+  @Test
+  void uc05_ext4k_unaYConUnaMateriaDeOtroProgramaSoloDiceNoCursable() {
+    MateriaExterna externaX = materiaDeOtroPrograma("Externa X", "8000011");
+    MateriaExterna externaY = materiaDeOtroPrograma("Externa Y", "8000012");
+    ContextoDeEvaluacion contexto =
+        ContextoDeEvaluacionFijo.nuevo().pendiente(A).pendiente(B).construir();
+
+    EstadoRestriccion unaY =
+        new Prerrequisito(A, ExpresionDeMaterias.todasLas(new TerminoMateria(A), externaX))
+            .evaluar(contexto);
+
+    assertThat(unaY.certeza()).isEqualTo(Certeza.PENDIENTE);
+    assertThat(unaY.razones()).containsExactly(new Razon.NoCursableDesdeElPrograma());
+
+    EstadoRestriccion dosRamasNoCumplibles =
+        new Prerrequisito(
+                A,
+                ExpresionDeMaterias.algunaDe(
+                    ExpresionDeMaterias.todasLas(new TerminoMateria(A), externaX),
+                    ExpresionDeMaterias.todasLas(new TerminoMateria(B), externaY)))
+            .evaluar(contexto);
+
+    assertThat(dosRamasNoCumplibles.certeza()).isEqualTo(Certeza.PENDIENTE);
+    assertThat(dosRamasNoCumplibles.razones())
+        .containsExactly(new Razon.NoCursableDesdeElPrograma());
+  }
+
+  private static MateriaExterna materiaDeOtroPrograma(String nombre, String codigo) {
+    return new MateriaExterna(
+        nombre, Optional.of(new CodigoMateria(codigo)), TipoMateriaExterna.OTRO_PROGRAMA);
   }
 
   private static EstadoRestriccion evaluarConContextoVacio(Restriccion restriccion) {

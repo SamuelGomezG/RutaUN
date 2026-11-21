@@ -35,6 +35,13 @@ public sealed interface ExpresionDeMaterias
    */
   EstadoRestriccion evaluar(Function<CodigoMateria, EstadoRestriccion> estadoDe);
 
+  /**
+   * Si la expresión se puede cumplir sin una materia de otro programa (S17).
+   *
+   * @return {@code true} si ninguna rama depende de una materia de otro programa
+   */
+  boolean esCumplible();
+
   /** Materia que figura en la malla del programa. */
   record TerminoMateria(CodigoMateria codigo) implements ExpresionDeMaterias {
 
@@ -47,6 +54,11 @@ public sealed interface ExpresionDeMaterias
     public EstadoRestriccion evaluar(Function<CodigoMateria, EstadoRestriccion> estadoDe) {
       ArgumentChecks.obligatorio(estadoDe, "estadoDe");
       return estadoDe.apply(codigo);
+    }
+
+    @Override
+    public boolean esCumplible() {
+      return true;
     }
   }
 
@@ -73,6 +85,11 @@ public sealed interface ExpresionDeMaterias
         case OTRO_PROGRAMA -> EstadoRestriccion.pendiente(new Razon.NoCursableDesdeElPrograma());
       };
     }
+
+    @Override
+    public boolean esCumplible() {
+      return tipo() == TipoMateriaExterna.NIVELACION;
+    }
   }
 
   /**
@@ -91,7 +108,16 @@ public sealed interface ExpresionDeMaterias
 
     @Override
     public EstadoRestriccion evaluar(Function<CodigoMateria, EstadoRestriccion> estadoDe) {
+      ArgumentChecks.obligatorio(estadoDe, "estadoDe");
+      if (!esCumplible()) {
+        return EstadoRestriccion.pendiente(new Razon.NoCursableDesdeElPrograma());
+      }
       return reducir(terminos, estadoDe, EstadoRestriccion::y);
+    }
+
+    @Override
+    public boolean esCumplible() {
+      return terminos.stream().allMatch(ExpresionDeMaterias::esCumplible);
     }
   }
 
@@ -111,7 +137,22 @@ public sealed interface ExpresionDeMaterias
 
     @Override
     public EstadoRestriccion evaluar(Function<CodigoMateria, EstadoRestriccion> estadoDe) {
-      return reducir(terminos, estadoDe, EstadoRestriccion::o);
+      ArgumentChecks.obligatorio(estadoDe, "estadoDe");
+      if (!esCumplible()) {
+        return EstadoRestriccion.pendiente(new Razon.NoCursableDesdeElPrograma());
+      }
+      Set<ExpresionDeMaterias> cumplibles = new LinkedHashSet<>();
+      for (ExpresionDeMaterias termino : terminos) {
+        if (termino.esCumplible()) {
+          cumplibles.add(termino);
+        }
+      }
+      return reducir(cumplibles, estadoDe, EstadoRestriccion::o);
+    }
+
+    @Override
+    public boolean esCumplible() {
+      return terminos.stream().anyMatch(ExpresionDeMaterias::esCumplible);
     }
   }
 

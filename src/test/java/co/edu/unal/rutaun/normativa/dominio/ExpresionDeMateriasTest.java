@@ -139,6 +139,42 @@ class ExpresionDeMateriasTest {
   }
 
   @Test
+  void s17_unaExpresionEsCumplibleSegunSusTerminos() {
+    ExpresionDeMaterias.MateriaExterna nivelacion =
+        new ExpresionDeMaterias.MateriaExterna(
+            "Nivelación", Optional.empty(), TipoMateriaExterna.NIVELACION);
+    ExpresionDeMaterias.MateriaExterna otroPrograma =
+        new ExpresionDeMaterias.MateriaExterna(
+            "Otra", Optional.empty(), TipoMateriaExterna.OTRO_PROGRAMA);
+    ExpresionDeMaterias.MateriaExterna otroProgramaDistinto =
+        new ExpresionDeMaterias.MateriaExterna(
+            "Otra más", Optional.empty(), TipoMateriaExterna.OTRO_PROGRAMA);
+
+    assertThat(new TerminoMateria(A).esCumplible()).isTrue();
+    assertThat(nivelacion.esCumplible()).isTrue();
+    assertThat(otroPrograma.esCumplible()).isFalse();
+
+    assertThat(ExpresionDeMaterias.todasLas(new TerminoMateria(A), nivelacion).esCumplible())
+        .isTrue();
+    assertThat(ExpresionDeMaterias.todasLas(new TerminoMateria(A), otroPrograma).esCumplible())
+        .isFalse();
+    assertThat(ExpresionDeMaterias.todasLas(nivelacion, otroPrograma).esCumplible()).isFalse();
+
+    assertThat(ExpresionDeMaterias.algunaDe(new TerminoMateria(A), otroPrograma).esCumplible())
+        .isTrue();
+    assertThat(ExpresionDeMaterias.algunaDe(nivelacion, otroPrograma).esCumplible()).isTrue();
+    assertThat(ExpresionDeMaterias.algunaDe(otroPrograma, otroProgramaDistinto).esCumplible())
+        .isFalse();
+
+    assertThat(
+            ExpresionDeMaterias.todasLas(
+                    new TerminoMateria(A),
+                    ExpresionDeMaterias.algunaDe(new TerminoMateria(B), otroPrograma))
+                .esCumplible())
+        .isTrue();
+  }
+
+  @Test
   void tt03_seConstruyeUnaMateriaExternaConNombreTipoYCodigoOpcional() {
     ExpresionDeMaterias.MateriaExterna externa =
         new ExpresionDeMaterias.MateriaExterna(
