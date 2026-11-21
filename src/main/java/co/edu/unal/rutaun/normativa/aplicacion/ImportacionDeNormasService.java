@@ -4,6 +4,7 @@ import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.Momento;
 import co.edu.unal.rutaun.compartido.ProgramaId;
 import co.edu.unal.rutaun.compartido.ReglaId;
+import co.edu.unal.rutaun.normativa.dominio.Afectacion;
 import co.edu.unal.rutaun.normativa.dominio.Alcance;
 import co.edu.unal.rutaun.normativa.dominio.ConsolidadoValidado;
 import co.edu.unal.rutaun.normativa.dominio.MotivoDeVersion;
@@ -123,6 +124,7 @@ public class ImportacionDeNormasService {
     }
 
     LocalDate fecha = LocalDate.now(reloj);
+    exigirReglasAfectadasRegistradas(incorporacion.reglas());
     List<ReglaEnVersion> reglasIncorporadas =
         conSuEstado(incorporacion.reglas(), normaLeida, fecha);
     normas.save(NormaMapper.aEntidad(norma));
@@ -137,6 +139,28 @@ public class ImportacionDeNormasService {
     }
     return new ResultadoDeImportacionDeNormas(
         true, identificacion, creadas, valida.ningunPlanQuedaDesactualizado());
+  }
+
+  /**
+   * Exige que toda regla afectada por otra ya esté registrada.
+   *
+   * <p>UC07 ext. 6b. Mientras el lector no resuelva la regla real (#182), deriva el identificador
+   * de la regla afectada de su norma, su artículo y su objeto, y ese identificador no coincide con
+   * una regla guardada; por eso toda afectación de destino {@code REGLA} se rechaza con un mensaje
+   * que nombra la regla.
+   */
+  private void exigirReglasAfectadasRegistradas(List<Regla> reglasDeLaIncorporacion) {
+    for (Regla regla : reglasDeLaIncorporacion) {
+      ReglaId afectada = regla.afectacion().flatMap(Afectacion::reglaAfectada).orElse(null);
+      if (afectada != null && !reglas.existsById(afectada.valor())) {
+        throw new ArchivoDeNormativaInvalidoException(
+            "La regla \""
+                + regla.objeto()
+                + "\" ("
+                + regla.fuente().articulo()
+                + ") afecta una regla que no está registrada.");
+      }
+    }
   }
 
   private static List<ReglaEnVersion> conSuEstado(

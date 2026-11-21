@@ -1,6 +1,7 @@
 package co.edu.unal.rutaun.normativa.aplicacion;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoRepository;
@@ -83,6 +84,19 @@ class ImportacionDeNormasServiceTest {
     assertThat(reglasEnVersion.findAll()).hasSize(20);
     assertThat(reglasEnVersion.findAll()).extracting(fila -> fila.getEstado()).contains("VIGENTE");
     assertThat(versiones.findAll().get(0).getNumero()).isEqualTo(1);
+  }
+
+  @Test
+  void uc07_ext6b_importarUnaAfectacionAUnaReglaNoRegistradaSeRechaza() throws IOException {
+    cargarProgramas();
+
+    assertThatThrownBy(() -> importarNorma("json/invalidos/afecta-regla-no-registrada.json"))
+        .isInstanceOf(ArchivoDeNormativaInvalidoException.class)
+        .hasMessageContaining("no está registrada");
+
+    assertThat(normasGuardadas.findAll()).isEmpty();
+    assertThat(reglas.findAll()).isEmpty();
+    assertThat(versiones.findAll()).isEmpty();
   }
 
   @Test

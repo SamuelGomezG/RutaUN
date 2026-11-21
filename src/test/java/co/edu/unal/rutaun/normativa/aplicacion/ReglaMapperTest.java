@@ -51,10 +51,15 @@ class ReglaMapperTest {
     normas.save(NormaMapper.aEntidad(norma));
   }
 
-  /** Borra lo que guardó la prueba, en orden inverso, porque aquí sí se hizo commit. */
+  /**
+   * Borra lo que guardó la prueba, en orden inverso, porque aquí sí se hizo commit y una regla no
+   * se puede borrar antes que la que la afecta.
+   */
   @AfterEach
   void limpiar() {
-    reglas.deleteAllById(reglasGuardadas);
+    for (int i = reglasGuardadas.size() - 1; i >= 0; i--) {
+      reglas.deleteById(reglasGuardadas.get(i));
+    }
     normas.deleteById(norma.id().valor());
   }
 

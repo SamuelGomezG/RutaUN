@@ -145,6 +145,74 @@ class PersistenciaNormativaTest {
   }
 
   @Test
+  void uc07_ext6b_unaAfectacionAUnaReglaInexistenteFalla() {
+    NormaEntity norma = nuevaNorma();
+
+    assertThatThrownBy(
+            () ->
+                reglas.saveAndFlush(
+                    new ReglaEntity(
+                        UUID.randomUUID(),
+                        norma.getId(),
+                        "OTRA",
+                        "Regla que afecta",
+                        "Modifica una regla inexistente.",
+                        "Articulo 9",
+                        null,
+                        null,
+                        "INFORMATIVA",
+                        "MODIFICA",
+                        UUID.randomUUID(),
+                        null,
+                        null)))
+        .isInstanceOf(DataIntegrityViolationException.class)
+        .hasMessageContaining("FK_REGLA_AFECTADA");
+  }
+
+  @Test
+  void tt04_unaAfectacionAUnaReglaGuardadaSeAcepta() {
+    NormaEntity norma = nuevaNorma();
+    ReglaEntity afectada =
+        reglas.saveAndFlush(
+            new ReglaEntity(
+                UUID.randomUUID(),
+                norma.getId(),
+                "OTRA",
+                "Regla afectada",
+                "Regla existente.",
+                "Articulo 1",
+                null,
+                null,
+                "INFORMATIVA",
+                null,
+                null,
+                null,
+                null));
+    ReglaEntity afectante =
+        reglas.save(
+            new ReglaEntity(
+                UUID.randomUUID(),
+                norma.getId(),
+                "OTRA",
+                "Regla que afecta",
+                "Modifica la regla anterior.",
+                "Articulo 2",
+                null,
+                null,
+                "INFORMATIVA",
+                "MODIFICA",
+                afectada.getId(),
+                null,
+                null));
+    vaciarMemoria();
+
+    assertThat(reglas.findById(afectante.getId()))
+        .get()
+        .extracting(ReglaEntity::getReglaAfectadaId)
+        .isEqualTo(afectada.getId());
+  }
+
+  @Test
   void tt04_guardaYLeeUnConsolidadoConSuVersionYSusReglas() {
     ProgramaEntity programa = nuevoPrograma();
     NormaEntity norma = nuevaNorma();
