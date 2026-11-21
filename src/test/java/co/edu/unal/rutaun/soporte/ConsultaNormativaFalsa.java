@@ -71,6 +71,9 @@ public final class ConsultaNormativaFalsa implements ConsultaNormativaFacade {
   /** Materia de la fachada falsa que no se puede cursar desde el programa (UC05 ext. 4k). */
   public static final CodigoMateria MATERIA_NO_CURSABLE = new CodigoMateria("2000006");
 
+  /** Materia de la fachada falsa con una restricción programada, una en revisión y una temporal. */
+  public static final CodigoMateria MATERIA_CON_ESTADOS = new CodigoMateria("2000007");
+
   /** Regla de habilitación de {@link #MATERIA_CON_HABILITACION}. */
   public static final ReglaId ID_HABILITACION = new ReglaId(new UUID(0, 17));
 
@@ -320,6 +323,44 @@ public final class ConsultaNormativaFalsa implements ConsultaNormativaFacade {
                       materiaA,
                       Optional.of(fuente("1", "art. 3"))))));
     }
+    if (MATERIA_CON_ESTADOS.equals(materia)) {
+      ExpresionVista.Materia materiaA = materiaDePrueba("2000001", "Materia A");
+      return Optional.of(
+          restriccionesDeLaMateria(
+              materia,
+              "Materia G",
+              List.of(
+                  restriccion(
+                      new ReglaId(new UUID(0, 18)),
+                      TipoDeRestriccion.PRERREQUISITO,
+                      "Regla de prueba: la materia G exige la materia A desde 2027.",
+                      materiaA,
+                      Optional.of(fuente("1", "art. 4")),
+                      EstadoRegla.PROGRAMADA,
+                      false,
+                      Optional.of(LocalDate.of(2027, 1, 15)),
+                      Optional.empty()),
+                  restriccion(
+                      new ReglaId(new UUID(0, 19)),
+                      TipoDeRestriccion.PRERREQUISITO,
+                      "Regla de prueba: la materia G exige la materia A, y está en revisión.",
+                      materiaA,
+                      Optional.of(fuente("1", "art. 5")),
+                      EstadoRegla.EN_REVISION,
+                      false,
+                      Optional.of(LocalDate.of(2026, 1, 15)),
+                      Optional.empty()),
+                  restriccion(
+                      new ReglaId(new UUID(0, 20)),
+                      TipoDeRestriccion.CORREQUISITO,
+                      "Regla de prueba: la materia G se cursa con la materia A hasta 2026.",
+                      materiaA,
+                      Optional.of(fuente("1", "art. 6")),
+                      EstadoRegla.VIGENTE,
+                      true,
+                      Optional.of(LocalDate.of(2026, 1, 15)),
+                      Optional.of(LocalDate.of(2026, 12, 31))))));
+    }
     if (MATERIA_NO_CURSABLE.equals(materia)) {
       return Optional.of(
           new RestriccionesDeMateriaVista(
@@ -354,7 +395,7 @@ public final class ConsultaNormativaFalsa implements ConsultaNormativaFacade {
       String enunciado,
       ExpresionVista exige,
       Optional<FuenteVista> fuente) {
-    return new RestriccionVista(
+    return restriccion(
         id,
         tipo,
         enunciado,
@@ -364,6 +405,20 @@ public final class ConsultaNormativaFalsa implements ConsultaNormativaFacade {
         false,
         Optional.of(LocalDate.of(2026, 1, 15)),
         Optional.empty());
+  }
+
+  private static RestriccionVista restriccion(
+      ReglaId id,
+      TipoDeRestriccion tipo,
+      String enunciado,
+      ExpresionVista exige,
+      Optional<FuenteVista> fuente,
+      EstadoRegla estado,
+      boolean temporal,
+      Optional<LocalDate> aplicaDesde,
+      Optional<LocalDate> vigenteHasta) {
+    return new RestriccionVista(
+        id, tipo, enunciado, exige, fuente, estado, temporal, aplicaDesde, vigenteHasta);
   }
 
   private static RestriccionesDeMateriaVista restriccionesDeLaMateria(

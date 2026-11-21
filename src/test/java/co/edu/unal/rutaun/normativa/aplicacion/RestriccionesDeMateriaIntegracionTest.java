@@ -245,4 +245,98 @@ class RestriccionesDeMateriaIntegracionTest {
 
     assertThat(restriccionesDe(ESTRUCTURAS_DE_DATOS).nombre()).isEqualTo("Estructuras de Datos");
   }
+
+  private UUID prerrequisitoDe(CodigoMateria materia) {
+    return jdbc.queryForObject(
+        "SELECT id FROM regla WHERE categoria = 'PRERREQUISITO' AND objeto LIKE ?",
+        UUID.class,
+        materia.valor() + " %");
+  }
+
+  /** Cambia el estado de la regla en la última versión del programa. */
+  private void laReglaPasaAEstado(UUID regla, EstadoRegla estado) {
+    entityManager.flush();
+    jdbc.update(
+        "UPDATE regla_en_version SET estado = ? WHERE regla_id = ? AND version_id ="
+            + " (SELECT id FROM version_consolidado WHERE programa_id = ? ORDER BY numero DESC"
+            + " LIMIT 1)",
+        estado.name(),
+        regla,
+        sistemas().valor());
+    entityManager.flush();
+    entityManager.clear();
+  }
+
+  /** Le da a la regla su propia vigencia; queda informativa, porque una temporal no es del plan. */
+  private void laReglaTieneVigenciaPropia(UUID regla, LocalDate desde, LocalDate hasta) {
+    entityManager.flush();
+    jdbc.update(
+        "UPDATE regla SET vigente_desde = ?, vigente_hasta = ?, clasificacion = 'INFORMATIVA'"
+            + " WHERE id = ?",
+        desde,
+        hasta,
+        regla);
+    entityManager.flush();
+    entityManager.clear();
+  }
+
+  /** Le pone fin de vigencia a la norma de la regla; la regla queda informativa. */
+  private void laNormaDeLaReglaVenceEl(UUID regla, LocalDate hasta) {
+    entityManager.flush();
+    jdbc.update("UPDATE regla SET clasificacion = 'INFORMATIVA' WHERE id = ?", regla);
+    jdbc.update(
+        "UPDATE norma SET vigente_hasta = ? WHERE id = (SELECT norma_id FROM regla WHERE id = ?)",
+        hasta,
+        regla);
+    entityManager.flush();
+    entityManager.clear();
+  }
+
+  @Test
+  void uc05_ge2_laVigenciaPropiaDeLaRestriccionGanaALaDeSuNorma() {
+    UUID regla = prerrequisitoDe(ESTRUCTURAS_DE_DATOS);
+    laReglaTieneVigenciaPropia(regla, LocalDate.of(2024, 2, 1), LocalDate.of(2030, 6, 30));
+    laNormaDeLaReglaVenceEl(regla, LocalDate.of(2035, 12, 31));
+
+    RestriccionVista restriccion = restriccionesDe(ESTRUCTURAS_DE_DATOS).restricciones().getFirst();
+
+    assertThat(restriccion.aplicaDesde()).contains(LocalDate.of(2024, 2, 1));
+    assertThat(restriccion.vigenteHasta()).contains(LocalDate.of(2030, 6, 30));
+    assertThat(restriccion.temporal()).isTrue();
+  }
+
+  @Test
+  void uc05_ge2_sinVigenciaPropiaLaRestriccionTomaElFinDeSuNorma() {
+    laNormaDeLaReglaVenceEl(prerrequisitoDe(ESTRUCTURAS_DE_DATOS), LocalDate.of(2030, 6, 30));
+
+    RestriccionVista restriccion = restriccionesDe(ESTRUCTURAS_DE_DATOS).restricciones().getFirst();
+
+    assertThat(restriccion.vigenteHasta()).contains(LocalDate.of(2030, 6, 30));
+    assertThat(restriccion.aplicaDesde()).contains(LocalDate.of(2023, 12, 12));
+    assertThat(restriccion.temporal()).isTrue();
+  }
+
+  @Test
+  void uc05_ext4_unaRestriccionQueYaNoRigeNoSeMuestra() {
+    laReglaPasaAEstado(prerrequisitoDe(ESTRUCTURAS_DE_DATOS), EstadoRegla.YA_NO_RIGE);
+
+    assertThat(restriccionesDe(ESTRUCTURAS_DE_DATOS).restricciones()).isEmpty();
+  }
+
+  @Test
+  void uc05_ge2_unaRestriccionProgramadaOEnRevisionSeMuestraConSuEstado() {
+    UUID regla = prerrequisitoDe(ESTRUCTURAS_DE_DATOS);
+
+    laReglaPasaAEstado(regla, EstadoRegla.PROGRAMADA);
+    assertThat(restriccionesDe(ESTRUCTURAS_DE_DATOS).restricciones())
+        .singleElement()
+        .extracting(RestriccionVista::estado)
+        .isEqualTo(EstadoRegla.PROGRAMADA);
+
+    laReglaPasaAEstado(regla, EstadoRegla.EN_REVISION);
+    assertThat(restriccionesDe(ESTRUCTURAS_DE_DATOS).restricciones())
+        .singleElement()
+        .extracting(RestriccionVista::estado)
+        .isEqualTo(EstadoRegla.EN_REVISION);
+  }
 }
