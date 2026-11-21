@@ -13,6 +13,8 @@ import co.edu.unal.rutaun.normativa.TipoDeRestriccion;
 import co.edu.unal.rutaun.normativa.TipoNorma;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaRepository;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -23,6 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -53,6 +56,8 @@ class RestriccionesDeMateriaIntegracionTest {
   @Autowired private ImportacionDeNormasService importacionDeNormas;
   @Autowired private ProgramaRepository programas;
   @Autowired private ConsultaNormativaFacade consulta;
+  @Autowired private JdbcTemplate jdbc;
+  @PersistenceContext private EntityManager entityManager;
 
   @BeforeEach
   void cargarLaSemilla() throws IOException {
@@ -168,5 +173,40 @@ class RestriccionesDeMateriaIntegracionTest {
     ProgramaId desconocido = new ProgramaId(UUID.randomUUID());
 
     assertThat(consulta.restriccionesDe(desconocido, ESTRUCTURAS_DE_DATOS)).isEmpty();
+  }
+
+  /**
+   * Agrega a la última versión una regla programada que le da otro nombre a la materia, como haría
+   * una norma que aún no rige.
+   */
+  private void unaNormaProgramadaLeCambiaElNombre(CodigoMateria materia, String nombre) {
+    entityManager.flush();
+    int copiadas =
+        jdbc.update(
+            "INSERT INTO regla (id, norma_id, categoria, objeto, enunciado, fuente, vigente_desde,"
+                + " vigente_hasta, clasificacion, datos) SELECT RANDOM_UUID(), norma_id, categoria,"
+                + " objeto, enunciado, fuente, vigente_desde, vigente_hasta, clasificacion,"
+                + " REPLACE(datos, ?, ?) FROM regla WHERE categoria = 'MATERIA'"
+                + " AND datos LIKE ?",
+            "Estructuras de Datos",
+            nombre,
+            "%" + materia.valor() + "%");
+    jdbc.update(
+        "INSERT INTO regla_en_version (id, version_id, regla_id, estado) SELECT RANDOM_UUID(),"
+            + " (SELECT id FROM version_consolidado WHERE programa_id = ? ORDER BY numero DESC"
+            + " LIMIT 1), id, 'PROGRAMADA' FROM regla WHERE categoria = 'MATERIA'"
+            + " AND datos LIKE ?",
+        sistemas().valor(),
+        "%" + nombre + "%");
+    assertThat(copiadas).isPositive();
+    entityManager.flush();
+    entityManager.clear();
+  }
+
+  @Test
+  void uc05_paso4_unaNormaProgramadaNoCambiaElNombreQueSeMuestra() {
+    unaNormaProgramadaLeCambiaElNombre(ESTRUCTURAS_DE_DATOS, "Estructuras de Datos (futuro)");
+
+    assertThat(restriccionesDe(ESTRUCTURAS_DE_DATOS).nombre()).isEqualTo("Estructuras de Datos");
   }
 }

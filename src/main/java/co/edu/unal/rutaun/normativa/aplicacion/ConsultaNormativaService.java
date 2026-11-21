@@ -247,12 +247,21 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
         .findAllById(filas.stream().map(ReglaEntity::getNormaId).distinct().toList())
         .forEach(norma -> normasPorId.put(norma.getId(), norma));
 
-    Map<CodigoMateria, String> nombres = new HashMap<>();
+    List<NombreDeMateria.Candidato> nombrados = new ArrayList<>();
     List<RestriccionDeLaMateria> candidatas = new ArrayList<>();
     for (ReglaEntity fila : filas) {
       Regla regla = ReglaMapper.aDominio(fila);
       switch (regla.datos()) {
-        case DatosDeRegla.DeMateria d -> nombres.put(d.materia().codigo(), d.materia().nombre());
+        case DatosDeRegla.DeMateria d ->
+            nombrados.add(
+                new NombreDeMateria.Candidato(
+                    d.materia().codigo(),
+                    d.materia().nombre(),
+                    estados.get(fila.getId()),
+                    normasPorId.containsKey(fila.getNormaId())
+                        ? normasPorId.get(fila.getNormaId()).getFechaExpedicion()
+                        : null,
+                    fila.getId()));
         case DatosDeRegla.DePrerrequisito d ->
             candidatas.add(
                 new RestriccionDeLaMateria(
@@ -276,6 +285,7 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
         default -> {}
       }
     }
+    Map<CodigoMateria, String> nombres = NombreDeMateria.elegir(nombrados);
     if (!nombres.containsKey(materia)) {
       return Optional.empty();
     }
