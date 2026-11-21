@@ -15,10 +15,10 @@ class RestriccionTest {
   private static final CodigoMateria C = new CodigoMateria("C");
   private static final ExpresionDeMaterias A_Y_B_O_C =
       new ExpresionDeMaterias.Y(
-          new ExpresionDeMaterias.MateriaDelPrograma(A),
+          new ExpresionDeMaterias.TerminoMateria(A),
           new ExpresionDeMaterias.O(
-              new ExpresionDeMaterias.MateriaDelPrograma(B),
-              new ExpresionDeMaterias.MateriaDelPrograma(C)));
+              new ExpresionDeMaterias.TerminoMateria(B),
+              new ExpresionDeMaterias.TerminoMateria(C)));
 
   @Test
   void tt03_seConstruyeUnPrerrequisitoConUnaExpresionConYConO() {

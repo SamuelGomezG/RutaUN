@@ -17,18 +17,18 @@ class ExpresionDeMateriasTest {
   void tt03_seConstruyeLaExpresionAConBAlternativaC() {
     ExpresionDeMaterias expresion =
         new ExpresionDeMaterias.Y(
-            new ExpresionDeMaterias.MateriaDelPrograma(A),
+            new ExpresionDeMaterias.TerminoMateria(A),
             new ExpresionDeMaterias.O(
-                new ExpresionDeMaterias.MateriaDelPrograma(B),
-                new ExpresionDeMaterias.MateriaDelPrograma(C)));
+                new ExpresionDeMaterias.TerminoMateria(B),
+                new ExpresionDeMaterias.TerminoMateria(C)));
 
     assertThat(expresion).isInstanceOf(ExpresionDeMaterias.Y.class);
     ExpresionDeMaterias.Y conjuncion = (ExpresionDeMaterias.Y) expresion;
-    assertThat(conjuncion.izquierda()).isEqualTo(new ExpresionDeMaterias.MateriaDelPrograma(A));
+    assertThat(conjuncion.izquierda()).isEqualTo(new ExpresionDeMaterias.TerminoMateria(A));
     assertThat(conjuncion.derecha()).isInstanceOf(ExpresionDeMaterias.O.class);
     ExpresionDeMaterias.O disyuncion = (ExpresionDeMaterias.O) conjuncion.derecha();
-    assertThat(disyuncion.izquierda()).isEqualTo(new ExpresionDeMaterias.MateriaDelPrograma(B));
-    assertThat(disyuncion.derecha()).isEqualTo(new ExpresionDeMaterias.MateriaDelPrograma(C));
+    assertThat(disyuncion.izquierda()).isEqualTo(new ExpresionDeMaterias.TerminoMateria(B));
+    assertThat(disyuncion.derecha()).isEqualTo(new ExpresionDeMaterias.TerminoMateria(C));
   }
 
   @Test
@@ -56,7 +56,7 @@ class ExpresionDeMateriasTest {
 
   @Test
   void tt03_lasExpresionesRechazanTerminosObligatoriosNulos() {
-    assertThatThrownBy(() -> new ExpresionDeMaterias.MateriaDelPrograma(null))
+    assertThatThrownBy(() -> new ExpresionDeMaterias.TerminoMateria(null))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("codigo no puede ser null");
     assertThatThrownBy(
@@ -78,11 +78,11 @@ class ExpresionDeMateriasTest {
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("tipo no puede ser null");
     assertThatThrownBy(
-            () -> new ExpresionDeMaterias.Y(null, new ExpresionDeMaterias.MateriaDelPrograma(A)))
+            () -> new ExpresionDeMaterias.Y(null, new ExpresionDeMaterias.TerminoMateria(A)))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("izquierda no puede ser null");
     assertThatThrownBy(
-            () -> new ExpresionDeMaterias.O(new ExpresionDeMaterias.MateriaDelPrograma(A), null))
+            () -> new ExpresionDeMaterias.O(new ExpresionDeMaterias.TerminoMateria(A), null))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("derecha no puede ser null");
   }

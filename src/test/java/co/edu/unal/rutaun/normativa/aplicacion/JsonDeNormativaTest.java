@@ -40,7 +40,7 @@ class JsonDeNormativaTest {
                     new Prerrequisito(
                         new CodigoMateria("A"),
                         new ExpresionDeMaterias.Y(
-                            new ExpresionDeMaterias.MateriaDelPrograma(new CodigoMateria("B")),
+                            new ExpresionDeMaterias.TerminoMateria(new CodigoMateria("B")),
                             new ExpresionDeMaterias.MateriaExterna(
                                 "Matemáticas Básicas",
                                 Optional.empty(),

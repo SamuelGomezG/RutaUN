@@ -65,7 +65,7 @@ public final class EvaluadorDeRestricciones {
   private static EstadoRestriccion evaluarExpresion(
       ExpresionDeMaterias expresion, ContextoDeEvaluacion contexto, boolean esCorrequisito) {
     return switch (expresion) {
-      case ExpresionDeMaterias.MateriaDelPrograma materia ->
+      case ExpresionDeMaterias.TerminoMateria materia ->
           evaluarMateria(materia.codigo(), contexto, esCorrequisito);
       case ExpresionDeMaterias.MateriaExterna externa -> evaluarMateriaExterna(externa);
       case ExpresionDeMaterias.Y conjuncion ->
