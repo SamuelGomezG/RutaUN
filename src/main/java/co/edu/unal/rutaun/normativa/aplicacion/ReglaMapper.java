@@ -10,9 +10,9 @@ import co.edu.unal.rutaun.normativa.dominio.Fuente;
 import co.edu.unal.rutaun.normativa.dominio.Regla;
 import co.edu.unal.rutaun.normativa.dominio.TipoAfectacion;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
+import co.edu.unal.rutaun.normativa.persistencia.ColumnasDeMomento;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEntity;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
-import java.time.LocalDate;
 import java.util.Optional;
 import tools.jackson.core.JacksonException;
 
@@ -28,10 +28,10 @@ import tools.jackson.core.JacksonException;
  * #aEntidad} no lo guarda y {@link #aDominio} solo reconstruye la regla; {@code
  * VersionDelConsolidadoMapper} la une a su estado en un {@code ReglaEnVersion}.
  *
- * <p>La tabla no puede guardar todo lo que el dominio admite, y el mapper lo rechaza en vez de
- * inventar datos: una vigencia propia dada por periodos (#141), una afectación a un artículo y una
- * afectación con un momento «desde» (#141). La categoría va en su columna y los datos propios de la
- * categoría, como JSON (provisional hasta #145; ver {@link JsonDeNormativa}).
+ * <p>La vigencia propia y el inicio de la afectación se guardan como momentos, cada uno en tres
+ * columnas. Una afectación a un artículo guarda su norma y su artículo. La categoría va en su
+ * columna y los datos propios de la categoría, como JSON (provisional hasta #145; ver {@link
+ * JsonDeNormativa}).
  */
 public final class ReglaMapper {
 
@@ -106,15 +106,11 @@ public final class ReglaMapper {
   /**
    * Convierte la regla en la fila que se guarda en la base. No guarda el estado: va en {@code
    * regla_en_version}.
-   *
-   * @throws IllegalArgumentException si la regla tiene algo que la tabla no puede guardar: una
-   *     vigencia propia por periodo, una afectación a un artículo o una afectación con «desde»
    */
   public static ReglaEntity aEntidad(Regla regla) {
     ArgumentChecks.obligatorio(regla, "regla");
     Optional<Vigencia> vigencia = regla.vigenciaPropia();
     Optional<Afectacion> afectacion = regla.afectacion();
-    afectacion.ifPresent(ReglaMapper::exigirQueSePuedaGuardar);
     return new ReglaEntity(
         regla.id().valor(),
         regla.fuente().norma().valor(),
@@ -122,23 +118,24 @@ public final class ReglaMapper {
         regla.objeto(),
         regla.enunciado(),
         regla.fuente().articulo(),
-        vigencia
-            .map(propia -> aFecha(propia.aplicaDesde(), "vigenciaPropia.aplicaDesde"))
-            .orElse(null),
-        vigencia
-            .flatMap(Vigencia::vigenteHasta)
-            .map(hasta -> aFecha(hasta, "vigenciaPropia.vigenteHasta"))
-            .orElse(null),
+        vigencia.map(propia -> MomentoEnColumnas.aColumnas(propia.aplicaDesde())).orElse(null),
+        vigencia.flatMap(Vigencia::vigenteHasta).map(MomentoEnColumnas::aColumnas).orElse(null),
         regla.clasificacion().name(),
         afectacion.map(a -> a.tipo().name()).orElse(null),
         afectacion.flatMap(Afectacion::reglaAfectada).map(ReglaId::valor).orElse(null),
-        null,
+        afectacion
+            .flatMap(Afectacion::articuloAfectado)
+            .map(Fuente::norma)
+            .map(NormaId::valor)
+            .orElse(null),
+        afectacion.flatMap(Afectacion::articuloAfectado).map(Fuente::articulo).orElse(null),
+        afectacion.flatMap(Afectacion::desde).map(MomentoEnColumnas::aColumnas).orElse(null),
         JsonDeNormativa.mapper().writeValueAsString(regla.datos()));
   }
 
   private static Optional<Vigencia> vigenciaADominio(ReglaEntity entidad) {
-    LocalDate desde = entidad.getVigenteDesde();
-    LocalDate hasta = entidad.getVigenteHasta();
+    ColumnasDeMomento desde = entidad.getVigenteDesde();
+    ColumnasDeMomento hasta = entidad.getVigenteHasta();
     if (desde == null && hasta == null) {
       return Optional.empty();
     }
@@ -147,30 +144,24 @@ public final class ReglaMapper {
     }
     return Optional.of(
         new Vigencia(
-            new Momento.EnFecha(desde),
-            Optional.ofNullable(hasta).<Momento>map(Momento.EnFecha::new)));
+            MomentoEnColumnas.aMomento(desde),
+            Optional.ofNullable(MomentoEnColumnas.aMomento(hasta))));
   }
 
   private static Optional<Afectacion> afectacionADominio(ReglaEntity entidad) {
     String tipo = entidad.getTipoAfectacion();
-    if (entidad.getArticuloAfectado() != null) {
-      throw new IllegalArgumentException(
-          "la regla afecta un artículo, y la tabla regla lo guarda sin su norma: no se puede"
-              + " reconstruir la afectación");
-    }
-    if (tipo == null && entidad.getReglaAfectadaId() == null) {
+    if (tipo == null) {
       return Optional.empty();
     }
-    if (tipo == null || entidad.getReglaAfectadaId() == null) {
-      throw new IllegalArgumentException(
-          "la afectación necesita su tipo y la regla afectada, y la fila trae solo uno");
-    }
+    Optional<ReglaId> reglaAfectada =
+        Optional.ofNullable(entidad.getReglaAfectadaId()).map(ReglaId::new);
+    Optional<Fuente> articuloAfectado =
+        Optional.ofNullable(entidad.getNormaAfectadaId())
+            .map(norma -> new Fuente(new NormaId(norma), entidad.getArticuloAfectado()));
+    Optional<Momento> desde =
+        Optional.ofNullable(MomentoEnColumnas.aMomento(entidad.getAfectacionDesde()));
     return Optional.of(
-        new Afectacion(
-            TipoAfectacion.valueOf(tipo),
-            Optional.of(new ReglaId(entidad.getReglaAfectadaId())),
-            Optional.empty(),
-            Optional.empty()));
+        new Afectacion(TipoAfectacion.valueOf(tipo), reglaAfectada, articuloAfectado, desde));
   }
 
   private static DatosDeRegla datosADominio(ReglaEntity entidad) {
@@ -182,26 +173,5 @@ public final class ReglaMapper {
       throw new IllegalArgumentException(
           "los datos de la regla " + entidad.getId() + " no son válidos para " + categoria, e);
     }
-  }
-
-  private static void exigirQueSePuedaGuardar(Afectacion afectacion) {
-    if (afectacion.articuloAfectado().isPresent()) {
-      throw new IllegalArgumentException(
-          "la afectación a un artículo no se guarda: la tabla regla no guarda la norma del"
-              + " artículo afectado");
-    }
-    if (afectacion.desde().isPresent()) {
-      throw new IllegalArgumentException(
-          "la afectación con un momento «desde» no se guarda: la tabla regla no tiene dónde");
-    }
-  }
-
-  private static LocalDate aFecha(Momento momento, String nombre) {
-    return switch (momento) {
-      case Momento.EnFecha enFecha -> enFecha.fecha();
-      case Momento.EnPeriodo enPeriodo ->
-          throw new IllegalArgumentException(
-              nombre + " debe ser una fecha: la tabla regla no guarda periodos académicos");
-    };
   }
 }

@@ -67,6 +67,14 @@ class ReglaCompletaControllerTest {
   }
 
   @Test
+  void uc06_paso8_muestraElPeriodoDeAplicacion() throws Exception {
+    mockMvc
+        .perform(get(ruta(ConsultaNormativaFalsa.ID_CARGA)))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("Fecha de aplicación: 2026-1")));
+  }
+
+  @Test
   void uc06_paso8_unaReglaTemporalDiceHastaCuandoRige() throws Exception {
     mockMvc
         .perform(get(ruta(ConsultaNormativaFalsa.ID_TEMPORAL)))

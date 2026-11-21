@@ -3,7 +3,6 @@ package co.edu.unal.rutaun.normativa.aplicacion;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import co.edu.unal.rutaun.compartido.Momento;
 import co.edu.unal.rutaun.normativa.TipoComponente;
 import co.edu.unal.rutaun.normativa.dominio.Agrupacion;
 import co.edu.unal.rutaun.normativa.dominio.ComponenteDeLibreEleccion;
@@ -257,12 +256,12 @@ class IncorporacionJsonReaderTest {
    * del JSON: no prueba al lector, sino que un cambio accidental de la semilla no pase inadvertido;
    * la comparación con la fuente oficial se hace en la revisión de la PR.
    *
-   * <p>TT-04-T5 (#134). El Acuerdo 008 es provisional: con R-05 (#141) pasa al periodo «2009-1».
+   * <p>TT-04-T5 (#134). El Acuerdo 008 rige desde el periodo «2009-1» (art. 61).
    */
   @ParameterizedTest
   @CsvSource({
     "semilla/acuerdo-003a-2022.json, 2022-10-14, 2023-01-11",
-    "semilla/acuerdo-008-2008.json, 2008-04-15, 2009-01-01",
+    "semilla/acuerdo-008-2008.json, 2008-04-15, 2009-1",
     "semilla/acuerdo-11-2023.json, 2023-12-07, 2023-12-12"
   })
   void tt04_lasNormasDeLaSemillaTienenLasFechasDeRegimenLegal(
@@ -279,7 +278,7 @@ class IncorporacionJsonReaderTest {
         .isEqualTo(LocalDate.parse(expedicion));
     assertThat(norma.vigencia().aplicaDesde())
         .as("%s: aplicaDesde", archivo)
-        .isEqualTo(new Momento.EnFecha(LocalDate.parse(aplicaDesde)));
+        .hasToString(aplicaDesde);
   }
 
   private static MedidaDeCreditos medidaLeida(

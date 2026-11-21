@@ -1,9 +1,12 @@
 package co.edu.unal.rutaun.normativa.aplicacion;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import co.edu.unal.rutaun.compartido.EstadoRegla;
+import co.edu.unal.rutaun.normativa.persistencia.ColumnasDeMomento;
 import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoRepository;
+import co.edu.unal.rutaun.normativa.persistencia.NormaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.NormaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntity;
@@ -14,8 +17,12 @@ import co.edu.unal.rutaun.normativa.persistencia.VersionDelConsolidadoRepository
 import co.edu.unal.rutaun.normativa.persistencia.VersionEntity;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
 import jakarta.persistence.EntityManager;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.time.Clock;
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +31,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +45,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class ImportacionDeNormasServiceTest {
 
+  private static final String FECHA = "{ \"tipo\": \"FECHA\", \"fecha\": \"2026-01-15\" }";
+
   private final ImportacionDeProgramasService programas;
   private final ImportacionDeNormasService normas;
   private final NormaRepository normasGuardadas;
@@ -44,6 +55,7 @@ class ImportacionDeNormasServiceTest {
   private final VersionDelConsolidadoRepository versiones;
   private final ReglaEnVersionRepository reglasEnVersion;
   private final ProgramaRepository programasGuardados;
+  private final Clock reloj;
 
   @Autowired private EntityManager em;
 
@@ -56,7 +68,8 @@ class ImportacionDeNormasServiceTest {
       ConsolidadoRepository consolidados,
       VersionDelConsolidadoRepository versiones,
       ReglaEnVersionRepository reglasEnVersion,
-      ProgramaRepository programasGuardados) {
+      ProgramaRepository programasGuardados,
+      Clock reloj) {
     this.programas = programas;
     this.normas = normas;
     this.normasGuardadas = normasGuardadas;
@@ -65,6 +78,7 @@ class ImportacionDeNormasServiceTest {
     this.versiones = versiones;
     this.reglasEnVersion = reglasEnVersion;
     this.programasGuardados = programasGuardados;
+    this.reloj = reloj;
   }
 
   @Test
@@ -212,6 +226,226 @@ class ImportacionDeNormasServiceTest {
             .map(ReglaEntity::getNormaId)
             .collect(Collectors.toSet());
     assertThat(normasDeLaVigente).hasSize(3);
+  }
+
+  @Test
+  void uc07_paso6_unaNormaConUnPeriodoDeUnAnioAnteriorQuedaVigente() throws IOException {
+    cargarProgramas();
+
+    ResultadoDeImportacionDeNormas resultado =
+        importarTexto(normaCon(periodo("2020-1"), "null", "null"));
+
+    assertThat(resultado.creada()).isTrue();
+    assertThat(reglasEnVersion.findAll())
+        .extracting(ReglaEnVersionEntity::getEstado)
+        .containsOnly(EstadoRegla.VIGENTE.name());
+    NormaEntity guardada = normasGuardadas.findAll().getFirst();
+    assertThat(guardada.getAplicaDesde())
+        .isEqualTo(new ColumnasDeMomento("PERIODO", null, "2020-1"));
+  }
+
+  @ParameterizedTest
+  @EnumSource(CasoDePeriodo.class)
+  void tt04_unPeriodoCuyoEstadoNoSePuedeCalcularSeRechaza(CasoDePeriodo caso) throws IOException {
+    cargarProgramas();
+    int anio = LocalDate.now(reloj).getYear();
+    String esteAnio = periodo(anio + "-1");
+    String anioSiguiente = periodo((anio + 1) + "-1");
+
+    String json =
+        switch (caso) {
+          case INICIO_DEL_ANIO -> normaCon(esteAnio, "null", "null");
+          case INICIO_FUTURO -> normaCon(anioSiguiente, "null", "null");
+          case HASTA_POR_PERIODO -> normaCon(FECHA, esteAnio, "null");
+          case VIGENCIA_PROPIA_DESDE -> normaCon(FECHA, "null", vigenciaPropia(esteAnio, "null"));
+          case VIGENCIA_PROPIA_HASTA -> normaCon(FECHA, "null", vigenciaPropia(FECHA, esteAnio));
+        };
+
+    assertThatThrownBy(() -> importarTexto(json))
+        .isInstanceOf(ArchivoDeNormativaInvalidoException.class)
+        .hasMessageContaining("periodo");
+
+    assertThat(normasGuardadas.count()).isZero();
+    assertThat(reglas.count()).isZero();
+  }
+
+  @Test
+  void uc07_ext6b_unaAfectacionAUnArticuloDeOtraNormaSeRechaza() throws IOException {
+    cargarProgramas();
+    importarNorma("semilla/acuerdo-003a-2022.json");
+
+    assertThatThrownBy(() -> importarTexto(afectacionAUnArticuloDelAcuerdo003A()))
+        .isInstanceOf(ArchivoDeNormativaInvalidoException.class)
+        .hasMessageContaining("Afecta un artículo de otra norma")
+        .hasMessageContaining("art. 1");
+
+    assertThat(normasGuardadas.count()).isEqualTo(1);
+  }
+
+  @Test
+  void uc07_paso5_unaAfectacionAUnArticuloDeLaMismaNormaSeImporta() throws IOException {
+    cargarProgramas();
+
+    ResultadoDeImportacionDeNormas resultado = importarTexto(afectacionAUnArticuloDeLaMismaNorma());
+
+    assertThat(resultado.creada()).isTrue();
+    NormaEntity guardada = normasGuardadas.findAll().getFirst();
+    List<ReglaEntity> reglasGuardadas = reglas.findAll();
+    assertThat(reglasGuardadas).hasSize(1);
+    assertThat(reglasGuardadas.getFirst().getNormaAfectadaId()).isEqualTo(guardada.getId());
+  }
+
+  private ResultadoDeImportacionDeNormas importarTexto(String json) {
+    return normas.importar(new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8)));
+  }
+
+  private static String periodo(String texto) {
+    return "{ \"tipo\": \"PERIODO\", \"periodo\": \"" + texto + "\" }";
+  }
+
+  private static String vigenciaPropia(String aplicaDesde, String vigenteHasta) {
+    return "{ \"aplicaDesde\": " + aplicaDesde + ", \"vigenteHasta\": " + vigenteHasta + " }";
+  }
+
+  private static String normaCon(String aplicaDesde, String vigenteHasta, String vigenciaPropia) {
+    String json =
+        """
+        {
+          "schemaVersion": "1.0",
+          "programa": {
+            "codigoSia": "2879",
+            "nombre": "Ingeniería de Sistemas y Computación",
+            "facultad": "Ingeniería"
+          },
+          "norma": {
+            "tipo": "CIRCULAR",
+            "numero": "98",
+            "anio": 2026,
+            "organo": "Vicerrectoría Académica (datos de prueba)",
+            "tipoDeEfecto": "BASE",
+            "fechaExpedicion": "2026-01-15",
+            "vigencia": {
+              "aplicaDesde": %s,
+              "vigenteHasta": %s
+            },
+            "enlaceRegimenLegal": null,
+            "alcance": {
+              "tipo": "PROGRAMAS",
+              "facultades": [],
+              "programas": ["2879"],
+              "exclusiones": [],
+              "texto": "Norma ficticia de prueba (datos de prueba)."
+            }
+          },
+          "reglas": [
+            {
+              "categoria": "OTRA",
+              "objeto": "Regla ficticia (datos de prueba)",
+              "enunciado": "Regla ficticia para probar la guarda de periodos (datos de prueba).",
+              "articulo": "art. 1",
+              "vigenciaPropia": %s,
+              "clasificacion": "INFORMATIVA",
+              "afectacion": null,
+              "datos": { "tipo": "OTRA" }
+            }
+          ]
+        }
+        """;
+    return json.formatted(aplicaDesde, vigenteHasta, vigenciaPropia);
+  }
+
+  private static String afectacionAUnArticuloDelAcuerdo003A() {
+    return afectacionAUnArticulo(
+        "ACUERDO",
+        "003-A",
+        2022,
+        "Consejo Académico",
+        "Afecta un artículo de otra norma (datos de prueba)",
+        "Regla ficticia que afecta el artículo 7 del Acuerdo 003-A (datos de prueba).");
+  }
+
+  private static String afectacionAUnArticuloDeLaMismaNorma() {
+    return afectacionAUnArticulo(
+        "CIRCULAR",
+        "98",
+        2026,
+        "Vicerrectoría Académica (datos de prueba)",
+        "Afecta un artículo de la misma norma (datos de prueba)",
+        "Regla ficticia que afecta el artículo 7 de su propia norma (datos de prueba).");
+  }
+
+  private static String afectacionAUnArticulo(
+      String tipoNorma,
+      String numeroNorma,
+      int anioNorma,
+      String organoNorma,
+      String objeto,
+      String enunciado) {
+    String json =
+        """
+        {
+          "schemaVersion": "1.0",
+          "programa": {
+            "codigoSia": "2879",
+            "nombre": "Ingeniería de Sistemas y Computación",
+            "facultad": "Ingeniería"
+          },
+          "norma": {
+            "tipo": "CIRCULAR",
+            "numero": "98",
+            "anio": 2026,
+            "organo": "Vicerrectoría Académica (datos de prueba)",
+            "tipoDeEfecto": "BASE",
+            "fechaExpedicion": "2026-01-15",
+            "vigencia": {
+              "aplicaDesde": { "tipo": "FECHA", "fecha": "2026-01-15" },
+              "vigenteHasta": null
+            },
+            "enlaceRegimenLegal": null,
+            "alcance": {
+              "tipo": "PROGRAMAS",
+              "facultades": [],
+              "programas": ["2879"],
+              "exclusiones": [],
+              "texto": "Norma ficticia de prueba (datos de prueba)."
+            }
+          },
+          "reglas": [
+            {
+              "categoria": "OTRA",
+              "objeto": "%s",
+              "enunciado": "%s",
+              "articulo": "art. 1",
+              "vigenciaPropia": null,
+              "clasificacion": "INFORMATIVA",
+              "afectacion": {
+                "tipo": "MODIFICA",
+                "destino": {
+                  "tipo": "ARTICULO",
+                  "norma": {
+                    "tipo": "%s",
+                    "numero": "%s",
+                    "anio": %d,
+                    "organo": "%s"
+                  },
+                  "articulo": "art. 7"
+                },
+                "desde": null
+              },
+              "datos": { "tipo": "OTRA" }
+            }
+          ]
+        }
+        """;
+    return json.formatted(objeto, enunciado, tipoNorma, numeroNorma, anioNorma, organoNorma);
+  }
+
+  private enum CasoDePeriodo {
+    INICIO_DEL_ANIO,
+    INICIO_FUTURO,
+    HASTA_POR_PERIODO,
+    VIGENCIA_PROPIA_DESDE,
+    VIGENCIA_PROPIA_HASTA
   }
 
   private void cargarProgramas() throws IOException {

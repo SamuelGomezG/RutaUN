@@ -42,11 +42,23 @@ public class ReglaEntity implements Persistable<UUID> {
   @Column(nullable = false)
   private String fuente;
 
-  @Column(name = "vigente_desde")
-  private LocalDate vigenteDesde;
+  @Column(name = "vigente_desde_tipo")
+  private String vigenteDesdeTipo;
 
-  @Column(name = "vigente_hasta")
-  private LocalDate vigenteHasta;
+  @Column(name = "vigente_desde_fecha")
+  private LocalDate vigenteDesdeFecha;
+
+  @Column(name = "vigente_desde_periodo")
+  private String vigenteDesdePeriodo;
+
+  @Column(name = "vigente_hasta_tipo")
+  private String vigenteHastaTipo;
+
+  @Column(name = "vigente_hasta_fecha")
+  private LocalDate vigenteHastaFecha;
+
+  @Column(name = "vigente_hasta_periodo")
+  private String vigenteHastaPeriodo;
 
   @Column(nullable = false)
   private String clasificacion;
@@ -57,8 +69,20 @@ public class ReglaEntity implements Persistable<UUID> {
   @Column(name = "regla_afectada_id")
   private UUID reglaAfectadaId;
 
+  @Column(name = "norma_afectada_id")
+  private UUID normaAfectadaId;
+
   @Column(name = "articulo_afectado")
   private String articuloAfectado;
+
+  @Column(name = "afectacion_desde_tipo")
+  private String afectacionDesdeTipo;
+
+  @Column(name = "afectacion_desde_fecha")
+  private LocalDate afectacionDesdeFecha;
+
+  @Column(name = "afectacion_desde_periodo")
+  private String afectacionDesdePeriodo;
 
   /** Datos propios de la categoría, como texto JSON. */
   @Lob private String datos;
@@ -74,12 +98,14 @@ public class ReglaEntity implements Persistable<UUID> {
       String objeto,
       String enunciado,
       String fuente,
-      LocalDate vigenteDesde,
-      LocalDate vigenteHasta,
+      ColumnasDeMomento vigenteDesde,
+      ColumnasDeMomento vigenteHasta,
       String clasificacion,
       String tipoAfectacion,
       UUID reglaAfectadaId,
+      UUID normaAfectadaId,
       String articuloAfectado,
+      ColumnasDeMomento afectacionDesde,
       String datos) {
     this.id = id;
     this.normaId = normaId;
@@ -87,12 +113,20 @@ public class ReglaEntity implements Persistable<UUID> {
     this.objeto = objeto;
     this.enunciado = enunciado;
     this.fuente = fuente;
-    this.vigenteDesde = vigenteDesde;
-    this.vigenteHasta = vigenteHasta;
+    this.vigenteDesdeTipo = vigenteDesde == null ? null : vigenteDesde.tipo();
+    this.vigenteDesdeFecha = vigenteDesde == null ? null : vigenteDesde.fecha();
+    this.vigenteDesdePeriodo = vigenteDesde == null ? null : vigenteDesde.periodo();
+    this.vigenteHastaTipo = vigenteHasta == null ? null : vigenteHasta.tipo();
+    this.vigenteHastaFecha = vigenteHasta == null ? null : vigenteHasta.fecha();
+    this.vigenteHastaPeriodo = vigenteHasta == null ? null : vigenteHasta.periodo();
     this.clasificacion = clasificacion;
     this.tipoAfectacion = tipoAfectacion;
     this.reglaAfectadaId = reglaAfectadaId;
+    this.normaAfectadaId = normaAfectadaId;
     this.articuloAfectado = articuloAfectado;
+    this.afectacionDesdeTipo = afectacionDesde == null ? null : afectacionDesde.tipo();
+    this.afectacionDesdeFecha = afectacionDesde == null ? null : afectacionDesde.fecha();
+    this.afectacionDesdePeriodo = afectacionDesde == null ? null : afectacionDesde.periodo();
     this.datos = datos;
   }
 
@@ -134,12 +168,22 @@ public class ReglaEntity implements Persistable<UUID> {
     return fuente;
   }
 
-  public LocalDate getVigenteDesde() {
-    return vigenteDesde;
+  public ColumnasDeMomento getVigenteDesde() {
+    return vigenteDesdeTipo == null
+        ? null
+        : new ColumnasDeMomento(vigenteDesdeTipo, vigenteDesdeFecha, vigenteDesdePeriodo);
   }
 
-  public LocalDate getVigenteHasta() {
-    return vigenteHasta;
+  public ColumnasDeMomento getVigenteHasta() {
+    return vigenteHastaTipo == null
+        ? null
+        : new ColumnasDeMomento(vigenteHastaTipo, vigenteHastaFecha, vigenteHastaPeriodo);
+  }
+
+  public ColumnasDeMomento getAfectacionDesde() {
+    return afectacionDesdeTipo == null
+        ? null
+        : new ColumnasDeMomento(afectacionDesdeTipo, afectacionDesdeFecha, afectacionDesdePeriodo);
   }
 
   public String getClasificacion() {
@@ -152,6 +196,10 @@ public class ReglaEntity implements Persistable<UUID> {
 
   public UUID getReglaAfectadaId() {
     return reglaAfectadaId;
+  }
+
+  public UUID getNormaAfectadaId() {
+    return normaAfectadaId;
   }
 
   public String getArticuloAfectado() {

@@ -215,7 +215,9 @@ class ConsultaNormativaServiceIntegracionTest {
     assertThat(todas(consolidado())).noneMatch(ReglaVista::temporal);
 
     entityManager.flush();
-    jdbc.update("UPDATE norma SET vigente_hasta = DATE '2030-01-01' WHERE numero = '008'");
+    jdbc.update(
+        "UPDATE norma SET vigente_hasta_tipo = 'FECHA', vigente_hasta_fecha = DATE '2030-01-01'"
+            + " WHERE numero = '008'");
     entityManager.flush();
     entityManager.clear();
 

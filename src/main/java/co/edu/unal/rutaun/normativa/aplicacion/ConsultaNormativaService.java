@@ -1,6 +1,7 @@
 package co.edu.unal.rutaun.normativa.aplicacion;
 
 import co.edu.unal.rutaun.compartido.EstadoRegla;
+import co.edu.unal.rutaun.compartido.Momento;
 import co.edu.unal.rutaun.compartido.ProgramaId;
 import co.edu.unal.rutaun.compartido.ReglaId;
 import co.edu.unal.rutaun.normativa.ConsolidadoVista;
@@ -191,12 +192,24 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
             regla.enunciado(),
             Optional.ofNullable(norma).map(n -> aFuente(n, regla.fuente().articulo())),
             estado,
-            esTemporal(regla.vigenciaPropia(), norma == null ? null : norma.getVigenteHasta()),
+            esTemporal(
+                regla.vigenciaPropia(),
+                MomentoEnColumnas.aMomento(norma == null ? null : norma.getVigenteHasta())),
             regla.clasificacion(),
             Optional.ofNullable(fila.getVigenteDesde())
-                .or(() -> Optional.ofNullable(norma).map(NormaEntity::getAplicaDesde)),
+                .map(MomentoEnColumnas::aMomento)
+                .or(
+                    () ->
+                        Optional.ofNullable(norma)
+                            .map(NormaEntity::getAplicaDesde)
+                            .map(MomentoEnColumnas::aMomento)),
             Optional.ofNullable(fila.getVigenteHasta())
-                .or(() -> Optional.ofNullable(norma).map(NormaEntity::getVigenteHasta)),
+                .map(MomentoEnColumnas::aMomento)
+                .or(
+                    () ->
+                        Optional.ofNullable(norma)
+                            .map(NormaEntity::getVigenteHasta)
+                            .map(MomentoEnColumnas::aMomento)),
             Optional.ofNullable(norma).map(n -> TipoAlcance.valueOf(n.getTipoAlcance())),
             Optional.ofNullable(norma)
                 .map(NormaEntity::getAlcanceDetalle)
@@ -322,7 +335,9 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
   private static Entrada aEntrada(ReglaEntity fila, EstadoRegla estado, NormaEntity norma) {
     Regla regla = ReglaMapper.aDominio(fila);
     boolean temporal =
-        esTemporal(regla.vigenciaPropia(), norma == null ? null : norma.getVigenteHasta());
+        esTemporal(
+            regla.vigenciaPropia(),
+            MomentoEnColumnas.aMomento(norma == null ? null : norma.getVigenteHasta()));
     ReglaVista vista =
         new ReglaVista(
             regla.id(),
@@ -355,10 +370,10 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
    * (glosario, «Vigencia»).
    *
    * @param vigenciaPropia vigencia de la regla, si tiene una propia
-   * @param vigenteHastaDeLaNorma fecha hasta la que rige la norma; {@code null} si no la tiene o la
-   *     regla no tiene norma
+   * @param vigenteHastaDeLaNorma momento hasta el que rige la norma; {@code null} si no lo tiene o
+   *     la regla no tiene norma
    */
-  static boolean esTemporal(Optional<Vigencia> vigenciaPropia, LocalDate vigenteHastaDeLaNorma) {
+  static boolean esTemporal(Optional<Vigencia> vigenciaPropia, Momento vigenteHastaDeLaNorma) {
     return vigenciaPropia.map(Vigencia::esTemporal).orElse(false) || vigenteHastaDeLaNorma != null;
   }
 

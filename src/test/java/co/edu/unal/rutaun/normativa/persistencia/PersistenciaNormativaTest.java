@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 @PruebaDeIntegracion
@@ -29,6 +30,7 @@ class PersistenciaNormativaTest {
   @Autowired private VersionDelConsolidadoRepository versiones;
   @Autowired private ReglaEnVersionRepository reglasEnVersion;
   @Autowired private EntityManager em;
+  @Autowired private JdbcTemplate jdbc;
 
   private void vaciarMemoria() {
     em.flush();
@@ -50,11 +52,31 @@ class PersistenciaNormativaTest {
             "Consejo Superior",
             "BASE",
             LocalDate.of(2022, 1, 1),
-            LocalDate.of(2022, 2, 1),
+            new ColumnasDeMomento("FECHA", LocalDate.of(2022, 2, 1), null),
             null,
             null,
             "PROGRAMAS",
             "{}"));
+  }
+
+  private ReglaEntity nuevaRegla(NormaEntity norma) {
+    return reglas.save(
+        new ReglaEntity(
+            UUID.randomUUID(),
+            norma.getId(),
+            "OTRA",
+            "Objeto",
+            "Enunciado",
+            "Articulo 1",
+            null,
+            null,
+            "DEL_PLAN",
+            null,
+            null,
+            null,
+            null,
+            null,
+            "{\"tipo\":\"OTRA\"}"));
   }
 
   private VersionEntity nuevaVersion(ConsolidadoEntity consolidado, int numero) {
@@ -123,6 +145,8 @@ class PersistenciaNormativaTest {
                 null,
                 null,
                 null,
+                null,
+                null,
                 json));
     vaciarMemoria();
 
@@ -148,6 +172,8 @@ class PersistenciaNormativaTest {
                 null,
                 null,
                 "INFORMATIVA",
+                null,
+                null,
                 null,
                 null,
                 null,
@@ -258,7 +284,7 @@ class PersistenciaNormativaTest {
             "Consejo Superior",
             "BASE",
             LocalDate.of(2023, 1, 1),
-            LocalDate.of(2023, 2, 1),
+            new ColumnasDeMomento("FECHA", LocalDate.of(2023, 2, 1), null),
             null,
             null,
             "PROGRAMAS",
@@ -272,6 +298,116 @@ class PersistenciaNormativaTest {
         .get()
         .extracting(NormaEntity::getNumero)
         .isEqualTo("003-A");
+  }
+
+  @Test
+  void tt04_unMomentoIncoherenteViolaLaRestriccion() {
+    NormaEntity norma = nuevaNorma();
+    final ReglaEntity regla = nuevaRegla(norma);
+    vaciarMemoria();
+
+    assertThatThrownBy(
+            () ->
+                jdbc.update(
+                    "UPDATE norma SET aplica_desde_tipo = 'PERIODO', aplica_desde_fecha = DATE"
+                        + " '2020-01-01', aplica_desde_periodo = NULL WHERE id = ?",
+                    norma.getId()))
+        .isInstanceOf(DataIntegrityViolationException.class);
+    assertThatThrownBy(
+            () ->
+                jdbc.update(
+                    "UPDATE norma SET aplica_desde_tipo = 'FECHA', aplica_desde_fecha = NULL"
+                        + " WHERE id = ?",
+                    norma.getId()))
+        .isInstanceOf(DataIntegrityViolationException.class);
+    assertThatThrownBy(
+            () ->
+                jdbc.update(
+                    "UPDATE norma SET aplica_desde_tipo = 'OTRO', aplica_desde_fecha = NULL,"
+                        + " aplica_desde_periodo = NULL WHERE id = ?",
+                    norma.getId()))
+        .isInstanceOf(DataIntegrityViolationException.class);
+    assertThatThrownBy(
+            () ->
+                jdbc.update(
+                    "UPDATE regla SET vigente_desde_tipo = 'PERIODO', vigente_desde_fecha = DATE"
+                        + " '2020-01-01' WHERE id = ?",
+                    regla.getId()))
+        .isInstanceOf(DataIntegrityViolationException.class);
+    assertThatThrownBy(
+            () ->
+                jdbc.update(
+                    "UPDATE norma SET vigente_hasta_tipo = NULL, vigente_hasta_fecha = DATE"
+                        + " '2030-01-01' WHERE id = ?",
+                    norma.getId()))
+        .isInstanceOf(DataIntegrityViolationException.class);
+    assertThatThrownBy(
+            () ->
+                jdbc.update(
+                    "UPDATE regla SET afectacion_desde_tipo = NULL, afectacion_desde_fecha = DATE"
+                        + " '2030-01-01' WHERE id = ?",
+                    regla.getId()))
+        .isInstanceOf(DataIntegrityViolationException.class);
+  }
+
+  @Test
+  void tt04_unaReglaConFinSinInicioViolaLaRestriccion() {
+    NormaEntity norma = nuevaNorma();
+    final ReglaEntity regla = nuevaRegla(norma);
+    vaciarMemoria();
+
+    assertThatThrownBy(
+            () ->
+                jdbc.update(
+                    "UPDATE regla SET vigente_hasta_tipo = 'FECHA', vigente_hasta_fecha = DATE"
+                        + " '2030-01-01' WHERE id = ?",
+                    regla.getId()))
+        .isInstanceOf(DataIntegrityViolationException.class);
+  }
+
+  @Test
+  void tt04_unaAfectacionConDestinoIncoherenteViolaLaRestriccion() {
+    NormaEntity norma = nuevaNorma();
+    final ReglaEntity regla = nuevaRegla(norma);
+    vaciarMemoria();
+
+    assertThatThrownBy(
+            () ->
+                jdbc.update(
+                    "UPDATE regla SET tipo_afectacion = 'MODIFICA', regla_afectada_id = ?,"
+                        + " norma_afectada_id = ? WHERE id = ?",
+                    UUID.randomUUID(),
+                    norma.getId(),
+                    regla.getId()))
+        .isInstanceOf(DataIntegrityViolationException.class);
+    assertThatThrownBy(
+            () ->
+                jdbc.update(
+                    "UPDATE regla SET tipo_afectacion = 'MODIFICA', articulo_afectado = 'art. 7'"
+                        + " WHERE id = ?",
+                    regla.getId()))
+        .isInstanceOf(DataIntegrityViolationException.class);
+    assertThatThrownBy(
+            () ->
+                jdbc.update(
+                    "UPDATE regla SET tipo_afectacion = 'MODIFICA' WHERE id = ?", regla.getId()))
+        .isInstanceOf(DataIntegrityViolationException.class);
+  }
+
+  @Test
+  void tt04_unArticuloAfectadoDeUnaNormaInexistenteViolaLaLlaveForanea() {
+    NormaEntity norma = nuevaNorma();
+    final ReglaEntity regla = nuevaRegla(norma);
+    vaciarMemoria();
+
+    assertThatThrownBy(
+            () ->
+                jdbc.update(
+                    "UPDATE regla SET tipo_afectacion = 'MODIFICA', articulo_afectado = 'art. 7',"
+                        + " norma_afectada_id = ? WHERE id = ?",
+                    UUID.randomUUID(),
+                    regla.getId()))
+        .isInstanceOf(DataIntegrityViolationException.class);
   }
 
   @Test

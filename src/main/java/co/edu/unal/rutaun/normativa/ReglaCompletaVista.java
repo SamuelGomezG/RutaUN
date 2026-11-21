@@ -1,9 +1,9 @@
 package co.edu.unal.rutaun.normativa;
 
 import co.edu.unal.rutaun.compartido.EstadoRegla;
+import co.edu.unal.rutaun.compartido.Momento;
 import co.edu.unal.rutaun.compartido.ReglaId;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,9 +18,9 @@ import java.util.Optional;
  * @param estado estado de la regla en el consolidado vigente
  * @param temporal si la regla es temporal por su norma o por una vigencia propia
  * @param clasificacion si el plan la aplica o solo la informa
- * @param aplicaDesde fecha desde la que rige: la de su vigencia propia, si la tiene, o la de su
- *     norma; vacía si no tiene norma
- * @param vigenteHasta fecha hasta la que rige, con el mismo criterio; vacía si no tiene fin
+ * @param aplicaDesde momento desde el que rige: el de su vigencia propia, si la tiene, o el de su
+ *     norma; vacío si no tiene norma
+ * @param vigenteHasta momento hasta el que rige, con el mismo criterio; vacío si no tiene fin
  * @param alcance alcance de su norma; vacío si no tiene norma
  * @param detalleDelAlcance texto con el que la norma fija su alcance; vacío si no lo trae
  * @param cadena la norma que la expidió y las que la afectan, de la más antigua a la más reciente;
@@ -33,8 +33,8 @@ public record ReglaCompletaVista(
     EstadoRegla estado,
     boolean temporal,
     ClasificacionRegla clasificacion,
-    Optional<LocalDate> aplicaDesde,
-    Optional<LocalDate> vigenteHasta,
+    Optional<Momento> aplicaDesde,
+    Optional<Momento> vigenteHasta,
     Optional<TipoAlcance> alcance,
     Optional<String> detalleDelAlcance,
     List<EslabonVista> cadena) {

@@ -45,11 +45,23 @@ public class NormaEntity implements Persistable<UUID> {
   @Column(name = "fecha_expedicion", nullable = false)
   private LocalDate fechaExpedicion;
 
-  @Column(name = "aplica_desde", nullable = false)
-  private LocalDate aplicaDesde;
+  @Column(name = "aplica_desde_tipo", nullable = false)
+  private String aplicaDesdeTipo;
 
-  @Column(name = "vigente_hasta")
-  private LocalDate vigenteHasta;
+  @Column(name = "aplica_desde_fecha")
+  private LocalDate aplicaDesdeFecha;
+
+  @Column(name = "aplica_desde_periodo")
+  private String aplicaDesdePeriodo;
+
+  @Column(name = "vigente_hasta_tipo")
+  private String vigenteHastaTipo;
+
+  @Column(name = "vigente_hasta_fecha")
+  private LocalDate vigenteHastaFecha;
+
+  @Column(name = "vigente_hasta_periodo")
+  private String vigenteHastaPeriodo;
 
   @Column(name = "enlace_regimen_legal")
   private String enlaceRegimenLegal;
@@ -73,8 +85,8 @@ public class NormaEntity implements Persistable<UUID> {
       String organo,
       String tipoDeEfecto,
       LocalDate fechaExpedicion,
-      LocalDate aplicaDesde,
-      LocalDate vigenteHasta,
+      ColumnasDeMomento aplicaDesde,
+      ColumnasDeMomento vigenteHasta,
       String enlaceRegimenLegal,
       String tipoAlcance,
       String alcanceDetalle) {
@@ -85,8 +97,12 @@ public class NormaEntity implements Persistable<UUID> {
     this.organo = organo;
     this.tipoDeEfecto = tipoDeEfecto;
     this.fechaExpedicion = fechaExpedicion;
-    this.aplicaDesde = aplicaDesde;
-    this.vigenteHasta = vigenteHasta;
+    this.aplicaDesdeTipo = aplicaDesde.tipo();
+    this.aplicaDesdeFecha = aplicaDesde.fecha();
+    this.aplicaDesdePeriodo = aplicaDesde.periodo();
+    this.vigenteHastaTipo = vigenteHasta == null ? null : vigenteHasta.tipo();
+    this.vigenteHastaFecha = vigenteHasta == null ? null : vigenteHasta.fecha();
+    this.vigenteHastaPeriodo = vigenteHasta == null ? null : vigenteHasta.periodo();
     this.enlaceRegimenLegal = enlaceRegimenLegal;
     this.tipoAlcance = tipoAlcance;
     this.alcanceDetalle = alcanceDetalle;
@@ -134,12 +150,14 @@ public class NormaEntity implements Persistable<UUID> {
     return fechaExpedicion;
   }
 
-  public LocalDate getAplicaDesde() {
-    return aplicaDesde;
+  public ColumnasDeMomento getAplicaDesde() {
+    return new ColumnasDeMomento(aplicaDesdeTipo, aplicaDesdeFecha, aplicaDesdePeriodo);
   }
 
-  public LocalDate getVigenteHasta() {
-    return vigenteHasta;
+  public ColumnasDeMomento getVigenteHasta() {
+    return vigenteHastaTipo == null
+        ? null
+        : new ColumnasDeMomento(vigenteHastaTipo, vigenteHastaFecha, vigenteHastaPeriodo);
   }
 
   public String getEnlaceRegimenLegal() {

@@ -15,12 +15,12 @@ import org.junit.jupiter.api.Test;
  */
 class ReglaVisibleYTemporalTest {
 
-  private static final LocalDate HASTA = LocalDate.of(2030, 1, 1);
+  private static final Momento HASTA = new Momento.EnFecha(LocalDate.of(2030, 1, 1));
 
   private static Vigencia vigencia(boolean conFin) {
     return new Vigencia(
         new Momento.EnFecha(LocalDate.of(2023, 1, 11)),
-        conFin ? Optional.of(new Momento.EnFecha(HASTA)) : Optional.empty());
+        conFin ? Optional.of(HASTA) : Optional.empty());
   }
 
   @Test

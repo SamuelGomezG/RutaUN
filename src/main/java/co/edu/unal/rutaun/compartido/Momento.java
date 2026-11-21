@@ -22,6 +22,11 @@ public sealed interface Momento {
     public EnPeriodo {
       ArgumentChecks.obligatorio(periodo, "periodo");
     }
+
+    @Override
+    public String toString() {
+      return periodo.toString();
+    }
   }
 
   /**
@@ -34,6 +39,11 @@ public sealed interface Momento {
     /** Exige la fecha. */
     public EnFecha {
       ArgumentChecks.obligatorio(fecha, "fecha");
+    }
+
+    @Override
+    public String toString() {
+      return fecha.toString();
     }
   }
 }

@@ -9,6 +9,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import co.edu.unal.rutaun.compartido.EstadoRegla;
+import co.edu.unal.rutaun.compartido.Momento;
+import co.edu.unal.rutaun.compartido.ParteDelAnio;
+import co.edu.unal.rutaun.compartido.PeriodoAcademico;
 import co.edu.unal.rutaun.compartido.ProgramaId;
 import co.edu.unal.rutaun.compartido.ReglaId;
 import co.edu.unal.rutaun.normativa.ConsultaNormativaFacade;
@@ -113,20 +116,26 @@ class ReglaCompletaIntegracionTest {
     UUID regla = UUID.randomUUID();
     jdbc.update(
         "INSERT INTO norma (id, tipo, numero, anio, organo, tipo_de_efecto, fecha_expedicion,"
-            + " aplica_desde, vigente_hasta, enlace_regimen_legal, tipo_alcance, alcance_detalle)"
+            + " aplica_desde_tipo, aplica_desde_fecha, aplica_desde_periodo, vigente_hasta_tipo,"
+            + " vigente_hasta_fecha, vigente_hasta_periodo, enlace_regimen_legal, tipo_alcance,"
+            + " alcance_detalle)"
             + " SELECT CAST(? AS UUID), tipo, CAST(? AS VARCHAR(50)), 2030, organo, tipo_de_efecto,"
-            + " CAST(? AS DATE), CAST(? AS DATE), NULL, NULL, tipo_alcance, alcance_detalle"
+            + " CAST(? AS DATE), 'FECHA', CAST(? AS DATE), NULL, NULL, NULL, NULL, NULL,"
+            + " tipo_alcance, alcance_detalle"
             + " FROM norma WHERE numero = '008'",
         norma,
         numero,
         expedicion,
         expedicion);
     jdbc.update(
-        "INSERT INTO regla (id, norma_id, categoria, objeto, enunciado, fuente, vigente_desde,"
-            + " vigente_hasta, clasificacion, tipo_afectacion, regla_afectada_id,"
-            + " articulo_afectado, datos)"
+        "INSERT INTO regla (id, norma_id, categoria, objeto, enunciado, fuente,"
+            + " vigente_desde_tipo, vigente_desde_fecha, vigente_desde_periodo, vigente_hasta_tipo,"
+            + " vigente_hasta_fecha, vigente_hasta_periodo, clasificacion, tipo_afectacion,"
+            + " regla_afectada_id, norma_afectada_id, articulo_afectado, afectacion_desde_tipo,"
+            + " afectacion_desde_fecha, afectacion_desde_periodo, datos)"
             + " SELECT CAST(? AS UUID), CAST(? AS UUID), categoria, objeto, enunciado,"
-            + " 'art. 9', NULL, NULL, clasificacion, 'MODIFICA', id, NULL, datos"
+            + " 'art. 9', NULL, NULL, NULL, NULL, NULL, NULL, clasificacion, 'MODIFICA', id,"
+            + " NULL, NULL, NULL, NULL, NULL, datos"
             + " FROM regla WHERE id = ?",
         regla,
         norma,
@@ -302,10 +311,31 @@ class ReglaCompletaIntegracionTest {
   }
 
   @Test
+  void uc06_paso8_unaFechaDeAplicacionPorPeriodoSeMuestraComoPeriodo() {
+    final ReglaId delAcuerdo008 =
+        consulta.consolidadoVigente(sistemas()).orElseThrow().reglasPorCategoria().values().stream()
+            .flatMap(List::stream)
+            .filter(regla -> regla.fuente().orElseThrow().norma().numero().equals("008"))
+            .map(ReglaVista::id)
+            .findFirst()
+            .orElseThrow();
+    entityManager.flush();
+    jdbc.update(
+        "UPDATE norma SET aplica_desde_tipo = 'PERIODO', aplica_desde_fecha = NULL,"
+            + " aplica_desde_periodo = '2009-1' WHERE numero = '008'");
+    entityManager.clear();
+
+    ReglaCompletaVista regla = consulta.regla(sistemas(), delAcuerdo008).orElseThrow();
+
+    assertThat(regla.aplicaDesde())
+        .contains(new Momento.EnPeriodo(new PeriodoAcademico(2009, ParteDelAnio.PRIMERO)));
+  }
+
+  @Test
   void uc06_paso8_laVigenciaHastaPropiaDeLaReglaGanaALaDeSuNorma() throws IOException {
     ReglaCompletaVista regla = consulta.regla(sistemas(), idDeLaReglaDeAjustes()).orElseThrow();
 
-    assertThat(regla.vigenteHasta()).contains(LocalDate.of(2099, 12, 31));
+    assertThat(regla.vigenteHasta()).contains(new Momento.EnFecha(LocalDate.of(2099, 12, 31)));
     assertThat(regla.temporal()).isTrue();
   }
 
@@ -313,12 +343,15 @@ class ReglaCompletaIntegracionTest {
   void uc06_paso8_laFechaDeAplicacionPropiaDeLaReglaGanaALaDeSuNorma() throws IOException {
     ReglaId ajustes = idDeLaReglaDeAjustes();
     entityManager.flush();
-    jdbc.update("UPDATE regla SET vigente_desde = DATE '2026-03-01' WHERE id = ?", ajustes.valor());
+    jdbc.update(
+        "UPDATE regla SET vigente_desde_tipo = 'FECHA', vigente_desde_fecha = DATE '2026-03-01'"
+            + " WHERE id = ?",
+        ajustes.valor());
     entityManager.clear();
 
     ReglaCompletaVista regla = consulta.regla(sistemas(), ajustes).orElseThrow();
 
-    assertThat(regla.aplicaDesde()).contains(LocalDate.of(2026, 3, 1));
+    assertThat(regla.aplicaDesde()).contains(new Momento.EnFecha(LocalDate.of(2026, 3, 1)));
   }
 
   @Test
