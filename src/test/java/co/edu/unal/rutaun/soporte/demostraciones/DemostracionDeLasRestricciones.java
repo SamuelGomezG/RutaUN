@@ -152,6 +152,23 @@ public final class DemostracionDeLasRestricciones {
                     Optional.empty(),
                     TipoMateriaExterna.OTRO_PROGRAMA))),
         ContextoDeEvaluacionFijo.nuevo().pendiente(SINTETICA).construir());
+
+    System.out.println();
+    System.out.println("[Materias externas del Acuerdo 11 de 2023, art. 2]");
+    mostrarRestriccion(
+        "Cálculo Diferencial (1000004)",
+        new Prerrequisito(
+            new CodigoMateria("1000004"),
+            new MateriaExterna(
+                "Matemáticas Básicas", Optional.empty(), TipoMateriaExterna.NIVELACION)),
+        ContextoDeEvaluacionFijo.vacio());
+    mostrarRestriccion(
+        "Electrónica Digital I (2016498)",
+        new Prerrequisito(
+            new CodigoMateria("2016498"),
+            new MateriaExterna(
+                "Electrónica Análoga I", Optional.empty(), TipoMateriaExterna.OTRO_PROGRAMA)),
+        ContextoDeEvaluacionFijo.vacio());
   }
 
   /** Traduce cada variante de {@link Razon} a un texto para leerla en la demostración. */
