@@ -148,6 +148,17 @@ class BuscarReglasIntegracionTest {
     entityManager.clear();
   }
 
+  /** Le pone a la norma de la regla un «vigente hasta» distinto del que la regla pueda tener. */
+  private void laNormaDeLaReglaVenceEl(ReglaId regla, LocalDate hasta) {
+    entityManager.flush();
+    jdbc.update(
+        "UPDATE norma SET vigente_hasta = ? WHERE id = (SELECT norma_id FROM regla WHERE id = ?)",
+        hasta,
+        regla.valor());
+    entityManager.flush();
+    entityManager.clear();
+  }
+
   @Test
   void uc06_paso6_sinBusquedaDevuelveElMismoConsolidadoQueElListadoNormal() {
     assertThat(consulta.buscarReglas(sistemas(), BusquedaDeReglas.TODAS))
@@ -275,6 +286,22 @@ class BuscarReglasIntegracionTest {
         .perform(get("/programas/" + sistemas().valor() + "/reglas?estado=YA_NO_RIGE"))
         .andExpect(content().string(containsString("hasta 2025-12-31")))
         .andExpect(content().string(not(containsString("sin fechas registradas"))));
+  }
+
+  @Test
+  void uc06_ext5b_laVigenciaHastaPropiaDeLaReglaGanaALaDeSuNorma() throws Exception {
+    ReglaId regla = idDeLaReglaDeCreditos();
+    laReglaYaNoRige(regla, LocalDate.of(2024, 6, 30));
+    laNormaDeLaReglaVenceEl(regla, LocalDate.of(2025, 12, 31));
+
+    ReglaVista vencida = buscar(BusquedaDeReglas.de(null, null, EstadoRegla.YA_NO_RIGE)).getFirst();
+
+    assertThat(vencida.id()).isEqualTo(regla);
+    assertThat(vencida.vigenteHasta()).contains(LocalDate.of(2024, 6, 30));
+    mockMvc
+        .perform(get("/programas/" + sistemas().valor() + "/reglas?estado=YA_NO_RIGE"))
+        .andExpect(content().string(containsString("hasta 2024-06-30")))
+        .andExpect(content().string(not(containsString("hasta 2025-12-31"))));
   }
 
   @Test
