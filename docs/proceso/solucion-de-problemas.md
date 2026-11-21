@@ -47,6 +47,10 @@ Si resuelves un fallo que no está aquí y le puede pasar a otra persona, agrég
 
 **Antes de borrar `data/`**, comprueba que la base es desechable: que solo tiene la semilla. Si guarda normas incorporadas por fuera de `semilla/` o incidentes que alguien necesita —y, cuando existan, avances y planes—, no la borres.
 
+**Si `V4` falla a medias**, H2 confirma cada sentencia DDL por separado: `uq_programa_codigo_sia` —y los objetos de los pasos siguientes, si el fallo ocurre más abajo— puede quedar creada aunque Flyway marque la migración como fallida (`"success" = FALSE` en `flyway_schema_history`). `flyway repair` borra esa entrada pero **no deshace** los objetos ya creados, así que reintentar `V4` choca con lo que existe. Para recuperar sin perder datos: copia `data/rutaun.mv.db` antes de actualizar; si falla, detén la aplicación, restaura la copia (con ella vuelven el esquema y el historial a antes de `V4`), corrige la causa en la base restaurada y reinicia. Comprueba el historial con `SELECT "version", "success" FROM "flyway_schema_history"`. Es un caso distinto al *checksum* de más arriba: allí la migración sí se había aplicado completa.
+
+**Otra causa de fallo de `V4`** son dos versiones `AUTOMATICO_POR_FECHA` del mismo programa y día con `numero` distinto: `V1` solo las limitaba por `(programa_id, numero)`, y `V4` les pone el mismo `dia_automatico`, así que `uq_version_automatica_por_dia` las rechaza (S15). Encuéntralas con `SELECT programa_id, fecha, COUNT(*) FROM version_consolidado WHERE motivo = 'AUTOMATICO_POR_FECHA' GROUP BY programa_id, fecha HAVING COUNT(*) > 1`. Es un estado que ya era incoherente con S15: en una base desechable, restaura o borra `data/`; si hay datos que conservar, acuerda con el administrador de normativa qué versión vale antes de restaurar y reintentar.
+
 ## Usar la aplicación
 
 | Síntoma | Causa | Qué hacer |
