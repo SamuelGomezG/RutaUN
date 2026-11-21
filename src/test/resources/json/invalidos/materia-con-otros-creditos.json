@@ -1,0 +1,79 @@
+{
+  "schemaVersion": "1.0",
+  "programa": {
+    "codigoSia": "2879",
+    "nombre": "Ingeniería de Sistemas y Computación",
+    "facultad": "Ingeniería"
+  },
+  "norma": {
+    "tipo": "ACUERDO",
+    "numero": "996",
+    "anio": 2026,
+    "organo": "Consejo de Facultad de Ingeniería (datos de prueba)",
+    "tipoDeEfecto": "BASE",
+    "fechaExpedicion": "2026-01-14",
+    "vigencia": {
+      "aplicaDesde": {
+        "tipo": "FECHA",
+        "fecha": "2026-01-15"
+      },
+      "vigenteHasta": null
+    },
+    "enlaceRegimenLegal": null,
+    "alcance": {
+      "tipo": "PROGRAMAS",
+      "facultades": [],
+      "programas": ["2879"],
+      "exclusiones": [],
+      "texto": "Norma ficticia de datos de prueba: una materia nueva y otra con otros créditos que los del catálogo."
+    }
+  },
+  "reglas": [
+    {
+      "categoria": "MATERIA",
+      "objeto": "9000099 Materia nueva de prueba",
+      "enunciado": "Materia nueva de prueba (9000099): 3 créditos, obligatoria; pertenece a la agrupación Métodos y Tecnologías de Software del Componente de Formación Disciplinar o Profesional (datos de prueba).",
+      "articulo": "art. 2",
+      "vigenciaPropia": null,
+      "clasificacion": "DEL_PLAN",
+      "afectacion": null,
+      "datos": {
+        "tipo": "MATERIA",
+        "materia": {
+          "codigo": "9000099",
+          "nombre": "Materia nueva de prueba",
+          "creditos": 3,
+          "obligatoriedad": "OBLIGATORIA",
+          "semestreSugerido": null
+        },
+        "contenedor": {
+          "componente": "Componente de Formación Disciplinar o Profesional",
+          "agrupacion": "Métodos y Tecnologías de Software"
+        }
+      }
+    },
+    {
+      "categoria": "MATERIA",
+      "objeto": "2016699 Estructuras de Datos",
+      "enunciado": "Estructuras de Datos (2016699): 4 créditos, obligatoria; pertenece a la agrupación Métodos y Tecnologías de Software del Componente de Formación Disciplinar o Profesional (datos de prueba).",
+      "articulo": "art. 2",
+      "vigenciaPropia": null,
+      "clasificacion": "DEL_PLAN",
+      "afectacion": null,
+      "datos": {
+        "tipo": "MATERIA",
+        "materia": {
+          "codigo": "2016699",
+          "nombre": "Estructuras de Datos",
+          "creditos": 4,
+          "obligatoriedad": "OBLIGATORIA",
+          "semestreSugerido": null
+        },
+        "contenedor": {
+          "componente": "Componente de Formación Disciplinar o Profesional",
+          "agrupacion": "Métodos y Tecnologías de Software"
+        }
+      }
+    }
+  ]
+}

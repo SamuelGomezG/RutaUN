@@ -213,6 +213,10 @@ El campo `datos.tipo` es el discriminante y debe coincidir con `categoria`.
 `obligatoriedad`: `OBLIGATORIA` u `OPTATIVA`. `semestreSugerido` puede ser `null`. `contenedor`
 indica el componente y, si aplica, la agrupación más interna que contiene la materia.
 
+El código identifica la materia en el catálogo global y sus créditos son fijos. La importación
+rechaza un archivo que le dé a un código otros créditos que los del catálogo, o dos valores
+distintos dentro de la misma norma (UC07 ext. 6d).
+
 #### `PRERREQUISITO` y `CORREQUISITO`
 
 ```jsonc

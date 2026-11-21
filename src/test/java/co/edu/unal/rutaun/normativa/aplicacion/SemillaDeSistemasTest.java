@@ -11,6 +11,7 @@ import co.edu.unal.rutaun.normativa.dominio.ReglaEnVersion;
 import co.edu.unal.rutaun.normativa.dominio.TipoCargaPorPeriodo;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
 import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoRepository;
+import co.edu.unal.rutaun.normativa.persistencia.MateriaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.NormaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntity;
@@ -41,7 +42,8 @@ import org.springframework.transaction.annotation.Transactional;
  * Verifica que la semilla real de Sistemas se carga completa con el runner de desarrollo.
  *
  * <p>TT-04-T5 (#131, #100): corre {@link SemillaDeDesarrolloRunner} sobre H2 en memoria y comprueba
- * programas, normas, reglas, consolidados, versiones y reglas por versión, una y dos veces.
+ * programas, normas, reglas, materias, consolidados, versiones y reglas por versión, una y dos
+ * veces.
  *
  * <p>Las cifras son las de la semilla del 2026-11-14, con los dos archivos de datos de prueba de
  * TT-04-T4 (#133). Cambian con #178 (agrupaciones repetidas) y #146 (orden de carga): quien las
@@ -66,6 +68,7 @@ class SemillaDeSistemasTest {
   private static final int PROGRAMAS = 1;
   private static final int NORMAS = 5;
   private static final int REGLAS = 280;
+  private static final int MATERIAS = 105;
   private static final int CONSOLIDADOS = 1;
   private static final List<Integer> REGLAS_POR_VERSION = List.of(20, 27, 276, 277, 280);
   private static final int VERSIONES = REGLAS_POR_VERSION.size();
@@ -81,13 +84,15 @@ class SemillaDeSistemasTest {
           CONSOLIDADOS,
           VERSIONES,
           REGLAS_EN_VERSION,
-          REGLAS_POR_VERSION);
+          REGLAS_POR_VERSION,
+          MATERIAS);
 
   private final ImportacionDeProgramasService programas;
   private final ImportacionDeNormasService normas;
   private final ProgramaRepository programasGuardados;
   private final NormaRepository normasGuardadas;
   private final ReglaRepository reglas;
+  private final MateriaRepository materias;
   private final ConsolidadoRepository consolidados;
   private final VersionDelConsolidadoRepository versiones;
   private final ReglaEnVersionRepository reglasEnVersion;
@@ -100,6 +105,7 @@ class SemillaDeSistemasTest {
       ProgramaRepository programasGuardados,
       NormaRepository normasGuardadas,
       ReglaRepository reglas,
+      MateriaRepository materias,
       ConsolidadoRepository consolidados,
       VersionDelConsolidadoRepository versiones,
       ReglaEnVersionRepository reglasEnVersion) {
@@ -108,6 +114,7 @@ class SemillaDeSistemasTest {
     this.programasGuardados = programasGuardados;
     this.normasGuardadas = normasGuardadas;
     this.reglas = reglas;
+    this.materias = materias;
     this.consolidados = consolidados;
     this.versiones = versiones;
     this.reglasEnVersion = reglasEnVersion;
@@ -236,7 +243,8 @@ class SemillaDeSistemasTest {
         reglasEnVersion.count(),
         ordenadas.stream()
             .map(version -> reglasEnVersion.findByVersionId(version.getId()).size())
-            .toList());
+            .toList(),
+        materias.count());
   }
 
   private UUID programaDeSistemas() {
@@ -313,10 +321,12 @@ class SemillaDeSistemasTest {
 
   private static void registrar(Cifras cifras) {
     LOG.info(
-        "Semilla cargada: {} programa, {} normas, {} reglas, {} versiones; vigente: {}",
+        "Semilla cargada: {} programa, {} normas, {} reglas, {} materias, {} versiones;"
+            + " vigente: {}",
         cifras.programas(),
         cifras.normas(),
         cifras.reglas(),
+        cifras.materias(),
         cifras.versiones(),
         cifras.reglasPorVersion().get(cifras.reglasPorVersion().size() - 1));
   }
@@ -328,5 +338,6 @@ class SemillaDeSistemasTest {
       long consolidados,
       long versiones,
       long reglasEnVersion,
-      List<Integer> reglasPorVersion) {}
+      List<Integer> reglasPorVersion,
+      long materias) {}
 }

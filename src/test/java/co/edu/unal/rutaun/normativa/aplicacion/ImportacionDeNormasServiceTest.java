@@ -1,9 +1,11 @@
 package co.edu.unal.rutaun.normativa.aplicacion;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoRepository;
+import co.edu.unal.rutaun.normativa.persistencia.MateriaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.NormaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntity;
@@ -14,14 +16,17 @@ import co.edu.unal.rutaun.normativa.persistencia.VersionDelConsolidadoRepository
 import co.edu.unal.rutaun.normativa.persistencia.VersionEntity;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
 import jakarta.persistence.EntityManager;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +45,7 @@ class ImportacionDeNormasServiceTest {
   private final ImportacionDeNormasService normas;
   private final NormaRepository normasGuardadas;
   private final ReglaRepository reglas;
+  private final MateriaRepository materiasGuardadas;
   private final ConsolidadoRepository consolidados;
   private final VersionDelConsolidadoRepository versiones;
   private final ReglaEnVersionRepository reglasEnVersion;
@@ -53,6 +59,7 @@ class ImportacionDeNormasServiceTest {
       ImportacionDeNormasService normas,
       NormaRepository normasGuardadas,
       ReglaRepository reglas,
+      MateriaRepository materiasGuardadas,
       ConsolidadoRepository consolidados,
       VersionDelConsolidadoRepository versiones,
       ReglaEnVersionRepository reglasEnVersion,
@@ -61,6 +68,7 @@ class ImportacionDeNormasServiceTest {
     this.normas = normas;
     this.normasGuardadas = normasGuardadas;
     this.reglas = reglas;
+    this.materiasGuardadas = materiasGuardadas;
     this.consolidados = consolidados;
     this.versiones = versiones;
     this.reglasEnVersion = reglasEnVersion;
@@ -212,6 +220,77 @@ class ImportacionDeNormasServiceTest {
             .map(ReglaEntity::getNormaId)
             .collect(Collectors.toSet());
     assertThat(normasDeLaVigente).hasSize(3);
+  }
+
+  @Test
+  void tt04_laImportacionRegistraLasMateriasEnElCatalogo() throws IOException {
+    cargarProgramas();
+
+    importarNorma("semilla/acuerdo-11-2023.json");
+
+    assertThat(materiasGuardadas.count()).isEqualTo(105);
+    assertThat(materiasGuardadas.findById("2016699"))
+        .hasValueSatisfying(materia -> assertThat(materia.getCreditos()).isEqualTo(3));
+  }
+
+  @Test
+  void uc07_ext6d_unaMateriaConOtrosCreditosRechazaLaIncorporacion() throws IOException {
+    cargarProgramas();
+    importarNorma("semilla/acuerdo-11-2023.json");
+    long normasAntes = normasGuardadas.count();
+
+    assertThatThrownBy(() -> importarNorma("json/invalidos/materia-con-otros-creditos.json"))
+        .isInstanceOf(ArchivoDeNormativaInvalidoException.class)
+        .hasMessageContaining("2016699")
+        .hasMessageContaining("le da 4")
+        .hasMessageContaining("tiene 3");
+
+    assertThat(normasGuardadas.count()).isEqualTo(normasAntes);
+    assertThat(materiasGuardadas.findById("2016699"))
+        .hasValueSatisfying(materia -> assertThat(materia.getCreditos()).isEqualTo(3));
+    assertThat(materiasGuardadas.findById("9000099")).isEmpty();
+  }
+
+  @Test
+  void tt04_otraNormaConLosMismosCreditosNoDuplicaElCatalogo() throws IOException {
+    cargarProgramas();
+    importarNorma("semilla/acuerdo-11-2023.json");
+    String conLosMismosCreditos =
+        leer("json/invalidos/materia-con-otros-creditos.json")
+            .replace("\"creditos\": 4", "\"creditos\": 3");
+
+    ResultadoDeImportacionDeNormas resultado = importarTexto(conLosMismosCreditos);
+
+    assertThat(resultado.creada()).isTrue();
+    assertThat(materiasGuardadas.count()).isEqualTo(106);
+  }
+
+  @Test
+  void uc07_ext6d_dosCreditosEnLaMismaNormaNoGuardanNada() throws IOException {
+    cargarProgramas();
+    String conDosCreditos =
+        Pattern.compile("(?<creditos>\"codigo\"\\s*:\\s*\"2028837\"[^}]*?\"creditos\"\\s*:\\s*)4")
+            .matcher(leer("semilla/acuerdo-11-2023.json"))
+            .replaceFirst("${creditos}5");
+
+    assertThatThrownBy(() -> importarTexto(conDosCreditos))
+        .isInstanceOf(ArchivoDeNormativaInvalidoException.class)
+        .hasMessageContaining("2028837")
+        .hasMessageContaining("en esta norma");
+
+    assertThat(materiasGuardadas.count()).isZero();
+    assertThat(normasGuardadas.count()).isZero();
+    assertThat(reglas.count()).isZero();
+  }
+
+  private String leer(String archivo) throws IOException {
+    try (InputStream entrada = new ClassPathResource(archivo).getInputStream()) {
+      return new String(entrada.readAllBytes(), StandardCharsets.UTF_8);
+    }
+  }
+
+  private ResultadoDeImportacionDeNormas importarTexto(String json) {
+    return normas.importar(new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8)));
   }
 
   private void cargarProgramas() throws IOException {
