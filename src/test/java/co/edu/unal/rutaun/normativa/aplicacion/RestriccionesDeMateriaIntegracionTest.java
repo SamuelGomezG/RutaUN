@@ -195,6 +195,23 @@ class RestriccionesDeMateriaIntegracionTest {
   }
 
   @Test
+  void uc05_paso4_laHabilitacionSaleDespuesDelPrerrequisitoEnLasMateriasQueTienenLosDos() {
+    for (String codigo :
+        List.of(
+            "2016007", "2016037", "2016091", "2016093", "2016599", "2016600", "2016615", "2016741",
+            "2017275", "2024045", "2026551")) {
+      List<TipoDeRestriccion> clases =
+          restriccionesDe(new CodigoMateria(codigo)).restricciones().stream()
+              .map(RestriccionVista::tipo)
+              .toList();
+
+      assertThat(clases)
+          .as(codigo)
+          .containsExactly(TipoDeRestriccion.PRERREQUISITO, TipoDeRestriccion.HABILITACION);
+    }
+  }
+
+  @Test
   void uc05_ext3a_unaMateriaSinRestriccionesDevuelveLaVistaSinRestricciones() {
     RestriccionesDeMateriaVista vista = restriccionesDe(new CodigoMateria("2016703"));
 
