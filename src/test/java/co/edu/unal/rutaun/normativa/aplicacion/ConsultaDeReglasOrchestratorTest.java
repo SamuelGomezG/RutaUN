@@ -314,6 +314,21 @@ class ConsultaDeReglasOrchestratorTest {
   }
 
   @Test
+  void uc06_ext5a_pedirLasQueYaNoRigenDeUnaCategoriaSinEllasNoEsUnIncidenteSiHayEnOtra() {
+    var orquestador = orquestador(new SoloReglasQueYaNoRigen());
+
+    ReglasDelPrograma resultado =
+        orquestador.reglasDelPrograma(
+            ConsultaNormativaFalsa.SISTEMAS,
+            BusquedaDeReglas.de(null, "Materias", EstadoRegla.YA_NO_RIGE));
+
+    var consultadas = (ReglasDelPrograma.Consultadas) resultado;
+    assertThat(consultadas.consolidado().sinReglas()).isTrue();
+    assertThat(consultadas.consolidadoSinReglas()).isFalse();
+    assertThat(eventos.publicados).isEmpty();
+  }
+
+  @Test
   void uc06_ext4a_conSoloReglasQueYaNoRigenSinElEstadoSigueSiendoElConsolidadoSinReglas() {
     var orquestador = orquestador(new SoloReglasQueYaNoRigen());
 
