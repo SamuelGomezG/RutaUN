@@ -7,6 +7,7 @@ import co.edu.unal.rutaun.compartido.ProgramaId;
 import co.edu.unal.rutaun.incidentes.IncidenteDePrograma;
 import co.edu.unal.rutaun.incidentes.IncidenteDetectado;
 import co.edu.unal.rutaun.incidentes.IncidenteInterno;
+import co.edu.unal.rutaun.incidentes.persistencia.ElementosJson;
 import co.edu.unal.rutaun.incidentes.persistencia.IncidenteEntity;
 import co.edu.unal.rutaun.incidentes.persistencia.IncidenteRepository;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
@@ -123,7 +124,7 @@ class IncidentesIntegracionTest {
             PROGRAMA,
             1,
             "Misma causa",
-            "programa",
+            new ElementosJson(ElementosJson.ESQUEMA, List.of("programa")),
             fecha,
             fecha,
             1,
@@ -134,9 +135,27 @@ class IncidentesIntegracionTest {
     assertThat(repositorio.findAll()).hasSize(2);
   }
 
+  @Test
+  void tt04_losElementosSeGuardanComoListaOrdenada() {
+    servicio.registrar(eventoDePrograma("Misma causa", List.of("a, b")));
+    servicio.registrar(eventoDePrograma("Misma causa", List.of("a", "b")));
+    servicio.registrar(eventoDePrograma("Misma causa", List.of("b", "a")));
+
+    assertThat(repositorio.findAll())
+        .hasSize(2)
+        .extracting(IncidenteEntity::getElementos)
+        .contains(
+            new ElementosJson(ElementosJson.ESQUEMA, List.of("a", "b")),
+            new ElementosJson(ElementosJson.ESQUEMA, List.of("a, b")));
+  }
+
   private static IncidenteDetectado eventoDePrograma(String causa) {
+    return eventoDePrograma(causa, List.of("programa"));
+  }
+
+  private static IncidenteDetectado eventoDePrograma(String causa, List<String> elementos) {
     return new IncidenteDePrograma(
-        "UC06-HU01", "ext. 4a", new ProgramaId(PROGRAMA), 1, causa, List.of("programa"));
+        "UC06-HU01", "ext. 4a", new ProgramaId(PROGRAMA), 1, causa, elementos);
   }
 
   private static IncidenteDetectado eventoInterno(String causa) {

@@ -2,23 +2,30 @@ package co.edu.unal.rutaun.normativa.dominio;
 
 import co.edu.unal.rutaun.compartido.CodigoMateria;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Expresión de materias combinadas con «y» y «o» (glosario, «Datos de una regla»). Un prerrequisito
  * o un correquisito exigen una materia del programa o, si la norma las menciona, materias externas.
+ * Las combinaciones no dependen del orden de sus términos ni anidan otra combinación del mismo
+ * tipo.
  */
 public sealed interface ExpresionDeMaterias
-    permits ExpresionDeMaterias.MateriaDelPrograma,
+    permits ExpresionDeMaterias.TerminoMateria,
         ExpresionDeMaterias.MateriaExterna,
-        ExpresionDeMaterias.Y,
-        ExpresionDeMaterias.O {
+        ExpresionDeMaterias.TodasLas,
+        ExpresionDeMaterias.AlgunaDe {
 
   /** Materia que figura en la malla del programa. */
-  record MateriaDelPrograma(CodigoMateria codigo) implements ExpresionDeMaterias {
+  record TerminoMateria(CodigoMateria codigo) implements ExpresionDeMaterias {
 
     /** Exige el código de la materia. */
-    public MateriaDelPrograma {
+    public TerminoMateria {
       ArgumentChecks.obligatorio(codigo, "codigo");
     }
   }
@@ -39,25 +46,90 @@ public sealed interface ExpresionDeMaterias
     }
   }
 
-  /** Conjunción: se cumple si se cumplen sus dos términos. */
-  record Y(ExpresionDeMaterias izquierda, ExpresionDeMaterias derecha)
-      implements ExpresionDeMaterias {
+  /**
+   * «y»: se cumple si se cumplen todos sus términos. Dos o más términos distintos, sin orden y sin
+   * «y» anidadas; al recorrerlos se conserva el orden en que se dieron.
+   */
+  record TodasLas(Set<ExpresionDeMaterias> terminos) implements ExpresionDeMaterias {
 
-    /** Exige los dos términos. */
-    public Y {
-      ArgumentChecks.obligatorio(izquierda, "izquierda");
-      ArgumentChecks.obligatorio(derecha, "derecha");
+    /** Aplana las «y» hijas y exige al menos dos términos distintos. */
+    public TodasLas {
+      terminos = aplanar(terminos, TodasLas.class);
+      if (terminos.size() < 2) {
+        throw new IllegalArgumentException("una «y» necesita al menos dos términos distintos");
+      }
     }
   }
 
-  /** Disyunción: se cumple si se cumple alguno de sus dos términos. */
-  record O(ExpresionDeMaterias izquierda, ExpresionDeMaterias derecha)
-      implements ExpresionDeMaterias {
+  /**
+   * «o»: se cumple si se cumple alguno de sus términos. Dos o más términos distintos, sin orden y
+   * sin «o» anidadas; al recorrerlos se conserva el orden en que se dieron.
+   */
+  record AlgunaDe(Set<ExpresionDeMaterias> terminos) implements ExpresionDeMaterias {
 
-    /** Exige los dos términos. */
-    public O {
-      ArgumentChecks.obligatorio(izquierda, "izquierda");
-      ArgumentChecks.obligatorio(derecha, "derecha");
+    /** Aplana las «o» hijas y exige al menos dos términos distintos. */
+    public AlgunaDe {
+      terminos = aplanar(terminos, AlgunaDe.class);
+      if (terminos.size() < 2) {
+        throw new IllegalArgumentException("una «o» necesita al menos dos términos distintos");
+      }
     }
+  }
+
+  /** «y» de varios términos; si queda uno, devuelve ese término. */
+  static ExpresionDeMaterias todasLas(ExpresionDeMaterias... terminos) {
+    ArgumentChecks.obligatorio(terminos, "terminos");
+    return combinar(
+        Arrays.asList(terminos), TodasLas.class, "una «y» necesita al menos un término");
+  }
+
+  /** «o» de varios términos; si queda uno, devuelve ese término. */
+  static ExpresionDeMaterias algunaDe(ExpresionDeMaterias... terminos) {
+    ArgumentChecks.obligatorio(terminos, "terminos");
+    return combinar(
+        Arrays.asList(terminos), AlgunaDe.class, "una «o» necesita al menos un término");
+  }
+
+  private static ExpresionDeMaterias combinar(
+      Collection<ExpresionDeMaterias> terminos,
+      Class<? extends ExpresionDeMaterias> tipo,
+      String mensajeSiVacio) {
+    Set<ExpresionDeMaterias> planos = aplanar(terminos, tipo);
+    if (planos.isEmpty()) {
+      throw new IllegalArgumentException(mensajeSiVacio);
+    }
+    if (planos.size() == 1) {
+      return planos.iterator().next();
+    }
+    return tipo == TodasLas.class ? new TodasLas(planos) : new AlgunaDe(planos);
+  }
+
+  /**
+   * Copia los términos en el orden en que se dieron, rechaza los nulos y reemplaza cada combinación
+   * del mismo tipo por sus términos. El resultado es inmutable.
+   */
+  private static Set<ExpresionDeMaterias> aplanar(
+      Collection<ExpresionDeMaterias> terminos, Class<? extends ExpresionDeMaterias> tipo) {
+    ArgumentChecks.obligatorio(terminos, "terminos");
+    Set<ExpresionDeMaterias> planos = new LinkedHashSet<>();
+    for (ExpresionDeMaterias termino : terminos) {
+      if (termino == null) {
+        throw new IllegalArgumentException("terminos no puede tener elementos null");
+      }
+      if (tipo.isInstance(termino)) {
+        planos.addAll(terminosDe(termino));
+      } else {
+        planos.add(termino);
+      }
+    }
+    return Collections.unmodifiableSet(planos);
+  }
+
+  private static Set<ExpresionDeMaterias> terminosDe(ExpresionDeMaterias combinacion) {
+    return switch (combinacion) {
+      case TodasLas todas -> todas.terminos();
+      case AlgunaDe alguna -> alguna.terminos();
+      default -> throw new IllegalArgumentException("la combinación no es del tipo esperado");
+    };
   }
 }

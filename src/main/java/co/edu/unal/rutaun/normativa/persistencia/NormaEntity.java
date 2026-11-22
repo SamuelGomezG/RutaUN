@@ -3,13 +3,14 @@ package co.edu.unal.rutaun.normativa.persistencia;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.PostPersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import java.time.LocalDate;
 import java.util.UUID;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.data.domain.Persistable;
 
 /**
@@ -57,9 +58,9 @@ public class NormaEntity implements Persistable<UUID> {
   @Column(name = "tipo_alcance", nullable = false)
   private String tipoAlcance;
 
-  @Lob
-  @Column(name = "alcance_detalle")
-  private String alcanceDetalle;
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(name = "alcance_detalle", nullable = false)
+  private AlcanceJson alcanceDetalle;
 
   /** Constructor sin argumentos que exige JPA. */
   protected NormaEntity() {}
@@ -77,7 +78,7 @@ public class NormaEntity implements Persistable<UUID> {
       LocalDate vigenteHasta,
       String enlaceRegimenLegal,
       String tipoAlcance,
-      String alcanceDetalle) {
+      AlcanceJson alcanceDetalle) {
     this.id = id;
     this.tipo = tipo;
     this.numero = numero;
@@ -150,7 +151,7 @@ public class NormaEntity implements Persistable<UUID> {
     return tipoAlcance;
   }
 
-  public String getAlcanceDetalle() {
+  public AlcanceJson getAlcanceDetalle() {
     return alcanceDetalle;
   }
 }

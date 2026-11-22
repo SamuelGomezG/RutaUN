@@ -3,13 +3,14 @@ package co.edu.unal.rutaun.normativa.persistencia;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.PostPersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import java.time.LocalDate;
 import java.util.UUID;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.data.domain.Persistable;
 
 /**
@@ -48,8 +49,9 @@ public class VersionEntity implements Persistable<UUID> {
   @Column(name = "numero_plan_de_estudios", nullable = false)
   private int numeroPlanDeEstudios;
 
-  /** Cambios respecto a la versión anterior, como texto JSON. */
-  @Lob private String cambios;
+  /** Cambios respecto a la versión anterior, en la columna JSON. */
+  @JdbcTypeCode(SqlTypes.JSON)
+  private String cambios;
 
   /** Día de la versión automática por fecha; nulo en los demás motivos. */
   @Column(name = "dia_automatico")

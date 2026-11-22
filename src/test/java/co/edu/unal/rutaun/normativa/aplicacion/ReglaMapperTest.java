@@ -15,6 +15,7 @@ import co.edu.unal.rutaun.normativa.dominio.Norma;
 import co.edu.unal.rutaun.normativa.dominio.Regla;
 import co.edu.unal.rutaun.normativa.dominio.TipoAfectacion;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
+import co.edu.unal.rutaun.normativa.persistencia.DatosDeReglaJson;
 import co.edu.unal.rutaun.normativa.persistencia.NormaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaRepository;
@@ -167,7 +168,8 @@ class ReglaMapperTest {
 
   @Test
   void tt04_reglaConCategoriaDesconocidaNoSeReconstituye() {
-    ReglaEntity invalida = entidadAMano("DECRETO", "{}");
+    ReglaEntity invalida =
+        entidadAMano("DECRETO", new DatosDeReglaJson.OtraJson(DatosDeReglaJson.ESQUEMA));
 
     assertThatThrownBy(() -> ReglaMapper.aDominio(invalida))
         .isInstanceOf(IllegalArgumentException.class)
@@ -176,8 +178,9 @@ class ReglaMapperTest {
 
   @Test
   void tt04_reglaConDatosIncompletosNoSeReconstituye() {
-    // «PROGRAMA» exige creditosExigidos; el JSON vacío no lo trae.
-    ReglaEntity invalida = entidadAMano("PROGRAMA", "{}");
+    // «PROGRAMA» exige creditosExigidos; el JSON no lo trae.
+    ReglaEntity invalida =
+        entidadAMano("PROGRAMA", new DatosDeReglaJson.ProgramaJson(DatosDeReglaJson.ESQUEMA, null));
 
     assertThatThrownBy(() -> ReglaMapper.aDominio(invalida))
         .isInstanceOf(IllegalArgumentException.class)
@@ -214,7 +217,7 @@ class ReglaMapperTest {
         new DatosDeRegla.DeOtraCategoria());
   }
 
-  private ReglaEntity entidadAMano(String categoria, String datos) {
+  private ReglaEntity entidadAMano(String categoria, DatosDeReglaJson datos) {
     return new ReglaEntity(
         UUID.randomUUID(),
         norma.id().valor(),

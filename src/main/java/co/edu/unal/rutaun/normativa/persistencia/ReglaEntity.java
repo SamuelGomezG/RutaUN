@@ -3,13 +3,14 @@ package co.edu.unal.rutaun.normativa.persistencia;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.PostPersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import java.time.LocalDate;
 import java.util.UUID;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.data.domain.Persistable;
 
 /**
@@ -60,8 +61,10 @@ public class ReglaEntity implements Persistable<UUID> {
   @Column(name = "articulo_afectado")
   private String articuloAfectado;
 
-  /** Datos propios de la categoría, como texto JSON. */
-  @Lob private String datos;
+  /** Datos propios de la categoría, en la columna JSON. */
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(nullable = false)
+  private DatosDeReglaJson datos;
 
   /** Constructor sin argumentos que exige JPA. */
   protected ReglaEntity() {}
@@ -80,7 +83,7 @@ public class ReglaEntity implements Persistable<UUID> {
       String tipoAfectacion,
       UUID reglaAfectadaId,
       String articuloAfectado,
-      String datos) {
+      DatosDeReglaJson datos) {
     this.id = id;
     this.normaId = normaId;
     this.categoria = categoria;
@@ -158,7 +161,7 @@ public class ReglaEntity implements Persistable<UUID> {
     return articuloAfectado;
   }
 
-  public String getDatos() {
+  public DatosDeReglaJson getDatos() {
     return datos;
   }
 }

@@ -3,13 +3,14 @@ package co.edu.unal.rutaun.incidentes.persistencia;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.PostPersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.data.domain.Persistable;
 
 /**
@@ -42,8 +43,10 @@ public class IncidenteEntity implements Persistable<UUID> {
   @Column(nullable = false)
   private String causa;
 
-  /** Elementos involucrados, como texto. */
-  @Lob private String elementos;
+  /** Elementos involucrados, en la columna JSON. */
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(nullable = false)
+  private ElementosJson elementos;
 
   @Column(name = "primera_fecha", nullable = false)
   private LocalDateTime primeraFecha;
@@ -68,7 +71,7 @@ public class IncidenteEntity implements Persistable<UUID> {
       UUID programaId,
       Integer versionConsolidado,
       String causa,
-      String elementos,
+      ElementosJson elementos,
       LocalDateTime primeraFecha,
       LocalDateTime ultimaFecha,
       int conteo,
@@ -124,7 +127,7 @@ public class IncidenteEntity implements Persistable<UUID> {
     return causa;
   }
 
-  public String getElementos() {
+  public ElementosJson getElementos() {
     return elementos;
   }
 

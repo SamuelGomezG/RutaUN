@@ -3,6 +3,7 @@ package co.edu.unal.rutaun.incidentes.aplicacion;
 import co.edu.unal.rutaun.incidentes.IncidenteDePrograma;
 import co.edu.unal.rutaun.incidentes.IncidenteDetectado;
 import co.edu.unal.rutaun.incidentes.IncidenteInterno;
+import co.edu.unal.rutaun.incidentes.persistencia.ElementosJson;
 import co.edu.unal.rutaun.incidentes.persistencia.IncidenteEntity;
 import co.edu.unal.rutaun.incidentes.persistencia.IncidenteRepository;
 import java.time.Clock;
@@ -93,8 +94,8 @@ public class IncidentesService {
     };
   }
 
-  private static String elementosDe(IncidenteDetectado evento) {
-    return String.join(", ", evento.elementos().stream().sorted().toList());
+  private static ElementosJson elementosDe(IncidenteDetectado evento) {
+    return new ElementosJson(ElementosJson.ESQUEMA, evento.elementos().stream().sorted().toList());
   }
 
   private static String recortar(String texto, int maximo) {

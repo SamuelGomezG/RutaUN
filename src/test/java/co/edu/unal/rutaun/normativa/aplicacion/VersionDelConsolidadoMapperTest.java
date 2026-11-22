@@ -18,6 +18,7 @@ import co.edu.unal.rutaun.normativa.dominio.Programa;
 import co.edu.unal.rutaun.normativa.dominio.Regla;
 import co.edu.unal.rutaun.normativa.dominio.ReglaEnVersion;
 import co.edu.unal.rutaun.normativa.dominio.VersionDelConsolidado;
+import co.edu.unal.rutaun.normativa.persistencia.DetalleDeMotivoJson;
 import co.edu.unal.rutaun.normativa.persistencia.NormaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntity;
@@ -28,6 +29,7 @@ import co.edu.unal.rutaun.normativa.persistencia.VersionDelConsolidadoRepository
 import co.edu.unal.rutaun.normativa.persistencia.VersionEntity;
 import co.edu.unal.rutaun.soporte.MallaDePrueba;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
+import co.edu.unal.rutaun.utilidades.JsonConfig;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,6 +41,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * TT-04-T3 (#91): ida y vuelta de {@link VersionDelConsolidado} (dominio, entidades, base,
@@ -59,6 +62,7 @@ class VersionDelConsolidadoMapperTest {
   @Autowired private ReglaRepository reglas;
   @Autowired private VersionDelConsolidadoRepository versiones;
   @Autowired private ReglaEnVersionRepository reglasEnVersion;
+  @Autowired private JdbcTemplate jdbc;
 
   private Programa programa;
   private Norma norma;
@@ -109,8 +113,7 @@ class VersionDelConsolidadoMapperTest {
                     new DatosDeRegla.DePrerrequisito(
                         new Prerrequisito(
                             new CodigoMateria("9000006"),
-                            new ExpresionDeMaterias.MateriaDelPrograma(
-                                new CodigoMateria("9000001"))))),
+                            new ExpresionDeMaterias.TerminoMateria(new CodigoMateria("9000001"))))),
                 EstadoRegla.VIGENTE));
     VersionDelConsolidado original =
         version(1, new MotivoDeVersion.PorIncorporacion(norma.id(), ADMINISTRADOR), deLaVersion);
@@ -222,6 +225,31 @@ class VersionDelConsolidadoMapperTest {
   }
 
   @Test
+  void tt04_elDetalleDelMotivoLlevaEsquema() {
+    List<MotivoDeVersion> motivos =
+        List.of(
+            new MotivoDeVersion.PorIncorporacion(norma.id(), ADMINISTRADOR),
+            new MotivoDeVersion.PorCorreccion(ADMINISTRADOR),
+            new MotivoDeVersion.AutomaticoPorPeriodo(
+                new PeriodoAcademico(2026, ParteDelAnio.PRIMERO)),
+            new MotivoDeVersion.AutomaticoPorFecha(LocalDate.of(2022, 2, 1)));
+
+    for (int i = 0; i < motivos.size(); i++) {
+      UUID versionId = guardar(version(i + 1, motivos.get(i), List.of()));
+      String crudo =
+          jdbc.queryForObject(
+              "SELECT detalle_motivo FROM version_consolidado WHERE id = ?",
+              String.class,
+              versionId);
+
+      assertThat(crudo).as("detalle de %s", motivos.get(i)).contains("\"esquema\":1");
+      if (motivos.get(i) instanceof MotivoDeVersion.AutomaticoPorFecha) {
+        assertThat(crudo).contains("\"fecha\":\"2022-02-01\"");
+      }
+    }
+  }
+
+  @Test
   void tt04_versionConUnMotivoQueNoCabeEnLaColumnaNoSeGuarda() {
     VersionDelConsolidado larga =
         version(1, new MotivoDeVersion.PorCorreccion("a".repeat(300)), List.of());
@@ -235,7 +263,10 @@ class VersionDelConsolidadoMapperTest {
   void tt04_versionConUnMotivoDeExactamenteElLargoDeLaColumnaSeGuarda() {
     // Se mide lo que ocupa el JSON sin el administrador, para llenar la columna justo hasta 300.
     int sinAdministrador =
-        JsonDeNormativa.mapper().writeValueAsString(new MotivoDeVersion.PorCorreccion("a")).length()
+        JsonConfig.mapper()
+                .writeValueAsString(
+                    new DetalleDeMotivoJson.PorCorreccion(DetalleDeMotivoJson.ESQUEMA, "a"))
+                .length()
             - 1;
     VersionDelConsolidado justa =
         version(

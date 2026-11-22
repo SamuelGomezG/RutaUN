@@ -10,6 +10,7 @@ import co.edu.unal.rutaun.normativa.dominio.ExpresionDeMaterias;
 import co.edu.unal.rutaun.normativa.dominio.ReglaEnVersion;
 import co.edu.unal.rutaun.normativa.dominio.TipoCargaPorPeriodo;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
+import co.edu.unal.rutaun.normativa.persistencia.DatosDeReglaJson;
 import co.edu.unal.rutaun.normativa.persistencia.NormaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntity;
@@ -20,6 +21,7 @@ import co.edu.unal.rutaun.normativa.persistencia.VersionDelConsolidadoRepository
 import co.edu.unal.rutaun.normativa.persistencia.VersionEntity;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
 import co.edu.unal.rutaun.soporte.SoporteDeSemilla;
+import jakarta.persistence.EntityManager;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -28,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.hibernate.Session;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -35,6 +38,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.DefaultApplicationArguments;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.core.StreamReadFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Verifica que la semilla real de Sistemas se carga completa con el runner de desarrollo.
@@ -81,6 +86,7 @@ class SemillaDeSistemasTest {
   private final ReglaRepository reglas;
   private final VersionDelConsolidadoRepository versiones;
   private final ReglaEnVersionRepository reglasEnVersion;
+  private final EntityManager em;
 
   /** Recibe los servicios y repositorios que Spring inyecta. */
   @Autowired
@@ -91,7 +97,8 @@ class SemillaDeSistemasTest {
       NormaRepository normasGuardadas,
       ReglaRepository reglas,
       VersionDelConsolidadoRepository versiones,
-      ReglaEnVersionRepository reglasEnVersion) {
+      ReglaEnVersionRepository reglasEnVersion,
+      EntityManager em) {
     this.programas = programas;
     this.normas = normas;
     this.programasGuardados = programasGuardados;
@@ -99,6 +106,7 @@ class SemillaDeSistemasTest {
     this.reglas = reglas;
     this.versiones = versiones;
     this.reglasEnVersion = reglasEnVersion;
+    this.em = em;
   }
 
   @BeforeEach
@@ -120,6 +128,28 @@ class SemillaDeSistemasTest {
     assertThat(vigente.getNumero()).isEqualTo(VERSIONES);
     assertThat(reglasEnVersion.findByVersionId(vigente.getId())).hasSize(REGLAS_DE_LA_VIGENTE);
     assertThat(normasDeLasReglasDe(vigente)).hasSize(NORMAS);
+  }
+
+  @Test
+  void tt04_lasReglasDeLaSemillaSeLeenIgualYSinCambios() {
+    cargarLaSemilla();
+    em.clear();
+
+    List<ReglaEntity> todas = reglas.findAll();
+    assertThat(todas)
+        .hasSize(REGLAS)
+        .allSatisfy(
+            regla -> assertThat(regla.getDatos().esquema()).isEqualTo(DatosDeReglaJson.ESQUEMA));
+
+    JsonMapper estricto =
+        JsonMapper.builder().enable(StreamReadFeature.STRICT_DUPLICATE_DETECTION).build();
+    List<?> crudos =
+        em.createNativeQuery("SELECT CAST(datos AS VARCHAR) FROM regla").getResultList();
+    assertThat(crudos)
+        .hasSize(REGLAS)
+        .allSatisfy(crudo -> assertThat(estricto.readTree(crudo.toString())).isNotNull());
+
+    assertThat(em.unwrap(Session.class).isDirty()).isFalse();
   }
 
   @Test
@@ -284,18 +314,19 @@ class SemillaDeSistemasTest {
 
   private static Set<CodigoMateria> codigosDe(ExpresionDeMaterias expresion) {
     return switch (expresion) {
-      case ExpresionDeMaterias.MateriaDelPrograma materia -> Set.of(materia.codigo());
+      case ExpresionDeMaterias.TerminoMateria materia -> Set.of(materia.codigo());
       case ExpresionDeMaterias.MateriaExterna ignored -> Set.of();
-      case ExpresionDeMaterias.Y y -> union(codigosDe(y.izquierda()), codigosDe(y.derecha()));
-      case ExpresionDeMaterias.O o -> union(codigosDe(o.izquierda()), codigosDe(o.derecha()));
+      case ExpresionDeMaterias.TodasLas todas -> codigosDe(todas.terminos());
+      case ExpresionDeMaterias.AlgunaDe alguna -> codigosDe(alguna.terminos());
     };
   }
 
-  private static Set<CodigoMateria> union(
-      Set<CodigoMateria> izquierda, Set<CodigoMateria> derecha) {
-    Set<CodigoMateria> todos = new HashSet<>(izquierda);
-    todos.addAll(derecha);
-    return todos;
+  private static Set<CodigoMateria> codigosDe(Set<ExpresionDeMaterias> terminos) {
+    Set<CodigoMateria> codigos = new HashSet<>();
+    for (ExpresionDeMaterias termino : terminos) {
+      codigos.addAll(codigosDe(termino));
+    }
+    return codigos;
   }
 
   private static void registrar(Cifras cifras) {

@@ -1,14 +1,19 @@
 package co.edu.unal.rutaun.normativa.aplicacion;
 
 import co.edu.unal.rutaun.compartido.EstadoRegla;
+import co.edu.unal.rutaun.compartido.NormaId;
+import co.edu.unal.rutaun.compartido.ParteDelAnio;
+import co.edu.unal.rutaun.compartido.PeriodoAcademico;
 import co.edu.unal.rutaun.compartido.ProgramaId;
 import co.edu.unal.rutaun.normativa.dominio.MotivoDeVersion;
 import co.edu.unal.rutaun.normativa.dominio.ReglaEnVersion;
 import co.edu.unal.rutaun.normativa.dominio.VersionDelConsolidado;
+import co.edu.unal.rutaun.normativa.persistencia.DetalleDeMotivoJson;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntity;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.VersionEntity;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
+import co.edu.unal.rutaun.utilidades.JsonConfig;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
@@ -63,14 +68,14 @@ public final class VersionDelConsolidadoMapper {
 
   /** Los motivos de versión, con el nombre que se guarda y la clase de su detalle. */
   private enum TipoDeMotivo {
-    POR_INCORPORACION(MotivoDeVersion.PorIncorporacion.class),
-    POR_CORRECCION(MotivoDeVersion.PorCorreccion.class),
-    AUTOMATICO_POR_PERIODO(MotivoDeVersion.AutomaticoPorPeriodo.class),
-    AUTOMATICO_POR_FECHA(MotivoDeVersion.AutomaticoPorFecha.class);
+    POR_INCORPORACION(DetalleDeMotivoJson.PorIncorporacion.class),
+    POR_CORRECCION(DetalleDeMotivoJson.PorCorreccion.class),
+    AUTOMATICO_POR_PERIODO(DetalleDeMotivoJson.AutomaticoPorPeriodo.class),
+    AUTOMATICO_POR_FECHA(DetalleDeMotivoJson.AutomaticoPorFecha.class);
 
-    private final Class<? extends MotivoDeVersion> clase;
+    private final Class<? extends DetalleDeMotivoJson> clase;
 
-    TipoDeMotivo(Class<? extends MotivoDeVersion> clase) {
+    TipoDeMotivo(Class<? extends DetalleDeMotivoJson> clase) {
       this.clase = clase;
     }
 
@@ -192,8 +197,9 @@ public final class VersionDelConsolidadoMapper {
   private static MotivoDeVersion motivoADominio(VersionEntity version) {
     TipoDeMotivo tipo = TipoDeMotivo.desde(version.getMotivo());
     String detalle = ArgumentChecks.obligatorioNoVacio(version.getDetalleMotivo(), "detalleMotivo");
+    DetalleDeMotivoJson json;
     try {
-      return JsonDeNormativa.mapper().readValue(detalle, tipo.clase);
+      json = JsonConfig.mapper().readValue(detalle, tipo.clase);
     } catch (JacksonException e) {
       throw new IllegalArgumentException(
           "el detalle del motivo de la versión "
@@ -202,10 +208,48 @@ public final class VersionDelConsolidadoMapper {
               + tipo,
           e);
     }
+    if (json.esquema() != DetalleDeMotivoJson.ESQUEMA) {
+      throw new IllegalArgumentException(
+          "el detalle del motivo de la versión "
+              + version.getNumero()
+              + " tiene un esquema desconocido: "
+              + json.esquema());
+    }
+    return switch (json) {
+      case DetalleDeMotivoJson.PorIncorporacion incorporacion ->
+          new MotivoDeVersion.PorIncorporacion(
+              new NormaId(incorporacion.norma()), incorporacion.administrador());
+      case DetalleDeMotivoJson.PorCorreccion correccion ->
+          new MotivoDeVersion.PorCorreccion(correccion.administrador());
+      case DetalleDeMotivoJson.AutomaticoPorPeriodo periodo ->
+          new MotivoDeVersion.AutomaticoPorPeriodo(
+              new PeriodoAcademico(periodo.anio(), ParteDelAnio.valueOf(periodo.parte())));
+      case DetalleDeMotivoJson.AutomaticoPorFecha fecha ->
+          new MotivoDeVersion.AutomaticoPorFecha(fecha.fecha());
+    };
   }
 
   private static String detalleDelMotivo(MotivoDeVersion motivo) {
-    String detalle = JsonDeNormativa.mapper().writeValueAsString(motivo);
+    DetalleDeMotivoJson json =
+        switch (motivo) {
+          case MotivoDeVersion.PorIncorporacion incorporacion ->
+              new DetalleDeMotivoJson.PorIncorporacion(
+                  DetalleDeMotivoJson.ESQUEMA,
+                  incorporacion.norma().valor(),
+                  incorporacion.administrador());
+          case MotivoDeVersion.PorCorreccion correccion ->
+              new DetalleDeMotivoJson.PorCorreccion(
+                  DetalleDeMotivoJson.ESQUEMA, correccion.administrador());
+          case MotivoDeVersion.AutomaticoPorPeriodo periodo ->
+              new DetalleDeMotivoJson.AutomaticoPorPeriodo(
+                  DetalleDeMotivoJson.ESQUEMA,
+                  periodo.periodo().anio(),
+                  periodo.periodo().parte().name());
+          case MotivoDeVersion.AutomaticoPorFecha fecha ->
+              new DetalleDeMotivoJson.AutomaticoPorFecha(
+                  DetalleDeMotivoJson.ESQUEMA, fecha.fecha());
+        };
+    String detalle = JsonConfig.mapper().writeValueAsString(json);
     if (detalle.length() > LARGO_DEL_DETALLE) {
       throw new IllegalArgumentException(
           "el detalle del motivo no cabe en detalle_motivo: tiene "

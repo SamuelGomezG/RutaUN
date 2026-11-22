@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
 import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
@@ -58,7 +59,7 @@ class PersistenciaNormativaTest {
             null,
             null,
             "PROGRAMAS",
-            "{}"));
+            new AlcanceJson(AlcanceJson.ESQUEMA, List.of(), List.of(), List.of(), null)));
   }
 
   private VersionEntity nuevaVersion(UUID programaId, int numero) {
@@ -114,7 +115,8 @@ class PersistenciaNormativaTest {
   @Test
   void tt04_guardaYLeeUnaReglaConSusDatosJson() {
     NormaEntity norma = nuevaNorma();
-    String json = "{\"materia\":\"2015714\",\"creditos\":3}";
+    DatosDeReglaJson json =
+        new DatosDeReglaJson.CargaPorPeriodoJson(DatosDeReglaJson.ESQUEMA, 10, "MINIMO");
     ReglaEntity regla =
         reglas.save(
             new ReglaEntity(
@@ -159,7 +161,7 @@ class PersistenciaNormativaTest {
                         "MODIFICA",
                         UUID.randomUUID(),
                         null,
-                        null)))
+                        sinDatos())))
         .isInstanceOf(DataIntegrityViolationException.class)
         .hasMessageContaining("FK_REGLA_AFECTADA");
   }
@@ -182,7 +184,7 @@ class PersistenciaNormativaTest {
                 null,
                 null,
                 null,
-                null));
+                sinDatos()));
     ReglaEntity afectante =
         reglas.save(
             new ReglaEntity(
@@ -198,7 +200,7 @@ class PersistenciaNormativaTest {
                 "MODIFICA",
                 afectada.getId(),
                 null,
-                null));
+                sinDatos()));
     vaciarMemoria();
 
     assertThat(reglas.findById(afectante.getId()))
@@ -226,7 +228,7 @@ class PersistenciaNormativaTest {
                 null,
                 null,
                 null,
-                null));
+                sinDatos()));
     VersionEntity version = versiones.save(nuevaVersion(programa.getId(), 1));
     ReglaEnVersionEntity enVersion =
         reglasEnVersion.save(
@@ -332,7 +334,7 @@ class PersistenciaNormativaTest {
             null,
             null,
             "PROGRAMAS",
-            "{}");
+            new AlcanceJson(AlcanceJson.ESQUEMA, List.of(), List.of(), List.of(), null));
 
     assertThatThrownBy(() -> normas.saveAndFlush(repetida))
         .isInstanceOf(DataIntegrityViolationException.class);
@@ -380,5 +382,9 @@ class PersistenciaNormativaTest {
 
     assertThatThrownBy(() -> versiones.saveAndFlush(nuevaVersion(programa.getId(), 1)))
         .isInstanceOf(DataIntegrityViolationException.class);
+  }
+
+  private static DatosDeReglaJson sinDatos() {
+    return new DatosDeReglaJson.OtraJson(DatosDeReglaJson.ESQUEMA);
   }
 }
