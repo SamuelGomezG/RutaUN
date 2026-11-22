@@ -12,15 +12,13 @@ depends_on:
 
 Antes de escribir una migración o una consulta, al revisar qué dejó guardado una carga de normativa y al demostrar un cambio con una consulta sobre la base. Para la forma del archivo que **entra**, ve a [`formato-normativa.md`](formato-normativa.md).
 
-Este documento es **derivado**: la fuente del esquema son las migraciones de `src/main/resources/db/migration/`. Describe las tablas como están hoy, tras `V2`; si difiere de las migraciones, mandan ellas. Las cifras y las consultas se ejecutaron el 12 de noviembre de 2026 sobre una base nueva cargada con la semilla.
+Este documento es **derivado**: la fuente del esquema son las migraciones de `src/main/resources/db/migration/`. Describe las tablas como están hoy, tras `V4`; si difiere de las migraciones, mandan ellas. Las cifras y las consultas se ejecutaron el 12 de noviembre de 2026 sobre una base nueva cargada con la semilla.
 
 ## Tablas y relaciones
 
 ```mermaid
 erDiagram
-    programa ||--o| consolidado : "tiene uno"
     programa ||--o{ version_consolidado : "tiene"
-    consolidado ||--o{ version_consolidado : "agrupa"
     version_consolidado ||--o{ regla_en_version : "contiene"
     regla ||--o{ regla_en_version : "aparece en"
     norma ||--o{ regla : "trae"
@@ -54,19 +52,14 @@ erDiagram
         VARCHAR clasificacion
         CLOB datos
     }
-    consolidado {
-        UUID id PK
-        UUID programa_id FK
-        BIGINT version_bloqueo
-    }
     version_consolidado {
         UUID id PK
-        UUID consolidado_id FK
         UUID programa_id FK
         INT numero
         DATE fecha
         VARCHAR motivo
         INT numero_plan_de_estudios
+        DATE dia_automatico
     }
     regla_en_version {
         UUID id PK
@@ -92,11 +85,10 @@ El diagrama muestra las columnas principales; la lista completa está en las mig
 
 | Tabla | Una fila es | Lo que la base garantiza | Notas |
 | --- | --- | --- | --- |
-| `programa` | Un programa cargado | Solo la llave primaria | El código SIA único lo cuida `ImportacionDeProgramasService`, no la base |
+| `programa` | Un programa cargado | Único por `codigo_sia` | `ImportacionDeProgramasService` omite los que ya existen, así que repetir la carga no choca con la restricción |
 | `norma` | Una norma incorporada | Única por `tipo`, `numero`, `anio` y `organo` | Por esa identificación, la importación omite una norma ya registrada (UC07 ext. 4c) |
-| `regla` | Una regla de una norma | `norma_id` existe | Las columnas comunes a toda regla, y en `datos` lo propio de su categoría. `regla_afectada_id` no es llave foránea |
-| `consolidado` | El consolidado de un programa | Uno por programa | `version_bloqueo` es el contador de bloqueo optimista de JPA (`@Version`). No es el número de la versión del consolidado |
-| `version_consolidado` | Una versión del consolidado de un programa | Única por `programa_id` y `numero` | Solo se agregan filas. `motivo` es `POR_INCORPORACION`, `POR_CORRECCION`, `AUTOMATICO_POR_PERIODO` o `AUTOMATICO_POR_FECHA` |
+| `regla` | Una regla de una norma | `norma_id` existe; `regla_afectada_id`, si lo hay, también | Las columnas comunes a toda regla, y en `datos` lo propio de su categoría |
+| `version_consolidado` | Una versión del consolidado de un programa | Única por `programa_id` y `numero`; una sola `AUTOMATICO_POR_FECHA` por programa y día (S15) | Solo se agregan filas. `motivo` es `POR_INCORPORACION`, `POR_CORRECCION`, `AUTOMATICO_POR_PERIODO` o `AUTOMATICO_POR_FECHA`. `dia_automatico` repite `fecha` solo en las versiones por fecha, y queda nulo en las demás |
 | `regla_en_version` | Que una regla está en una versión, y con qué estado | Única por `version_id` y `regla_id` | `estado` es `VIGENTE`, `PROGRAMADA` o `YA_NO_RIGE`. Una versión lleva las reglas de la anterior más las de la norma incorporada, así que una misma regla tiene una fila por cada versión en que está |
 | `materia` | Una materia del catálogo: código y créditos | Solo la llave primaria | Hoy queda vacía: la importación todavía no la llena ([#155](https://github.com/SamuelGomezG/RutaUN/issues/155)) |
 | `incidente` | Un grupo de incidentes iguales sin atender | Solo la llave primaria | `conteo`, `primera_fecha` y `ultima_fecha` resumen las ocurrencias. `programa_id` y `version_consolidado` son nulos en un incidente interno |
@@ -125,6 +117,7 @@ Tres cosas que no se deducen del esquema:
 | --- | --- |
 | `db/migration/V1__esquema.sql` | Las siete tablas de Normativa |
 | `db/migration/V2__incidente.sql` | `incidente` |
+| `db/migration/V4__alinear_con_el_diseno.sql` | Restricciones de unicidad y llaves foráneas, el día de la versión automática y el retiro de `consolidado` |
 | `src/test/resources/db/humo/V0__humo.sql` | La tabla `humo`. Solo existe con el perfil `test` |
 
 Flyway registra lo aplicado en la tabla `flyway_schema_history`. Cómo agregar una migración está en [`recetas.md`](../proceso/recetas.md).
@@ -136,7 +129,6 @@ Antes de apoyarte en un detalle de una tabla, revisa si uno de estos issues lo c
 | Issue | Qué cambia |
 | --- | --- |
 | [#141](https://github.com/SamuelGomezG/RutaUN/issues/141) | El esquema no guarda vigencias por periodo ni el inicio de una afectación: `aplica_desde` y `vigente_hasta` son fechas |
-| [#142](https://github.com/SamuelGomezG/RutaUN/issues/142) | El esquema se aparta del diseño y acepta datos incoherentes |
 | [#143](https://github.com/SamuelGomezG/RutaUN/issues/143) | Un repositorio por raíz, sin borrado del historial |
 | [#145](https://github.com/SamuelGomezG/RutaUN/issues/145) | Los datos de las reglas, en columnas JSON |
 | [#155](https://github.com/SamuelGomezG/RutaUN/issues/155) | El catálogo de materias queda vacío |
@@ -151,7 +143,6 @@ Con una base nueva y el perfil `dev`:
 | `programa` | 1 |
 | `norma` | 5 |
 | `regla` | 280 |
-| `consolidado` | 1 |
 | `version_consolidado` | 5 |
 | `regla_en_version` | 880 |
 | `materia` | 0 |

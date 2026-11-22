@@ -234,17 +234,11 @@ class ConsultaNormativaServiceIntegracionTest {
     UUID programaId = UUID.randomUUID();
     programas.save(new ProgramaEntity(programaId, nombre, codigoSia, "Ingeniería"));
     entityManager.flush();
-    UUID consolidadoId = UUID.randomUUID();
     jdbc.update(
-        "INSERT INTO consolidado (id, programa_id, version_bloqueo) VALUES (?, ?, 0)",
-        consolidadoId,
-        programaId);
-    jdbc.update(
-        "INSERT INTO version_consolidado (id, consolidado_id, programa_id, numero, fecha, "
-            + "motivo, numero_plan_de_estudios) "
-            + "VALUES (?, ?, ?, 1, DATE '2026-01-01', 'PRUEBA', 1)",
+        "INSERT INTO version_consolidado (id, programa_id, numero, fecha, motivo, "
+            + "numero_plan_de_estudios) "
+            + "VALUES (?, ?, 1, DATE '2026-01-01', 'PRUEBA', 1)",
         UUID.randomUUID(),
-        consolidadoId,
         programaId);
   }
 

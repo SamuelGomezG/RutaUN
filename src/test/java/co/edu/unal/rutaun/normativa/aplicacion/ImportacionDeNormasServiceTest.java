@@ -1,9 +1,9 @@
 package co.edu.unal.rutaun.normativa.aplicacion;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import co.edu.unal.rutaun.compartido.EstadoRegla;
-import co.edu.unal.rutaun.normativa.persistencia.ConsolidadoRepository;
 import co.edu.unal.rutaun.normativa.persistencia.NormaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntity;
@@ -40,7 +40,6 @@ class ImportacionDeNormasServiceTest {
   private final ImportacionDeNormasService normas;
   private final NormaRepository normasGuardadas;
   private final ReglaRepository reglas;
-  private final ConsolidadoRepository consolidados;
   private final VersionDelConsolidadoRepository versiones;
   private final ReglaEnVersionRepository reglasEnVersion;
   private final ProgramaRepository programasGuardados;
@@ -53,7 +52,6 @@ class ImportacionDeNormasServiceTest {
       ImportacionDeNormasService normas,
       NormaRepository normasGuardadas,
       ReglaRepository reglas,
-      ConsolidadoRepository consolidados,
       VersionDelConsolidadoRepository versiones,
       ReglaEnVersionRepository reglasEnVersion,
       ProgramaRepository programasGuardados) {
@@ -61,7 +59,6 @@ class ImportacionDeNormasServiceTest {
     this.normas = normas;
     this.normasGuardadas = normasGuardadas;
     this.reglas = reglas;
-    this.consolidados = consolidados;
     this.versiones = versiones;
     this.reglasEnVersion = reglasEnVersion;
     this.programasGuardados = programasGuardados;
@@ -77,12 +74,24 @@ class ImportacionDeNormasServiceTest {
     assertThat(resultado.versionesCreadas()).isEqualTo(1);
     assertThat(normasGuardadas.findAll()).hasSize(1);
     assertThat(programasGuardados.findByCodigoSia("2879")).isPresent();
-    assertThat(consolidados.findAll()).hasSize(1);
     assertThat(reglas.findAll()).hasSize(20);
     assertThat(versiones.findAll()).hasSize(1);
     assertThat(reglasEnVersion.findAll()).hasSize(20);
     assertThat(reglasEnVersion.findAll()).extracting(fila -> fila.getEstado()).contains("VIGENTE");
     assertThat(versiones.findAll().get(0).getNumero()).isEqualTo(1);
+  }
+
+  @Test
+  void uc07_ext6b_importarUnaAfectacionAUnaReglaNoRegistradaSeRechaza() throws IOException {
+    cargarProgramas();
+
+    assertThatThrownBy(() -> importarNorma("json/invalidos/afecta-regla-no-registrada.json"))
+        .isInstanceOf(ArchivoDeNormativaInvalidoException.class)
+        .hasMessageContaining("no está registrada");
+
+    assertThat(normasGuardadas.findAll()).isEmpty();
+    assertThat(reglas.findAll()).isEmpty();
+    assertThat(versiones.findAll()).isEmpty();
   }
 
   @Test

@@ -10,8 +10,8 @@ public interface ProgramaRepository extends JpaRepository<ProgramaEntity, UUID> 
   /**
    * Busca un programa por su código SIA.
    *
-   * <p>SOP-03 (#55). La tabla no garantiza que el código sea único, así que quien guarda programas
-   * debe buscar primero. Si hubiera dos filas con el mismo código, falla con una excepción.
+   * <p>SOP-03 (#55). El código es único por `uq_programa_codigo_sia`; quien guarda programas busca
+   * primero y omite los que ya existen, así que repetir la carga no choca con la restricción.
    */
   Optional<ProgramaEntity> findByCodigoSia(String codigoSia);
 }

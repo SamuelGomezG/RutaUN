@@ -8,7 +8,11 @@ import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
 import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.util.UUID;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,12 +24,12 @@ import org.springframework.transaction.annotation.Transactional;
 class PersistenciaNormativaTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(PersistenciaNormativaTest.class);
+  private static final LocalDate FECHA = LocalDate.of(2026, 10, 22);
 
   @Autowired private ProgramaRepository programas;
   @Autowired private MateriaRepository materias;
   @Autowired private NormaRepository normas;
   @Autowired private ReglaRepository reglas;
-  @Autowired private ConsolidadoRepository consolidados;
   @Autowired private VersionDelConsolidadoRepository versiones;
   @Autowired private ReglaEnVersionRepository reglasEnVersion;
   @Autowired private EntityManager em;
@@ -57,18 +61,9 @@ class PersistenciaNormativaTest {
             "{}"));
   }
 
-  private VersionEntity nuevaVersion(ConsolidadoEntity consolidado, int numero) {
+  private VersionEntity nuevaVersion(UUID programaId, int numero) {
     return new VersionEntity(
-        UUID.randomUUID(),
-        consolidado.getId(),
-        consolidado.getProgramaId(),
-        numero,
-        LocalDate.of(2026, 10, 22),
-        "INCORPORACION",
-        null,
-        null,
-        1,
-        "[]");
+        UUID.randomUUID(), programaId, numero, FECHA, "INCORPORACION", null, null, 1, "[]", null);
   }
 
   @Test
@@ -80,6 +75,18 @@ class PersistenciaNormativaTest {
         .get()
         .extracting(ProgramaEntity::getCodigoSia)
         .isEqualTo("2879");
+  }
+
+  @Test
+  void sop03_dosProgramasConElMismoCodigoSiaFallan() {
+    nuevoPrograma();
+
+    assertThatThrownBy(
+            () ->
+                programas.saveAndFlush(
+                    new ProgramaEntity(UUID.randomUUID(), "Otro nombre", "2879", "Ingenieria")))
+        .isInstanceOf(DataIntegrityViolationException.class)
+        .hasMessageContaining("UQ_PROGRAMA_CODIGO_SIA");
   }
 
   @Test
@@ -133,7 +140,75 @@ class PersistenciaNormativaTest {
   }
 
   @Test
-  void tt04_guardaYLeeUnConsolidadoConSuVersionYSusReglas() {
+  void uc07_ext6b_unaAfectacionAUnaReglaInexistenteFalla() {
+    NormaEntity norma = nuevaNorma();
+
+    assertThatThrownBy(
+            () ->
+                reglas.saveAndFlush(
+                    new ReglaEntity(
+                        UUID.randomUUID(),
+                        norma.getId(),
+                        "OTRA",
+                        "Regla que afecta",
+                        "Modifica una regla inexistente.",
+                        "Articulo 9",
+                        null,
+                        null,
+                        "INFORMATIVA",
+                        "MODIFICA",
+                        UUID.randomUUID(),
+                        null,
+                        null)))
+        .isInstanceOf(DataIntegrityViolationException.class)
+        .hasMessageContaining("FK_REGLA_AFECTADA");
+  }
+
+  @Test
+  void tt04_unaAfectacionAUnaReglaGuardadaSeAcepta() {
+    NormaEntity norma = nuevaNorma();
+    ReglaEntity afectada =
+        reglas.saveAndFlush(
+            new ReglaEntity(
+                UUID.randomUUID(),
+                norma.getId(),
+                "OTRA",
+                "Regla afectada",
+                "Regla existente.",
+                "Articulo 1",
+                null,
+                null,
+                "INFORMATIVA",
+                null,
+                null,
+                null,
+                null));
+    ReglaEntity afectante =
+        reglas.save(
+            new ReglaEntity(
+                UUID.randomUUID(),
+                norma.getId(),
+                "OTRA",
+                "Regla que afecta",
+                "Modifica la regla anterior.",
+                "Articulo 2",
+                null,
+                null,
+                "INFORMATIVA",
+                "MODIFICA",
+                afectada.getId(),
+                null,
+                null));
+    vaciarMemoria();
+
+    assertThat(reglas.findById(afectante.getId()))
+        .get()
+        .extracting(ReglaEntity::getReglaAfectadaId)
+        .isEqualTo(afectada.getId());
+  }
+
+  @Test
+  void tt04_guardaYLeeUnaVersionYSusReglas() {
     ProgramaEntity programa = nuevoPrograma();
     NormaEntity norma = nuevaNorma();
     ReglaEntity regla =
@@ -152,9 +227,7 @@ class PersistenciaNormativaTest {
                 null,
                 null,
                 null));
-    ConsolidadoEntity consolidado =
-        consolidados.save(new ConsolidadoEntity(UUID.randomUUID(), programa.getId()));
-    VersionEntity version = versiones.save(nuevaVersion(consolidado, 1));
+    VersionEntity version = versiones.save(nuevaVersion(programa.getId(), 1));
     ReglaEnVersionEntity enVersion =
         reglasEnVersion.save(
             new ReglaEnVersionEntity(UUID.randomUUID(), version.getId(), regla.getId(), "VIGENTE"));
@@ -164,7 +237,6 @@ class PersistenciaNormativaTest {
         .get()
         .extracting(ReglaEnVersionEntity::getEstado)
         .isEqualTo("VIGENTE");
-    assertThat(consolidados.findById(consolidado.getId())).isPresent();
     assertThat(versiones.findById(version.getId()))
         .get()
         .extracting(VersionEntity::getNumero)
@@ -209,16 +281,13 @@ class PersistenciaNormativaTest {
   @Test
   void tt04_guardarComoNuevaUnaVersionConUnIdExistenteFalla() {
     ProgramaEntity programa = nuevoPrograma();
-    ConsolidadoEntity consolidado =
-        consolidados.save(new ConsolidadoEntity(UUID.randomUUID(), programa.getId()));
-    VersionEntity original = nuevaVersion(consolidado, 1);
+    VersionEntity original = nuevaVersion(programa.getId(), 1);
     versiones.saveAndFlush(original);
     vaciarMemoria();
 
     VersionEntity repetida =
         new VersionEntity(
             original.getId(),
-            original.getConsolidadoId(),
             original.getProgramaId(),
             7,
             original.getFecha(),
@@ -226,7 +295,8 @@ class PersistenciaNormativaTest {
             null,
             null,
             1,
-            "[]");
+            "[]",
+            null);
 
     Throwable error = catchThrowable(() -> versiones.saveAndFlush(repetida));
 
@@ -274,14 +344,41 @@ class PersistenciaNormativaTest {
         .isEqualTo("003-A");
   }
 
+  @ParameterizedTest(name = "{0} con día {1}")
+  @MethodSource("diasQueNoCuadranConElMotivo")
+  void tt04_elDiaAutomaticoDebeCoincidirConElMotivo(String motivo, LocalDate diaAutomatico) {
+    ProgramaEntity programa = nuevoPrograma();
+    VersionEntity version =
+        new VersionEntity(
+            UUID.randomUUID(),
+            programa.getId(),
+            1,
+            FECHA,
+            motivo,
+            null,
+            null,
+            1,
+            "[]",
+            diaAutomatico);
+
+    assertThatThrownBy(() -> versiones.saveAndFlush(version))
+        .isInstanceOf(DataIntegrityViolationException.class)
+        .hasMessageContaining("CK_VERSION_DIA_AUTOMATICO");
+  }
+
+  static Stream<Arguments> diasQueNoCuadranConElMotivo() {
+    return Stream.of(
+        Arguments.of("AUTOMATICO_POR_FECHA", null),
+        Arguments.of("AUTOMATICO_POR_FECHA", FECHA.minusDays(1)),
+        Arguments.of("POR_CORRECCION", FECHA));
+  }
+
   @Test
   void tt04_dosVersionesDelMismoProgramaConElMismoNumeroFallan() {
     ProgramaEntity programa = nuevoPrograma();
-    ConsolidadoEntity consolidado =
-        consolidados.save(new ConsolidadoEntity(UUID.randomUUID(), programa.getId()));
-    versiones.saveAndFlush(nuevaVersion(consolidado, 1));
+    versiones.saveAndFlush(nuevaVersion(programa.getId(), 1));
 
-    assertThatThrownBy(() -> versiones.saveAndFlush(nuevaVersion(consolidado, 1)))
+    assertThatThrownBy(() -> versiones.saveAndFlush(nuevaVersion(programa.getId(), 1)))
         .isInstanceOf(DataIntegrityViolationException.class);
   }
 }

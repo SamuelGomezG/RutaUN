@@ -9,6 +9,7 @@ import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntity;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.VersionEntity;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -28,14 +29,11 @@ import tools.jackson.core.JacksonException;
  * identificadores nuevos, y guardar dos veces la misma versión choca con la restricción de unicidad
  * del programa y el número, que es lo que se espera.
  *
- * <p>Lo que el esquema y el dominio de hoy no calzan, y qué hace el mapper (lo corrigen #142 y
- * #145):
+ * <p>Lo que el esquema y el dominio de hoy no calzan, y qué hace el mapper (lo corrige #145):
  *
  * <ul>
  *   <li>El administrador del motivo es un texto en el dominio y {@code administrador_id} es un
  *       UUID: va dentro de {@code detalle_motivo} y la columna queda en {@code null} (D-11, #91).
- *   <li>La tabla {@code consolidado} no existe en el dominio: {@code consolidadoId} entra como
- *       parámetro (#142).
  *   <li>{@code regla_en_version} no guarda el orden de las reglas, y el dominio no lo necesita: la
  *       versión es un conjunto de reglas y el orden en que se muestran lo calcula la consulta. Se
  *       leen ordenadas por identificador para que la lectura sea determinista.
@@ -133,17 +131,14 @@ public final class VersionDelConsolidadoMapper {
    * Convierte la versión en las filas que se guardan en la base.
    *
    * @param version versión que se guarda
-   * @param consolidadoId fila de {@code consolidado} del programa, que quien guarda busca o crea
    * @throws IllegalArgumentException si el detalle del motivo no cabe en {@code detalle_motivo}
    */
-  public static Filas aEntidades(VersionDelConsolidado version, UUID consolidadoId) {
+  public static Filas aEntidades(VersionDelConsolidado version) {
     ArgumentChecks.obligatorio(version, "version");
-    ArgumentChecks.obligatorio(consolidadoId, "consolidadoId");
     UUID versionId = UUID.randomUUID();
     VersionEntity fila =
         new VersionEntity(
             versionId,
-            consolidadoId,
             version.programa().valor(),
             version.numero(),
             version.fecha(),
@@ -151,7 +146,8 @@ public final class VersionDelConsolidadoMapper {
             detalleDelMotivo(version.motivo()),
             null,
             version.versionDelPlan(),
-            null);
+            null,
+            diaAutomatico(version));
     List<ReglaEnVersionEntity> reglasEnVersion =
         version.reglas().stream()
             .map(
@@ -163,6 +159,15 @@ public final class VersionDelConsolidadoMapper {
                         enVersion.estado().name()))
             .toList();
     return new Filas(fila, reglasEnVersion);
+  }
+
+  private static LocalDate diaAutomatico(VersionDelConsolidado version) {
+    return switch (version.motivo()) {
+      case MotivoDeVersion.AutomaticoPorFecha ignored -> version.fecha();
+      case MotivoDeVersion.PorIncorporacion ignored -> null;
+      case MotivoDeVersion.PorCorreccion ignored -> null;
+      case MotivoDeVersion.AutomaticoPorPeriodo ignored -> null;
+    };
   }
 
   private static ReglaEnVersion reglaDeLaVersion(

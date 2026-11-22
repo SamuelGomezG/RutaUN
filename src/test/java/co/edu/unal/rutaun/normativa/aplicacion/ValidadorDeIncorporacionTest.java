@@ -6,14 +6,17 @@ import co.edu.unal.rutaun.compartido.Momento;
 import co.edu.unal.rutaun.compartido.NormaId;
 import co.edu.unal.rutaun.compartido.ParteDelAnio;
 import co.edu.unal.rutaun.compartido.PeriodoAcademico;
+import co.edu.unal.rutaun.compartido.ReglaId;
 import co.edu.unal.rutaun.normativa.ClasificacionRegla;
 import co.edu.unal.rutaun.normativa.TipoAlcance;
 import co.edu.unal.rutaun.normativa.TipoDeEfecto;
 import co.edu.unal.rutaun.normativa.TipoNorma;
+import co.edu.unal.rutaun.normativa.dominio.Afectacion;
 import co.edu.unal.rutaun.normativa.dominio.DatosDeRegla;
 import co.edu.unal.rutaun.normativa.dominio.Fuente;
 import co.edu.unal.rutaun.normativa.dominio.IdentificacionNorma;
 import co.edu.unal.rutaun.normativa.dominio.Regla;
+import co.edu.unal.rutaun.normativa.dominio.TipoAfectacion;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
 import java.io.InputStream;
 import java.time.LocalDate;
@@ -115,6 +118,38 @@ class ValidadorDeIncorporacionTest {
             ((ValidadorDeIncorporacion.ResultadoDeValidacion.Valida) resultado)
                 .ningunPlanQuedaDesactualizado())
         .isFalse();
+  }
+
+  @Test
+  void uc07_ext6b_elValidadorInformaLaReglaAfectadaNoRegistrada() {
+    NormaLeida norma = norma(false);
+    Regla afectante =
+        Regla.registrar(
+            "Regla que afecta",
+            "Modifica otra regla.",
+            new Fuente(norma.id(), "art. 8"),
+            Optional.empty(),
+            ClasificacionRegla.INFORMATIVA,
+            Optional.of(
+                new Afectacion(
+                    TipoAfectacion.MODIFICA,
+                    Optional.of(ReglaId.nuevo()),
+                    Optional.empty(),
+                    Optional.empty())),
+            new DatosDeRegla.DeOtraCategoria());
+    IncorporacionLeida incorporacion = new IncorporacionLeida(PROGRAMA, norma, List.of(afectante));
+
+    var resultado = ValidadorDeIncorporacion.validar(incorporacion, regla -> false);
+
+    assertThat(resultado)
+        .isInstanceOf(
+            ValidadorDeIncorporacion.ResultadoDeValidacion.ReglaAfectadaNoRegistrada.class);
+    var noRegistrada =
+        (ValidadorDeIncorporacion.ResultadoDeValidacion.ReglaAfectadaNoRegistrada) resultado;
+    assertThat(noRegistrada.objeto()).isEqualTo("Regla que afecta");
+    assertThat(noRegistrada.articulo()).isEqualTo("art. 8");
+    assertThat(ValidadorDeIncorporacion.validar(incorporacion, regla -> true))
+        .isInstanceOf(ValidadorDeIncorporacion.ResultadoDeValidacion.Valida.class);
   }
 
   private static ValidadorDeIncorporacion.ResultadoDeValidacion validarArchivo(String ruta) {
