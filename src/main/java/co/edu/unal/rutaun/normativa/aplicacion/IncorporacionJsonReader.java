@@ -144,7 +144,12 @@ public final class IncorporacionJsonReader {
   }
 
   private static PeriodoAcademico periodo(JsonNode nodo) {
-    return PeriodoAcademico.desdeTexto(texto(nodo, "periodo"));
+    String campo = "periodo";
+    try {
+      return PeriodoAcademico.desdeTexto(texto(nodo, campo));
+    } catch (IllegalArgumentException e) {
+      throw new IllegalArgumentException(campo + " no es válido: " + e.getMessage(), e);
+    }
   }
 
   private static Regla regla(JsonNode nodo, NormaLeida norma) {

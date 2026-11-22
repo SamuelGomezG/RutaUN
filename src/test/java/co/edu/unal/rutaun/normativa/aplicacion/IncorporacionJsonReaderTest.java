@@ -194,6 +194,17 @@ class IncorporacionJsonReaderTest {
         .contains("LIBRE_ELECCION no lleva desglose");
   }
 
+  @Test
+  void uc07_ext4a_unPeriodoVacioNombraElCampo() {
+    String json = COMPONENTE_LIBRE.formatted("null").replace("\"2022-2\"", "\"\"");
+
+    var resultado = leerTexto(json);
+
+    assertThat(resultado).isInstanceOf(IncorporacionJsonReader.ResultadoDeLectura.Invalida.class);
+    assertThat(((IncorporacionJsonReader.ResultadoDeLectura.Invalida) resultado).motivo())
+        .contains("periodo");
+  }
+
   @ParameterizedTest
   @EnumSource(TipoComponente.class)
   void tt03_t9_leeLaMedidaDeUnComponenteConSuTipo(TipoComponente tipo) {
