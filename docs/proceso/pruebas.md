@@ -25,6 +25,7 @@ esto se rompe: los nombres los revisa Checkstyle y el formato, Spotless.
 | Solo las pruebas de integración (etiqueta `integracion`) | `./mvnw test -Dgroups=integracion` |
 | Todas menos las de integración | `./mvnw test -DexcludedGroups=integracion` |
 | Formatear el código | `./mvnw spotless:apply` |
+| Cobertura con JaCoCo: reporte en `target/site/jacoco/index.html` | `./mvnw verify`
 
 Las pruebas de integración corren con el perfil `test`
 (`application-test.yml`): H2 en memoria y las migraciones de
@@ -32,6 +33,8 @@ Las pruebas de integración corren con el perfil `test`
 
 `src/test/resources/semilla/` no debe existir: cualquier archivo ahí oculta la
 semilla real en las pruebas (`SemillaDeSistemasTest` lo detecta).
+
+El reporte mide lo que corrió. Con `-Dgroups=integracion` solo muestra la cobertura de las pruebas de integración; para el total, corre `./mvnw verify` completo. Para abrirlo en el navegador usa Start-Process target\site\jacoco\index.html en PowerShell (start en CMD), open target/site/jacoco/index.html en macOS o xdg-open target/site/jacoco/index.html en Linux.
 
 ## Nombres
 
