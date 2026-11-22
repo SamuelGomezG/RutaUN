@@ -72,7 +72,7 @@ class ImportacionDeNormasServiceTest {
     assertThat(todasLasReglasEnVersion()).hasSize(20);
     assertThat(todasLasReglasEnVersion())
         .extracting(ReglaEnVersionEntity::getEstado)
-        .contains("VIGENTE");
+        .containsOnly("VIGENTE");
     assertThat(versionesTodas().get(0).getNumero()).isEqualTo(1);
   }
 
