@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.support.TransactionTemplate;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
@@ -25,8 +26,8 @@ abstract class ColumnaJsonIdaYVueltaBase {
   private static final JsonMapper JSON = JsonMapper.builder().build();
 
   @Autowired private NormaRepository normas;
-  @Autowired private ReglaRepository reglas;
   @Autowired private JdbcTemplate jdbc;
+  @Autowired private TransactionTemplate transaccion;
 
   @Value("${spring.datasource.url}")
   private String urlDeLaBase;
@@ -50,10 +51,10 @@ abstract class ColumnaJsonIdaYVueltaBase {
   @AfterEach
   void limpiar() {
     if (reglaId != null) {
-      reglas.deleteById(reglaId);
+      jdbc.update("DELETE FROM regla WHERE CAST(id AS VARCHAR) = ?", reglaId.toString());
     }
     if (normaId != null) {
-      normas.deleteById(normaId);
+      jdbc.update("DELETE FROM norma WHERE CAST(id AS VARCHAR) = ?", normaId.toString());
     }
   }
 
@@ -64,8 +65,6 @@ abstract class ColumnaJsonIdaYVueltaBase {
 
   @Test
   void tt04_columnaJsonIdaYVuelta() {
-    NormaEntity norma = normas.save(nuevaNorma());
-    normaId = norma.getId();
     DatosDeReglaPrueba original =
         new DatosDeReglaPrueba(
             "2015714",
@@ -75,10 +74,19 @@ abstract class ColumnaJsonIdaYVueltaBase {
             List.of("2015710", "1000001"),
             LocalDate.of(2022, 2, 1));
     String json = JSON.writeValueAsString(original);
-    ReglaEntity regla = reglas.save(nuevaRegla(normaId, json));
+    ReglaEntity regla = nuevaRegla(json);
+    NormaEntity norma = normas.save(nuevaNorma(List.of(regla)));
+    normaId = norma.getId();
     reglaId = regla.getId();
 
-    String leidoPorHibernate = reglas.findById(reglaId).orElseThrow().getDatos();
+    String leidoPorHibernate =
+        transaccion.execute(
+            estado ->
+                normas.findById(normaId).orElseThrow().getReglas().stream()
+                    .filter(guardada -> guardada.getId().equals(reglaId))
+                    .findFirst()
+                    .orElseThrow()
+                    .getDatos());
     String leidoPorSql =
         jdbc.queryForObject(
             "SELECT datos FROM regla WHERE CAST(id AS VARCHAR) = ?",
@@ -90,7 +98,7 @@ abstract class ColumnaJsonIdaYVueltaBase {
     assertThat(JSON.readValue(leidoPorHibernate, DatosDeReglaPrueba.class)).isEqualTo(original);
   }
 
-  private static NormaEntity nuevaNorma() {
+  private static NormaEntity nuevaNorma(List<ReglaEntity> reglas) {
     return new NormaEntity(
         UUID.randomUUID(),
         "ACUERDO",
@@ -103,13 +111,13 @@ abstract class ColumnaJsonIdaYVueltaBase {
         null,
         null,
         "PROGRAMAS",
-        "{}");
+        "{}",
+        reglas);
   }
 
-  private static ReglaEntity nuevaRegla(UUID normaId, String datos) {
+  private static ReglaEntity nuevaRegla(String datos) {
     return new ReglaEntity(
         UUID.randomUUID(),
-        normaId,
         "MATERIA",
         "Cálculo diferencial",
         "La materia vale 4 créditos.",

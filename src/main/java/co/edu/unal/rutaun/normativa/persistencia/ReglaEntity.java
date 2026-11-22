@@ -27,9 +27,6 @@ public class ReglaEntity implements Persistable<UUID> {
   /** Si la fila todavía no está en la base. JPA no lo guarda. */
   @Transient private boolean nueva = true;
 
-  @Column(name = "norma_id", nullable = false)
-  private UUID normaId;
-
   @Column(nullable = false)
   private String categoria;
 
@@ -69,7 +66,6 @@ public class ReglaEntity implements Persistable<UUID> {
   /** Crea una regla. */
   public ReglaEntity(
       UUID id,
-      UUID normaId,
       String categoria,
       String objeto,
       String enunciado,
@@ -82,7 +78,6 @@ public class ReglaEntity implements Persistable<UUID> {
       String articuloAfectado,
       String datos) {
     this.id = id;
-    this.normaId = normaId;
     this.categoria = categoria;
     this.objeto = objeto;
     this.enunciado = enunciado;
@@ -112,10 +107,6 @@ public class ReglaEntity implements Persistable<UUID> {
   @PostLoad
   void marcarComoGuardada() {
     nueva = false;
-  }
-
-  public UUID getNormaId() {
-    return normaId;
   }
 
   public String getCategoria() {

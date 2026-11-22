@@ -2,6 +2,7 @@ package co.edu.unal.rutaun.normativa.aplicacion;
 
 import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.Momento;
+import co.edu.unal.rutaun.compartido.NormaId;
 import co.edu.unal.rutaun.compartido.ProgramaId;
 import co.edu.unal.rutaun.compartido.ReglaId;
 import co.edu.unal.rutaun.normativa.dominio.Alcance;
@@ -12,11 +13,13 @@ import co.edu.unal.rutaun.normativa.dominio.Regla;
 import co.edu.unal.rutaun.normativa.dominio.ReglaEnVersion;
 import co.edu.unal.rutaun.normativa.dominio.VersionDelConsolidado;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
+import co.edu.unal.rutaun.normativa.persistencia.NormaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.NormaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaRepository;
+import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntity;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionRepository;
-import co.edu.unal.rutaun.normativa.persistencia.ReglaRepository;
+import co.edu.unal.rutaun.normativa.persistencia.ReglaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.VersionDelConsolidadoRepository;
 import co.edu.unal.rutaun.normativa.persistencia.VersionEntity;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
@@ -24,6 +27,7 @@ import java.io.InputStream;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +56,6 @@ public class ImportacionDeNormasService {
 
   private final ProgramaRepository programas;
   private final NormaRepository normas;
-  private final ReglaRepository reglas;
   private final VersionDelConsolidadoRepository versiones;
   private final ReglaEnVersionRepository reglasEnVersion;
   private final Clock reloj;
@@ -61,13 +64,11 @@ public class ImportacionDeNormasService {
   public ImportacionDeNormasService(
       ProgramaRepository programas,
       NormaRepository normas,
-      ReglaRepository reglas,
       VersionDelConsolidadoRepository versiones,
       ReglaEnVersionRepository reglasEnVersion,
       Clock reloj) {
     this.programas = ArgumentChecks.obligatorio(programas, "programas");
     this.normas = ArgumentChecks.obligatorio(normas, "normas");
-    this.reglas = ArgumentChecks.obligatorio(reglas, "reglas");
     this.versiones = ArgumentChecks.obligatorio(versiones, "versiones");
     this.reglasEnVersion = ArgumentChecks.obligatorio(reglasEnVersion, "reglasEnVersion");
     this.reloj = ArgumentChecks.obligatorio(reloj, "reloj");
@@ -129,8 +130,7 @@ public class ImportacionDeNormasService {
     LocalDate fecha = LocalDate.now(reloj);
     List<ReglaEnVersion> reglasIncorporadas =
         conSuEstado(incorporacion.reglas(), normaLeida, fecha);
-    normas.save(NormaMapper.aEntidad(norma));
-    reglas.saveAll(incorporacion.reglas().stream().map(ReglaMapper::aEntidad).toList());
+    normas.save(NormaMapper.aEntidad(norma, incorporacion.reglas()));
 
     MotivoDeVersion motivo =
         new MotivoDeVersion.PorIncorporacion(norma.id(), ADMINISTRADOR_DE_SEMILLA);
@@ -153,7 +153,7 @@ public class ImportacionDeNormasService {
    */
   private ValidadorDeIncorporacion.ResultadoDeValidacion exigirReglasAfectadasRegistradas(
       IncorporacionJsonReader.ResultadoDeLectura lectura) {
-    return ValidadorDeIncorporacion.validar(lectura, id -> reglas.existsById(id.valor()));
+    return ValidadorDeIncorporacion.validar(lectura, id -> normas.existsByReglasId(id.valor()));
   }
 
   private static List<ReglaEnVersion> conSuEstado(
@@ -282,12 +282,15 @@ public class ImportacionDeNormasService {
   }
 
   private VersionDelConsolidado cargarVersion(VersionEntity entidad) {
-    List<co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntity> filas =
-        reglasEnVersion.findByVersionId(entidad.getId());
-    List<UUID> ids = filas.stream().map(fila -> fila.getReglaId()).toList();
-    Map<UUID, co.edu.unal.rutaun.normativa.persistencia.ReglaEntity> reglasPorId =
-        reglas.findAllById(ids).stream()
-            .collect(Collectors.toMap(regla -> regla.getId(), regla -> regla));
+    List<ReglaEnVersionEntity> filas = reglasEnVersion.findByVersionId(entidad.getId());
+    List<UUID> ids = filas.stream().map(ReglaEnVersionEntity::getReglaId).toList();
+    Map<UUID, Regla> reglasPorId = new HashMap<>();
+    for (NormaEntity norma : normas.findDeLasReglas(ids)) {
+      NormaId normaId = new NormaId(norma.getId());
+      for (ReglaEntity regla : norma.getReglas()) {
+        reglasPorId.put(regla.getId(), ReglaMapper.aDominio(regla, normaId));
+      }
+    }
     return VersionDelConsolidadoMapper.aDominio(entidad, filas, reglasPorId);
   }
 

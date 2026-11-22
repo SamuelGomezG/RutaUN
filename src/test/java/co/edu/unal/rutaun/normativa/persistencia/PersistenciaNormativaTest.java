@@ -7,8 +7,11 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
 import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
+import org.hibernate.SessionFactory;
+import org.hibernate.stat.Statistics;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -29,7 +32,6 @@ class PersistenciaNormativaTest {
   @Autowired private ProgramaRepository programas;
   @Autowired private MateriaRepository materias;
   @Autowired private NormaRepository normas;
-  @Autowired private ReglaRepository reglas;
   @Autowired private VersionDelConsolidadoRepository versiones;
   @Autowired private ReglaEnVersionRepository reglasEnVersion;
   @Autowired private EntityManager em;
@@ -45,20 +47,40 @@ class PersistenciaNormativaTest {
   }
 
   private NormaEntity nuevaNorma() {
-    return normas.save(
-        new NormaEntity(
-            UUID.randomUUID(),
-            "ACUERDO",
-            "003-A",
-            2022,
-            "Consejo Superior",
-            "BASE",
-            LocalDate.of(2022, 1, 1),
-            LocalDate.of(2022, 2, 1),
-            null,
-            null,
-            "PROGRAMAS",
-            "{}"));
+    return nuevaNorma(List.of());
+  }
+
+  private NormaEntity nuevaNorma(List<ReglaEntity> reglas) {
+    return new NormaEntity(
+        UUID.randomUUID(),
+        "ACUERDO",
+        "T8-" + UUID.randomUUID().toString().substring(0, 8),
+        2022,
+        "Consejo Superior",
+        "BASE",
+        LocalDate.of(2022, 1, 1),
+        LocalDate.of(2022, 2, 1),
+        null,
+        null,
+        "PROGRAMAS",
+        "{}",
+        reglas);
+  }
+
+  private static ReglaEntity nuevaRegla(String objeto) {
+    return new ReglaEntity(
+        UUID.randomUUID(),
+        "OTRA",
+        objeto,
+        "Regla informativa.",
+        "Articulo 1",
+        null,
+        null,
+        "INFORMATIVA",
+        null,
+        null,
+        null,
+        "{}");
   }
 
   private VersionEntity nuevaVersion(UUID programaId, int numero) {
@@ -102,38 +124,118 @@ class PersistenciaNormativaTest {
 
   @Test
   void tt04_guardaYLeeUnaNorma() {
-    NormaEntity norma = nuevaNorma();
+    NormaEntity norma = normas.save(nuevaNorma());
     vaciarMemoria();
 
     assertThat(normas.findById(norma.getId()))
         .get()
         .extracting(NormaEntity::getNumero)
-        .isEqualTo("003-A");
+        .isEqualTo(norma.getNumero());
+  }
+
+  @Test
+  void tt04_unaNormaSeGuardaConSusReglasYSeLeeIgual() {
+    ReglaEntity primera = nuevaRegla("Primera regla");
+    ReglaEntity segunda = nuevaRegla("Segunda regla");
+    NormaEntity norma = normas.save(nuevaNorma(List.of(primera, segunda)));
+    vaciarMemoria();
+
+    List<ReglaEntity> leidas = normas.findById(norma.getId()).orElseThrow().getReglas();
+
+    assertThat(leidas).hasSize(2);
+    assertThat(leidas)
+        .extracting(ReglaEntity::getObjeto)
+        .containsExactlyInAnyOrder("Primera regla", "Segunda regla");
+    assertThat(leidas).allSatisfy(regla -> assertThat(regla.getDatos()).isEqualTo("{}"));
+  }
+
+  @Test
+  void tt04_leerUnaNormaPorUnaReglaTraeTodasSusReglas() {
+    ReglaEntity primera = nuevaRegla("Primera regla");
+    ReglaEntity segunda = nuevaRegla("Segunda regla");
+    normas.save(nuevaNorma(List.of(primera, segunda)));
+    vaciarMemoria();
+
+    List<NormaEntity> encontradas = normas.findDeLasReglas(List.of(primera.getId()));
+
+    assertThat(encontradas).hasSize(1);
+    assertThat(encontradas.get(0).getReglas()).hasSize(2);
+  }
+
+  @Test
+  void tt04_guardarUnaNormaNoActualizaLaLlaveDeSusReglas() {
+    Statistics estadisticas =
+        em.getEntityManagerFactory().unwrap(SessionFactory.class).getStatistics();
+    estadisticas.setStatisticsEnabled(true);
+    estadisticas.clear();
+
+    normas.save(nuevaNorma(List.of(nuevaRegla("Primera regla"), nuevaRegla("Segunda regla"))));
+    em.flush();
+
+    assertThat(estadisticas.getPrepareStatementCount()).isEqualTo(3);
+  }
+
+  @Test
+  void uc07_ext6b_laGuardaEncuentraUnaReglaPorSuNorma() {
+    ReglaEntity regla = nuevaRegla("Regla registrada");
+    normas.save(nuevaNorma(List.of(regla)));
+    em.flush();
+
+    assertThat(normas.existsByReglasId(regla.getId())).isTrue();
+    assertThat(normas.existsByReglasId(UUID.randomUUID())).isFalse();
+  }
+
+  @Test
+  void tt04_lasNormasQueAfectanAUnaReglaSeEncuentran() {
+    ReglaEntity afectada = nuevaRegla("Regla afectada");
+    normas.saveAndFlush(nuevaNorma(List.of(afectada)));
+
+    ReglaEntity afectante =
+        new ReglaEntity(
+            UUID.randomUUID(),
+            "OTRA",
+            "Regla que afecta",
+            "Modifica la regla anterior.",
+            "Articulo 2",
+            null,
+            null,
+            "INFORMATIVA",
+            "MODIFICA",
+            afectada.getId(),
+            null,
+            "{}");
+    NormaEntity normaAfectante = normas.saveAndFlush(nuevaNorma(List.of(afectante)));
+
+    List<NormaEntity> encontradas = normas.findDeLasReglasQueAfectanA(afectada.getId());
+
+    assertThat(encontradas).extracting(NormaEntity::getId).containsExactly(normaAfectante.getId());
   }
 
   @Test
   void tt04_guardaYLeeUnaReglaConSusDatosJson() {
-    NormaEntity norma = nuevaNorma();
     String json = "{\"materia\":\"2015714\",\"creditos\":3}";
     ReglaEntity regla =
-        reglas.save(
-            new ReglaEntity(
-                UUID.randomUUID(),
-                norma.getId(),
-                "MATERIA",
-                "Calculo diferencial",
-                "La materia vale 3 creditos.",
-                "Articulo 5",
-                null,
-                null,
-                "DEL_PLAN",
-                null,
-                null,
-                null,
-                json));
+        new ReglaEntity(
+            UUID.randomUUID(),
+            "MATERIA",
+            "Calculo diferencial",
+            "La materia vale 3 creditos.",
+            "Articulo 5",
+            null,
+            null,
+            "DEL_PLAN",
+            null,
+            null,
+            null,
+            json);
+    normas.save(nuevaNorma(List.of(regla)));
     vaciarMemoria();
 
-    assertThat(reglas.findById(regla.getId()))
+    assertThat(
+            normas.findDeLasReglas(List.of(regla.getId())).stream()
+                .flatMap(norma -> norma.getReglas().stream())
+                .filter(guardada -> guardada.getId().equals(regla.getId()))
+                .findFirst())
         .get()
         .extracting(ReglaEntity::getDatos)
         .isEqualTo(json);
@@ -141,96 +243,62 @@ class PersistenciaNormativaTest {
 
   @Test
   void uc07_ext6b_unaAfectacionAUnaReglaInexistenteFalla() {
-    NormaEntity norma = nuevaNorma();
+    ReglaEntity afectante =
+        new ReglaEntity(
+            UUID.randomUUID(),
+            "OTRA",
+            "Regla que afecta",
+            "Modifica una regla inexistente.",
+            "Articulo 9",
+            null,
+            null,
+            "INFORMATIVA",
+            "MODIFICA",
+            UUID.randomUUID(),
+            null,
+            "{}");
 
-    assertThatThrownBy(
-            () ->
-                reglas.saveAndFlush(
-                    new ReglaEntity(
-                        UUID.randomUUID(),
-                        norma.getId(),
-                        "OTRA",
-                        "Regla que afecta",
-                        "Modifica una regla inexistente.",
-                        "Articulo 9",
-                        null,
-                        null,
-                        "INFORMATIVA",
-                        "MODIFICA",
-                        UUID.randomUUID(),
-                        null,
-                        null)))
+    assertThatThrownBy(() -> normas.saveAndFlush(nuevaNorma(List.of(afectante))))
         .isInstanceOf(DataIntegrityViolationException.class)
         .hasMessageContaining("FK_REGLA_AFECTADA");
   }
 
   @Test
   void tt04_unaAfectacionAUnaReglaGuardadaSeAcepta() {
-    NormaEntity norma = nuevaNorma();
-    ReglaEntity afectada =
-        reglas.saveAndFlush(
-            new ReglaEntity(
-                UUID.randomUUID(),
-                norma.getId(),
-                "OTRA",
-                "Regla afectada",
-                "Regla existente.",
-                "Articulo 1",
-                null,
-                null,
-                "INFORMATIVA",
-                null,
-                null,
-                null,
-                null));
+    ReglaEntity afectada = nuevaRegla("Regla afectada");
+    normas.saveAndFlush(nuevaNorma(List.of(afectada)));
     ReglaEntity afectante =
-        reglas.save(
-            new ReglaEntity(
-                UUID.randomUUID(),
-                norma.getId(),
-                "OTRA",
-                "Regla que afecta",
-                "Modifica la regla anterior.",
-                "Articulo 2",
-                null,
-                null,
-                "INFORMATIVA",
-                "MODIFICA",
-                afectada.getId(),
-                null,
-                null));
+        new ReglaEntity(
+            UUID.randomUUID(),
+            "OTRA",
+            "Regla que afecta",
+            "Modifica la regla anterior.",
+            "Articulo 2",
+            null,
+            null,
+            "INFORMATIVA",
+            "MODIFICA",
+            afectada.getId(),
+            null,
+            "{}");
+    NormaEntity norma = normas.save(nuevaNorma(List.of(afectante)));
     vaciarMemoria();
 
-    assertThat(reglas.findById(afectante.getId()))
-        .get()
+    assertThat(normas.findById(norma.getId()).orElseThrow().getReglas())
+        .filteredOn(guardada -> guardada.getId().equals(afectante.getId()))
         .extracting(ReglaEntity::getReglaAfectadaId)
-        .isEqualTo(afectada.getId());
+        .containsExactly(afectada.getId());
   }
 
   @Test
   void tt04_guardaYLeeUnaVersionYSusReglas() {
     ProgramaEntity programa = nuevoPrograma();
-    NormaEntity norma = nuevaNorma();
-    ReglaEntity regla =
-        reglas.save(
-            new ReglaEntity(
-                UUID.randomUUID(),
-                norma.getId(),
-                "OTRA",
-                "General",
-                "Regla informativa.",
-                "Articulo 1",
-                null,
-                null,
-                "INFORMATIVA",
-                null,
-                null,
-                null,
-                null));
+    NormaEntity norma = normas.save(nuevaNorma(List.of(nuevaRegla("General"))));
+    UUID reglaId = norma.getReglas().get(0).getId();
     VersionEntity version = versiones.save(nuevaVersion(programa.getId(), 1));
     ReglaEnVersionEntity enVersion =
         reglasEnVersion.save(
-            new ReglaEnVersionEntity(UUID.randomUUID(), version.getId(), regla.getId(), "VIGENTE"));
+            new ReglaEnVersionEntity(UUID.randomUUID(), version.getId(), reglaId, "VIGENTE"));
     vaciarMemoria();
 
     assertThat(reglasEnVersion.findById(enVersion.getId()))
@@ -316,7 +384,7 @@ class PersistenciaNormativaTest {
 
   @Test
   void tt04_guardarComoNuevaUnaNormaConUnIdExistenteFalla() {
-    NormaEntity original = nuevaNorma();
+    NormaEntity original = normas.save(nuevaNorma());
     vaciarMemoria();
 
     NormaEntity repetida =
@@ -332,7 +400,8 @@ class PersistenciaNormativaTest {
             null,
             null,
             "PROGRAMAS",
-            "{}");
+            "{}",
+            List.of());
 
     assertThatThrownBy(() -> normas.saveAndFlush(repetida))
         .isInstanceOf(DataIntegrityViolationException.class);
@@ -341,7 +410,7 @@ class PersistenciaNormativaTest {
     assertThat(normas.findById(original.getId()))
         .get()
         .extracting(NormaEntity::getNumero)
-        .isEqualTo("003-A");
+        .isEqualTo(original.getNumero());
   }
 
   @ParameterizedTest(name = "{0} con día {1}")

@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import co.edu.unal.rutaun.compartido.CodigoMateria;
 import co.edu.unal.rutaun.compartido.Creditos;
 import co.edu.unal.rutaun.compartido.EstadoRegla;
+import co.edu.unal.rutaun.compartido.NormaId;
 import co.edu.unal.rutaun.compartido.ParteDelAnio;
 import co.edu.unal.rutaun.compartido.PeriodoAcademico;
 import co.edu.unal.rutaun.normativa.dominio.DatosDeRegla;
@@ -18,12 +19,12 @@ import co.edu.unal.rutaun.normativa.dominio.Programa;
 import co.edu.unal.rutaun.normativa.dominio.Regla;
 import co.edu.unal.rutaun.normativa.dominio.ReglaEnVersion;
 import co.edu.unal.rutaun.normativa.dominio.VersionDelConsolidado;
+import co.edu.unal.rutaun.normativa.persistencia.NormaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.NormaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntity;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEntity;
-import co.edu.unal.rutaun.normativa.persistencia.ReglaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.VersionDelConsolidadoRepository;
 import co.edu.unal.rutaun.normativa.persistencia.VersionEntity;
 import co.edu.unal.rutaun.soporte.MallaDePrueba;
@@ -39,6 +40,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * TT-04-T3 (#91): ida y vuelta de {@link VersionDelConsolidado} (dominio, entidades, base,
@@ -56,13 +59,15 @@ class VersionDelConsolidadoMapperTest {
 
   @Autowired private ProgramaRepository programas;
   @Autowired private NormaRepository normas;
-  @Autowired private ReglaRepository reglas;
   @Autowired private VersionDelConsolidadoRepository versiones;
   @Autowired private ReglaEnVersionRepository reglasEnVersion;
+  @Autowired private JdbcTemplate jdbc;
+  @Autowired private TransactionTemplate transaccion;
 
   private Programa programa;
   private Norma norma;
   private final List<UUID> programasGuardados = new ArrayList<>();
+  private final List<UUID> normasGuardadas = new ArrayList<>();
   private final List<UUID> reglasGuardadas = new ArrayList<>();
   private final List<UUID> versionesGuardadas = new ArrayList<>();
 
@@ -77,7 +82,8 @@ class VersionDelConsolidadoMapperTest {
     programas.save(ProgramaMapper.aEntidad(programa));
     programasGuardados.add(programa.id().valor());
     norma = ReglasDePrueba.normaNueva();
-    normas.save(NormaMapper.aEntidad(norma));
+    normas.save(NormaMapper.aEntidad(norma, List.of()));
+    normasGuardadas.add(norma.id().valor());
   }
 
   /** Borra lo que guardó la prueba, en orden inverso, porque aquí sí se hizo commit. */
@@ -87,8 +93,12 @@ class VersionDelConsolidadoMapperTest {
       reglasEnVersion.deleteAll(reglasEnVersion.findByVersionId(versionId));
     }
     versiones.deleteAllById(versionesGuardadas);
-    reglas.deleteAllById(reglasGuardadas);
-    normas.deleteById(norma.id().valor());
+    for (UUID reglaId : reglasGuardadas) {
+      jdbc.update("DELETE FROM regla WHERE CAST(id AS VARCHAR) = ?", reglaId.toString());
+    }
+    for (UUID normaId : normasGuardadas) {
+      jdbc.update("DELETE FROM norma WHERE CAST(id AS VARCHAR) = ?", normaId.toString());
+    }
     programasGuardados.forEach(programas::deleteById);
   }
 
@@ -351,10 +361,12 @@ class VersionDelConsolidadoMapperTest {
     }
   }
 
-  /** Guarda una regla de la norma de la prueba y devuelve la regla de dominio. */
+  /** Guarda una regla dentro de su propia norma y devuelve la regla de dominio. */
   private Regla guardarRegla(DatosDeRegla datos) {
-    Regla regla = ReglasDePrueba.regla(norma, datos);
-    reglas.save(ReglaMapper.aEntidad(regla));
+    Norma normaDeLaRegla = ReglasDePrueba.normaNueva();
+    Regla regla = ReglasDePrueba.regla(normaDeLaRegla, datos);
+    normas.save(NormaMapper.aEntidad(normaDeLaRegla, List.of(regla)));
+    normasGuardadas.add(normaDeLaRegla.id().valor());
     reglasGuardadas.add(regla.id().valor());
     return regla;
   }
@@ -375,13 +387,21 @@ class VersionDelConsolidadoMapperTest {
 
   /** Lee las filas de la base, como lo haría quien consulta una versión, y la reconstruye. */
   private VersionDelConsolidado leer(UUID versionId) {
-    VersionEntity fila = versiones.findById(versionId).orElseThrow();
-    List<ReglaEnVersionEntity> delasReglas = reglasEnVersion.findByVersionId(versionId);
-    Map<UUID, ReglaEntity> porId = new HashMap<>();
-    reglas
-        .findAllById(delasReglas.stream().map(ReglaEnVersionEntity::getReglaId).toList())
-        .forEach(regla -> porId.put(regla.getId(), regla));
-    return VersionDelConsolidadoMapper.aDominio(fila, delasReglas, porId);
+    return transaccion.execute(
+        estado -> {
+          VersionEntity fila = versiones.findById(versionId).orElseThrow();
+          List<ReglaEnVersionEntity> delasReglas = reglasEnVersion.findByVersionId(versionId);
+          Map<UUID, Regla> porId = new HashMap<>();
+          for (NormaEntity contenedora :
+              normas.findDeLasReglas(
+                  delasReglas.stream().map(ReglaEnVersionEntity::getReglaId).toList())) {
+            NormaId normaId = new NormaId(contenedora.getId());
+            for (ReglaEntity regla : contenedora.getReglas()) {
+              porId.put(regla.getId(), ReglaMapper.aDominio(regla, normaId));
+            }
+          }
+          return VersionDelConsolidadoMapper.aDominio(fila, delasReglas, porId);
+        });
   }
 
   private VersionEntity versionAMano(UUID id, String motivo, String detalle) {

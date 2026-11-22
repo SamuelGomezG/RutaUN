@@ -4,23 +4,26 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import co.edu.unal.rutaun.compartido.CodigoMateria;
 import co.edu.unal.rutaun.compartido.EstadoRegla;
+import co.edu.unal.rutaun.compartido.NormaId;
 import co.edu.unal.rutaun.normativa.ClasificacionRegla;
 import co.edu.unal.rutaun.normativa.dominio.DatosDeRegla;
 import co.edu.unal.rutaun.normativa.dominio.ExpresionDeMaterias;
 import co.edu.unal.rutaun.normativa.dominio.ReglaEnVersion;
 import co.edu.unal.rutaun.normativa.dominio.TipoCargaPorPeriodo;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
+import co.edu.unal.rutaun.normativa.persistencia.NormaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.NormaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntity;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEntity;
-import co.edu.unal.rutaun.normativa.persistencia.ReglaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.VersionDelConsolidadoRepository;
 import co.edu.unal.rutaun.normativa.persistencia.VersionEntity;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
 import co.edu.unal.rutaun.soporte.SoporteDeSemilla;
+import jakarta.persistence.EntityManager;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -78,9 +81,10 @@ class SemillaDeSistemasTest {
   private final ImportacionDeNormasService normas;
   private final ProgramaRepository programasGuardados;
   private final NormaRepository normasGuardadas;
-  private final ReglaRepository reglas;
   private final VersionDelConsolidadoRepository versiones;
   private final ReglaEnVersionRepository reglasEnVersion;
+
+  @Autowired private EntityManager em;
 
   /** Recibe los servicios y repositorios que Spring inyecta. */
   @Autowired
@@ -89,14 +93,12 @@ class SemillaDeSistemasTest {
       ImportacionDeNormasService normas,
       ProgramaRepository programasGuardados,
       NormaRepository normasGuardadas,
-      ReglaRepository reglas,
       VersionDelConsolidadoRepository versiones,
       ReglaEnVersionRepository reglasEnVersion) {
     this.programas = programas;
     this.normas = normas;
     this.programasGuardados = programasGuardados;
     this.normasGuardadas = normasGuardadas;
-    this.reglas = reglas;
     this.versiones = versiones;
     this.reglasEnVersion = reglasEnVersion;
   }
@@ -218,7 +220,7 @@ class SemillaDeSistemasTest {
     return new Cifras(
         programasGuardados.count(),
         normasGuardadas.count(),
-        reglas.count(),
+        reglaCuenta(),
         ordenadas.size(),
         reglasEnVersion.count(),
         ordenadas.stream()
@@ -246,7 +248,7 @@ class SemillaDeSistemasTest {
     Set<UUID> ids = new HashSet<>();
     programasGuardados.findAll().forEach(programa -> ids.add(programa.getId()));
     normasGuardadas.findAll().forEach(norma -> ids.add(norma.getId()));
-    reglas.findAll().forEach(regla -> ids.add(regla.getId()));
+    ids.addAll(em.createQuery("select r.id from ReglaEntity r", UUID.class).getResultList());
     versiones.findAll().forEach(version -> ids.add(version.getId()));
     return ids;
   }
@@ -256,8 +258,8 @@ class SemillaDeSistemasTest {
         reglasEnVersion.findByVersionId(version.getId()).stream()
             .map(ReglaEnVersionEntity::getReglaId)
             .collect(Collectors.toSet());
-    return reglas.findAllById(reglaIds).stream()
-        .map(ReglaEntity::getNormaId)
+    return normasGuardadas.findDeLasReglas(reglaIds).stream()
+        .map(NormaEntity::getId)
         .collect(Collectors.toSet());
   }
 
@@ -268,11 +270,21 @@ class SemillaDeSistemasTest {
                 Collectors.toMap(
                     ReglaEnVersionEntity::getReglaId,
                     fila -> EstadoRegla.valueOf(fila.getEstado())));
-    return reglas.findAllById(estados.keySet()).stream()
-        .map(
-            entidad ->
-                new ReglaEnVersion(ReglaMapper.aDominio(entidad), estados.get(entidad.getId())))
-        .toList();
+    List<ReglaEnVersion> reglas = new ArrayList<>();
+    for (NormaEntity norma : normasGuardadas.findDeLasReglas(estados.keySet())) {
+      NormaId normaId = new NormaId(norma.getId());
+      for (ReglaEntity regla : norma.getReglas()) {
+        if (estados.containsKey(regla.getId())) {
+          reglas.add(
+              new ReglaEnVersion(ReglaMapper.aDominio(regla, normaId), estados.get(regla.getId())));
+        }
+      }
+    }
+    return reglas;
+  }
+
+  private long reglaCuenta() {
+    return em.createQuery("select count(r) from ReglaEntity r", Long.class).getSingleResult();
   }
 
   private static Set<CodigoMateria> materiasDeLaVersion(List<ReglaEnVersion> reglas) {

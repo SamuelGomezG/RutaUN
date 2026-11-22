@@ -1,6 +1,7 @@
 package co.edu.unal.rutaun.normativa.aplicacion;
 
 import co.edu.unal.rutaun.compartido.EstadoRegla;
+import co.edu.unal.rutaun.compartido.NormaId;
 import co.edu.unal.rutaun.compartido.ProgramaId;
 import co.edu.unal.rutaun.compartido.ReglaId;
 import co.edu.unal.rutaun.normativa.ConsolidadoVista;
@@ -26,7 +27,6 @@ import co.edu.unal.rutaun.normativa.persistencia.ProgramaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntity;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEntity;
-import co.edu.unal.rutaun.normativa.persistencia.ReglaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.VersionDelConsolidadoRepository;
 import co.edu.unal.rutaun.normativa.persistencia.VersionEntity;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
@@ -44,7 +44,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.core.JacksonException;
@@ -111,7 +110,6 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
   private final ProgramaRepository programas;
   private final VersionDelConsolidadoRepository versiones;
   private final ReglaEnVersionRepository reglasEnVersion;
-  private final ReglaRepository reglas;
   private final NormaRepository normas;
 
   /** Crea el servicio con los repositorios de los que lee. */
@@ -119,12 +117,10 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
       ProgramaRepository programas,
       VersionDelConsolidadoRepository versiones,
       ReglaEnVersionRepository reglasEnVersion,
-      ReglaRepository reglas,
       NormaRepository normas) {
     this.programas = ArgumentChecks.obligatorio(programas, "programas");
     this.versiones = ArgumentChecks.obligatorio(versiones, "versiones");
     this.reglasEnVersion = ArgumentChecks.obligatorio(reglasEnVersion, "reglasEnVersion");
-    this.reglas = ArgumentChecks.obligatorio(reglas, "reglas");
     this.normas = ArgumentChecks.obligatorio(normas, "normas");
   }
 
@@ -157,12 +153,20 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
     ArgumentChecks.obligatorio(id, "id");
     Optional<VersionEntity> version =
         versiones.findTopByProgramaIdOrderByNumeroDesc(programa.valor());
-    Optional<ReglaEntity> encontrada = reglas.findById(id.valor());
-    if (version.isEmpty() || encontrada.isEmpty()) {
+    List<NormaEntity> normasDeLaRegla = normas.findDeLasReglas(List.of(id.valor()));
+    if (version.isEmpty() || normasDeLaRegla.isEmpty()) {
       return Optional.empty();
     }
-    ReglaEntity fila = encontrada.get();
-    List<ReglaEntity> linaje = linajeDeLaRegla(fila);
+    Map<UUID, ReglaEntity> reglasPorId = new HashMap<>();
+    Map<UUID, NormaEntity> normaDeLaRegla = new HashMap<>();
+    for (NormaEntity norma : normasDeLaRegla) {
+      agregarReglas(norma, reglasPorId, normaDeLaRegla);
+    }
+    ReglaEntity fila = reglasPorId.get(id.valor());
+    if (fila == null) {
+      return Optional.empty();
+    }
+    List<ReglaEntity> linaje = linajeDeLaRegla(fila, reglasPorId, normaDeLaRegla);
 
     Map<UUID, EstadoRegla> estados = new HashMap<>();
     for (ReglaEnVersionEntity enVersion :
@@ -177,14 +181,8 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
     List<ReglaEntity> deLaVersion =
         linaje.stream().filter(regla -> estados.containsKey(regla.getId())).toList();
 
-    Map<UUID, NormaEntity> normasPorId =
-        normas
-            .findAllById(deLaVersion.stream().map(ReglaEntity::getNormaId).distinct().toList())
-            .stream()
-            .collect(Collectors.toMap(NormaEntity::getId, norma -> norma));
-
-    Regla regla = ReglaMapper.aDominio(fila);
-    NormaEntity norma = normasPorId.get(fila.getNormaId());
+    NormaEntity norma = normaDeLaRegla.get(fila.getId());
+    Regla regla = ReglaMapper.aDominio(fila, new NormaId(norma.getId()));
     return Optional.of(
         new ReglaCompletaVista(
             regla.id(),
@@ -201,7 +199,7 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
             Optional.ofNullable(norma)
                 .map(NormaEntity::getAlcanceDetalle)
                 .flatMap(ConsultaNormativaService::textoDelAlcance),
-            cadenaDeNormas(deLaVersion, estados, normasPorId)));
+            cadenaDeNormas(deLaVersion, estados, normaDeLaRegla)));
   }
 
   /**
@@ -210,27 +208,67 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
    * abra la regla que se abra: la original, la que la modifica o una modificatoria de la
    * modificatoria.
    */
-  private List<ReglaEntity> linajeDeLaRegla(ReglaEntity fila) {
+  private List<ReglaEntity> linajeDeLaRegla(
+      ReglaEntity fila, Map<UUID, ReglaEntity> reglasPorId, Map<UUID, NormaEntity> normaDeLaRegla) {
     Map<UUID, ReglaEntity> linaje = new LinkedHashMap<>();
     linaje.put(fila.getId(), fila);
     UUID idDeLaAfectada = fila.getReglaAfectadaId();
     while (idDeLaAfectada != null && !linaje.containsKey(idDeLaAfectada)) {
-      Optional<ReglaEntity> afectada = reglas.findById(idDeLaAfectada);
-      if (afectada.isEmpty()) {
-        break;
+      ReglaEntity afectada = reglasPorId.get(idDeLaAfectada);
+      if (afectada == null) {
+        Optional<ReglaEntity> encontrada = buscarRegla(idDeLaAfectada, reglasPorId, normaDeLaRegla);
+        if (encontrada.isEmpty()) {
+          break;
+        }
+        afectada = encontrada.get();
       }
-      linaje.put(idDeLaAfectada, afectada.get());
-      idDeLaAfectada = afectada.get().getReglaAfectadaId();
+      linaje.put(idDeLaAfectada, afectada);
+      idDeLaAfectada = afectada.getReglaAfectadaId();
     }
     Deque<ReglaEntity> pendientes = new ArrayDeque<>(linaje.values());
     while (!pendientes.isEmpty()) {
-      for (ReglaEntity afectante : reglas.findByReglaAfectadaId(pendientes.poll().getId())) {
+      for (ReglaEntity afectante :
+          reglasQueAfectanA(pendientes.poll().getId(), reglasPorId, normaDeLaRegla)) {
         if (linaje.putIfAbsent(afectante.getId(), afectante) == null) {
           pendientes.add(afectante);
         }
       }
     }
     return new ArrayList<>(linaje.values());
+  }
+
+  /** Trae la norma que contiene esa regla y registra todas sus reglas. */
+  private Optional<ReglaEntity> buscarRegla(
+      UUID reglaId, Map<UUID, ReglaEntity> reglasPorId, Map<UUID, NormaEntity> normaDeLaRegla) {
+    for (NormaEntity norma : normas.findDeLasReglas(List.of(reglaId))) {
+      agregarReglas(norma, reglasPorId, normaDeLaRegla);
+    }
+    return Optional.ofNullable(reglasPorId.get(reglaId));
+  }
+
+  /** Las reglas que afectan a esa regla; la norma trae también las que no. */
+  private List<ReglaEntity> reglasQueAfectanA(
+      UUID reglaId, Map<UUID, ReglaEntity> reglasPorId, Map<UUID, NormaEntity> normaDeLaRegla) {
+    List<ReglaEntity> afectantes = new ArrayList<>();
+    for (NormaEntity norma : normas.findDeLasReglasQueAfectanA(reglaId)) {
+      agregarReglas(norma, reglasPorId, normaDeLaRegla);
+      for (ReglaEntity regla : norma.getReglas()) {
+        if (reglaId.equals(regla.getReglaAfectadaId())) {
+          afectantes.add(regla);
+        }
+      }
+    }
+    return afectantes;
+  }
+
+  private static void agregarReglas(
+      NormaEntity norma,
+      Map<UUID, ReglaEntity> reglasPorId,
+      Map<UUID, NormaEntity> normaDeLaRegla) {
+    for (ReglaEntity regla : norma.getReglas()) {
+      reglasPorId.put(regla.getId(), regla);
+      normaDeLaRegla.put(regla.getId(), norma);
+    }
   }
 
   /**
@@ -258,10 +296,10 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
   private static List<EslabonVista> cadenaDeNormas(
       List<ReglaEntity> deLaVersion,
       Map<UUID, EstadoRegla> estados,
-      Map<UUID, NormaEntity> normasPorId) {
+      Map<UUID, NormaEntity> normaDeLaRegla) {
     List<EslabonVista> cadena = new ArrayList<>();
     for (ReglaEntity regla : deLaVersion) {
-      NormaEntity norma = normasPorId.get(regla.getNormaId());
+      NormaEntity norma = normaDeLaRegla.get(regla.getId());
       if (norma != null) {
         cadena.add(aEslabon(regla, norma, estados));
       }
@@ -294,14 +332,19 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
         estados.put(fila.getReglaId(), estado);
       }
     }
-    List<ReglaEntity> filas = reglas.findAllById(estados.keySet());
-    Map<UUID, NormaEntity> normasPorId =
-        normas.findAllById(filas.stream().map(ReglaEntity::getNormaId).distinct().toList()).stream()
-            .collect(Collectors.toMap(NormaEntity::getId, norma -> norma));
+    Map<UUID, ReglaEntity> reglasPorId = new HashMap<>();
+    Map<UUID, NormaEntity> normaDeLaRegla = new HashMap<>();
+    for (NormaEntity norma : normas.findDeLasReglas(estados.keySet())) {
+      agregarReglas(norma, reglasPorId, normaDeLaRegla);
+    }
 
     List<Entrada> entradas = new ArrayList<>();
-    for (ReglaEntity fila : filas) {
-      entradas.add(aEntrada(fila, estados.get(fila.getId()), normasPorId.get(fila.getNormaId())));
+    for (Map.Entry<UUID, EstadoRegla> enVersion : estados.entrySet()) {
+      ReglaEntity fila = reglasPorId.get(enVersion.getKey());
+      NormaEntity norma = normaDeLaRegla.get(enVersion.getKey());
+      if (fila != null && norma != null) {
+        entradas.add(aEntrada(fila, enVersion.getValue(), norma));
+      }
     }
     entradas.sort(ORDEN_DE_REGLAS);
 
@@ -320,7 +363,7 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
   }
 
   private static Entrada aEntrada(ReglaEntity fila, EstadoRegla estado, NormaEntity norma) {
-    Regla regla = ReglaMapper.aDominio(fila);
+    Regla regla = ReglaMapper.aDominio(fila, new NormaId(norma.getId()));
     boolean temporal =
         esTemporal(regla.vigenciaPropia(), norma == null ? null : norma.getVigenteHasta());
     ReglaVista vista =

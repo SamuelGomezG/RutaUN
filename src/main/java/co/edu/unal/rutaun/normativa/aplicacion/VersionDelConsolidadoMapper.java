@@ -3,10 +3,10 @@ package co.edu.unal.rutaun.normativa.aplicacion;
 import co.edu.unal.rutaun.compartido.EstadoRegla;
 import co.edu.unal.rutaun.compartido.ProgramaId;
 import co.edu.unal.rutaun.normativa.dominio.MotivoDeVersion;
+import co.edu.unal.rutaun.normativa.dominio.Regla;
 import co.edu.unal.rutaun.normativa.dominio.ReglaEnVersion;
 import co.edu.unal.rutaun.normativa.dominio.VersionDelConsolidado;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntity;
-import co.edu.unal.rutaun.normativa.persistencia.ReglaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.VersionEntity;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
 import java.time.LocalDate;
@@ -102,14 +102,14 @@ public final class VersionDelConsolidadoMapper {
    *
    * @param version fila de la versión
    * @param reglasEnVersion filas de {@code regla_en_version} de esa versión
-   * @param reglasPorId filas de {@code regla} de todas las reglas citadas, por identificador
+   * @param reglasPorId reglas citadas, ya reconstruidas con la norma que las contiene
    * @throws IllegalArgumentException si una fila no es de esta versión, si falta una regla, si el
    *     motivo o un estado son desconocidos o si algún dato es inválido para el dominio
    */
   public static VersionDelConsolidado aDominio(
       VersionEntity version,
       List<ReglaEnVersionEntity> reglasEnVersion,
-      Map<UUID, ReglaEntity> reglasPorId) {
+      Map<UUID, Regla> reglasPorId) {
     ArgumentChecks.obligatorio(version, "version");
     ArgumentChecks.obligatorio(reglasEnVersion, "reglasEnVersion");
     ArgumentChecks.obligatorio(reglasPorId, "reglasPorId");
@@ -171,12 +171,12 @@ public final class VersionDelConsolidadoMapper {
   }
 
   private static ReglaEnVersion reglaDeLaVersion(
-      VersionEntity version, ReglaEnVersionEntity fila, Map<UUID, ReglaEntity> reglasPorId) {
+      VersionEntity version, ReglaEnVersionEntity fila, Map<UUID, Regla> reglasPorId) {
     if (!version.getId().equals(fila.getVersionId())) {
       throw new IllegalArgumentException(
           "la regla " + fila.getReglaId() + " no es de la versión " + version.getId());
     }
-    ReglaEntity regla = reglasPorId.get(fila.getReglaId());
+    Regla regla = reglasPorId.get(fila.getReglaId());
     if (regla == null) {
       throw new IllegalArgumentException(
           "falta la regla "
@@ -186,7 +186,7 @@ public final class VersionDelConsolidadoMapper {
               + " del programa "
               + version.getProgramaId());
     }
-    return new ReglaEnVersion(ReglaMapper.aDominio(regla), EstadoRegla.valueOf(fila.getEstado()));
+    return new ReglaEnVersion(regla, EstadoRegla.valueOf(fila.getEstado()));
   }
 
   private static MotivoDeVersion motivoADominio(VersionEntity version) {

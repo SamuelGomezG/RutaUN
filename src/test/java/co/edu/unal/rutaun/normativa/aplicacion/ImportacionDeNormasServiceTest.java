@@ -4,12 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import co.edu.unal.rutaun.compartido.EstadoRegla;
+import co.edu.unal.rutaun.normativa.persistencia.NormaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.NormaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntity;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionRepository;
-import co.edu.unal.rutaun.normativa.persistencia.ReglaEntity;
-import co.edu.unal.rutaun.normativa.persistencia.ReglaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.VersionDelConsolidadoRepository;
 import co.edu.unal.rutaun.normativa.persistencia.VersionEntity;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
@@ -39,7 +38,6 @@ class ImportacionDeNormasServiceTest {
   private final ImportacionDeProgramasService programas;
   private final ImportacionDeNormasService normas;
   private final NormaRepository normasGuardadas;
-  private final ReglaRepository reglas;
   private final VersionDelConsolidadoRepository versiones;
   private final ReglaEnVersionRepository reglasEnVersion;
   private final ProgramaRepository programasGuardados;
@@ -51,14 +49,12 @@ class ImportacionDeNormasServiceTest {
       ImportacionDeProgramasService programas,
       ImportacionDeNormasService normas,
       NormaRepository normasGuardadas,
-      ReglaRepository reglas,
       VersionDelConsolidadoRepository versiones,
       ReglaEnVersionRepository reglasEnVersion,
       ProgramaRepository programasGuardados) {
     this.programas = programas;
     this.normas = normas;
     this.normasGuardadas = normasGuardadas;
-    this.reglas = reglas;
     this.versiones = versiones;
     this.reglasEnVersion = reglasEnVersion;
     this.programasGuardados = programasGuardados;
@@ -74,7 +70,7 @@ class ImportacionDeNormasServiceTest {
     assertThat(resultado.versionesCreadas()).isEqualTo(1);
     assertThat(normasGuardadas.findAll()).hasSize(1);
     assertThat(programasGuardados.findByCodigoSia("2879")).isPresent();
-    assertThat(reglas.findAll()).hasSize(20);
+    assertThat(reglaCuenta()).isEqualTo(20);
     assertThat(versiones.findAll()).hasSize(1);
     assertThat(reglasEnVersion.findAll()).hasSize(20);
     assertThat(reglasEnVersion.findAll()).extracting(fila -> fila.getEstado()).contains("VIGENTE");
@@ -90,7 +86,7 @@ class ImportacionDeNormasServiceTest {
         .hasMessageContaining("no está registrada");
 
     assertThat(normasGuardadas.findAll()).isEmpty();
-    assertThat(reglas.findAll()).isEmpty();
+    assertThat(reglaCuenta()).isZero();
     assertThat(versiones.findAll()).isEmpty();
   }
 
@@ -205,7 +201,7 @@ class ImportacionDeNormasServiceTest {
     List<VersionEntity> ordenadas = versionesOrdenadas();
 
     assertThat(normasGuardadas.count()).isEqualTo(3);
-    assertThat(reglas.count()).isEqualTo(276);
+    assertThat(reglaCuenta()).isEqualTo(276);
     assertThat(ordenadas).hasSize(3);
     assertThat(reglasPorVersion()).containsEntry(1, 20).containsEntry(2, 27).containsEntry(3, 276);
     assertThat(ordenadas)
@@ -217,10 +213,14 @@ class ImportacionDeNormasServiceTest {
         .hasValueSatisfying(vigente -> assertThat(vigente.getNumero()).isEqualTo(3));
 
     Set<UUID> normasDeLaVigente =
-        reglas.findAllById(idsDeReglas(ordenadas.get(2))).stream()
-            .map(ReglaEntity::getNormaId)
+        normasGuardadas.findDeLasReglas(idsDeReglas(ordenadas.get(2))).stream()
+            .map(NormaEntity::getId)
             .collect(Collectors.toSet());
     assertThat(normasDeLaVigente).hasSize(3);
+  }
+
+  private long reglaCuenta() {
+    return em.createQuery("select count(r) from ReglaEntity r", Long.class).getSingleResult();
   }
 
   private void cargarProgramas() throws IOException {

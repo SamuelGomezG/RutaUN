@@ -10,12 +10,15 @@ import co.edu.unal.rutaun.normativa.dominio.Alcance;
 import co.edu.unal.rutaun.normativa.dominio.Facultad;
 import co.edu.unal.rutaun.normativa.dominio.IdentificacionNorma;
 import co.edu.unal.rutaun.normativa.dominio.Norma;
+import co.edu.unal.rutaun.normativa.dominio.Regla;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
 import co.edu.unal.rutaun.normativa.persistencia.AlcanceJson;
 import co.edu.unal.rutaun.normativa.persistencia.NormaEntity;
+import co.edu.unal.rutaun.normativa.persistencia.ReglaEntity;
 import co.edu.unal.rutaun.utilidades.ArgumentChecks;
 import co.edu.unal.rutaun.utilidades.JsonConfig;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -58,13 +61,31 @@ public final class NormaMapper {
   }
 
   /**
-   * Convierte la norma en la fila que se guarda en la base.
+   * Convierte la norma en la fila que se guarda en la base, con sus reglas.
    *
    * <p>Falla con {@link IllegalArgumentException} si la vigencia de la norma está dada por un
-   * periodo académico, porque la tabla solo guarda fechas.
+   * periodo académico, porque la tabla solo guarda fechas, o si alguna regla declara como fuente
+   * otra norma (#143): la regla se guarda dentro de la norma que la contiene y ese dato se perdería
+   * en silencio.
    */
-  public static NormaEntity aEntidad(Norma norma) {
+  public static NormaEntity aEntidad(Norma norma, List<Regla> reglas) {
     ArgumentChecks.obligatorio(norma, "norma");
+    ArgumentChecks.obligatorio(reglas, "reglas");
+    List<ReglaEntity> filas = new ArrayList<>(reglas.size());
+    for (Regla regla : reglas) {
+      ArgumentChecks.obligatorio(regla, "regla");
+      if (!norma.id().equals(regla.fuente().norma())) {
+        throw new IllegalArgumentException(
+            "la regla "
+                + regla.id().valor()
+                + " tiene como fuente la norma "
+                + regla.fuente().norma().valor()
+                + " y no la norma "
+                + norma.id().valor()
+                + " que la contiene");
+      }
+      filas.add(ReglaMapper.aEntidad(regla));
+    }
     return new NormaEntity(
         norma.id().valor(),
         norma.identificacion().tipo().name(),
@@ -77,7 +98,8 @@ public final class NormaMapper {
         norma.vigencia().vigenteHasta().map(hasta -> aFecha(hasta, "vigenteHasta")).orElse(null),
         norma.enlaceRegimenLegal().orElse(null),
         norma.alcance().tipo().name(),
-        alcanceAJson(norma.alcance()));
+        alcanceAJson(norma.alcance()),
+        filas);
   }
 
   private static Alcance alcanceADominio(NormaEntity entidad) {
