@@ -1,14 +1,20 @@
 package co.edu.unal.rutaun.normativa.persistencia;
 
+import co.edu.unal.rutaun.utilidades.ArgumentChecks;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.PostPersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Persistable;
 
@@ -55,10 +61,18 @@ public class VersionEntity implements Persistable<UUID> {
   @Column(name = "dia_automatico")
   private LocalDate diaAutomatico;
 
+  /**
+   * Las filas de las reglas en esta versión. La columna {@code version_id} la administra esta
+   * colección, y la fila no la mapea como campo propio (#143).
+   */
+  @OneToMany(cascade = CascadeType.PERSIST, orphanRemoval = false)
+  @JoinColumn(name = "version_id", nullable = false, updatable = false)
+  private List<ReglaEnVersionEntity> reglasEnVersion = new ArrayList<>();
+
   /** Constructor sin argumentos que exige JPA. */
   protected VersionEntity() {}
 
-  /** Crea una versión del consolidado. */
+  /** Crea una versión del consolidado con sus filas. */
   public VersionEntity(
       UUID id,
       UUID programaId,
@@ -69,7 +83,8 @@ public class VersionEntity implements Persistable<UUID> {
       UUID administradorId,
       int numeroPlanDeEstudios,
       String cambios,
-      LocalDate diaAutomatico) {
+      LocalDate diaAutomatico,
+      List<ReglaEnVersionEntity> reglasEnVersion) {
     this.id = id;
     this.programaId = programaId;
     this.numero = numero;
@@ -80,6 +95,8 @@ public class VersionEntity implements Persistable<UUID> {
     this.numeroPlanDeEstudios = numeroPlanDeEstudios;
     this.cambios = cambios;
     this.diaAutomatico = diaAutomatico;
+    this.reglasEnVersion =
+        new ArrayList<>(ArgumentChecks.copiaSinNulos(reglasEnVersion, "reglasEnVersion"));
   }
 
   @Override
@@ -134,5 +151,10 @@ public class VersionEntity implements Persistable<UUID> {
 
   public LocalDate getDiaAutomatico() {
     return diaAutomatico;
+  }
+
+  /** Las reglas que la versión contiene. Devuelve una copia que no se puede modificar. */
+  public List<ReglaEnVersionEntity> getReglasEnVersion() {
+    return List.copyOf(reglasEnVersion);
   }
 }

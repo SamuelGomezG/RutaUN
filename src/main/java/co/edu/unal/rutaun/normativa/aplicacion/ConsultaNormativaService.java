@@ -25,7 +25,6 @@ import co.edu.unal.rutaun.normativa.persistencia.NormaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntity;
-import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.VersionDelConsolidadoRepository;
 import co.edu.unal.rutaun.normativa.persistencia.VersionEntity;
@@ -43,7 +42,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.core.JacksonException;
@@ -109,18 +110,15 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
 
   private final ProgramaRepository programas;
   private final VersionDelConsolidadoRepository versiones;
-  private final ReglaEnVersionRepository reglasEnVersion;
   private final NormaRepository normas;
 
   /** Crea el servicio con los repositorios de los que lee. */
   public ConsultaNormativaService(
       ProgramaRepository programas,
       VersionDelConsolidadoRepository versiones,
-      ReglaEnVersionRepository reglasEnVersion,
       NormaRepository normas) {
     this.programas = ArgumentChecks.obligatorio(programas, "programas");
     this.versiones = ArgumentChecks.obligatorio(versiones, "versiones");
-    this.reglasEnVersion = ArgumentChecks.obligatorio(reglasEnVersion, "reglasEnVersion");
     this.normas = ArgumentChecks.obligatorio(normas, "normas");
   }
 
@@ -168,11 +166,12 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
     }
     List<ReglaEntity> linaje = linajeDeLaRegla(fila, reglasPorId, normaDeLaRegla);
 
+    Set<UUID> idsDelLinaje = linaje.stream().map(ReglaEntity::getId).collect(Collectors.toSet());
     Map<UUID, EstadoRegla> estados = new HashMap<>();
-    for (ReglaEnVersionEntity enVersion :
-        reglasEnVersion.findByVersionIdAndReglaIdIn(
-            version.get().getId(), linaje.stream().map(ReglaEntity::getId).toList())) {
-      estados.put(enVersion.getReglaId(), EstadoRegla.valueOf(enVersion.getEstado()));
+    for (ReglaEnVersionEntity enVersion : version.get().getReglasEnVersion()) {
+      if (idsDelLinaje.contains(enVersion.getReglaId())) {
+        estados.put(enVersion.getReglaId(), EstadoRegla.valueOf(enVersion.getEstado()));
+      }
     }
     EstadoRegla estado = estados.get(fila.getId());
     if (estado == null) {
@@ -326,7 +325,7 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
 
   private ConsolidadoVista aConsolidado(ProgramaId programa, VersionEntity version) {
     Map<UUID, EstadoRegla> estados = new HashMap<>();
-    for (ReglaEnVersionEntity fila : reglasEnVersion.findByVersionId(version.getId())) {
+    for (ReglaEnVersionEntity fila : version.getReglasEnVersion()) {
       EstadoRegla estado = EstadoRegla.valueOf(fila.getEstado());
       if (seMuestra(estado)) {
         estados.put(fila.getReglaId(), estado);

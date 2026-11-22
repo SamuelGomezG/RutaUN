@@ -8,13 +8,13 @@ import co.edu.unal.rutaun.normativa.persistencia.NormaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.NormaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntity;
-import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionRepository;
 import co.edu.unal.rutaun.normativa.persistencia.VersionDelConsolidadoRepository;
 import co.edu.unal.rutaun.normativa.persistencia.VersionEntity;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
 import jakarta.persistence.EntityManager;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -39,7 +39,6 @@ class ImportacionDeNormasServiceTest {
   private final ImportacionDeNormasService normas;
   private final NormaRepository normasGuardadas;
   private final VersionDelConsolidadoRepository versiones;
-  private final ReglaEnVersionRepository reglasEnVersion;
   private final ProgramaRepository programasGuardados;
 
   @Autowired private EntityManager em;
@@ -50,13 +49,11 @@ class ImportacionDeNormasServiceTest {
       ImportacionDeNormasService normas,
       NormaRepository normasGuardadas,
       VersionDelConsolidadoRepository versiones,
-      ReglaEnVersionRepository reglasEnVersion,
       ProgramaRepository programasGuardados) {
     this.programas = programas;
     this.normas = normas;
     this.normasGuardadas = normasGuardadas;
     this.versiones = versiones;
-    this.reglasEnVersion = reglasEnVersion;
     this.programasGuardados = programasGuardados;
   }
 
@@ -72,8 +69,10 @@ class ImportacionDeNormasServiceTest {
     assertThat(programasGuardados.findByCodigoSia("2879")).isPresent();
     assertThat(reglaCuenta()).isEqualTo(20);
     assertThat(versiones.findAll()).hasSize(1);
-    assertThat(reglasEnVersion.findAll()).hasSize(20);
-    assertThat(reglasEnVersion.findAll()).extracting(fila -> fila.getEstado()).contains("VIGENTE");
+    assertThat(todasLasReglasEnVersion()).hasSize(20);
+    assertThat(todasLasReglasEnVersion())
+        .extracting(ReglaEnVersionEntity::getEstado)
+        .contains("VIGENTE");
     assertThat(versiones.findAll().get(0).getNumero()).isEqualTo(1);
   }
 
@@ -111,7 +110,7 @@ class ImportacionDeNormasServiceTest {
     importarNorma("semilla/acuerdo-003a-2022.json");
 
     VersionEntity primera = versionesOrdenadas().get(0);
-    ReglaEnVersionEntity heredada = reglasEnVersion.findByVersionId(primera.getId()).get(0);
+    ReglaEnVersionEntity heredada = primera.getReglasEnVersion().get(0);
     // Una versión no se modifica por el dominio: el estado se fija con un UPDATE.
     em.flush();
     em.createQuery("UPDATE ReglaEnVersionEntity r SET r.estado = :estado WHERE r.id = :id")
@@ -143,7 +142,7 @@ class ImportacionDeNormasServiceTest {
 
     importarNorma("json/validos/norma-vencida.json");
 
-    assertThat(reglasEnVersion.findAll())
+    assertThat(todasLasReglasEnVersion())
         .as("las reglas de una norma vencida quedan en YA_NO_RIGE")
         .isNotEmpty()
         .extracting(ReglaEnVersionEntity::getEstado)
@@ -249,20 +248,28 @@ class ImportacionDeNormasServiceTest {
   private Map<Integer, Integer> reglasPorVersion() {
     Map<Integer, Integer> porNumero = new HashMap<>();
     for (VersionEntity version : versiones.findAll()) {
-      porNumero.put(version.getNumero(), reglasEnVersion.findByVersionId(version.getId()).size());
+      porNumero.put(version.getNumero(), version.getReglasEnVersion().size());
     }
     return porNumero;
   }
 
   private Set<UUID> idsDeReglas(VersionEntity version) {
-    return reglasEnVersion.findByVersionId(version.getId()).stream()
+    return version.getReglasEnVersion().stream()
         .map(ReglaEnVersionEntity::getReglaId)
         .collect(Collectors.toSet());
   }
 
   private Map<UUID, String> estadosPorRegla(VersionEntity version) {
-    return reglasEnVersion.findByVersionId(version.getId()).stream()
+    return version.getReglasEnVersion().stream()
         .collect(
             Collectors.toMap(ReglaEnVersionEntity::getReglaId, ReglaEnVersionEntity::getEstado));
+  }
+
+  private List<ReglaEnVersionEntity> todasLasReglasEnVersion() {
+    List<ReglaEnVersionEntity> filas = new ArrayList<>();
+    for (VersionEntity version : versiones.findAll()) {
+      filas.addAll(version.getReglasEnVersion());
+    }
+    return filas;
   }
 }

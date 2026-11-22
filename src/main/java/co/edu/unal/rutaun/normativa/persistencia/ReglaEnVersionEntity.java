@@ -25,9 +25,6 @@ public class ReglaEnVersionEntity implements Persistable<UUID> {
   /** Si la fila todavía no está en la base. JPA no lo guarda. */
   @Transient private boolean nueva = true;
 
-  @Column(name = "version_id", nullable = false)
-  private UUID versionId;
-
   @Column(name = "regla_id", nullable = false)
   private UUID reglaId;
 
@@ -38,9 +35,8 @@ public class ReglaEnVersionEntity implements Persistable<UUID> {
   protected ReglaEnVersionEntity() {}
 
   /** Crea la relación entre una regla y una versión. */
-  public ReglaEnVersionEntity(UUID id, UUID versionId, UUID reglaId, String estado) {
+  public ReglaEnVersionEntity(UUID id, UUID reglaId, String estado) {
     this.id = id;
-    this.versionId = versionId;
     this.reglaId = reglaId;
     this.estado = estado;
   }
@@ -61,10 +57,6 @@ public class ReglaEnVersionEntity implements Persistable<UUID> {
   @PostLoad
   void marcarComoGuardada() {
     nueva = false;
-  }
-
-  public UUID getVersionId() {
-    return versionId;
   }
 
   public UUID getReglaId() {

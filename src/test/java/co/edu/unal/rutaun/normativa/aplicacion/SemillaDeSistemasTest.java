@@ -15,7 +15,6 @@ import co.edu.unal.rutaun.normativa.persistencia.NormaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.NormaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntity;
-import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.VersionDelConsolidadoRepository;
 import co.edu.unal.rutaun.normativa.persistencia.VersionEntity;
@@ -82,7 +81,6 @@ class SemillaDeSistemasTest {
   private final ProgramaRepository programasGuardados;
   private final NormaRepository normasGuardadas;
   private final VersionDelConsolidadoRepository versiones;
-  private final ReglaEnVersionRepository reglasEnVersion;
 
   @Autowired private EntityManager em;
 
@@ -93,14 +91,12 @@ class SemillaDeSistemasTest {
       ImportacionDeNormasService normas,
       ProgramaRepository programasGuardados,
       NormaRepository normasGuardadas,
-      VersionDelConsolidadoRepository versiones,
-      ReglaEnVersionRepository reglasEnVersion) {
+      VersionDelConsolidadoRepository versiones) {
     this.programas = programas;
     this.normas = normas;
     this.programasGuardados = programasGuardados;
     this.normasGuardadas = normasGuardadas;
     this.versiones = versiones;
-    this.reglasEnVersion = reglasEnVersion;
   }
 
   @BeforeEach
@@ -120,7 +116,7 @@ class SemillaDeSistemasTest {
 
     VersionEntity vigente = versionVigente();
     assertThat(vigente.getNumero()).isEqualTo(VERSIONES);
-    assertThat(reglasEnVersion.findByVersionId(vigente.getId())).hasSize(REGLAS_DE_LA_VIGENTE);
+    assertThat(vigente.getReglasEnVersion()).hasSize(REGLAS_DE_LA_VIGENTE);
     assertThat(normasDeLasReglasDe(vigente)).hasSize(NORMAS);
   }
 
@@ -222,10 +218,8 @@ class SemillaDeSistemasTest {
         normasGuardadas.count(),
         reglaCuenta(),
         ordenadas.size(),
-        reglasEnVersion.count(),
-        ordenadas.stream()
-            .map(version -> reglasEnVersion.findByVersionId(version.getId()).size())
-            .toList());
+        ordenadas.stream().mapToLong(version -> version.getReglasEnVersion().size()).sum(),
+        ordenadas.stream().map(version -> version.getReglasEnVersion().size()).toList());
   }
 
   private UUID programaDeSistemas() {
@@ -255,7 +249,7 @@ class SemillaDeSistemasTest {
 
   private Set<UUID> normasDeLasReglasDe(VersionEntity version) {
     Set<UUID> reglaIds =
-        reglasEnVersion.findByVersionId(version.getId()).stream()
+        version.getReglasEnVersion().stream()
             .map(ReglaEnVersionEntity::getReglaId)
             .collect(Collectors.toSet());
     return normasGuardadas.findDeLasReglas(reglaIds).stream()
@@ -265,7 +259,7 @@ class SemillaDeSistemasTest {
 
   private List<ReglaEnVersion> reglasDeLaVersion(VersionEntity version) {
     Map<UUID, EstadoRegla> estados =
-        reglasEnVersion.findByVersionId(version.getId()).stream()
+        version.getReglasEnVersion().stream()
             .collect(
                 Collectors.toMap(
                     ReglaEnVersionEntity::getReglaId,

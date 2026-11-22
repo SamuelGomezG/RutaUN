@@ -18,7 +18,6 @@ import co.edu.unal.rutaun.normativa.persistencia.NormaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.ProgramaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionEntity;
-import co.edu.unal.rutaun.normativa.persistencia.ReglaEnVersionRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.VersionDelConsolidadoRepository;
 import co.edu.unal.rutaun.normativa.persistencia.VersionEntity;
@@ -57,7 +56,6 @@ public class ImportacionDeNormasService {
   private final ProgramaRepository programas;
   private final NormaRepository normas;
   private final VersionDelConsolidadoRepository versiones;
-  private final ReglaEnVersionRepository reglasEnVersion;
   private final Clock reloj;
 
   /** Crea el servicio con los repositorios y el reloj de la aplicación. */
@@ -65,12 +63,10 @@ public class ImportacionDeNormasService {
       ProgramaRepository programas,
       NormaRepository normas,
       VersionDelConsolidadoRepository versiones,
-      ReglaEnVersionRepository reglasEnVersion,
       Clock reloj) {
     this.programas = ArgumentChecks.obligatorio(programas, "programas");
     this.normas = ArgumentChecks.obligatorio(normas, "normas");
     this.versiones = ArgumentChecks.obligatorio(versiones, "versiones");
-    this.reglasEnVersion = ArgumentChecks.obligatorio(reglasEnVersion, "reglasEnVersion");
     this.reloj = ArgumentChecks.obligatorio(reloj, "reloj");
   }
 
@@ -237,9 +233,7 @@ public class ImportacionDeNormasService {
         anterior
             .map(v -> v.siguiente(validado, motivo, fecha))
             .orElseGet(() -> VersionDelConsolidado.primera(validado, motivo, fecha));
-    VersionDelConsolidadoMapper.Filas filas = VersionDelConsolidadoMapper.aEntidades(version);
-    versiones.save(filas.version());
-    reglasEnVersion.saveAll(filas.reglasEnVersion());
+    versiones.save(VersionDelConsolidadoMapper.aEntidad(version));
   }
 
   /**
@@ -282,8 +276,8 @@ public class ImportacionDeNormasService {
   }
 
   private VersionDelConsolidado cargarVersion(VersionEntity entidad) {
-    List<ReglaEnVersionEntity> filas = reglasEnVersion.findByVersionId(entidad.getId());
-    List<UUID> ids = filas.stream().map(ReglaEnVersionEntity::getReglaId).toList();
+    List<UUID> ids =
+        entidad.getReglasEnVersion().stream().map(ReglaEnVersionEntity::getReglaId).toList();
     Map<UUID, Regla> reglasPorId = new HashMap<>();
     for (NormaEntity norma : normas.findDeLasReglas(ids)) {
       NormaId normaId = new NormaId(norma.getId());
@@ -291,7 +285,7 @@ public class ImportacionDeNormasService {
         reglasPorId.put(regla.getId(), ReglaMapper.aDominio(regla, normaId));
       }
     }
-    return VersionDelConsolidadoMapper.aDominio(entidad, filas, reglasPorId);
+    return VersionDelConsolidadoMapper.aDominio(entidad, reglasPorId);
   }
 
   private static String identificacion(NormaLeida norma) {

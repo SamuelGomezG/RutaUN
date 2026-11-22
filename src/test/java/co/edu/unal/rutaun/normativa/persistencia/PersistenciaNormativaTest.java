@@ -33,7 +33,6 @@ class PersistenciaNormativaTest {
   @Autowired private MateriaRepository materias;
   @Autowired private NormaRepository normas;
   @Autowired private VersionDelConsolidadoRepository versiones;
-  @Autowired private ReglaEnVersionRepository reglasEnVersion;
   @Autowired private EntityManager em;
 
   private void vaciarMemoria() {
@@ -85,7 +84,17 @@ class PersistenciaNormativaTest {
 
   private VersionEntity nuevaVersion(UUID programaId, int numero) {
     return new VersionEntity(
-        UUID.randomUUID(), programaId, numero, FECHA, "INCORPORACION", null, null, 1, "[]", null);
+        UUID.randomUUID(),
+        programaId,
+        numero,
+        FECHA,
+        "INCORPORACION",
+        null,
+        null,
+        1,
+        "[]",
+        null,
+        List.of());
   }
 
   @Test
@@ -294,21 +303,66 @@ class PersistenciaNormativaTest {
   void tt04_guardaYLeeUnaVersionYSusReglas() {
     ProgramaEntity programa = nuevoPrograma();
     NormaEntity norma = normas.save(nuevaNorma(List.of(nuevaRegla("General"))));
-    UUID reglaId = norma.getReglas().get(0).getId();
-    VersionEntity version = versiones.save(nuevaVersion(programa.getId(), 1));
-    ReglaEnVersionEntity enVersion =
-        reglasEnVersion.save(
-            new ReglaEnVersionEntity(UUID.randomUUID(), version.getId(), reglaId, "VIGENTE"));
+    ReglaEntity regla = norma.getReglas().get(0);
+    VersionEntity version =
+        versiones.save(
+            new VersionEntity(
+                UUID.randomUUID(),
+                programa.getId(),
+                1,
+                FECHA,
+                "INCORPORACION",
+                null,
+                null,
+                1,
+                "[]",
+                null,
+                List.of(new ReglaEnVersionEntity(UUID.randomUUID(), regla.getId(), "VIGENTE"))));
     vaciarMemoria();
 
-    assertThat(reglasEnVersion.findById(enVersion.getId()))
-        .get()
+    VersionEntity leida = versiones.findById(version.getId()).orElseThrow();
+
+    assertThat(leida.getNumero()).isEqualTo(1);
+    assertThat(leida.getReglasEnVersion())
+        .singleElement()
         .extracting(ReglaEnVersionEntity::getEstado)
         .isEqualTo("VIGENTE");
-    assertThat(versiones.findById(version.getId()))
-        .get()
-        .extracting(VersionEntity::getNumero)
-        .isEqualTo(1);
+  }
+
+  @Test
+  void tt04_lasReglasEnVersionSeGuardanConSuVersion() {
+    ProgramaEntity programa = nuevoPrograma();
+    NormaEntity norma =
+        normas.save(nuevaNorma(List.of(nuevaRegla("Primera regla"), nuevaRegla("Segunda regla"))));
+    List<ReglaEntity> reglas = norma.getReglas();
+    VersionEntity version =
+        versiones.save(
+            new VersionEntity(
+                UUID.randomUUID(),
+                programa.getId(),
+                1,
+                FECHA,
+                "INCORPORACION",
+                null,
+                null,
+                1,
+                "[]",
+                null,
+                List.of(
+                    new ReglaEnVersionEntity(UUID.randomUUID(), reglas.get(0).getId(), "VIGENTE"),
+                    new ReglaEnVersionEntity(
+                        UUID.randomUUID(), reglas.get(1).getId(), "PROGRAMADA"))));
+    vaciarMemoria();
+
+    VersionEntity leida = versiones.findById(version.getId()).orElseThrow();
+
+    assertThat(leida.getReglasEnVersion()).hasSize(2);
+    assertThat(leida.getReglasEnVersion())
+        .extracting(ReglaEnVersionEntity::getReglaId)
+        .containsExactlyInAnyOrder(reglas.get(0).getId(), reglas.get(1).getId());
+    assertThat(leida.getReglasEnVersion())
+        .extracting(ReglaEnVersionEntity::getEstado)
+        .containsExactlyInAnyOrder("VIGENTE", "PROGRAMADA");
   }
 
   @Test
@@ -364,7 +418,8 @@ class PersistenciaNormativaTest {
             null,
             1,
             "[]",
-            null);
+            null,
+            List.of());
 
     Throwable error = catchThrowable(() -> versiones.saveAndFlush(repetida));
 
@@ -428,7 +483,8 @@ class PersistenciaNormativaTest {
             null,
             1,
             "[]",
-            diaAutomatico);
+            diaAutomatico,
+            List.of());
 
     assertThatThrownBy(() -> versiones.saveAndFlush(version))
         .isInstanceOf(DataIntegrityViolationException.class)
