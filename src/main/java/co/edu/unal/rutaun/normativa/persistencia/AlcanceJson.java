@@ -1,5 +1,6 @@
 package co.edu.unal.rutaun.normativa.persistencia;
 
+import co.edu.unal.rutaun.utilidades.ArgumentChecks;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,4 +24,11 @@ public record AlcanceJson(
 
   /** Versión del esquema de este JSON. */
   public static final int ESQUEMA = 1;
+
+  /** Deja las listas inmutables. */
+  public AlcanceJson {
+    facultades = ArgumentChecks.copiaSinNulos(facultades, "facultades");
+    programas = ArgumentChecks.copiaSinNulos(programas, "programas");
+    exclusiones = ArgumentChecks.copiaSinNulos(exclusiones, "exclusiones");
+  }
 }

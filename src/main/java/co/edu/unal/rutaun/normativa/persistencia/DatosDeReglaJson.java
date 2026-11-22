@@ -1,7 +1,10 @@
 package co.edu.unal.rutaun.normativa.persistencia;
 
+import co.edu.unal.rutaun.utilidades.ArgumentChecks;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -119,7 +122,13 @@ public sealed interface DatosDeReglaJson {
    * @param destino código de la materia de destino
    */
   record EquivalenciaJson(int esquema, List<String> origen, String destino)
-      implements DatosDeReglaJson {}
+      implements DatosDeReglaJson {
+
+    /** Deja la lista de origen inmutable. */
+    public EquivalenciaJson {
+      origen = ArgumentChecks.copiaSinNulos(origen, "origen");
+    }
+  }
 
   /**
    * Datos de una regla de carga mínima o máxima por periodo.
@@ -175,7 +184,16 @@ public sealed interface DatosDeReglaJson {
       Integer exigidos,
       Integer obligatorios,
       Integer optativos,
-      Map<Integer, Integer> sugeridosPorSemestre) {}
+      Map<Integer, Integer> sugeridosPorSemestre) {
+
+    /** Deja el mapa de sugeridos inmutable y en su orden. */
+    public ExigenciaJson {
+      sugeridosPorSemestre =
+          Collections.unmodifiableMap(
+              new LinkedHashMap<>(
+                  ArgumentChecks.obligatorio(sugeridosPorSemestre, "sugeridosPorSemestre")));
+    }
+  }
 
   /**
    * Nodo de la malla: componente, componente de libre elección o agrupación.
@@ -206,7 +224,14 @@ public sealed interface DatosDeReglaJson {
         ExigenciaJson exigencia,
         List<MateriaEnMallaJson> materias,
         List<AgrupacionNodo> agrupaciones)
-        implements NodoJson {}
+        implements NodoJson {
+
+      /** Deja las listas inmutables. */
+      public ComponenteNodo {
+        materias = ArgumentChecks.copiaSinNulos(materias, "materias");
+        agrupaciones = ArgumentChecks.copiaSinNulos(agrupaciones, "agrupaciones");
+      }
+    }
 
     /**
      * Componente de libre elección.
@@ -217,7 +242,13 @@ public sealed interface DatosDeReglaJson {
      */
     record LibreEleccionNodo(
         String nombre, ExigenciaJson exigencia, List<AgrupacionNodo> agrupaciones)
-        implements NodoJson {}
+        implements NodoJson {
+
+      /** Deja la lista de agrupaciones inmutable. */
+      public LibreEleccionNodo {
+        agrupaciones = ArgumentChecks.copiaSinNulos(agrupaciones, "agrupaciones");
+      }
+    }
 
     /**
      * Agrupación de la malla.
@@ -234,7 +265,14 @@ public sealed interface DatosDeReglaJson {
         ExigenciaJson exigencia,
         List<MateriaEnMallaJson> materias,
         List<AgrupacionNodo> subagrupaciones)
-        implements NodoJson {}
+        implements NodoJson {
+
+      /** Deja las listas inmutables. */
+      public AgrupacionNodo {
+        materias = ArgumentChecks.copiaSinNulos(materias, "materias");
+        subagrupaciones = ArgumentChecks.copiaSinNulos(subagrupaciones, "subagrupaciones");
+      }
+    }
   }
 
   /**
@@ -273,13 +311,25 @@ public sealed interface DatosDeReglaJson {
      *
      * @param terminos términos de la combinación, en orden
      */
-    record Todas(List<ExpresionJson> terminos) implements ExpresionJson {}
+    record Todas(List<ExpresionJson> terminos) implements ExpresionJson {
+
+      /** Deja la lista de términos inmutable. */
+      public Todas {
+        terminos = ArgumentChecks.copiaSinNulos(terminos, "terminos");
+      }
+    }
 
     /**
      * «O» de varios términos.
      *
      * @param terminos términos de la combinación, en orden
      */
-    record Alguna(List<ExpresionJson> terminos) implements ExpresionJson {}
+    record Alguna(List<ExpresionJson> terminos) implements ExpresionJson {
+
+      /** Deja la lista de términos inmutable. */
+      public Alguna {
+        terminos = ArgumentChecks.copiaSinNulos(terminos, "terminos");
+      }
+    }
   }
 }
