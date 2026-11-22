@@ -88,15 +88,18 @@ public final class ReglaMapper {
   /**
    * Reconstruye la regla que guarda esta fila.
    *
+   * @param entidad fila de {@code regla}; no guarda la norma a la que pertenece
+   * @param norma norma que contiene la regla, de la que sale su fuente
    * @throws IllegalArgumentException si la fila trae un dato inválido o una categoría desconocida
    */
-  public static Regla aDominio(ReglaEntity entidad) {
+  public static Regla aDominio(ReglaEntity entidad, NormaId norma) {
     ArgumentChecks.obligatorio(entidad, "entidad");
+    ArgumentChecks.obligatorio(norma, "norma");
     return Regla.reconstituir(
         new ReglaId(entidad.getId()),
         entidad.getObjeto(),
         entidad.getEnunciado(),
-        new Fuente(new NormaId(entidad.getNormaId()), entidad.getFuente()),
+        new Fuente(norma, entidad.getFuente()),
         vigenciaADominio(entidad),
         ClasificacionRegla.valueOf(entidad.getClasificacion()),
         afectacionADominio(entidad),
@@ -117,7 +120,6 @@ public final class ReglaMapper {
     afectacion.ifPresent(ReglaMapper::exigirQueSePuedaGuardar);
     return new ReglaEntity(
         regla.id().valor(),
-        regla.fuente().norma().valor(),
         Categoria.de(regla.datos()).name(),
         regla.objeto(),
         regla.enunciado(),

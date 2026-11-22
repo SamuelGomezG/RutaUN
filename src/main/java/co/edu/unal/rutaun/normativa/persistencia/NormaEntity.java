@@ -1,14 +1,20 @@
 package co.edu.unal.rutaun.normativa.persistencia;
 
+import co.edu.unal.rutaun.utilidades.ArgumentChecks;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.PostPersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Persistable;
 
@@ -61,10 +67,18 @@ public class NormaEntity implements Persistable<UUID> {
   @Column(name = "alcance_detalle")
   private String alcanceDetalle;
 
+  /**
+   * Las reglas de la norma. La columna {@code norma_id} la administra esta colección, y la regla no
+   * la mapea como campo propio (#143).
+   */
+  @OneToMany(cascade = CascadeType.PERSIST, orphanRemoval = false)
+  @JoinColumn(name = "norma_id", nullable = false, updatable = false)
+  private List<ReglaEntity> reglas = new ArrayList<>();
+
   /** Constructor sin argumentos que exige JPA. */
   protected NormaEntity() {}
 
-  /** Crea una norma. */
+  /** Crea una norma con sus reglas. */
   public NormaEntity(
       UUID id,
       String tipo,
@@ -77,7 +91,8 @@ public class NormaEntity implements Persistable<UUID> {
       LocalDate vigenteHasta,
       String enlaceRegimenLegal,
       String tipoAlcance,
-      String alcanceDetalle) {
+      String alcanceDetalle,
+      List<ReglaEntity> reglas) {
     this.id = id;
     this.tipo = tipo;
     this.numero = numero;
@@ -90,6 +105,7 @@ public class NormaEntity implements Persistable<UUID> {
     this.enlaceRegimenLegal = enlaceRegimenLegal;
     this.tipoAlcance = tipoAlcance;
     this.alcanceDetalle = alcanceDetalle;
+    this.reglas = new ArrayList<>(ArgumentChecks.copiaSinNulos(reglas, "reglas"));
   }
 
   @Override
@@ -152,5 +168,10 @@ public class NormaEntity implements Persistable<UUID> {
 
   public String getAlcanceDetalle() {
     return alcanceDetalle;
+  }
+
+  /** Las reglas que contiene la norma. Devuelve una copia que no se puede modificar. */
+  public List<ReglaEntity> getReglas() {
+    return List.copyOf(reglas);
   }
 }

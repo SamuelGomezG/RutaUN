@@ -11,19 +11,25 @@ import co.edu.unal.rutaun.normativa.TipoAlcance;
 import co.edu.unal.rutaun.normativa.TipoDeEfecto;
 import co.edu.unal.rutaun.normativa.TipoNorma;
 import co.edu.unal.rutaun.normativa.dominio.Alcance;
+import co.edu.unal.rutaun.normativa.dominio.DatosDeRegla;
 import co.edu.unal.rutaun.normativa.dominio.IdentificacionNorma;
 import co.edu.unal.rutaun.normativa.dominio.Norma;
+import co.edu.unal.rutaun.normativa.dominio.Regla;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
 import co.edu.unal.rutaun.normativa.persistencia.NormaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.NormaRepository;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
+import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * TT-04-T3 (#91): ida y vuelta de {@link Norma} (dominio, entidad, base, entidad, dominio).
@@ -38,6 +44,9 @@ class NormaMapperTest {
       "{\"facultades\":[],\"programas\":[],\"exclusiones\":[],\"texto\":\"Todos\"}";
 
   @Autowired private NormaRepository normas;
+  @Autowired private JdbcTemplate jdbc;
+  @Autowired private EntityManager em;
+  @Autowired private TransactionTemplate transaccion;
 
   private UUID normaId;
 
@@ -45,7 +54,7 @@ class NormaMapperTest {
   @AfterEach
   void limpiar() {
     if (normaId != null) {
-      normas.deleteById(normaId);
+      jdbc.update("DELETE FROM norma WHERE CAST(id AS VARCHAR) = ?", normaId.toString());
     }
   }
 
@@ -72,8 +81,8 @@ class NormaMapperTest {
                 "Aplica a tres programas, salvo uno."));
     normaId = original.id().valor();
 
-    normas.save(NormaMapper.aEntidad(original));
-    NormaEntity leida = normas.findById(normaId).orElseThrow();
+    normas.save(NormaMapper.aEntidad(original, List.of()));
+    NormaEntity leida = transaccion.execute(estado -> em.find(NormaEntity.class, normaId));
     Norma reconstruida = NormaMapper.aDominio(leida);
 
     // Norma.equals solo compara el id; la comparación recursiva revisa todos los campos.
@@ -93,8 +102,8 @@ class NormaMapperTest {
                 TipoAlcance.TODOS, Set.of(), Set.of(), Set.of(), "Aplica a todos los programas."));
     normaId = original.id().valor();
 
-    normas.save(NormaMapper.aEntidad(original));
-    NormaEntity leida = normas.findById(normaId).orElseThrow();
+    normas.save(NormaMapper.aEntidad(original, List.of()));
+    NormaEntity leida = transaccion.execute(estado -> em.find(NormaEntity.class, normaId));
     Norma reconstruida = NormaMapper.aDominio(leida);
 
     assertThat(reconstruida).usingRecursiveComparison().isEqualTo(original);
@@ -135,9 +144,20 @@ class NormaMapperTest {
             new Alcance(
                 TipoAlcance.TODOS, Set.of(), Set.of(), Set.of(), "Aplica a todos los programas."));
 
-    assertThatThrownBy(() -> NormaMapper.aEntidad(conPeriodo))
+    assertThatThrownBy(() -> NormaMapper.aEntidad(conPeriodo, List.of()))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("aplicaDesde");
+  }
+
+  @Test
+  void tt04_unaReglaDeOtraNormaNoSeGuardaEnEsta() {
+    Norma norma = ReglasDePrueba.normaNueva();
+    Norma otra = ReglasDePrueba.normaNueva();
+    Regla regla = ReglasDePrueba.regla(otra, new DatosDeRegla.DeOtraCategoria());
+
+    assertThatThrownBy(() -> NormaMapper.aEntidad(norma, List.of(regla)))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("tiene como fuente la norma");
   }
 
   private static String numeroUnico() {
@@ -157,6 +177,7 @@ class NormaMapperTest {
         null,
         null,
         tipoAlcance,
-        alcanceJson);
+        alcanceJson,
+        List.of());
   }
 }
