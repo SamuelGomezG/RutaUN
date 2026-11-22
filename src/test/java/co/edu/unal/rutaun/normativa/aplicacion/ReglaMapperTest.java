@@ -16,7 +16,6 @@ import co.edu.unal.rutaun.normativa.dominio.Norma;
 import co.edu.unal.rutaun.normativa.dominio.Regla;
 import co.edu.unal.rutaun.normativa.dominio.TipoAfectacion;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
-import co.edu.unal.rutaun.normativa.persistencia.NormaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.NormaRepository;
 import co.edu.unal.rutaun.normativa.persistencia.ReglaEntity;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
@@ -204,9 +203,9 @@ class ReglaMapperTest {
     UUID reglaId = regla.id().valor();
     return transaccion.execute(
         estado -> {
-          NormaEntity leida = normas.findById(normaId.valor()).orElseThrow();
           ReglaEntity fila =
-              leida.getReglas().stream()
+              normas.findDeLasReglas(List.of(reglaId)).stream()
+                  .flatMap(contenedora -> contenedora.getReglas().stream())
                   .filter(guardada -> guardada.getId().equals(reglaId))
                   .findFirst()
                   .orElseThrow();

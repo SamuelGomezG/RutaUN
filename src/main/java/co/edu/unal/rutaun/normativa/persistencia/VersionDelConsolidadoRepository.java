@@ -2,10 +2,17 @@ package co.edu.unal.rutaun.normativa.persistencia;
 
 import java.util.Optional;
 import java.util.UUID;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.Repository;
 
-/** Repositorio de Spring Data de {@link VersionEntity}. */
-public interface VersionDelConsolidadoRepository extends JpaRepository<VersionEntity, UUID> {
+/**
+ * Repositorio de Spring Data de {@link VersionEntity}.
+ *
+ * <p>#143: es una raíz del historial, así que solo agrega y lee. No expone métodos de borrado.
+ */
+public interface VersionDelConsolidadoRepository extends Repository<VersionEntity, UUID> {
+
+  /** Guarda la versión y, por cascada, sus filas de reglas. */
+  <S extends VersionEntity> S save(S version);
 
   /** Devuelve la versión vigente del consolidado de un programa. */
   Optional<VersionEntity> findTopByProgramaIdOrderByNumeroDesc(UUID programaId);

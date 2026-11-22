@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -136,8 +137,8 @@ class PersistenciaNormativaTest {
     NormaEntity norma = normas.save(nuevaNorma());
     vaciarMemoria();
 
-    assertThat(normas.findById(norma.getId()))
-        .get()
+    assertThat(em.find(NormaEntity.class, norma.getId()))
+        .isNotNull()
         .extracting(NormaEntity::getNumero)
         .isEqualTo(norma.getNumero());
   }
@@ -149,7 +150,7 @@ class PersistenciaNormativaTest {
     NormaEntity norma = normas.save(nuevaNorma(List.of(primera, segunda)));
     vaciarMemoria();
 
-    List<ReglaEntity> leidas = normas.findById(norma.getId()).orElseThrow().getReglas();
+    List<ReglaEntity> leidas = em.find(NormaEntity.class, norma.getId()).getReglas();
 
     assertThat(leidas).hasSize(2);
     assertThat(leidas)
@@ -197,7 +198,8 @@ class PersistenciaNormativaTest {
   @Test
   void tt04_lasNormasQueAfectanAUnaReglaSeEncuentran() {
     ReglaEntity afectada = nuevaRegla("Regla afectada");
-    normas.saveAndFlush(nuevaNorma(List.of(afectada)));
+    normas.save(nuevaNorma(List.of(afectada)));
+    em.flush();
 
     ReglaEntity afectante =
         new ReglaEntity(
@@ -213,7 +215,9 @@ class PersistenciaNormativaTest {
             afectada.getId(),
             null,
             "{}");
-    NormaEntity normaAfectante = normas.saveAndFlush(nuevaNorma(List.of(afectante)));
+    NormaEntity normaAfectante = nuevaNorma(List.of(afectante));
+    normas.save(normaAfectante);
+    em.flush();
 
     List<NormaEntity> encontradas = normas.findDeLasReglasQueAfectanA(afectada.getId());
 
@@ -267,15 +271,20 @@ class PersistenciaNormativaTest {
             null,
             "{}");
 
-    assertThatThrownBy(() -> normas.saveAndFlush(nuevaNorma(List.of(afectante))))
-        .isInstanceOf(DataIntegrityViolationException.class)
+    assertThatThrownBy(
+            () -> {
+              normas.save(nuevaNorma(List.of(afectante)));
+              em.flush();
+            })
+        .isInstanceOf(PersistenceException.class)
         .hasMessageContaining("FK_REGLA_AFECTADA");
   }
 
   @Test
   void tt04_unaAfectacionAUnaReglaGuardadaSeAcepta() {
     ReglaEntity afectada = nuevaRegla("Regla afectada");
-    normas.saveAndFlush(nuevaNorma(List.of(afectada)));
+    normas.save(nuevaNorma(List.of(afectada)));
+    em.flush();
     ReglaEntity afectante =
         new ReglaEntity(
             UUID.randomUUID(),
@@ -293,7 +302,7 @@ class PersistenciaNormativaTest {
     NormaEntity norma = normas.save(nuevaNorma(List.of(afectante)));
     vaciarMemoria();
 
-    assertThat(normas.findById(norma.getId()).orElseThrow().getReglas())
+    assertThat(em.find(NormaEntity.class, norma.getId()).getReglas())
         .filteredOn(guardada -> guardada.getId().equals(afectante.getId()))
         .extracting(ReglaEntity::getReglaAfectadaId)
         .containsExactly(afectada.getId());
@@ -320,7 +329,7 @@ class PersistenciaNormativaTest {
                 List.of(new ReglaEnVersionEntity(UUID.randomUUID(), regla.getId(), "VIGENTE"))));
     vaciarMemoria();
 
-    VersionEntity leida = versiones.findById(version.getId()).orElseThrow();
+    VersionEntity leida = em.find(VersionEntity.class, version.getId());
 
     assertThat(leida.getNumero()).isEqualTo(1);
     assertThat(leida.getReglasEnVersion())
@@ -354,7 +363,7 @@ class PersistenciaNormativaTest {
                         UUID.randomUUID(), reglas.get(1).getId(), "PROGRAMADA"))));
     vaciarMemoria();
 
-    VersionEntity leida = versiones.findById(version.getId()).orElseThrow();
+    VersionEntity leida = em.find(VersionEntity.class, version.getId());
 
     assertThat(leida.getReglasEnVersion()).hasSize(2);
     assertThat(leida.getReglasEnVersion())
@@ -404,7 +413,8 @@ class PersistenciaNormativaTest {
   void tt04_guardarComoNuevaUnaVersionConUnIdExistenteFalla() {
     ProgramaEntity programa = nuevoPrograma();
     VersionEntity original = nuevaVersion(programa.getId(), 1);
-    versiones.saveAndFlush(original);
+    versiones.save(original);
+    em.flush();
     vaciarMemoria();
 
     VersionEntity repetida =
@@ -421,11 +431,16 @@ class PersistenciaNormativaTest {
             null,
             List.of());
 
-    Throwable error = catchThrowable(() -> versiones.saveAndFlush(repetida));
+    Throwable error =
+        catchThrowable(
+            () -> {
+              versiones.save(repetida);
+              em.flush();
+            });
 
-    assertThat(error).isInstanceOf(DataIntegrityViolationException.class);
+    assertThat(error).isInstanceOf(PersistenceException.class);
     em.clear();
-    VersionEntity quedo = versiones.findById(original.getId()).orElseThrow();
+    VersionEntity quedo = em.find(VersionEntity.class, original.getId());
     LOG.info(
         "Guardar una versión nueva con un id repetido falló con {}; la fila quedó con número {} y"
             + " motivo {}",
@@ -434,7 +449,8 @@ class PersistenciaNormativaTest {
         quedo.getMotivo());
     assertThat(quedo.getNumero()).isEqualTo(1);
     assertThat(quedo.getMotivo()).isEqualTo("INCORPORACION");
-    assertThat(versiones.count()).isEqualTo(1);
+    assertThat(em.createQuery("select count(v) from VersionEntity v", Long.class).getSingleResult())
+        .isEqualTo(1);
   }
 
   @Test
@@ -458,12 +474,16 @@ class PersistenciaNormativaTest {
             "{}",
             List.of());
 
-    assertThatThrownBy(() -> normas.saveAndFlush(repetida))
-        .isInstanceOf(DataIntegrityViolationException.class);
+    assertThatThrownBy(
+            () -> {
+              normas.save(repetida);
+              em.flush();
+            })
+        .isInstanceOf(PersistenceException.class);
 
     em.clear();
-    assertThat(normas.findById(original.getId()))
-        .get()
+    assertThat(em.find(NormaEntity.class, original.getId()))
+        .isNotNull()
         .extracting(NormaEntity::getNumero)
         .isEqualTo(original.getNumero());
   }
@@ -486,8 +506,12 @@ class PersistenciaNormativaTest {
             diaAutomatico,
             List.of());
 
-    assertThatThrownBy(() -> versiones.saveAndFlush(version))
-        .isInstanceOf(DataIntegrityViolationException.class)
+    assertThatThrownBy(
+            () -> {
+              versiones.save(version);
+              em.flush();
+            })
+        .isInstanceOf(PersistenceException.class)
         .hasMessageContaining("CK_VERSION_DIA_AUTOMATICO");
   }
 
@@ -501,9 +525,14 @@ class PersistenciaNormativaTest {
   @Test
   void tt04_dosVersionesDelMismoProgramaConElMismoNumeroFallan() {
     ProgramaEntity programa = nuevoPrograma();
-    versiones.saveAndFlush(nuevaVersion(programa.getId(), 1));
+    versiones.save(nuevaVersion(programa.getId(), 1));
+    em.flush();
 
-    assertThatThrownBy(() -> versiones.saveAndFlush(nuevaVersion(programa.getId(), 1)))
-        .isInstanceOf(DataIntegrityViolationException.class);
+    assertThatThrownBy(
+            () -> {
+              versiones.save(nuevaVersion(programa.getId(), 1));
+              em.flush();
+            })
+        .isInstanceOf(PersistenceException.class);
   }
 }

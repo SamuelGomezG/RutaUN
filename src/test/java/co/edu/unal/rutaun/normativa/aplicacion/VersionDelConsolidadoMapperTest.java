@@ -28,6 +28,7 @@ import co.edu.unal.rutaun.normativa.persistencia.VersionDelConsolidadoRepository
 import co.edu.unal.rutaun.normativa.persistencia.VersionEntity;
 import co.edu.unal.rutaun.soporte.MallaDePrueba;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
+import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,6 +61,7 @@ class VersionDelConsolidadoMapperTest {
   @Autowired private NormaRepository normas;
   @Autowired private VersionDelConsolidadoRepository versiones;
   @Autowired private JdbcTemplate jdbc;
+  @Autowired private EntityManager em;
   @Autowired private TransactionTemplate transaccion;
 
   private Programa programa;
@@ -92,7 +94,10 @@ class VersionDelConsolidadoMapperTest {
           "DELETE FROM regla_en_version WHERE CAST(version_id AS VARCHAR) = ?",
           versionId.toString());
     }
-    versiones.deleteAllById(versionesGuardadas);
+    for (UUID versionId : versionesGuardadas) {
+      jdbc.update(
+          "DELETE FROM version_consolidado WHERE CAST(id AS VARCHAR) = ?", versionId.toString());
+    }
     for (UUID reglaId : reglasGuardadas) {
       jdbc.update("DELETE FROM regla WHERE CAST(id AS VARCHAR) = ?", reglaId.toString());
     }
@@ -237,7 +242,12 @@ class VersionDelConsolidadoMapperTest {
 
     UUID versionId = guardar(justa);
 
-    assertThat(versiones.findById(versionId).orElseThrow().getDetalleMotivo()).hasSize(300);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT detalle_motivo FROM version_consolidado WHERE CAST(id AS VARCHAR) = ?",
+                String.class,
+                versionId.toString()))
+        .hasSize(300);
     assertThat(leer(versionId)).usingRecursiveComparison().isEqualTo(justa);
   }
 
@@ -253,7 +263,7 @@ class VersionDelConsolidadoMapperTest {
     VersionEntity otraVez = VersionDelConsolidadoMapper.aEntidad(original);
 
     // Una versión es de solo agregar: la restricción de (programa, número) rechaza la segunda.
-    assertThatThrownBy(() -> versiones.saveAndFlush(otraVez))
+    assertThatThrownBy(() -> versiones.save(otraVez))
         .isInstanceOf(DataIntegrityViolationException.class)
         .hasMessageContaining("UQ_VERSION_PROGRAMA_NUMERO");
   }
@@ -264,7 +274,7 @@ class VersionDelConsolidadoMapperTest {
     VersionDelConsolidado segunda =
         version(2, new MotivoDeVersion.AutomaticoPorFecha(FECHA), List.of());
 
-    assertThatThrownBy(() -> versiones.saveAndFlush(VersionDelConsolidadoMapper.aEntidad(segunda)))
+    assertThatThrownBy(() -> versiones.save(VersionDelConsolidadoMapper.aEntidad(segunda)))
         .isInstanceOf(DataIntegrityViolationException.class)
         .hasMessageContaining("UQ_VERSION_AUTOMATICA_POR_DIA");
   }
@@ -287,8 +297,8 @@ class VersionDelConsolidadoMapperTest {
                     new PeriodoAcademico(2026, ParteDelAnio.PRIMERO)),
                 List.of()));
 
-    assertThat(versiones.findById(segunda)).isPresent();
-    assertThat(versiones.findById(tercera)).isPresent();
+    assertThat(existeVersion(segunda)).isTrue();
+    assertThat(existeVersion(tercera)).isTrue();
   }
 
   @Test
@@ -300,9 +310,9 @@ class VersionDelConsolidadoMapperTest {
         guardar(
             version(3, new MotivoDeVersion.PorIncorporacion(norma.id(), ADMINISTRADOR), List.of()));
 
-    assertThat(versiones.findById(primera)).isPresent();
-    assertThat(versiones.findById(segunda)).isPresent();
-    assertThat(versiones.findById(tercera)).isPresent();
+    assertThat(existeVersion(primera)).isTrue();
+    assertThat(existeVersion(segunda)).isTrue();
+    assertThat(existeVersion(tercera)).isTrue();
   }
 
   @Test
@@ -321,7 +331,7 @@ class VersionDelConsolidadoMapperTest {
 
     UUID idOtro = guardar(delOtro);
 
-    assertThat(versiones.findById(idOtro)).isPresent();
+    assertThat(existeVersion(idOtro)).isTrue();
   }
 
   @Test
@@ -370,7 +380,7 @@ class VersionDelConsolidadoMapperTest {
   private VersionDelConsolidado leer(UUID versionId) {
     return transaccion.execute(
         estado -> {
-          VersionEntity fila = versiones.findById(versionId).orElseThrow();
+          VersionEntity fila = em.find(VersionEntity.class, versionId);
           Map<UUID, Regla> porId = new HashMap<>();
           for (NormaEntity contenedora :
               normas.findDeLasReglas(
@@ -384,6 +394,14 @@ class VersionDelConsolidadoMapperTest {
           }
           return VersionDelConsolidadoMapper.aDominio(fila, porId);
         });
+  }
+
+  private boolean existeVersion(UUID versionId) {
+    return jdbc.queryForObject(
+            "SELECT COUNT(*) FROM version_consolidado WHERE CAST(id AS VARCHAR) = ?",
+            Long.class,
+            versionId.toString())
+        > 0;
   }
 
   private List<String> estadosEnVersion(UUID versionId) {

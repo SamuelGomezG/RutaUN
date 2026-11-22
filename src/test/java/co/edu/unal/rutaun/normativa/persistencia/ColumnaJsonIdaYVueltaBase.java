@@ -82,7 +82,8 @@ abstract class ColumnaJsonIdaYVueltaBase {
     String leidoPorHibernate =
         transaccion.execute(
             estado ->
-                normas.findById(normaId).orElseThrow().getReglas().stream()
+                normas.findDeLasReglas(List.of(reglaId)).stream()
+                    .flatMap(contenedora -> contenedora.getReglas().stream())
                     .filter(guardada -> guardada.getId().equals(reglaId))
                     .findFirst()
                     .orElseThrow()

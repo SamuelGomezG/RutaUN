@@ -19,6 +19,7 @@ import co.edu.unal.rutaun.normativa.dominio.Vigencia;
 import co.edu.unal.rutaun.normativa.persistencia.NormaEntity;
 import co.edu.unal.rutaun.normativa.persistencia.NormaRepository;
 import co.edu.unal.rutaun.soporte.PruebaDeIntegracion;
+import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * TT-04-T3 (#91): ida y vuelta de {@link Norma} (dominio, entidad, base, entidad, dominio).
@@ -43,6 +45,8 @@ class NormaMapperTest {
 
   @Autowired private NormaRepository normas;
   @Autowired private JdbcTemplate jdbc;
+  @Autowired private EntityManager em;
+  @Autowired private TransactionTemplate transaccion;
 
   private UUID normaId;
 
@@ -78,7 +82,7 @@ class NormaMapperTest {
     normaId = original.id().valor();
 
     normas.save(NormaMapper.aEntidad(original, List.of()));
-    NormaEntity leida = normas.findById(normaId).orElseThrow();
+    NormaEntity leida = transaccion.execute(estado -> em.find(NormaEntity.class, normaId));
     Norma reconstruida = NormaMapper.aDominio(leida);
 
     // Norma.equals solo compara el id; la comparación recursiva revisa todos los campos.
@@ -99,7 +103,7 @@ class NormaMapperTest {
     normaId = original.id().valor();
 
     normas.save(NormaMapper.aEntidad(original, List.of()));
-    NormaEntity leida = normas.findById(normaId).orElseThrow();
+    NormaEntity leida = transaccion.execute(estado -> em.find(NormaEntity.class, normaId));
     Norma reconstruida = NormaMapper.aDominio(leida);
 
     assertThat(reconstruida).usingRecursiveComparison().isEqualTo(original);

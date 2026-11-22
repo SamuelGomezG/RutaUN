@@ -215,7 +215,7 @@ class SemillaDeSistemasTest {
     List<VersionEntity> ordenadas = versionesDeSistemas();
     return new Cifras(
         programasGuardados.count(),
-        normasGuardadas.count(),
+        normaCuenta(),
         reglaCuenta(),
         ordenadas.size(),
         ordenadas.stream().mapToLong(version -> version.getReglasEnVersion().size()).sum(),
@@ -228,7 +228,7 @@ class SemillaDeSistemasTest {
 
   private List<VersionEntity> versionesDeSistemas() {
     UUID programaId = programaDeSistemas();
-    return versiones.findAll().stream()
+    return versionesTodas().stream()
         .filter(version -> programaId.equals(version.getProgramaId()))
         .sorted(Comparator.comparingInt(VersionEntity::getNumero))
         .toList();
@@ -241,9 +241,9 @@ class SemillaDeSistemasTest {
   private Set<UUID> identificadores() {
     Set<UUID> ids = new HashSet<>();
     programasGuardados.findAll().forEach(programa -> ids.add(programa.getId()));
-    normasGuardadas.findAll().forEach(norma -> ids.add(norma.getId()));
+    normasTodas().forEach(norma -> ids.add(norma.getId()));
     ids.addAll(em.createQuery("select r.id from ReglaEntity r", UUID.class).getResultList());
-    versiones.findAll().forEach(version -> ids.add(version.getId()));
+    versionesTodas().forEach(version -> ids.add(version.getId()));
     return ids;
   }
 
@@ -275,6 +275,18 @@ class SemillaDeSistemasTest {
       }
     }
     return reglas;
+  }
+
+  private long normaCuenta() {
+    return em.createQuery("select count(n) from NormaEntity n", Long.class).getSingleResult();
+  }
+
+  private List<NormaEntity> normasTodas() {
+    return em.createQuery("select n from NormaEntity n", NormaEntity.class).getResultList();
+  }
+
+  private List<VersionEntity> versionesTodas() {
+    return em.createQuery("select v from VersionEntity v", VersionEntity.class).getResultList();
   }
 
   private long reglaCuenta() {

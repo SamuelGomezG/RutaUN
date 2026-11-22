@@ -4,12 +4,19 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 
-/** Repositorio de Spring Data de {@link NormaEntity}. */
-public interface NormaRepository extends JpaRepository<NormaEntity, UUID> {
+/**
+ * Repositorio de Spring Data de {@link NormaEntity}.
+ *
+ * <p>#143: es una raíz del historial, así que solo agrega y lee. No expone métodos de borrado.
+ */
+public interface NormaRepository extends Repository<NormaEntity, UUID> {
+
+  /** Guarda la norma y, por cascada, sus reglas. */
+  <S extends NormaEntity> S save(S norma);
 
   /** Busca una norma por su identificación única. */
   Optional<NormaEntity> findByTipoAndNumeroAndAnioAndOrgano(
@@ -18,7 +25,7 @@ public interface NormaRepository extends JpaRepository<NormaEntity, UUID> {
   /**
    * Dice si alguna norma contiene esa regla.
    *
-   * <p>UC07 ext. 6b (#143): reemplaza la consulta que hacía {@code ReglaRepository}, que ya no
+   * <p>UC07 ext. 6b (#143): reemplaza la consulta que hacía el repositorio de reglas, que ya no
    * existe.
    */
   boolean existsByReglasId(UUID reglaId);
