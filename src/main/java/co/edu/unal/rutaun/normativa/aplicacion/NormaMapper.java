@@ -9,7 +9,9 @@ import co.edu.unal.rutaun.normativa.TipoNorma;
 import co.edu.unal.rutaun.normativa.dominio.Alcance;
 import co.edu.unal.rutaun.normativa.dominio.Facultad;
 import co.edu.unal.rutaun.normativa.dominio.IdentificacionNorma;
+import co.edu.unal.rutaun.normativa.dominio.NivelDeOrgano;
 import co.edu.unal.rutaun.normativa.dominio.Norma;
+import co.edu.unal.rutaun.normativa.dominio.Organo;
 import co.edu.unal.rutaun.normativa.dominio.Vigencia;
 import co.edu.unal.rutaun.normativa.persistencia.AlcanceJson;
 import co.edu.unal.rutaun.normativa.persistencia.NormaEntity;
@@ -47,7 +49,7 @@ public final class NormaMapper {
             TipoNorma.valueOf(entidad.getTipo()),
             entidad.getNumero(),
             entidad.getAnio(),
-            entidad.getOrgano()),
+            organoADominio(entidad)),
         TipoDeEfecto.valueOf(entidad.getTipoDeEfecto()),
         entidad.getFechaExpedicion(),
         new Vigencia(
@@ -70,7 +72,10 @@ public final class NormaMapper {
         norma.identificacion().tipo().name(),
         norma.identificacion().numero(),
         norma.identificacion().anio(),
-        norma.identificacion().organo(),
+        norma.identificacion().organo().nombre(),
+        norma.identificacion().organo().nivel().name(),
+        norma.identificacion().organo().facultad().map(Facultad::codigo).orElse(null),
+        norma.identificacion().organo().clave(),
         norma.tipoDeEfecto().name(),
         norma.fechaExpedicion(),
         aFecha(norma.vigencia().aplicaDesde(), "aplicaDesde"),
@@ -78,6 +83,13 @@ public final class NormaMapper {
         norma.enlaceRegimenLegal().orElse(null),
         norma.alcance().tipo().name(),
         alcanceAJson(norma.alcance()));
+  }
+
+  private static Organo organoADominio(NormaEntity entidad) {
+    return new Organo(
+        entidad.getOrganoNombre(),
+        NivelDeOrgano.valueOf(entidad.getOrganoNivel()),
+        Optional.ofNullable(entidad.getOrganoFacultadCodigo()).map(Facultad::new));
   }
 
   private static Alcance alcanceADominio(NormaEntity entidad) {
@@ -98,7 +110,7 @@ public final class NormaMapper {
     return JsonConfig.mapper()
         .writeValueAsString(
             new AlcanceJson(
-                alcance.facultades().stream().map(Facultad::nombre).sorted().toList(),
+                alcance.facultades().stream().map(Facultad::codigo).sorted().toList(),
                 alcance.programas().stream().map(ProgramaId::valor).sorted().toList(),
                 alcance.exclusiones().stream().map(ProgramaId::valor).sorted().toList(),
                 alcance.texto()));

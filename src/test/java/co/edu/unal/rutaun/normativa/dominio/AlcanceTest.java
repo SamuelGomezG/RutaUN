@@ -11,13 +11,14 @@ import org.junit.jupiter.api.Test;
 
 class AlcanceTest {
 
-  private static final Facultad INGENIERIA = new Facultad("Ingeniería");
-  private static final Facultad MEDICINA = new Facultad("Medicina");
+  private static final Facultad INGENIERIA = new Facultad("ING");
+  private static final Facultad MEDICINA = new Facultad("MED");
   private static final Programa SISTEMAS =
-      Programa.registrar("Ingeniería de Sistemas", "2879", INGENIERIA);
-  private static final Programa CIVIL = Programa.registrar("Ingeniería Civil", "2880", INGENIERIA);
+      Programa.registrar("Ingeniería de Sistemas", "2879", INGENIERIA, "Ingeniería");
+  private static final Programa CIVIL =
+      Programa.registrar("Ingeniería Civil", "2880", INGENIERIA, "Ingeniería");
   private static final Programa MEDICINA_PROGRAMA =
-      Programa.registrar("Medicina", "2501", MEDICINA);
+      Programa.registrar("Medicina", "2501", MEDICINA, "Medicina");
 
   @Test
   void tt03_alcanceDeTodosComprendeCualquierPrograma() {
@@ -42,6 +43,21 @@ class AlcanceTest {
     assertThat(alcance.comprende(SISTEMAS)).isTrue();
     assertThat(alcance.comprende(CIVIL)).isTrue();
     assertThat(alcance.comprende(MEDICINA_PROGRAMA)).isFalse();
+  }
+
+  @Test
+  void tt02_elAlcanceComprendeLosProgramasPorElCodigoDeSuFacultad() {
+    Programa programa =
+        Programa.registrar("Ingeniería de Sistemas", "2879", new Facultad("ing"), "Ingeniería");
+    Alcance alcance =
+        new Alcance(
+            TipoAlcance.FACULTADES,
+            Set.of(new Facultad("ING")),
+            Set.of(),
+            Set.of(),
+            "Los programas de la facultad de Ingeniería");
+
+    assertThat(alcance.comprende(programa)).isTrue();
   }
 
   @Test

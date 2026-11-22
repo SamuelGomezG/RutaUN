@@ -38,7 +38,7 @@ class ProgramaMapperTest {
   void tt04_programaIdaYVuelta() {
     Programa original =
         Programa.registrar(
-            "Ingeniería de Sistemas y Computación", "2879", new Facultad("Ingeniería"));
+            "Ingeniería de Sistemas y Computación", "2879", new Facultad("ING"), "Ingeniería");
     programaId = original.id().valor();
 
     programas.save(ProgramaMapper.aEntidad(original));
@@ -51,7 +51,8 @@ class ProgramaMapperTest {
 
   @Test
   void tt04_programaConNombreEnBlancoNoSeReconstituye() {
-    ProgramaEntity invalida = new ProgramaEntity(UUID.randomUUID(), "   ", "2879", "Ingeniería");
+    ProgramaEntity invalida =
+        new ProgramaEntity(UUID.randomUUID(), "   ", "2879", "Ingeniería", "ING");
 
     assertThatThrownBy(() -> ProgramaMapper.aDominio(invalida))
         .isInstanceOf(IllegalArgumentException.class)

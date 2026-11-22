@@ -43,7 +43,7 @@ class MigracionAlinearEsquemaTest {
         .migrate();
     insertarDatos(List.of("POR_INCORPORACION", "AUTOMATICO_POR_FECHA", "AUTOMATICO_POR_PERIODO"));
 
-    flyway().migrate();
+    migrarHasta(versionDeAlinear(flyway()));
 
     try (Connection conexion = DriverManager.getConnection(url, USUARIO, CLAVE);
         Statement sentencia = conexion.createStatement()) {
@@ -85,7 +85,7 @@ class MigracionAlinearEsquemaTest {
         .migrate();
     insertarDatos(List.of("AUTOMATICO_POR_FECHA", "AUTOMATICO_POR_FECHA"));
 
-    assertThatThrownBy(() -> flyway().migrate())
+    assertThatThrownBy(() -> migrarHasta(versionDeAlinear(flyway())))
         .isInstanceOf(FlywayException.class)
         .hasMessageContaining("UQ_VERSION_AUTOMATICA_POR_DIA");
   }
@@ -95,6 +95,26 @@ class MigracionAlinearEsquemaTest {
         .dataSource(url, USUARIO, CLAVE)
         .locations("classpath:db/migration")
         .load();
+  }
+
+  /** Migra hasta la versión dada, sin llegar a las migraciones posteriores. */
+  private void migrarHasta(String version) {
+    Flyway.configure()
+        .dataSource(url, USUARIO, CLAVE)
+        .locations("classpath:db/migration")
+        .target(MigrationVersion.fromVersion(version))
+        .load()
+        .migrate();
+  }
+
+  /** La versión de la migración que alinea el esquema. */
+  private static String versionDeAlinear(Flyway flyway) {
+    for (MigrationInfo info : flyway.info().all()) {
+      if (info.getScript().contains("alinear_con_el_diseno")) {
+        return info.getVersion().getVersion();
+      }
+    }
+    throw new IllegalStateException("no encontré V*__alinear_con_el_diseno.sql");
   }
 
   /** La versión de la migración inmediatamente anterior a la que alinea el esquema. */

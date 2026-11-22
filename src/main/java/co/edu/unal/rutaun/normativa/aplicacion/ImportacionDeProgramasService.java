@@ -86,7 +86,10 @@ public class ImportacionDeProgramasService {
     }
     try {
       return Programa.registrar(
-          entrada.nombre(), entrada.codigoSia(), new Facultad(entrada.facultad()));
+          entrada.nombre(),
+          entrada.codigoSia(),
+          new Facultad(entrada.codigoFacultad()),
+          entrada.facultad());
     } catch (IllegalArgumentException e) {
       throw new ArchivoDeProgramasInvalidoException(
           "El programa " + posicion + " del archivo no es válido: " + e.getMessage(), e);

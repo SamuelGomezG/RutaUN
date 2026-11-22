@@ -3,7 +3,8 @@
     {
       "nombre": "Ingeniería de Sistemas y Computación",
       "codigoSia": "2879",
-      "facultad": "Ingeniería"
+      "facultad": "Ingeniería",
+      "codigoFacultad": "ING"
     }
   ]
 }

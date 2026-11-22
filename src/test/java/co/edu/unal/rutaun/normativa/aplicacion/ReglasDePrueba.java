@@ -18,8 +18,10 @@ import co.edu.unal.rutaun.normativa.dominio.IdentificacionNorma;
 import co.edu.unal.rutaun.normativa.dominio.Malla;
 import co.edu.unal.rutaun.normativa.dominio.MateriaEnMalla;
 import co.edu.unal.rutaun.normativa.dominio.MedidaDeCreditos;
+import co.edu.unal.rutaun.normativa.dominio.NivelDeOrgano;
 import co.edu.unal.rutaun.normativa.dominio.NodoDeMalla;
 import co.edu.unal.rutaun.normativa.dominio.Norma;
+import co.edu.unal.rutaun.normativa.dominio.Organo;
 import co.edu.unal.rutaun.normativa.dominio.Prerrequisito;
 import co.edu.unal.rutaun.normativa.dominio.Regla;
 import co.edu.unal.rutaun.normativa.dominio.ReglaDeHabilitacion;
@@ -48,7 +50,7 @@ final class ReglasDePrueba {
             TipoNorma.ACUERDO,
             "T3-" + UUID.randomUUID().toString().substring(0, 8),
             2026,
-            "Consejo Superior Universitario"),
+            new Organo("Consejo Superior Universitario", NivelDeOrgano.NACIONAL, Optional.empty())),
         TipoDeEfecto.BASE,
         LocalDate.of(2026, 1, 15),
         new Vigencia(new Momento.EnFecha(LocalDate.of(2026, 2, 1)), Optional.empty()),

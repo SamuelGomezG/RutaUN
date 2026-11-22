@@ -6,11 +6,11 @@ import co.edu.unal.rutaun.utilidades.ArgumentChecks;
 import java.util.Set;
 
 /**
- * Alcance de una norma tal como viene en el JSON: las facultades y los programas se identifican por
- * nombre o código SIA, no por los identificadores internos que todavía no existen al leer.
+ * Alcance de una norma tal como viene en el JSON: las facultades se identifican por su código y los
+ * programas por su código SIA, no por los identificadores internos que todavía no existen al leer.
  *
  * @param tipo tipo del alcance
- * @param facultades nombres de las facultades comprendidas
+ * @param facultades códigos de las facultades comprendidas
  * @param programas códigos SIA de los programas comprendidos
  * @param exclusiones códigos SIA de los programas excluidos
  * @param texto texto con el que la norma fija el alcance

@@ -3,13 +3,14 @@
   "programa": {
     "codigoSia": "2879",
     "nombre": "Ingeniería de Sistemas y Computación",
-    "facultad": "Ingeniería"
+    "facultad": "Ingeniería",
+    "codigoFacultad": "ING"
   },
   "norma": {
     "tipo": "ACUERDO",
     "numero": "901",
     "anio": 2026,
-    "organo": "Consejo de Facultad de Ingeniería (datos de prueba)",
+    "organo": { "nombre": "Consejo de Facultad de Ingeniería (datos de prueba)", "nivel": "FACULTAD", "facultad": "ING" },
     "tipoDeEfecto": "BASE",
     "fechaExpedicion": "2026-01-15",
     "vigencia": {

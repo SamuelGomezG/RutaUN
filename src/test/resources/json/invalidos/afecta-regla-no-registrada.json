@@ -3,13 +3,14 @@
   "programa": {
     "codigoSia": "2879",
     "nombre": "Ingeniería de Sistemas y Computación",
-    "facultad": "Ingeniería"
+    "facultad": "Ingeniería",
+    "codigoFacultad": "ING"
   },
   "norma": {
     "tipo": "ACUERDO",
     "numero": "994",
     "anio": 2026,
-    "organo": "Consejo de Facultad de Ingeniería (datos de prueba)",
+    "organo": { "nombre": "Consejo de Facultad de Ingeniería (datos de prueba)", "nivel": "FACULTAD", "facultad": "ING" },
     "tipoDeEfecto": "BASE",
     "fechaExpedicion": "2026-01-14",
     "vigencia": {
@@ -44,7 +45,7 @@
             "tipo": "ACUERDO",
             "numero": "008",
             "anio": 2008,
-            "organo": "Consejo Superior Universitario"
+            "organo": { "nombre": "Consejo Superior Universitario", "nivel": "NACIONAL", "facultad": null }
           },
           "articulo": "art. 4",
           "objeto": "Carga académica mínima"

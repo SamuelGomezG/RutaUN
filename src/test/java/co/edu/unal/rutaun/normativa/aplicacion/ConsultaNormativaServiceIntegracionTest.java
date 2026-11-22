@@ -232,7 +232,7 @@ class ConsultaNormativaServiceIntegracionTest {
   /** Crea un programa con una versión del consolidado, sin reglas, solo para listarlo. */
   private void programaConVersion(String nombre, String codigoSia) {
     UUID programaId = UUID.randomUUID();
-    programas.save(new ProgramaEntity(programaId, nombre, codigoSia, "Ingeniería"));
+    programas.save(new ProgramaEntity(programaId, nombre, codigoSia, "Ingeniería", "ING"));
     entityManager.flush();
     jdbc.update(
         "INSERT INTO version_consolidado (id, programa_id, numero, fecha, motivo, "
@@ -245,7 +245,7 @@ class ConsultaNormativaServiceIntegracionTest {
   @Test
   void uc06_paso2_unProgramaSinVersionVigenteNoSeOfrece() {
     programas.save(
-        new ProgramaEntity(UUID.randomUUID(), "Programa sin norma", "9900", "Ingeniería"));
+        new ProgramaEntity(UUID.randomUUID(), "Programa sin norma", "9900", "Ingeniería", "ING"));
 
     assertThat(consulta.programas())
         .extracting(ProgramaVista::nombre)

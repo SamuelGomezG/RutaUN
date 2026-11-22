@@ -112,9 +112,11 @@ class ReglaCompletaIntegracionTest {
     UUID norma = UUID.randomUUID();
     UUID regla = UUID.randomUUID();
     jdbc.update(
-        "INSERT INTO norma (id, tipo, numero, anio, organo, tipo_de_efecto, fecha_expedicion,"
+        "INSERT INTO norma (id, tipo, numero, anio, organo_nombre, organo_nivel,"
+            + " organo_facultad_codigo, organo_clave, tipo_de_efecto, fecha_expedicion,"
             + " aplica_desde, vigente_hasta, enlace_regimen_legal, tipo_alcance, alcance_detalle)"
-            + " SELECT CAST(? AS UUID), tipo, CAST(? AS VARCHAR(50)), 2030, organo, tipo_de_efecto,"
+            + " SELECT CAST(? AS UUID), tipo, CAST(? AS VARCHAR(50)), 2030, organo_nombre,"
+            + " organo_nivel, organo_facultad_codigo, organo_clave, tipo_de_efecto,"
             + " CAST(? AS DATE), CAST(? AS DATE), NULL, NULL, tipo_alcance, alcance_detalle"
             + " FROM norma WHERE numero = '008'",
         norma,

@@ -28,7 +28,8 @@ class ProgramaPorCodigoSiaTest {
   @Test
   void sop03_buscarPorCodigoSiaEncuentraElProgramaGuardado() {
     UUID id = UUID.randomUUID();
-    programas.saveAndFlush(new ProgramaEntity(id, "Programa de prueba", "T-001", "Ingeniería"));
+    programas.saveAndFlush(
+        new ProgramaEntity(id, "Programa de prueba", "T-001", "Ingeniería", "ING"));
 
     assertThat(programas.findByCodigoSia("T-001")).map(ProgramaEntity::getId).contains(id);
   }

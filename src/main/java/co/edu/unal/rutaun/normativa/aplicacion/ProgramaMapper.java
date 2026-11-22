@@ -24,7 +24,8 @@ public final class ProgramaMapper {
         new ProgramaId(entidad.getId()),
         entidad.getNombre(),
         entidad.getCodigoSia(),
-        new Facultad(entidad.getFacultad()));
+        new Facultad(entidad.getFacultadCodigo()),
+        entidad.getFacultad());
   }
 
   /** Convierte el programa en la fila que se guarda en la base. */
@@ -34,6 +35,7 @@ public final class ProgramaMapper {
         programa.id().valor(),
         programa.nombre(),
         programa.codigoSia(),
-        programa.facultad().nombre());
+        programa.nombreDeFacultad(),
+        programa.facultad().codigo());
   }
 }

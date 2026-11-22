@@ -17,12 +17,17 @@ import org.junit.jupiter.api.Test;
 
 class NormaTest {
 
-  private static final Facultad INGENIERIA = new Facultad("Ingeniería");
+  private static final Facultad INGENIERIA = new Facultad("ING");
   private static final Programa SISTEMAS =
-      Programa.registrar("Ingeniería de Sistemas", "2879", INGENIERIA);
-  private static final Programa CIVIL = Programa.registrar("Ingeniería Civil", "2880", INGENIERIA);
+      Programa.registrar("Ingeniería de Sistemas", "2879", INGENIERIA, "Ingeniería");
+  private static final Programa CIVIL =
+      Programa.registrar("Ingeniería Civil", "2880", INGENIERIA, "Ingeniería");
   private static final IdentificacionNorma IDENTIFICACION =
-      new IdentificacionNorma(TipoNorma.ACUERDO, "003-A", 2022, "Consejo Académico");
+      new IdentificacionNorma(
+          TipoNorma.ACUERDO,
+          "003-A",
+          2022,
+          new Organo("Consejo Académico", NivelDeOrgano.NACIONAL, Optional.empty()));
   private static final Vigencia VIGENCIA =
       new Vigencia(
           new Momento.EnPeriodo(new PeriodoAcademico(2022, ParteDelAnio.SEGUNDO)),

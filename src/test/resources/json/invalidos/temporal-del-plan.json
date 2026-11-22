@@ -3,13 +3,14 @@
   "programa": {
     "codigoSia": "2541",
     "nombre": "Ingeniería de Sistemas y Computación",
-    "facultad": "Facultad de Ingeniería"
+    "facultad": "Facultad de Ingeniería",
+    "codigoFacultad": "ING"
   },
   "norma": {
     "tipo": "ACUERDO",
     "numero": "003-A",
     "anio": 2022,
-    "organo": "Consejo Académico",
+    "organo": { "nombre": "Consejo Académico", "nivel": "NACIONAL", "facultad": null },
     "tipoDeEfecto": "BASE",
     "fechaExpedicion": "2022-05-25",
     "vigencia": {

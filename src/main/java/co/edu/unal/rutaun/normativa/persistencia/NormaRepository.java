@@ -8,6 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface NormaRepository extends JpaRepository<NormaEntity, UUID> {
 
   /** Busca una norma por su identificación única. */
-  Optional<NormaEntity> findByTipoAndNumeroAndAnioAndOrgano(
-      String tipo, String numero, int anio, String organo);
+  Optional<NormaEntity> findByTipoAndNumeroAndAnioAndOrganoClave(
+      String tipo, String numero, int anio, String organoClave);
 }
