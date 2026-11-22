@@ -306,7 +306,7 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
     List<RestriccionVista> restricciones =
         candidatas.stream()
             .filter(candidata -> candidata.materia().equals(materia))
-            .sorted(ORDEN_DE_RESTRICCIONES)
+            .sorted(Comparator.comparing(RestriccionDeLaMateria::clave, OrdenDeRestricciones.ORDEN))
             .flatMap(candidata -> candidata.aVista(nombre).stream())
             .toList();
     // Solo cuentan las reglas que ya rigen: una programada o en revisión se muestra sin evaluarla
@@ -354,6 +354,10 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
       return fila.getId();
     }
 
+    OrdenDeRestricciones.Clave clave() {
+      return new OrdenDeRestricciones.Clave(tipo, expedicion(), articulo(), id());
+    }
+
     /** La vista de la restricción; vacía si solo menciona materias externas (ext. 4k). */
     Optional<RestriccionVista> aVista(Function<CodigoMateria, String> nombre) {
       Optional<ExpresionVista> exigencia =
@@ -375,18 +379,6 @@ public class ConsultaNormativaService implements ConsultaNormativaFacade {
                   vigenteHasta(fila, norma)));
     }
   }
-
-  /**
-   * Orden de las restricciones de una materia: primero los prerrequisitos, y dentro de cada clase
-   * por fecha de expedición de la norma (la más antigua primero; sin norma, al final), artículo e
-   * identificador.
-   */
-  private static final Comparator<RestriccionDeLaMateria> ORDEN_DE_RESTRICCIONES =
-      Comparator.comparing(RestriccionDeLaMateria::tipo)
-          .thenComparing(
-              RestriccionDeLaMateria::expedicion, Comparator.nullsLast(Comparator.naturalOrder()))
-          .thenComparing(RestriccionDeLaMateria::articulo, OrdenDeArticulos.INSTANCIA)
-          .thenComparing(RestriccionDeLaMateria::id);
 
   /**
    * La regla y todas las que la rodean por afectaciones: las que ella afecta, hacia arriba hasta la
