@@ -8,6 +8,7 @@ import co.edu.unal.rutaun.utilidades.ArgumentChecks;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -36,14 +37,12 @@ final class ExpresionAVista {
     ArgumentChecks.obligatorio(expresion, "expresion");
     ArgumentChecks.obligatorio(nombres, "nombres");
     return switch (expresion) {
-      case ExpresionDeMaterias.MateriaDelPrograma materia ->
+      case ExpresionDeMaterias.TerminoMateria materia ->
           Optional.of(
               new ExpresionVista.Materia(materia.codigo(), nombres.apply(materia.codigo())));
       case ExpresionDeMaterias.MateriaExterna externa -> Optional.empty();
-      case ExpresionDeMaterias.Y y ->
-          combinar(true, aVista(y.izquierda(), nombres), aVista(y.derecha(), nombres));
-      case ExpresionDeMaterias.O o ->
-          combinar(false, aVista(o.izquierda(), nombres), aVista(o.derecha(), nombres));
+      case ExpresionDeMaterias.TodasLas todas -> combinar(true, todas.terminos(), nombres);
+      case ExpresionDeMaterias.AlgunaDe alguna -> combinar(false, alguna.terminos(), nombres);
     };
   }
 
@@ -59,27 +58,33 @@ final class ExpresionAVista {
   static boolean noSePuedeCumplir(ExpresionDeMaterias expresion) {
     ArgumentChecks.obligatorio(expresion, "expresion");
     return switch (expresion) {
-      case ExpresionDeMaterias.MateriaDelPrograma materia -> false;
+      case ExpresionDeMaterias.TerminoMateria materia -> false;
       case ExpresionDeMaterias.MateriaExterna externa ->
           externa.tipo() == TipoMateriaExterna.OTRO_PROGRAMA;
-      case ExpresionDeMaterias.Y y ->
-          noSePuedeCumplir(y.izquierda()) || noSePuedeCumplir(y.derecha());
-      case ExpresionDeMaterias.O o ->
-          noSePuedeCumplir(o.izquierda()) && noSePuedeCumplir(o.derecha());
+      case ExpresionDeMaterias.TodasLas todas ->
+          todas.terminos().stream().anyMatch(ExpresionAVista::noSePuedeCumplir);
+      case ExpresionDeMaterias.AlgunaDe alguna ->
+          alguna.terminos().stream().allMatch(ExpresionAVista::noSePuedeCumplir);
     };
   }
 
-  /** Junta dos lados con «y» o con «o»; si falta uno, queda el otro. */
+  /** Junta los términos con «y» o con «o», omitiendo los que no tienen vista. */
   private static Optional<ExpresionVista> combinar(
-      boolean conjuncion, Optional<ExpresionVista> izquierda, Optional<ExpresionVista> derecha) {
-    if (izquierda.isEmpty() || derecha.isEmpty()) {
-      return izquierda.or(() -> derecha);
+      boolean conjuncion,
+      Set<ExpresionDeMaterias> terminos,
+      Function<CodigoMateria, String> nombres) {
+    List<ExpresionVista> partes = new ArrayList<>();
+    for (ExpresionDeMaterias termino : terminos) {
+      aVista(termino, nombres).ifPresent(vista -> agregar(conjuncion, vista, partes));
     }
-    List<ExpresionVista> terminos = new ArrayList<>();
-    agregar(conjuncion, izquierda.get(), terminos);
-    agregar(conjuncion, derecha.get(), terminos);
+    if (partes.isEmpty()) {
+      return Optional.empty();
+    }
+    if (partes.size() == 1) {
+      return Optional.of(partes.get(0));
+    }
     return Optional.of(
-        conjuncion ? new ExpresionVista.TodasLas(terminos) : new ExpresionVista.AlgunaDe(terminos));
+        conjuncion ? new ExpresionVista.TodasLas(partes) : new ExpresionVista.AlgunaDe(partes));
   }
 
   /** Agrega el término; si es del mismo tipo que la combinación, agrega los suyos. */

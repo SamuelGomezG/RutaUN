@@ -114,8 +114,7 @@ class VersionDelConsolidadoMapperTest {
                     new DatosDeRegla.DePrerrequisito(
                         new Prerrequisito(
                             new CodigoMateria("9000006"),
-                            new ExpresionDeMaterias.TerminoMateria(
-                                new CodigoMateria("9000001"))))),
+                            new ExpresionDeMaterias.TerminoMateria(new CodigoMateria("9000001"))))),
                 EstadoRegla.VIGENTE));
     VersionDelConsolidado original =
         version(1, new MotivoDeVersion.PorIncorporacion(norma.id(), ADMINISTRADOR), deLaVersion);
