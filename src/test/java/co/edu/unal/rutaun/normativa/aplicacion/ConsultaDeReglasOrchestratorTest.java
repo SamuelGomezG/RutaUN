@@ -79,6 +79,12 @@ class ConsultaDeReglasOrchestratorTest {
     public Optional<ReglaCompletaVista> regla(ProgramaId programa, ReglaId regla) {
       return Optional.empty();
     }
+
+    @Override
+    public Optional<RestriccionesDeMateriaVista> restriccionesDe(
+        ProgramaId programa, CodigoMateria materia) {
+      return Optional.empty();
+    }
   }
 
   private final RegistroDeEventos eventos = new RegistroDeEventos();
