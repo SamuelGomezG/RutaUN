@@ -23,6 +23,7 @@ esto se rompe: los nombres los revisa Checkstyle y el formato, Spotless.
 | --- | --- |
 | Todo: formato, estilo, arquitectura y pruebas | `./mvnw verify` |
 | Solo las pruebas de integración (etiqueta `integracion`) | `./mvnw test -Dgroups=integracion` |
+| Solo la capa web (MockMvc; no llevan la etiqueta) | ./mvnw test -Dtest="*ControllerTest,ReglasDelProgramaEstadosTest" |
 | Todas menos las de integración | `./mvnw test -DexcludedGroups=integracion` |
 | Formatear el código | `./mvnw spotless:apply` |
 | Cobertura con JaCoCo: reporte en `target/site/jacoco/index.html` | `./mvnw verify`
@@ -55,10 +56,10 @@ El reporte mide lo que corrió. Con `-Dgroups=integracion` solo muestra la cober
 | Unitarias de dominio | Valores y restricciones, sin Spring | JUnit 6 y AssertJ | `utilidades/ArgumentChecksTest` |
 | Propiedades | Determinismo del cálculo, cumplimiento del tope y de restricciones | jqwik | `utilidades/ArgumentChecksPropiedadesTest` |
 | Oráculo de optimalidad | El plan mínimo y los seis criterios del cálculo, contra fuerza bruta | JUnit 6 con mallas sintéticas | *(pendiente, PRU-02 #61)*; el prototipo de `spikes/tt-05-motor/` no demuestra optimalidad de c4–c6 |
-| Orquestadores | Flujos y extensiones de cada caso con fachadas falsas | Mockito con `Clock` fijo | *(sprint 2)* |
+| Orquestadores | Flujos y extensiones de cada caso con fachadas falsas | Mockito con `Clock` fijo | `normativa/aplicacion/ConsultaDeReglasOrchestratorTest, ConsultaDeRestriccionesOrchestratorTest` |
 | Arquitectura | Reglas de capas, módulos y nombres | Modulith `verify()` y ArchUnit | `arquitectura/ModulosTest`, `CapasTest`, `NombresTest`, `EntidadesTest` |
-| Integración | Repositorios, restricción única, eventos, sesión, reserva de UC07 | `@PruebaDeIntegracion` (contexto completo, H2 en memoria) | `PersistenciaHumoTest`, `normativa/aplicacion/SemillaDeSistemasTest` |
-| Web | Controladores, rutas, Post/Redirect/Get, errores de formulario | MockMvc (`@SpringBootTest` + `@AutoConfigureMockMvc`) | `web/InicioControllerTest` |
+| Integración | Repositorios, restricción única, eventos, sesión, reserva de UC07 | `@PruebaDeIntegracion` (contexto completo, H2 en memoria) | `PersistenciaHumoTest`, `normativa/aplicacion/ConsultaNormativaServiceIntegracionTest` |
+| Web | Controladores, rutas, Post/Redirect/Get, errores de formulario | MockMvc (`@SpringBootTest` + `@AutoConfigureMockMvc`) | `web/InicioControllerTest`, flujo completo hasta H2: `normativa/web/ReglasDelProgramaEstadosTest` |
 | Contrato | Formato JSON de importación, válido e inválido | JUnit 6 con archivos de `src/test/resources/json/` | `normativa/aplicacion/FormatoNormativaTest` |
 | Aceptación | Criterios de las 47 historias de usuario | Escenarios con datos de la semilla | *(sprint 2)* |
 
@@ -102,6 +103,29 @@ ASCII. Las reglas sobre paquetes que aún no tienen clases no fallan
 `EntidadesTest`: toda entidad JPA implementa `Persistable` o tiene un campo
 `@Version`, para que guardar una entidad nueva con una llave existente falle
 en vez de sobrescribir la fila (#140).
+
+### Un ejemplo de cada nivel
+
+Las rutas son relativas a `src/test/java/co/edu/unal/rutaun/`.
+
+| Nivel | Ejemplo |
+| --- | --- |
+| Unitaria de dominio, sin Spring | `utilidades/ArgumentChecksTest` |
+| Propiedades (jqwik) | `utilidades/ArgumentChecksPropiedadesTest` |
+| Arquitectura | `arquitectura/CapasTest` |
+| Integración (contexto completo, H2 en memoria, etiqueta `integracion`) | `normativa/aplicacion/ConsultaNormativaServiceIntegracionTest` |
+| Capa web: MockMvc con `@SpringBootTest` y `@AutoConfigureMockMvc` | `normativa/web/ReglasDelProgramaEstadosTest`: la petición HTTP recorre controlador, orquestador y publicador real de eventos, y la prueba lee el incidente guardado en H2. Solo la fachada de normativa es falsa. |
+| Contrato (formato JSON) | `normativa/aplicacion/FormatoNormativaTest` |
+
+### Dobles de prueba
+
+| Doble | Ejemplo |
+| --- | --- |
+| Dummy | `soporte/PublicadorDeEventosDeRelleno`, usado en `uc06_paso2_listarLosProgramasNoNecesitaPublicarEventos` |
+| Fake | `soporte/ConsultaNormativaFalsa`: filtra reglas por estado, categoría y texto, con datos sintéticos fijos |
+| Stub | `soporte/ContextoDeEvaluacionFijo` |
+| Espía | `RegistroDeEventos`, dentro de `normativa/aplicacion/ConsultaDeReglasOrchestratorTest` |
+| Mock (Mockito) | `normativa/aplicacion/ConsultaDeRestriccionesOrchestratorTest` |
 
 ## Pendientes (se completan al llegar)
 
