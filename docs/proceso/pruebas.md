@@ -23,10 +23,10 @@ esto se rompe: los nombres los revisa Checkstyle y el formato, Spotless.
 | --- | --- |
 | Todo: formato, estilo, arquitectura y pruebas | `./mvnw verify` |
 | Solo las pruebas de integración (etiqueta `integracion`) | `./mvnw test -Dgroups=integracion` |
-| Solo la capa web (MockMvc; no llevan la etiqueta) | ./mvnw test -Dtest="*ControllerTest,ReglasDelProgramaEstadosTest" |
+| Solo la capa web (MockMvc; no llevan la etiqueta) | `./mvnw test -Dtest="*ControllerTest,ReglasDelProgramaEstadosTest"` |
 | Todas menos las de integración | `./mvnw test -DexcludedGroups=integracion` |
 | Formatear el código | `./mvnw spotless:apply` |
-| Cobertura con JaCoCo: reporte en `target/site/jacoco/index.html` | `./mvnw verify`
+| Cobertura con JaCoCo: reporte en `target/site/jacoco/index.html` | `./mvnw verify` |
 
 Las pruebas de integración corren con el perfil `test`
 (`application-test.yml`): H2 en memoria y las migraciones de
@@ -35,7 +35,12 @@ Las pruebas de integración corren con el perfil `test`
 `src/test/resources/semilla/` no debe existir: cualquier archivo ahí oculta la
 semilla real en las pruebas (`SemillaDeSistemasTest` lo detecta).
 
-El reporte mide lo que corrió. Con `-Dgroups=integracion` solo muestra la cobertura de las pruebas de integración; para el total, corre `./mvnw verify` completo. Para abrirlo en el navegador usa Start-Process target\site\jacoco\index.html en PowerShell (start en CMD), open target/site/jacoco/index.html en macOS o xdg-open target/site/jacoco/index.html en Linux.
+El reporte mide lo que corrió. Con `-Dgroups=integracion` solo muestra la
+cobertura de las pruebas de integración; para el total, corre `./mvnw verify`
+completo. Para abrirlo en el navegador usa
+`Start-Process target\site\jacoco\index.html` en PowerShell (`start` en CMD),
+`open target/site/jacoco/index.html` en macOS o
+`xdg-open target/site/jacoco/index.html` en Linux.
 
 ## Nombres
 
@@ -51,17 +56,23 @@ El reporte mide lo que corrió. Con `-Dgroups=integracion` solo muestra la cober
 
 ## Pirámide y ejemplos
 
+Las rutas de los ejemplos son relativas a `src/test/java/co/edu/unal/rutaun/`.
+
 | Nivel | Qué se prueba | Herramienta | Ejemplo en el código |
 | --- | --- | --- | --- |
 | Unitarias de dominio | Valores y restricciones, sin Spring | JUnit 6 y AssertJ | `utilidades/ArgumentChecksTest` |
 | Propiedades | Determinismo del cálculo, cumplimiento del tope y de restricciones | jqwik | `utilidades/ArgumentChecksPropiedadesTest` |
 | Oráculo de optimalidad | El plan mínimo y los seis criterios del cálculo, contra fuerza bruta | JUnit 6 con mallas sintéticas | *(pendiente, PRU-02 #61)*; el prototipo de `spikes/tt-05-motor/` no demuestra optimalidad de c4–c6 |
-| Orquestadores | Flujos y extensiones de cada caso con fachadas falsas | Mockito con `Clock` fijo | `normativa/aplicacion/ConsultaDeReglasOrchestratorTest, ConsultaDeRestriccionesOrchestratorTest` |
+| Orquestadores | Flujos y extensiones de cada caso con fachadas falsas | Mockito con `Clock` fijo | `normativa/aplicacion/ConsultaDeReglasOrchestratorTest`, `normativa/aplicacion/ConsultaDeRestriccionesOrchestratorTest` |
 | Arquitectura | Reglas de capas, módulos y nombres | Modulith `verify()` y ArchUnit | `arquitectura/ModulosTest`, `CapasTest`, `NombresTest`, `EntidadesTest` |
 | Integración | Repositorios, restricción única, eventos, sesión, reserva de UC07 | `@PruebaDeIntegracion` (contexto completo, H2 en memoria) | `PersistenciaHumoTest`, `normativa/aplicacion/ConsultaNormativaServiceIntegracionTest` |
 | Web | Controladores, rutas, Post/Redirect/Get, errores de formulario | MockMvc (`@SpringBootTest` + `@AutoConfigureMockMvc`) | `web/InicioControllerTest`, flujo completo hasta H2: `normativa/web/ReglasDelProgramaEstadosTest` |
 | Contrato | Formato JSON de importación, válido e inválido | JUnit 6 con archivos de `src/test/resources/json/` | `normativa/aplicacion/FormatoNormativaTest` |
 | Aceptación | Criterios de las 47 historias de usuario | Escenarios con datos de la semilla | *(sprint 2)* |
+
+En `normativa/web/ReglasDelProgramaEstadosTest` la petición HTTP recorre el
+controlador, el orquestador y el publicador real de eventos, y la prueba lee el
+incidente guardado en H2. Solo la fachada de normativa es falsa.
 
 ## Dobles de prueba
 
@@ -70,8 +81,8 @@ El reporte mide lo que corrió. Con `-Dgroups=integracion` solo muestra la cober
 | Dummy | Objeto que solo llena un parámetro obligatorio; si se usa, la prueba falla | `soporte/PublicadorDeEventosDeRelleno` (prueba `uc06_paso2_listarLosProgramasNoNecesitaPublicarEventos`) |
 | Fake | Implementación que funciona, pero simplificada: datos sintéticos fijos, sin persistencia | `soporte/ConsultaNormativaFalsa` (filtra reglas por estado, categoría y texto) |
 | Stub | Responde con datos fijos que se arman antes de la prueba | `soporte/ContextoDeEvaluacionFijo` |
-| Espía | Guarda lo que recibe para comprobarlo después | `RegistroDeEventos` en `ConsultaDeReglasOrchestratorTest` |
-| Mock | Doble de Mockito con respuestas y verificaciones programadas | `ConsultaDeRestriccionesOrchestratorTest`, `SemillaDeDesarrolloRunnerTest` |
+| Espía | Escrito a mano: guarda lo que recibe para comprobarlo después | `RegistroDeEventos`, clase interna de `normativa/aplicacion/ConsultaDeReglasOrchestratorTest` |
+| Mock | Doble de Mockito con respuestas y verificaciones programadas | `normativa/aplicacion/ConsultaDeRestriccionesOrchestratorTest`, `normativa/aplicacion/SemillaDeDesarrolloRunnerTest` |
 
 `ConsultaNormativaFalsa` no guarda estado: sus datos son fijos. Se
 clasifica como Fake y no como Stub porque implementa el comportamiento de la
@@ -103,29 +114,6 @@ ASCII. Las reglas sobre paquetes que aún no tienen clases no fallan
 `EntidadesTest`: toda entidad JPA implementa `Persistable` o tiene un campo
 `@Version`, para que guardar una entidad nueva con una llave existente falle
 en vez de sobrescribir la fila (#140).
-
-### Un ejemplo de cada nivel
-
-Las rutas son relativas a `src/test/java/co/edu/unal/rutaun/`.
-
-| Nivel | Ejemplo |
-| --- | --- |
-| Unitaria de dominio, sin Spring | `utilidades/ArgumentChecksTest` |
-| Propiedades (jqwik) | `utilidades/ArgumentChecksPropiedadesTest` |
-| Arquitectura | `arquitectura/CapasTest` |
-| Integración (contexto completo, H2 en memoria, etiqueta `integracion`) | `normativa/aplicacion/ConsultaNormativaServiceIntegracionTest` |
-| Capa web: MockMvc con `@SpringBootTest` y `@AutoConfigureMockMvc` | `normativa/web/ReglasDelProgramaEstadosTest`: la petición HTTP recorre controlador, orquestador y publicador real de eventos, y la prueba lee el incidente guardado en H2. Solo la fachada de normativa es falsa. |
-| Contrato (formato JSON) | `normativa/aplicacion/FormatoNormativaTest` |
-
-### Dobles de prueba
-
-| Doble | Ejemplo |
-| --- | --- |
-| Dummy | `soporte/PublicadorDeEventosDeRelleno`, usado en `uc06_paso2_listarLosProgramasNoNecesitaPublicarEventos` |
-| Fake | `soporte/ConsultaNormativaFalsa`: filtra reglas por estado, categoría y texto, con datos sintéticos fijos |
-| Stub | `soporte/ContextoDeEvaluacionFijo` |
-| Espía | `RegistroDeEventos`, dentro de `normativa/aplicacion/ConsultaDeReglasOrchestratorTest` |
-| Mock (Mockito) | `normativa/aplicacion/ConsultaDeRestriccionesOrchestratorTest` |
 
 ## Pendientes (se completan al llegar)
 
