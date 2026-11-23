@@ -104,6 +104,14 @@ sdk env install
 > [!IMPORTANT]
 > RutaUN queda en [http://localhost:8080/](http://localhost:8080/), el puerto por defecto de Spring Boot. En Windows usa `mvnw.cmd` en lugar de `./mvnw`.
 
+### Abrir en GitHub Codespaces
+
+Si prefieres no instalar nada, abre el proyecto en [GitHub Codespaces](https://github.com/features/codespaces): en la página del repositorio elige **Code → Codespaces → Create codespace on main**. El devcontainer (`.devcontainer/devcontainer.json`) prepara Java 21, las extensiones de Java y Spring para VS Code y reenvía el puerto 8080, así que no hace falta clonar el repositorio ni instalar el JDK. Cuando termine de crearse, abre la terminal y corre los pasos 3 y 4 de arriba (`./mvnw verify` y `./mvnw spring-boot:run -Dspring-boot.run.profiles=dev`); el entorno es Linux, así que ahí se usa `./mvnw`.
+
+Si ya tenías un Codespace creado antes de que existiera el devcontainer, ejecuta **Codespaces: Rebuild Container** desde la paleta de comandos (`Ctrl+Shift+P`) o crea uno nuevo.
+
+Si al abrir alguna vista la aplicación falla por datos de una ejecución anterior, borra la carpeta `data/` (en Codespaces, `rm -rf data`) y vuelve a arrancar con el perfil `dev`.
+
 ## Pruebas
 
 Cada prueba lleva en su nombre el ID del requisito que verifica, por ejemplo `uc01_ext4b_topeBajoElMinimoAdvierte`. Hay pruebas unitarias del dominio sin Spring, de propiedades con jqwik, de arquitectura (módulos y capas), de integración con H2 en memoria, de la capa web con MockMvc y de contrato para el formato del JSON de normativa. Los tipos, la convención de nombres y cómo correrlas por etiqueta están en [`docs/proceso/pruebas.md`](docs/proceso/pruebas.md). Se corren todas con:
