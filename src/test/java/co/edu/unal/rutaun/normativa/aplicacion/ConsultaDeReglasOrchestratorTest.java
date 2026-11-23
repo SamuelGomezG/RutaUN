@@ -16,6 +16,7 @@ import co.edu.unal.rutaun.normativa.ReglaCompletaVista;
 import co.edu.unal.rutaun.normativa.RestriccionesDeMateriaVista;
 import co.edu.unal.rutaun.puertos.DomainEventPublisher;
 import co.edu.unal.rutaun.soporte.ConsultaNormativaFalsa;
+import co.edu.unal.rutaun.soporte.PublicadorDeEventosDeRelleno;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -360,5 +361,15 @@ class ConsultaDeReglasOrchestratorTest {
 
     assertThat(orquestador.categoriasDeReglas())
         .contains("Materias", "Prerrequisitos y habilitación", "Otra");
+  }
+
+  @Test
+  void uc06_paso2_listarLosProgramasNoNecesitaPublicarEventos() {
+    var orquestador =
+        new ConsultaDeReglasOrchestrator(
+            ConsultaNormativaFalsa.conReglas(), new PublicadorDeEventosDeRelleno());
+
+    assertThat(orquestador.programas())
+        .containsExactlyElementsOf(ConsultaNormativaFalsa.conReglas().programas());
   }
 }

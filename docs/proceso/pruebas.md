@@ -62,6 +62,21 @@ El reporte mide lo que corrió. Con `-Dgroups=integracion` solo muestra la cober
 | Contrato | Formato JSON de importación, válido e inválido | JUnit 6 con archivos de `src/test/resources/json/` | `normativa/aplicacion/FormatoNormativaTest` |
 | Aceptación | Criterios de las 47 historias de usuario | Escenarios con datos de la semilla | *(sprint 2)* |
 
+## Dobles de prueba
+
+| Doble | Qué es | Dónde está |
+| --- | --- | --- |
+| Dummy | Objeto que solo llena un parámetro obligatorio; si se usa, la prueba falla | `soporte/PublicadorDeEventosDeRelleno` (prueba `uc06_paso2_listarLosProgramasNoNecesitaPublicarEventos`) |
+| Fake | Implementación que funciona, pero simplificada: datos sintéticos fijos, sin persistencia | `soporte/ConsultaNormativaFalsa` (filtra reglas por estado, categoría y texto) |
+| Stub | Responde con datos fijos que se arman antes de la prueba | `soporte/ContextoDeEvaluacionFijo` |
+| Espía | Guarda lo que recibe para comprobarlo después | `RegistroDeEventos` en `ConsultaDeReglasOrchestratorTest` |
+| Mock | Doble de Mockito con respuestas y verificaciones programadas | `ConsultaDeRestriccionesOrchestratorTest`, `SemillaDeDesarrolloRunnerTest` |
+
+`ConsultaNormativaFalsa` no guarda estado: sus datos son fijos. Se
+clasifica como Fake y no como Stub porque implementa el comportamiento de la
+fachada (filtros y programa inexistente), no solo devuelve respuestas
+enlatadas.
+
 ## Reglas de arquitectura que se verifican
 
 `CapasTest` (AGENTS.md, «Capas y módulos»):
