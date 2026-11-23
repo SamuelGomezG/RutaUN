@@ -109,8 +109,12 @@ sdk env install
 Cada prueba lleva en su nombre el ID del requisito que verifica, por ejemplo `uc01_ext4b_topeBajoElMinimoAdvierte`. Hay pruebas unitarias del dominio sin Spring, de propiedades con jqwik, de arquitectura (módulos y capas), de integración con H2 en memoria, de la capa web con MockMvc y de contrato para el formato del JSON de normativa. Los tipos, la convención de nombres y cómo correrlas por etiqueta están en [`docs/proceso/pruebas.md`](docs/proceso/pruebas.md). Se corren todas con:
 
 ```sh
-./mvnw verify
+./mvnw verify                        # formato, estilo, arquitectura, pruebas y cobertura
+./mvnw test -Dgroups=integracion     # solo pruebas de integración
+./mvnw test -Dtest=NombreDeLaClase   # una clase (en PowerShell: "-Dtest=NombreDeLaClase")
 ```
+
+Tras correr `./mvnw verify`, JaCoCo genera el reporte de cobertura en `target/site/jacoco/index.html`. La convención de nombres, los ejemplos por nivel y la clasificación de dobles de prueba están detallados en [`docs/proceso/pruebas.md`](docs/proceso/pruebas.md).
 
 ## Documentación
 
